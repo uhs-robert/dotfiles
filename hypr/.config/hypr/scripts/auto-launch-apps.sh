@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
+# hypr/.config/hypr/scripts/auto-launch-apps.sh
 
 # ─── Globals ────────────────────────────────────────────────────────────────
-WAYLAND_DISPLAY=wayland-1
 PAIRS=()
 WORKSPACES=()
 FIREFOX_WORKSPACES=()
@@ -26,58 +26,55 @@ trap clean_up EXIT
 # ─── Reusable Application Blocks ────────────────────────────────────────────
 declare -A APPS
 
-# Firefox: triple workspace default
+## Firefox: triple workspace default
 FIREFOX_TRIPLE_WS=("3:firefox" "6:firefox" "2:firefox")
 APPS["Firefox"]=$(
   IFS='|'
   echo "${FIREFOX_TRIPLE_WS[*]}"
 )
 
-# Email client
+## Email client
 APPS["Email"]="1:flatpak run eu.betterbird.Betterbird"
 
-# Terminal sessions
-tmux() {
+## Terminal sessions
+### tmuxifier: load a tmuxifier session on a workspace (default ws=4)
+tmuxifier() {
   local session="$1"
   local ws="${2:-4}"
   echo "${ws}:kitty -e tmuxifier load-session $session"
 }
 
-# Slack
+### tmux: create or attach to a tmux session by name on a workspace (default ws=4)
+tmux() {
+  local name="$1"
+  local ws="${2:-4}"
+  echo "${ws}:kitty -e tmux new -A -s $name"
+}
+
+## Slack
 APPS["Slack"]="5:slack"
 
-# File manager
+## File manager
 APPS["Yazi"]="4:kitty -e yazi"
 APPS["Dolphin"]="3:dolphin"
 
-# Monitoring tools
+## Monitoring tools
 APPS["Journal"]="3:kitty -e journalctl -f"
 APPS["Btop"]="4:kitty -e btop"
 
 # ─── Setup Definitions ──────────────────────────────────────────────────────
 
 declare -A SETUPS
-SETUPS["🌐 Browsing"]="${APPS["Firefox"]}|$(tmux config)"
-SETUPS["🧱 Civil"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmux cc-dev)|${APPS["Slack"]}"
-SETUPS["🛠 Config"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmux config)"
+SETUPS["🌐 Browsing"]="${APPS["Firefox"]}|$(tmuxifier config)"
+SETUPS["🧱 Civil"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmuxifier cc-dev)|$(tmuxifier config 3)|${APPS["Slack"]}"
+SETUPS["🛠 Config"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmuxifier config)"
 SETUPS["🗂 Files"]="${APPS["Dolphin"]}|${APPS["Yazi"]}"
 SETUPS["🧩 Game Mods"]="2:steam|3:kitty -d ~/Downloads/ yazi|4:kitty -d ~/.steam/steam/steamapps/ yazi"
 SETUPS["🎮 Game"]="2:steam"
 SETUPS["📅 Meeting"]="5:firefox https://calendar.google.com/|7:firefox"
 SETUPS["📊 System Monitor"]="${APPS["Journal"]}|${APPS["Btop"]}"
 SETUPS["🛡️ DNF Update"]="2:kitty -e sysup|${APPS["Journal"]}"
-SETUPS["💼 Work"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmux uphill)|${APPS["Slack"]}"
-
-# SETUPS["🌐 Browsing"]="3:firefox|6:firefox|2:firefox|1:kitty -e yazi|4:kitty -e tmuxifier load-session config"
-# SETUPS["🧱 Civil"]="1:flatpak run eu.betterbird.Betterbird|3:firefox|6:firefox|2:firefox|4:kitty -e tmuxifier load-session cc-dev|5:slack"
-# SETUPS["🛠 Config"]="1:flatpak run eu.betterbird.Betterbird|3:firefox|6:firefox|2:firefox|4:kitty -e tmuxifier load-session config"
-# SETUPS["🗂 Files"]="3:dolphin|4:kitty -e yazi"
-# SETUPS["🧩 Game Mods"]="2:steam|3:kitty -d ~/Downloads/ yazi|4:kitty -d ~/.steam/steam/steamapps/ yazi"
-# SETUPS["🎮 Game"]="2:steam"
-# SETUPS["📅 Meeting"]="5:firefox https://calendar.google.com/|7:firefox"
-# SETUPS["📊 System Monitor"]="3:kitty -e journalctl -f|4:kitty -e btop"
-# SETUPS["🛡️ DNF Update"]="2:kitty -e sysup|3:kitty -e journalctl -f"
-# SETUPS["💼 Work"]="1:flatpak run eu.betterbird.Betterbird|3:firefox|6:firefox|2:firefox|4:kitty -e tmuxifier load-session uphill|5:slack"
+SETUPS["💼 Work"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmuxifier uphill)|$(tmuxifier config 3)|${APPS["Slack"]}"
 
 # Log to journal and echo
 log() {
