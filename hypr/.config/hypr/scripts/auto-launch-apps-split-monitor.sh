@@ -16,8 +16,8 @@ declare -A MONITOR_MAP=(
 )
 
 # Runtime tracking
-declare -A MONITOR_CURRENT_WS   # track current workspace per monitor name
-declare -A WORKSPACE_USAGE      # track number of apps assigned to each workspace
+declare -A MONITOR_CURRENT_WS # track current workspace per monitor name
+declare -A WORKSPACE_USAGE    # track number of apps assigned to each workspace
 if [[ "$1" == "--startup" ]]; then
   IS_STARTUP=true
 else
@@ -64,7 +64,7 @@ tmux() {
 }
 
 ## Slack
-APPS["Slack"]="LEFT+:slack"
+APPS["Slack"]="LAPTOP+:slack"
 
 ## File manager
 APPS["Yazi"]="RIGHT+:kitty -e yazi"
@@ -78,15 +78,15 @@ APPS["Btop"]="RIGHT+:kitty -e btop"
 
 declare -A SETUPS
 SETUPS["🌐 Browsing"]="${APPS["Firefox"]}|$(tmuxifier config)"
-SETUPS["🧱 Civil"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmuxifier cc-dev)|$(tmuxifier config CENTER)|${APPS["Slack"]}"
-SETUPS["🛠 Config"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmuxifier config)"
+SETUPS["🧱 Civil"]="${APPS["Firefox"]}|$(tmuxifier cc-dev)|$(tmuxifier config CENTER)|${APPS["Slack"]}|${APPS["Email"]}"
+SETUPS["🛠 Config"]="${APPS["Firefox"]}|$(tmuxifier config)|${APPS["Email"]}"
 SETUPS["🗂 Files"]="${APPS["Dolphin"]}|${APPS["Yazi"]}"
 SETUPS["🧩 Game Mods"]="LEFT+:steam|CENTER+:kitty -d ~/Downloads/ yazi|RIGHT+:kitty -d ~/.steam/steam/steamapps/ yazi"
 SETUPS["🎮 Game"]="LEFT+:steam"
 SETUPS["📅 Meeting"]="LAPTOP+:firefox https://calendar.google.com/|CENTER+:firefox"
 SETUPS["📊 System Monitor"]="${APPS["Journal"]}|${APPS["Btop"]}"
 SETUPS["🛡️ DNF Update"]="LEFT+:kitty -e sysup|${APPS["Journal"]}"
-SETUPS["💼 Work"]="${APPS["Email"]}|${APPS["Firefox"]}|$(tmuxifier uphill)|$(tmuxifier config CENTER)|${APPS["Slack"]}"
+SETUPS["💼 Work"]="${APPS["Firefox"]}|$(tmuxifier uphill)|$(tmuxifier config CENTER)|${APPS["Slack"]}|${APPS["Email"]}"
 
 # Log to journal and echo
 log() {
@@ -168,7 +168,7 @@ get_next_workspace() {
       local prev_ws="$current_ws"
       current_ws=$((current_ws + 1))
       if [[ $current_ws -gt $end_ws ]]; then
-        current_ws=$start_ws  # Wrap around
+        current_ws=$start_ws # Wrap around
       fi
       log "Workspace $prev_ws has windows or assignments, incrementing to $current_ws"
     else
