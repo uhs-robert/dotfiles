@@ -1,5 +1,5 @@
-# Set a custom session root path. Default is `$HOME`.
 # layouts/cc-dev.session.sh
+# Set a custom session root path. Default is `$HOME`.
 # Must be called before `initialize_session`.
 session_root "$HOME/Documents/github-uphill/civil-communicator/"
 # Check if tmux is running, and start it if not
@@ -9,9 +9,12 @@ fi
 
 # Create session with specified name if it does not already exist. If no
 # argument is given, session name will be based on layout file name.
-if initialize_session "cc-dev"; then
+if initialize_session "CIVIL"; then
   new_window ""
   run_cmd "cd $session_root"
+  run_cmd "yazi"
+  new_window ""
+  run_cmd "cd $HOME/Documents/github-uphill/civil-communicator-server/"
   run_cmd "yazi"
   new_window ""
   run_cmd "cd $session_root"
