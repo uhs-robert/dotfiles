@@ -1,0 +1,24 @@
+# tmux/tmuxifier-layouts/oasis-swap.sh
+# Set a custom session root path. Default is `$HOME`.
+# Must be called before `initialize_session`.
+session_root "$HOME"
+
+# Check if tmux is running, and start it if not
+if ! pgrep tmux >/dev/null; then
+  tmux start-server
+fi
+
+# Create session with specified name if it does not already exist. If no
+# argument is given, session name will be based on layout file name.
+if initialize_session "OASIS"; then
+  new_window ""
+  run_cmd "cd $session_root/Documents/github-uphill/oasis.nvim/assets/example-scripts/"
+  run_cmd "nvim index.js"
+  new_window ""
+  run_cmd "cd $session_root/dotfiles/tmux/"
+  run_cmd "nvim .tmux.conf"
+  select_window 1
+fi
+
+# Finalize session creation and switch/attach to it.
+finalize_and_go_to_session
