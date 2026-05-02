@@ -1,7 +1,7 @@
 # tmux/tmuxifier-layouts/peak-portal.session.sh
 # Set a custom session root path. Default is `$HOME`.
 # Must be called before `initialize_session`.
-session_root "$HOME/Documents/github-uphill/peak/"
+session_root "$HOME/Development/peak/"
 # Check if tmux is running, and start it if not
 if ! pgrep tmux >/dev/null; then
   tmux start-server
