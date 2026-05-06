@@ -10,7 +10,7 @@ fi
 
 # Create session with specified name if it does not already exist. If no
 # argument is given, session name will be based on layout file name.
-if initialize_session "OASIS"; then
+if initialize_session "Oasis"; then
   new_window ""
   run_cmd "cd $session_root/Development/oasis.nvim/assets/example-scripts/"
   run_cmd "nvim index.js"
