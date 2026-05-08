@@ -7,9 +7,13 @@ if ! pgrep tmux >/dev/null; then
   tmux start-server
 fi
 
+session_name="Civil Communicator"
+
 # Create session with specified name if it does not already exist. If no
 # argument is given, session name will be based on layout file name.
-if initialize_session "Civil Communicator"; then
+if initialize_session "$session_name"; then
+  tmux set-option -t "$session_name" set-titles on
+  tmux set-option -t "$session_name" set-titles-string "Tmux $session_name"
   new_window ""
   run_cmd "cd $session_root"
   run_cmd "yazi"
