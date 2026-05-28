@@ -14,7 +14,7 @@ session_name="Oasis"
 # argument is given, session name will be based on layout file name.
 if initialize_session "$session_name"; then
   new_window ""
-  run_cmd "cd $session_root/Development/oasis.nvim/assets/example-scripts/"
+  run_cmd "cd $session_root/Development/personal/oasis.nvim/assets/example-scripts/"
   run_cmd "nvim index.js"
   new_window ""
   run_cmd "cd $session_root/dotfiles/tmux/"

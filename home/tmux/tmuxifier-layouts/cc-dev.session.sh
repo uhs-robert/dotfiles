@@ -1,7 +1,7 @@
 # tmux/tmuxifier-layouts/cc-dev.session.sh
 # Set a custom session root path. Default is `$HOME`.
 # Must be called before `initialize_session`.
-session_root "$HOME/Development/civil-communicator/"
+session_root "$HOME/Development/work/civil-communicator/"
 # Check if tmux is running, and start it if not
 if ! pgrep tmux >/dev/null; then
   tmux start-server
@@ -18,7 +18,7 @@ if initialize_session "$session_name"; then
   run_cmd "cd $session_root"
   run_cmd "yazi"
   new_window ""
-  run_cmd "cd $HOME/Development/civil-communicator-server/"
+  run_cmd "cd $HOME/Development/work/civil-communicator-server/"
   run_cmd "yazi"
   new_window ""
   run_cmd "cd $session_root"
