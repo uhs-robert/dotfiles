@@ -22,7 +22,7 @@ if initialize_session "$session_name"; then
   run_cmd "yazi"
   new_window ""
   run_cmd "cd $session_root"
-  run_cmd "npm run dev"
+  run_cmd "just dev"
   select_window 1
 fi
 
