@@ -8,6 +8,7 @@ if ! pgrep tmux >/dev/null; then
 fi
 
 session_name="Civil Communicator"
+dir_server="$HOME/Development/work/civil-communicator-server/"
 
 # Create session with specified name if it does not already exist. If no
 # argument is given, session name will be based on layout file name.
@@ -18,11 +19,12 @@ if initialize_session "$session_name"; then
   run_cmd "cd $session_root"
   run_cmd "yazi"
   new_window ""
-  run_cmd "cd $HOME/Development/work/civil-communicator-server/"
+  run_cmd "cd $dir_server"
   run_cmd "yazi"
   new_window ""
   run_cmd "cd $session_root"
   run_cmd "just dev"
+  run_cmd "cd $dir_server"
   select_window 1
 fi
 
