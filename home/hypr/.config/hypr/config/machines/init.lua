@@ -15,25 +15,25 @@ local function hostname()
 end
 
 --- Load the optional profile for the current hostname.
---- Missing profiles are intentionally ignored.
+--- Missing profiles are intentionally ignored; errors in existing profiles propagate.
 --- @return table
 function Machines.load()
   local name = hostname()
   if not name then return {} end
 
-  local ok, profile = pcall(require, "config.machines." .. name)
-  if not ok then return {} end
+  local module = "config.machines." .. name
+  if not package.searchpath(module, package.path) then return {} end
 
-  return profile
+  return require(module)
 end
 
---- Merge the current machine profile with explicit session overrides.
---- Explicit overrides win over machine-profile values.
---- @param overrides table|nil
+--- Merge shared session values with the current machine profile.
+--- Machine-profile values win so host-specific hardware can override shared defaults.
+--- @param shared table|nil
 --- @return table
-function Machines.merge(overrides)
-  local merged = Utils.deep_extend({}, Machines.load())
-  if overrides then Utils.deep_extend(merged, overrides) end
+function Machines.merge(shared)
+  local merged = Utils.deep_extend({}, shared or {})
+  Utils.deep_extend(merged, Machines.load())
 
   return merged
 end
