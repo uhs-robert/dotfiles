@@ -16,4 +16,4 @@ return {
 }
 ```
 
-The loader uses `$HOSTNAME` first and falls back to `/etc/hostname`. Missing hostname profiles are ignored. Hostname-profile values take precedence over `workstation.lua`, so host-specific differences can be represented without duplicating the full configuration.
+The loader uses `$HOSTNAME` first and falls back to `/etc/hostname`. Profiles are keyed by the short hostname (everything before the first `.`), and profile names must contain only `A-Z`, `a-z`, `0-9`, `_`, or `-`. Invalid hostnames and missing hostname profiles are ignored. Hostname-profile values take precedence over `workstation.lua`, so host-specific differences can be represented without duplicating the full configuration.
