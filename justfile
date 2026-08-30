@@ -50,3 +50,10 @@ uninstall *ARGS:
 # Shellcheck install.sh, uninstall.sh, and lib/*.sh
 lint:
     shellcheck install.sh uninstall.sh lib/*.sh
+
+# Validate formatting, package manifests, and whitespace
+check: lint
+    shfmt -d install.sh uninstall.sh lib/*.sh
+    stylua --check home/hypr/.config/hypr
+    ./lib/check-packages.sh
+    git diff --check
