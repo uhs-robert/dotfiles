@@ -17,7 +17,6 @@ local Window = {
   group_toggle = function() return Hypr.dispatch(hl.dsp.group.toggle()) end,
   group_next = function() return Hypr.dispatch(hl.dsp.group.next()) end,
   group_prev = function() return Hypr.dispatch(hl.dsp.group.prev()) end,
-  group_move_in = function() return Hypr.dispatch(hl.dsp.window.move({ into_group = "r" })) end,
   group_move_out = function() return Hypr.dispatch(hl.dsp.window.move({ out_of_group = true })) end,
   group_lock_toggle = function() return Hypr.dispatch(hl.dsp.group.lock_active({ action = "toggle" })) end,
 }
@@ -40,6 +39,9 @@ Window.focus_dir = function(dir) return Hypr.dispatch(hl.dsp.focus({ direction =
 
 --- @param dir string  Direction code: "l", "d", "u", "r"
 Window.move_dir = function(dir) return Hypr.dispatch(hl.dsp.window.move({ direction = dir })) end
+
+--- @param dir string  Direction code: "l", "d", "u", "r"
+Window.group_move_in = function(dir) return Hypr.dispatch(hl.dsp.window.move({ into_group = dir })) end
 
 --- @param name string  Key into SPECIAL_WS (e.g. "scratchpad")
 Window.toggle_special = function(name) return Hypr.dispatch(hl.dsp.workspace.toggle_special(name)) end
