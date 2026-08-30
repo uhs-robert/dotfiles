@@ -89,7 +89,9 @@ main() {
 
   if command -v ya >/dev/null 2>&1 && [[ -f "$HOME/.config/yazi/package.toml" ]]; then
     info "Installing Yazi packages..."
-    ya pkg install
+    if ! ya pkg install; then
+      warn "Failed to install Yazi packages; continuing"
+    fi
   fi
 
   SELECTED_OPTIONAL=()
