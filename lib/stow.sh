@@ -47,19 +47,6 @@ bootstrap_tmuxifier() {
 }
 
 template_user_configs() {
-  local src_home="/home/roberth"
-  [[ "$HOME" == "$src_home" ]] && return
-  info "Replacing hardcoded home paths in user configs..."
-  local files=(
-    "$HOME/.codex/config.toml"
-    "$HOME/.config/yazi/keymap.toml"
-  )
-  for f in "${files[@]}"; do
-    [[ -f "$f" ]] || continue
-    sed -i "s|$src_home|$HOME|g" "$f"
-    success "Templated $(basename "$(dirname "$f")")/$(basename "$f")"
-  done
-
   local active="$HOME/.config/hypr/monitors/active.conf"
   local default_layout="$HOME/.config/hypr/monitors/layouts/monitors-default.conf"
   if [[ -L "$active" && -f "$default_layout" ]]; then
@@ -86,9 +73,18 @@ setup_root_symlinks() {
   sudo ln -sf "$HOME/.oh-my-zsh"   /root/.oh-my-zsh
   sudo ln -sf "$HOME/.config/nvim" /root/.config/nvim
 
-  for item in flavors plugins keymap.toml yazi.toml; do
+  for item in flavors plugins yazi.toml; do
     sudo ln -sf "$HOME/.config/yazi/$item" "/root/.config/yazi/$item"
   done
+
+  if [[ -f "$HOME/.config/yazi/keymap.toml" ]]; then
+    sed \
+      -e "s|cd ~/|cd $PRIMARY_HOME/|g" \
+      -e 's|/run/media/$USER/|/run/media/'"$PRIMARY_USER"'/|g' \
+      "$HOME/.config/yazi/keymap.toml" | sudo tee /root/.config/yazi/keymap.toml >/dev/null
+  else
+    warn "Yazi keymap not found, skipping root keymap generation"
+  fi
 
   sudo tee /root/.config/yazi/theme.toml > /dev/null <<'EOF'
 [flavor]
