@@ -9,6 +9,7 @@
 --
 
 local Config = require("config") ---@class Config
+local Machines = require("config.machines")
 
 --- @type Config.Monitor[]
 -- stylua: ignore start
@@ -30,10 +31,10 @@ local MONITORS_DESKTOP = {
 
 --- Initialises the Hyprland session: applies machine config and loads all subsystems.
 local function init()
-  Config.setup({
+  Config.setup(Machines.merge({
     drm_devices = "/dev/dri/card1:/dev/dri/card2 Hyprland",
     monitors = function(is_laptop) return is_laptop and MONITORS_LAPTOP or MONITORS_DESKTOP end,
-  })
+  }))
 
   require("lua.plugins.hyprvim").setup({
     keys = { leader = "SUPER", activate = "SPACE", exit = "ESCAPE" },
