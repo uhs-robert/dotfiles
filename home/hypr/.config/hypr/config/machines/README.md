@@ -1,8 +1,10 @@
 # Machine profiles
 
-Optional hostname-specific Hyprland overrides live in this directory.
+Machine-specific Hyprland configuration lives in this directory.
 
-Create `<hostname>.lua` and return only the values that differ from the shared configuration:
+`workstation.lua` owns the current workstation hardware configuration, including monitor layouts and DRM device ordering. This keeps physical-device details out of the shared `hyprland.lua` entrypoint.
+
+Optional hostname-specific overrides can further specialize that configuration. Create `<hostname>.lua` and return only the values that differ from the workstation configuration:
 
 ```lua
 return {
@@ -14,4 +16,4 @@ return {
 }
 ```
 
-The loader uses `$HOSTNAME` first and falls back to `/etc/hostname`. Missing profiles are ignored. Machine-profile values take precedence over the shared values in `hyprland.lua`, allowing host-specific hardware such as monitors and DRM devices to be overridden without duplicating the full configuration.
+The loader uses `$HOSTNAME` first and falls back to `/etc/hostname`. Missing hostname profiles are ignored. Hostname-profile values take precedence over `workstation.lua`, so host-specific differences can be represented without duplicating the full configuration.
