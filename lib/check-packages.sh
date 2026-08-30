@@ -4,7 +4,13 @@ set -eu
 packages=$(awk '
   /^[[:space:]]*($|#|\[)/ { next }
   { print $1 }
-' packages/*.ini | sort)
+' \
+  packages/arch.ini \
+  packages/arch-aur.ini \
+  packages/devtools.ini \
+  packages/fonts.ini \
+  packages/luarocks.ini \
+  packages/pipx.ini | sort)
 
 duplicates=$(printf '%s\n' "$packages" | uniq -d)
 
