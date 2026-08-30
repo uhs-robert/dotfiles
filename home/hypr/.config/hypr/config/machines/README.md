@@ -14,4 +14,4 @@ return {
 }
 ```
 
-The loader uses `$HOSTNAME` first and falls back to `/etc/hostname`. Missing profiles are ignored. Explicit values passed by `hyprland.lua` take precedence over profile values, so profiles remain a narrow override layer rather than a replacement configuration.
+The loader uses `$HOSTNAME` first and falls back to `/etc/hostname`. Missing profiles are ignored. Machine-profile values take precedence over the shared values in `hyprland.lua`, allowing host-specific hardware such as monitors and DRM devices to be overridden without duplicating the full configuration.
