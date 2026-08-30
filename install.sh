@@ -87,6 +87,11 @@ main() {
   mapfile -t core < <(read_ini_section stow.ini CORE)
   do_stow "${core[@]}"
 
+  if command -v ya >/dev/null 2>&1 && [[ -f "$HOME/.config/yazi/package.toml" ]]; then
+    info "Installing Yazi packages..."
+    ya pkg install
+  fi
+
   SELECTED_OPTIONAL=()
   prompt_optional
   if [[ ${#SELECTED_OPTIONAL[@]} -gt 0 ]]; then
