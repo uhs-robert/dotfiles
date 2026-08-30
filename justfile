@@ -55,5 +55,5 @@ lint:
 check: lint
     shfmt -d install.sh uninstall.sh lib/*.sh
     stylua --check home/hypr/.config/hypr
-    ./lib/check-packages.sh
+    sh ./lib/check-packages.sh
     git diff --check
