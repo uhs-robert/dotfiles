@@ -1,14 +1,8 @@
 --- Window groups submap
 
-local Cmd = require("lib.actions.cmd") ---@class Cmd
 local Config = require("config") ---@class Config
 local Submap = require("lib.key.submap") ---@class Submap
-
-local function dispatch(name, args)
-  local command = "hyprctl dispatch " .. name
-  if args then command = command .. " " .. args end
-  return Cmd.run(command)
-end
+local Window = require("lib.actions.window") ---@class WindowActions
 
 Submap.define({
   name = "Groups",
@@ -20,12 +14,12 @@ Submap.define({
 
   binds = function()
     return {
-      { "G", dispatch("togglegroup"), "Toggle Group" },
-      { "N", dispatch("changegroupactive", "f"), "Next Group Window" },
-      { "P", dispatch("changegroupactive", "b"), "Previous Group Window" },
-      { "I", dispatch("moveintogroup", "r"), "Move Into Group" },
-      { "O", dispatch("moveoutofgroup"), "Move Out of Group" },
-      { "L", dispatch("lockactivegroup", "toggle"), "Toggle Group Lock" },
+      { "G", Window.group_toggle(), "Toggle Group" },
+      { "N", Window.group_next(), "Next Group Window" },
+      { "P", Window.group_prev(), "Previous Group Window" },
+      { "I", Window.group_move_in(), "Move Into Group" },
+      { "O", Window.group_move_out(), "Move Out of Group" },
+      { "L", Window.group_lock_toggle(), "Toggle Group Lock" },
     }
   end,
 }).setup()
