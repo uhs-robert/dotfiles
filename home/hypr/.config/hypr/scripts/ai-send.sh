@@ -21,7 +21,22 @@ case "$mode" in
 esac
 
 i=0
-while [ ! -s "$transcript_file" ]; do
+previous_size=-1
+stable_count=0
+
+while :; do
+  if [ -s "$transcript_file" ]; then
+    current_size=$(wc -c < "$transcript_file")
+
+    if [ "$current_size" -eq "$previous_size" ]; then
+      stable_count=$((stable_count + 1))
+      [ "$stable_count" -ge 2 ] && break
+    else
+      previous_size="$current_size"
+      stable_count=0
+    fi
+  fi
+
   i=$((i + 1))
   [ "$i" -ge 300 ] && exit 1
   sleep 0.1
