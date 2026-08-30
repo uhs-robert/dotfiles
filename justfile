@@ -51,9 +51,10 @@ uninstall *ARGS:
 lint:
     shellcheck install.sh uninstall.sh lib/*.sh
 
-# Validate formatting, package manifests, and whitespace
-check: lint
-    shfmt -d install.sh uninstall.sh lib/*.sh
-    stylua --check home/hypr/.config/hypr
+# Validate formatting, package manifests, and whitespace; run optional tooling when available
+check:
+    if command -v shellcheck >/dev/null 2>&1; then shellcheck install.sh uninstall.sh lib/*.sh; else echo 'skip: shellcheck not installed'; fi
+    if command -v shfmt >/dev/null 2>&1; then shfmt -d install.sh uninstall.sh lib/*.sh; else echo 'skip: shfmt not installed'; fi
+    if command -v stylua >/dev/null 2>&1; then stylua --check home/hypr/.config/hypr; else echo 'skip: stylua not installed'; fi
     sh ./lib/check-packages.sh
     git diff --check
