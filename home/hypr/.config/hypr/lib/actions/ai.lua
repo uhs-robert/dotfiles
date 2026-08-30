@@ -20,6 +20,12 @@ local function shell_quote(value)
   return "'" .. value:gsub("'", "'\\''") .. "'"
 end
 
+--- @param command string
+--- @param rules table|nil
+local function exec(command, rules)
+  hl.dispatch(hl.dsp.exec_cmd(command, rules))
+end
+
 --- @return boolean
 local function window_exists()
   return #hl.get_windows({ class = AI_CLASS }) > 0
@@ -44,7 +50,7 @@ end
 function AI.launch()
   if window_exists() then return end
 
-  hl.exec_cmd(Config.app.term_cmd .. " --class " .. AI_CLASS .. " -e tmuxifier load-session ai", {
+  exec(Config.app.term_cmd .. " --class " .. AI_CLASS .. " -e tmuxifier load-session ai", {
     workspace = "special:" .. AI_WORKSPACE .. " silent",
   })
 end
@@ -73,11 +79,11 @@ local function start_recording(prefix, submit)
   AI.submit = submit
 
   os.remove(TRANSCRIPT_FILE)
-  hl.exec_cmd("voxtype record start --file=" .. shell_quote(TRANSCRIPT_FILE))
+  exec("voxtype record start --file=" .. shell_quote(TRANSCRIPT_FILE))
 end
 
 local function finish_recording()
-  hl.exec_cmd("voxtype record stop")
+  exec("voxtype record stop")
 
   local prefix = AI.prefix or ""
   local mode = AI.submit and "submit" or "prefill"
@@ -86,7 +92,7 @@ local function finish_recording()
   AI.prefix = nil
   AI.submit = true
 
-  hl.exec_cmd(string.format(
+  exec(string.format(
     "%s %s %s %s",
     AI_SEND,
     shell_quote(TRANSCRIPT_FILE),
