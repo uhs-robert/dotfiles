@@ -8,8 +8,8 @@
 --- @field cmd string shell command to launch
 --- @field class string|nil window class for dynamic workspace rule (mutually exclusive with title)
 --- @field title string|nil window title for dynamic workspace rule (mutually exclusive with class)
---- @field size {integer, integer}|nil window size as {w, h} (e.g. {1280, 720})
---- @field pos {integer, integer}|nil window position as {x, y} (e.g. {100, 200})
+--- @field size [integer, integer]|nil window size as {w, h} (e.g. {1280, 720})
+--- @field pos [integer, integer]|nil window position as {x, y} (e.g. {100, 200})
 --- @field delay integer|nil milliseconds to wait before launching
 
 --- @class Sessions
@@ -89,7 +89,6 @@ function M.get_sessions()
 
     ["💼 Work"] = {
       betterbird(),
-      tmuxifier({ session = "ai", monitor = 4, ws = 2 }),
       { monitor = 2, ws = 1, cmd = "qutebrowser" },
       { monitor = 3, ws = 1, cmd = "firefox --new-window" },
       tmuxifier({ session = "uphill" }),

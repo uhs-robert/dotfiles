@@ -54,3 +54,7 @@ sync-root-yazi:
 # Shellcheck install.sh, uninstall.sh, and lib/*.sh
 lint:
     shellcheck install.sh uninstall.sh lib/*.sh
+
+# Validate formatting, package manifests, and whitespace; run optional tooling when available
+check:
+    sh ./lib/check.sh

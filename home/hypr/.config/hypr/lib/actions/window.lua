@@ -14,10 +14,16 @@ local Window = {
   pass_to_active = function() return Hypr.dispatch(hl.dsp.pass({ window = "active" })) end,
   drag = function() return Hypr.dispatch(hl.dsp.window.drag()) end,
   resize_mouse = function() return Hypr.dispatch(hl.dsp.window.resize()) end,
+  group_toggle = function() return Hypr.dispatch(hl.dsp.group.toggle()) end,
+  group_next = function() return Hypr.dispatch(hl.dsp.group.next()) end,
+  group_prev = function() return Hypr.dispatch(hl.dsp.group.prev()) end,
+  group_move_out = function() return Hypr.dispatch(hl.dsp.window.move({ out_of_group = true })) end,
+  group_lock_toggle = function() return Hypr.dispatch(hl.dsp.group.lock_active({ action = "toggle" })) end,
 }
 
 local SPECIAL_WS = {
   scratchpad = "special:scratchpad",
+  ai = "special:agents",
 }
 
 --- Focus the monitor in the given slot (1-based index into Config.monitors).
@@ -29,11 +35,22 @@ Window.focus_monitor = function(slot)
   end
 end
 
+--- Focus the previously focused window.
+Window.focus_last = function() return Hypr.dispatch(hl.dsp.focus({ last = true })) end
+
 --- @param dir string  Direction code: "l", "d", "u", "r"
 Window.focus_dir = function(dir) return Hypr.dispatch(hl.dsp.focus({ direction = dir })) end
 
 --- @param dir string  Direction code: "l", "d", "u", "r"
 Window.move_dir = function(dir) return Hypr.dispatch(hl.dsp.window.move({ direction = dir })) end
+
+--- Move the active window into the group in the given direction if group.
+--- @param dir string  Direction code: "l", "d", "u", "r"
+Window.group_move_in = function(dir) return Hypr.dispatch(hl.dsp.window.move({ into_group = dir })) end
+
+--- Move the active window into the group in the given direction or create.
+--- @param dir string  Direction code: "l", "d", "u", "r"
+Window.group_move_or_create = function(dir) return Hypr.dispatch(hl.dsp.window.move({ into_or_create_group = dir })) end
 
 --- @param name string  Key into SPECIAL_WS (e.g. "scratchpad")
 Window.toggle_special = function(name) return Hypr.dispatch(hl.dsp.workspace.toggle_special(name)) end
