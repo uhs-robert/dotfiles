@@ -77,8 +77,10 @@ setup_root_symlinks() {
     sudo ln -sf "$HOME/.config/yazi/$item" "/root/.config/yazi/$item"
   done
 
-  # Launcher that keeps root's Yazi keymap in sync with the user's.
+  # Launcher that keeps root's Yazi keymap in sync with the user's, plus a shim
+  # on sudo's secure_path so plain "sudo yazi" syncs too.
   sudo install -Dm755 "$DOTFILES_DIR/system/usr/local/bin/yazi-root" /usr/local/bin/yazi-root
+  sudo install -Dm755 "$DOTFILES_DIR/system/usr/local/sbin/yazi" /usr/local/sbin/yazi
 
   if [[ -f "$HOME/.config/yazi/keymap.toml" ]]; then
     /usr/local/bin/yazi-root --sync-only
