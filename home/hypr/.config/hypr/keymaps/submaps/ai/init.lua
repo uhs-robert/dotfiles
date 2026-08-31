@@ -14,11 +14,21 @@ Submap.define({
 
   escape = "reset",
   catchall = "stay",
+  on_enter = function()
+    if AI.is_visible() then
+      AI.hide()
+      Submap.reset()
+    else
+      AI.show()
+    end
+  end,
+  on_exit = AI.finish,
 
   -- stylua: ignore
   binds = {
-    { "PERIOD",     Submap.reset,                                                   "Exit AI" },
-    { "A",          AI.show,                                                        "AI Workspace" },
+    { "PERIOD",     Submap.reset,                                                  "Exit AI" },
+    { "X",          function() AI.send_text("/clear") end,          "Clear" },
+    { "BACKSPACE",  AI.cancel,                                      "Cancel Recording" },
 
     { "G",          function() AI.toggle("use gog to", true) end,                  "Gog" },
     { "CTRL + G",   function() AI.toggle("use gog to", false) end,                 "Gog (Prefill)" },

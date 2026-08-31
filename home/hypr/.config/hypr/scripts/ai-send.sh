@@ -1,52 +1,71 @@
 #!/bin/sh
+# Stops the recording, waits for voxtype to go idle again, pastes the transcript into tmux.
 
 set -eu
 
-if [ "$#" -ne 3 ]; then
-  printf 'usage: %s TRANSCRIPT_FILE PREFIX submit|prefill\n' "$0" >&2
+if [ "$#" -ne 4 ]; then
+  printf 'usage: %s TRANSCRIPT_FILE PREFIX submit|prefill TMUX_TARGET\n' "$0" >&2
   exit 2
 fi
 
 transcript_file="$1"
 prefix="$2"
 mode="$3"
-tmux_target="AI:Claude.0"
+tmux_target="$4"
+
+timeout_seconds=90
+
+notify() {
+  notify-send "AI" "$1" 2>/dev/null || true
+}
+
+fail() {
+  notify "$1"
+  printf '%s\n' "$1" >&2
+  exit 1
+}
 
 case "$mode" in
-  submit|prefill) ;;
-  *)
-    printf 'invalid mode: %s\n' "$mode" >&2
-    exit 2
-    ;;
+  submit | prefill) ;;
+  *) fail "invalid mode: $mode" ;;
 esac
 
-i=0
-previous_size=-1
-stable_count=0
+fifo=$(mktemp -u "${XDG_RUNTIME_DIR:-/tmp}/ai-voice-status.XXXXXX")
+mkfifo "$fifo"
+cleanup() { rm -f "$fifo"; }
+trap cleanup EXIT
 
-while :; do
-  if [ -s "$transcript_file" ]; then
-    current_size=$(wc -c < "$transcript_file")
+timeout "$timeout_seconds" voxtype status --follow --format json >"$fifo" 2>/dev/null &
+watcher_pid=$!
 
-    if [ "$current_size" -eq "$previous_size" ]; then
-      stable_count=$((stable_count + 1))
-      [ "$stable_count" -ge 2 ] && break
-    else
-      previous_size="$current_size"
-      stable_count=0
-    fi
-  fi
+# attach before stop, so first line is "recording" not a stale "idle"
+exec 3<"$fifo"
 
-  i=$((i + 1))
-  [ "$i" -ge 300 ] && exit 1
-  sleep 0.1
+voxtype record stop
+
+found_idle=0
+while IFS= read -r line <&3; do
+  case "$line" in
+    *'"alt": "idle"'*)
+      found_idle=1
+      break
+      ;;
+  esac
 done
 
-transcript=$(cat "$transcript_file")
-[ -n "$transcript" ] || exit 0
+exec 3<&-
+kill "$watcher_pid" 2>/dev/null || true
+wait "$watcher_pid" 2>/dev/null || true
 
-printf '%s %s' "$prefix" "$transcript" | tmux load-buffer -
-tmux paste-buffer -d -t "$tmux_target"
+[ "$found_idle" -eq 1 ] || fail "voxtype transcription timed out"
+
+transcript=$(cat "$transcript_file" 2>/dev/null || true)
+rm -f "$transcript_file"
+
+[ -n "$transcript" ] || { notify "Empty transcript, nothing sent"; exit 0; }
+
+printf '%s %s' "$prefix" "$transcript" | tmux load-buffer -b ai-voice -
+tmux paste-buffer -p -d -b ai-voice -t "$tmux_target"
 
 if [ "$mode" = "submit" ]; then
   tmux send-keys -t "$tmux_target" Enter
