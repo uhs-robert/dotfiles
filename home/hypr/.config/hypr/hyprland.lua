@@ -10,11 +10,11 @@
 
 local Config = require("config") ---@class Config
 local Machines = require("config.machines")
-local Workstation = require("config.machines.workstation")
+local Default = require("config.machines.default")
 
 --- Initialises the Hyprland session: applies machine config and loads all subsystems.
 local function init()
-  Config.setup(Machines.merge(Workstation))
+  Config.setup(Machines.merge(Default))
 
   require("lua.plugins.hyprvim").setup({
     keys = { leader = "SUPER", activate = "SPACE", exit = "ESCAPE" },
