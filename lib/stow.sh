@@ -77,12 +77,11 @@ setup_root_symlinks() {
     sudo ln -sf "$HOME/.config/yazi/$item" "/root/.config/yazi/$item"
   done
 
-  # Identity + launcher used to keep root's Yazi keymap in sync with the user's.
-  sudo install -Dm644 "$DOTFILES_DIR/oasis.conf" /etc/oasis.conf
+  # Launcher that keeps root's Yazi keymap in sync with the user's.
   sudo install -Dm755 "$DOTFILES_DIR/system/usr/local/bin/yazi-root" /usr/local/bin/yazi-root
 
   if [[ -f "$HOME/.config/yazi/keymap.toml" ]]; then
-    YAZI_PRIMARY_USER="$PRIMARY_USER" /usr/local/bin/yazi-root --sync-only
+    /usr/local/bin/yazi-root --sync-only
     success "Generated root Yazi keymap (rerun 'just sync-root-yazi' or launch 'yazi-root' to refresh)"
   else
     warn "Yazi keymap not found, skipping root keymap generation"

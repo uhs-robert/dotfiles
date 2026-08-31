@@ -5,6 +5,9 @@
 # runs as root. This script rewrites those to the primary user's home and name
 # on every launch, so root's keymap never drifts from the user's.
 #
+# The primary user is read back off the yazi.toml symlink that install.sh points
+# at the user's config, so there is no username configured anywhere.
+#
 # Usage:
 #   yazi-root [yazi args...]   regenerate the root keymap, then launch Yazi
 #   yazi-root --sync-only      regenerate the root keymap and exit
@@ -12,6 +15,7 @@ set -euo pipefail
 
 readonly root_config_dir="/root/.config/yazi"
 readonly root_keymap="$root_config_dir/keymap.toml"
+readonly link="$root_config_dir/yazi.toml"
 
 # Runs a command as root, using sudo only when not already root.
 as_root() {
@@ -22,46 +26,26 @@ as_root() {
   fi
 }
 
-# Resolves the primary user: explicit override, then /etc/oasis.conf, then the
-# invoking user (sudo or login name), then the current user when not root.
-resolve_primary_user() {
-  if [[ -n "${YAZI_PRIMARY_USER:-}" ]]; then
-    echo "$YAZI_PRIMARY_USER"
-    return
-  fi
-  if [[ -r /etc/oasis.conf ]]; then
-    # shellcheck disable=SC1091  # installed at runtime, not in this repo path
-    source /etc/oasis.conf
-    if [[ -n "${PRIMARY_USER:-}" ]]; then
-      echo "$PRIMARY_USER"
-      return
-    fi
-  fi
-  if [[ -n "${SUDO_USER:-}" ]]; then
-    echo "$SUDO_USER"
-    return
-  fi
-  if [[ $EUID -ne 0 ]]; then
-    id -un
-    return
-  fi
-  logname 2>/dev/null || return 1
-}
-
-primary_user="$(resolve_primary_user)" || {
-  echo "yazi-root: cannot determine the primary user, set YAZI_PRIMARY_USER" >&2
+if [[ ! -L "$link" ]]; then
+  echo "yazi-root: $link is not a symlink to a user config, run install.sh first" >&2
   exit 1
-}
+fi
 
+src_dir="$(dirname "$(readlink -f "$link")")"
+if [[ ! -d "$src_dir" ]]; then
+  echo "yazi-root: $link is broken, run install.sh first" >&2
+  exit 1
+fi
+
+primary_user="$(stat -c %U "$src_dir")"
 primary_home="$(getent passwd "$primary_user" | cut -d: -f6)"
 if [[ -z "$primary_home" ]]; then
   echo "yazi-root: no home directory for user '$primary_user'" >&2
   exit 1
 fi
 
-src_keymap="$primary_home/.config/yazi/keymap.toml"
+src_keymap="$src_dir/keymap.toml"
 if [[ -f "$src_keymap" ]]; then
-  as_root mkdir -p "$root_config_dir"
   # shellcheck disable=SC2016  # $USER is a literal in the keymap, not expanded here
   sed \
     -e "s|cd ~/|cd $primary_home/|g" \
