@@ -34,4 +34,9 @@ just stow <package>   # symlink one package
 just unstow <package> # remove one package's symlinks
 just install          # run install.sh
 just uninstall        # run uninstall.sh
+just sync-root-yazi   # regenerate root's Yazi keymap from the user's
 ```
+
+## Root Yazi
+
+The user Yazi keymap uses `~` and `$USER`, which resolve to `/root` when Yazi runs as root, so root gets a rewritten copy at `/root/.config/yazi/keymap.toml` rather than a symlink. Launch root Yazi with `yazi-root` (installed to `/usr/local/bin` by `install.sh`): it regenerates that copy from the current user keymap on every launch, so the two never drift. To refresh the copy without launching Yazi, run `yazi-root --sync-only` or `just sync-root-yazi`.
