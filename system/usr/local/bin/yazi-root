@@ -13,18 +13,15 @@
 #   yazi-root --sync-only      regenerate the root keymap and exit
 set -euo pipefail
 
+# /root is mode 700, so every path below needs root to even stat. Re-exec
+# under sudo rather than sprinkling sudo over the individual commands.
+if [[ $EUID -ne 0 ]]; then
+  exec sudo -- "$0" "$@"
+fi
+
 readonly root_config_dir="/root/.config/yazi"
 readonly root_keymap="$root_config_dir/keymap.toml"
 readonly link="$root_config_dir/yazi.toml"
-
-# Runs a command as root, using sudo only when not already root.
-as_root() {
-  if [[ $EUID -eq 0 ]]; then
-    "$@"
-  else
-    sudo "$@"
-  fi
-}
 
 if [[ ! -L "$link" ]]; then
   echo "yazi-root: $link is not a symlink to a user config, run install.sh first" >&2
@@ -46,11 +43,17 @@ fi
 
 src_keymap="$src_dir/keymap.toml"
 if [[ -f "$src_keymap" ]]; then
+  # Write via a temp file and mv, so an earlier install's keymap.toml symlink is
+  # replaced rather than followed, which would rewrite the user's own keymap.
+  tmp_keymap="$(mktemp "$root_config_dir/.keymap.toml.XXXXXX")"
+  trap 'rm -f "$tmp_keymap"' EXIT
   # shellcheck disable=SC2016  # $USER is a literal in the keymap, not expanded here
   sed \
     -e "s|cd ~/|cd $primary_home/|g" \
     -e 's|/run/media/$USER/|/run/media/'"$primary_user"'/|g' \
-    "$src_keymap" | as_root tee "$root_keymap" >/dev/null
+    "$src_keymap" >"$tmp_keymap"
+  chmod 644 "$tmp_keymap"
+  mv -f "$tmp_keymap" "$root_keymap"
 else
   echo "yazi-root: $src_keymap not found, leaving root keymap as-is" >&2
 fi
@@ -59,4 +62,4 @@ if [[ "${1:-}" == "--sync-only" ]]; then
   exit 0
 fi
 
-as_root yazi "$@"
+exec yazi "$@"
