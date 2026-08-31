@@ -29,25 +29,18 @@ local function hostname()
   return name
 end
 
-local function module_exists(module)
-  local searchers = package.searchers or package.loaders or {}
-  for _, searcher in ipairs(searchers) do
-    local loader = searcher(module)
-    if type(loader) == "function" then return true end
-  end
-
-  return false
-end
+local function module_path(module) return package.searchpath(module, package.path) end
 
 --- Load the optional profile for the current hostname.
---- Missing profiles are intentionally ignored; errors in existing profiles propagate.
+--- Missing profiles are intentionally ignored; errors in existing profiles (including
+--- syntax errors) propagate.
 --- @return table
 function Machines.load()
   local name = hostname()
   if not name then return {} end
 
   local module = "config.machines." .. name
-  if not module_exists(module) then return {} end
+  if not module_path(module) then return {} end
 
   return require(module)
 end
