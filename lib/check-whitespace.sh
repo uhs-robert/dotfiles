@@ -9,6 +9,9 @@ repo_dir=$(dirname -- "$script_dir")
 
 cd "$repo_dir" || exit 1
 
+# git grep exits 1 when nothing matches and >1 on a real failure, so the two
+# cases have to be told apart or an error would read as a clean scan.
+status=0
 offenders=$(
   git grep -nIE '[[:blank:]]+$' -- \
     install.sh \
@@ -17,7 +20,12 @@ offenders=$(
     lib \
     packages \
     home/hypr/.config/hypr
-) || offenders=''
+) || status=$?
+
+if [ "$status" -gt 1 ]; then
+  echo "Failed to scan for trailing whitespace (git grep exit $status)" >&2
+  exit 1
+fi
 
 if [ -n "$offenders" ]; then
   printf 'Trailing whitespace:\n%s\n' "$offenders" >&2
