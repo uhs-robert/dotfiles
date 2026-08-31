@@ -6,17 +6,27 @@ script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 repo_dir=$(dirname -- "$script_dir")
 pkg_dir="$repo_dir/packages"
 
+# Every manifest in packages/ lists OS/language package names, except these two:
+# stow.ini names dotfile directories and repos.ini names git repositories, so a
+# name shared with a real package there is not a duplicate.
+set --
+for manifest in "$pkg_dir"/*.ini; do
+  case "${manifest##*/}" in
+  stow.ini | repos.ini) continue ;;
+  esac
+  set -- "$@" "$manifest"
+done
+
+if [ "$#" -eq 0 ]; then
+  echo "No package manifests found in $pkg_dir" >&2
+  exit 1
+fi
+
 packages=$(
   awk '
     /^[[:space:]]*($|#|\[)/ { next }
     { print $1 }
-  ' \
-    "$pkg_dir/arch.ini" \
-    "$pkg_dir/arch-aur.ini" \
-    "$pkg_dir/devtools.ini" \
-    "$pkg_dir/fonts.ini" \
-    "$pkg_dir/luarocks.ini" \
-    "$pkg_dir/pipx.ini"
+  ' "$@"
 ) || {
   echo "Failed to read package manifests" >&2
   exit 1

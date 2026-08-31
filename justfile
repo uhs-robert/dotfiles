@@ -57,4 +57,5 @@ check:
     if command -v shfmt >/dev/null 2>&1; then shfmt -i 2 -d install.sh uninstall.sh lib/*.sh; else echo 'skip: shfmt not installed'; fi
     if command -v stylua >/dev/null 2>&1; then stylua --respect-ignores --check home/hypr/.config/hypr; else echo 'skip: stylua not installed'; fi
     sh ./lib/check-packages.sh
-    git diff --check
+    git diff --check HEAD
+    sh ./lib/check-whitespace.sh
