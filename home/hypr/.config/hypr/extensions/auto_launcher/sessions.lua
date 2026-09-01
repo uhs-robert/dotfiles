@@ -136,7 +136,7 @@ function M.get_sessions()
       { monitor = 3, ws = 1, cmd = "firefox --new-window", class = "firefox" },
       tmuxifier({ session = "uphill" }),
       tmuxifier({ session = "config", ws = 3 }),
-      { monitor = 4, ws = 1, cmd = "slack", class = "Slack", size = { 1064, 461 }, delay = 5000 },
+      { monitor = 4, ws = 1, cmd = "slack", class = "slack", size = { 1064, 461 }, delay = 5000 },
     },
   }
 end
