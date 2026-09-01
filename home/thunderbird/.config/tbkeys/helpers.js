@@ -118,6 +118,22 @@
     for (let i = 0; i < n; i++) window.goDoCommand(cmd);
   };
 
+  // -- last-action recording for . -----------------------------------------
+
+  tk.last_action = null;
+
+  /**
+   * Wraps window[name] so invoking it records itself (and the count it saw) as the last action, for . to replay; delegates to the original with no behavior change.
+   * @param {string} name - name of a window.tk_* function to wrap in place
+   */
+  tk.record_action = (name) => {
+    const original = window[name];
+    window[name] = (...args) => {
+      tk.last_action = { name, count: tk.peek_count() };
+      return original(...args);
+    };
+  };
+
   /**
    * @param {number} n - digit pressed
    * @returns {Function} handler that appends the digit to the pending count prefix
@@ -795,4 +811,19 @@
     }
     tk.reset_count();
   };
+
+  window.tk_repeat_last = () => {
+    const last = tk.last_action;
+    if (!last || typeof window[last.name] !== "function") return;
+    if (!tk.has_count()) window.count = last.count;
+    window[last.name]();
+  };
+
+  [
+    "tk_delete",
+    "tk_archive",
+    "tk_mark_read",
+    "tk_mark_unread",
+    "tk_mark_flagged",
+  ].forEach(tk.record_action);
 })();

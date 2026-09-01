@@ -79,5 +79,6 @@
   "ctrl+u": "func:tk_page_up",
   "ctrl+d": "func:tk_page_down",
   "g g": "func:tk_goto_top",
-  "G": "func:tk_goto_bottom"
+  "G": "func:tk_goto_bottom",
+  ".": "func:tk_repeat_last"
 }
