@@ -301,6 +301,35 @@
     tt.scrollTo({ top: target, behavior: "instant" });
   };
 
+  // -- unread thread navigation ----------------------------------------------
+
+  /**
+   * Selects the next/previous row with an unread header, stopping at the folder's edge without wrapping or crossing folders; extends the visual selection like j/k when in visual mode.
+   * @param {number} direction - 1 for next, -1 for previous
+   */
+  tk.step_unread = (direction) => {
+    const tt = tk.get_thread_tree();
+    const view = tt?.view;
+    if (!tt || !view) return;
+    const row_count = view.rowCount;
+    let idx = tt.currentIndex;
+    for (idx += direction; idx >= 0 && idx < row_count; idx += direction) {
+      const hdr = view.getMsgHdrAt(idx);
+      if (hdr && !hdr.isRead) break;
+    }
+    if (idx < 0 || idx >= row_count) return;
+    if (tk.is_visual()) {
+      const anchor =
+        typeof window.visualAnchor === "number"
+          ? window.visualAnchor
+          : tt.currentIndex;
+      tt._selectRange(anchor, idx, false);
+      window.visualEnd = idx;
+    } else {
+      tt._selectSingle(idx);
+    }
+  };
+
   window.tk = tk;
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------
@@ -532,6 +561,9 @@
       ft.scrollToIndex?.(matches[0]);
     }
   };
+
+  window.tk_next_unread_thread = () => tk.step_unread(1);
+  window.tk_prev_unread_thread = () => tk.step_unread(-1);
 
   window.tk_search_next = () => {
     if (!tk.folder_search_step(1)) window.goDoCommand("cmd_findAgain");
