@@ -49,7 +49,7 @@
    * @param {Object} folder - folder to switch the current tab to, or null to no-op
    */
   tk.show_folder = (folder) => {
-    if (folder) window.gTabmail.currentAbout3Pane.displayFolder(folder);
+    if (folder) window.gTabmail?.currentAbout3Pane?.displayFolder?.(folder);
   };
 
   /**
@@ -280,17 +280,21 @@
     window.gTabmail?.currentAboutMessage?.getMessagePaneBrowser?.()?.focus?.();
 
   window.tk_next_tab = () =>
-    window.document.getElementById("tabmail-tabs").advanceSelectedTab(-1, true);
+    window.document
+      .getElementById("tabmail-tabs")
+      ?.advanceSelectedTab?.(-1, true);
   window.tk_prev_tab = () =>
-    window.document.getElementById("tabmail-tabs").advanceSelectedTab(1, true);
+    window.document
+      .getElementById("tabmail-tabs")
+      ?.advanceSelectedTab?.(1, true);
 
   window.tk_toggle_starred_filter = () =>
-    window.gTabmail.currentAbout3Pane.document
-      .getElementById("qfb-starred")
+    window.gTabmail?.currentAbout3Pane?.document
+      ?.getElementById("qfb-starred")
       ?.click();
 
   window.tk_quickmove_goto = () => {
-    const extension = window.ExtensionParent.GlobalManager.getExtension(
+    const extension = window.ExtensionParent?.GlobalManager?.getExtension?.(
       "quickmove@mozilla.kewis.ch",
     );
     if (!extension) {
@@ -299,7 +303,7 @@
       );
       return;
     }
-    extension.shortcuts.onCommand("goto");
+    extension.shortcuts?.onCommand?.("goto");
   };
 
   for (let i = 0; i <= 9; i++) {
