@@ -4,6 +4,7 @@
   "use strict";
 
   const tk = {};
+  const PROJECTS_FOLDER = "Projects";
 
   // -- window/tree accessors --------------------------------------------
 
@@ -41,8 +42,34 @@
    * @param {string} url - folder URI to switch the current tab to
    */
   tk.display_folder = (url) => {
-    const folder = tk.lookup_folder(url);
+    tk.show_folder(tk.lookup_folder(url));
+  };
+
+  /**
+   * @param {Object} folder - folder to switch the current tab to, or null to no-op
+   */
+  tk.show_folder = (folder) => {
     if (folder) window.gTabmail.currentAbout3Pane.displayFolder(folder);
+  };
+
+  /**
+   * Searches every account for a folder named `name`, preferring an exact match over a substring one.
+   * @param {string} name - folder name, matched case-insensitively
+   * @returns {Object} the first matching folder, or null if none matches
+   */
+  tk.find_folder_by_name = (name) => {
+    const target = name.toLowerCase();
+    let partial = null;
+    for (const account of window.MailServices?.accounts?.accounts ?? []) {
+      const root = account.incomingServer?.rootFolder;
+      if (!root) continue;
+      for (const folder of root.descendants) {
+        const folder_name = folder.name.toLowerCase();
+        if (folder_name === target) return folder;
+        if (!partial && folder_name.includes(target)) partial = folder;
+      }
+    }
+    return partial;
   };
 
   /**
@@ -370,9 +397,7 @@
     if (!tt) return;
     const hdr = tk.get_current_hdr(tt);
     tk.toggle_read_state(hdr);
-    const folder = tk.lookup_folder(
-      "imap://robert.hill%40uphillsolutions.tech@imap.gmail.com/Projects",
-    );
+    const folder = tk.find_folder_by_name(PROJECTS_FOLDER);
     if (!folder) return;
     tt.view?.doCommandWithFolder?.(
       window.Ci.nsMsgViewCommandType.moveMessages,
@@ -389,9 +414,7 @@
   window.tk_goto_sent = () =>
     tk.display_folder("mailbox://nobody@smart%20mailboxes/Sent");
   window.tk_goto_projects = () =>
-    tk.display_folder(
-      "imap://robert.hill%40uphillsolutions.tech@imap.gmail.com/Projects",
-    );
+    tk.show_folder(tk.find_folder_by_name(PROJECTS_FOLDER));
 
   window.tk_collapse_all = () => {
     const e = tk.get_focused_element();
