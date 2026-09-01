@@ -25,7 +25,7 @@
   "o": "cmd:cmd_openMessage",
   "v": "(() => { const wasVisual = window.vim === 'visual'; window.vim = wasVisual ? 'normal' : 'visual'; const tt = window.gTabmail?.currentAbout3Pane?.threadTree; if (!wasVisual) { if (tt) { window.visualAnchor = tt.currentIndex; window.visualEnd = tt.currentIndex; } } else { window.visualAnchor = undefined; window.visualEnd = undefined; } })()",
   "esc": "(() => { const wasVisual = window.vim === 'visual'; window.vim = 'normal'; window.count = 0; if (wasVisual) { const tt = window.gTabmail?.currentAbout3Pane?.threadTree; const end = typeof window.visualEnd === 'number' ? window.visualEnd : tt?.currentIndex; if (tt && typeof end === 'number') tt._selectSingle(end); } window.visualAnchor = undefined; window.visualEnd = undefined; })()",
-  "f": "cmd:cmd_forward",
+  "F": "cmd:cmd_forward",
   "d d": "cmd:cmd_delete",
   "m R": "(() => { const tt = window.gTabmail?.currentAbout3Pane?.threadTree; const hdr = tt?.view?.getMsgHdrAt?.(tt.currentIndex); if (hdr) window.goDoCommand(hdr.isRead ? 'cmd_markAsUnread' : 'cmd_markAsRead'); window.goDoCommand('cmd_markAllRead'); })()",
   "m r": "(() => { const tt = window.gTabmail?.currentAbout3Pane?.threadTree; const hdr = tt?.view?.getMsgHdrAt?.(tt.currentIndex); if (hdr) window.goDoCommand(hdr.isRead ? 'cmd_markAsUnread' : 'cmd_markAsRead'); window.goDoCommand('cmd_markAsRead'); })()",
