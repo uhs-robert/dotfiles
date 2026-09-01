@@ -95,16 +95,27 @@
   tk.is_visual = () => window.vim === "visual";
 
   /**
-   * @returns {number} the pending count prefix, or 1 if none is set
+   * @returns {boolean} true when a count prefix is actually pending, as opposed to peek_count's default of 1
    */
-  tk.peek_count = () =>
+  tk.has_count = () =>
     typeof window.count === "number" &&
     Number.isFinite(window.count) &&
-    window.count > 0
-      ? window.count
-      : 1;
+    window.count > 0;
+
+  /**
+   * @returns {number} the pending count prefix, or 1 if none is set
+   */
+  tk.peek_count = () => (tk.has_count() ? window.count : 1);
   tk.reset_count = () => {
     window.count = undefined;
+  };
+
+  /**
+   * @param {string} cmd - goDoCommand command id
+   * @param {number} n - number of times to run it
+   */
+  tk.repeat_command = (cmd, n) => {
+    for (let i = 0; i < n; i++) window.goDoCommand(cmd);
   };
 
   /**
@@ -374,19 +385,35 @@
     const tt = tk.get_thread_tree();
     const hdr = tk.get_current_hdr(tt);
     tk.toggle_read_state(hdr);
-    window.goDoCommand("cmd_markAsRead");
+    const n = tk.peek_count();
+    tk.reset_count();
+    tk.repeat_command("cmd_markAsRead", n);
   };
   window.tk_mark_unread = () => {
     const tt = tk.get_thread_tree();
     const hdr = tk.get_current_hdr(tt);
     tk.toggle_read_state(hdr);
-    window.goDoCommand("cmd_markAsUnread");
+    const n = tk.peek_count();
+    tk.reset_count();
+    tk.repeat_command("cmd_markAsUnread", n);
   };
   window.tk_mark_flagged = () => {
     const tt = tk.get_thread_tree();
     const hdr = tk.get_current_hdr(tt);
     tk.toggle_read_state(hdr);
-    window.goDoCommand("cmd_markAsFlagged");
+    const n = tk.peek_count();
+    tk.reset_count();
+    tk.repeat_command("cmd_markAsFlagged", n);
+  };
+  window.tk_delete = () => {
+    const n = tk.peek_count();
+    tk.reset_count();
+    tk.repeat_command("cmd_delete", n);
+  };
+  window.tk_archive = () => {
+    const n = tk.peek_count();
+    tk.reset_count();
+    tk.repeat_command("cmd_archive", n);
   };
   window.tk_mark_junk_toggle = () => {
     const tt = tk.get_thread_tree();
@@ -652,16 +679,19 @@
     const is_visual = tk.is_visual();
     const e = tk.get_focused_element();
     if (!e) return;
+    const n = tk.peek_count();
     if (e.id === "threadTree") {
+      const last = (e.view?.rowCount ?? 1) - 1;
+      const target = Math.min(Math.max(n - 1, 0), Math.max(last, 0));
       if (is_visual) {
         const anchor =
           typeof window.visualAnchor === "number"
             ? window.visualAnchor
             : e.currentIndex;
-        e._selectRange(anchor, 0, false);
-        window.visualEnd = 0;
+        e._selectRange(anchor, target, false);
+        window.visualEnd = target;
       } else {
-        e._selectSingle(0);
+        e._selectSingle(target);
       }
     } else if (e.id === "folderTree") {
       e.handleEvent(
@@ -671,23 +701,29 @@
         }),
       );
     }
+    tk.reset_count();
   };
 
   window.tk_goto_bottom = () => {
     const is_visual = tk.is_visual();
     const e = tk.get_focused_element();
     if (!e) return;
+    const has_count = tk.has_count();
+    const n = tk.peek_count();
     if (e.id === "threadTree") {
       const last = (e.view?.rowCount ?? 1) - 1;
+      const target = has_count
+        ? Math.min(Math.max(n - 1, 0), Math.max(last, 0))
+        : last;
       if (is_visual) {
         const anchor =
           typeof window.visualAnchor === "number"
             ? window.visualAnchor
             : e.currentIndex;
-        e._selectRange(anchor, last, false);
-        window.visualEnd = last;
+        e._selectRange(anchor, target, false);
+        window.visualEnd = target;
       } else {
-        e._selectSingle(last);
+        e._selectSingle(target);
       }
     } else if (e.id === "folderTree") {
       e.handleEvent(
@@ -697,5 +733,6 @@
         }),
       );
     }
+    tk.reset_count();
   };
 })();
