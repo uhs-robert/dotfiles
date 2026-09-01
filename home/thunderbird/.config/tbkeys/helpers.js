@@ -279,6 +279,28 @@
     return true;
   };
 
+  // -- viewport repositioning -----------------------------------------------
+
+  /**
+   * Scrolls the tree so the current row lands at the given viewport position, without touching selection or currentIndex.
+   * @param {Element} tt - the thread tree
+   * @param {"top"|"center"|"bottom"} position - target position within the viewport
+   */
+  tk.reposition_row = (tt, position) => {
+    const row_height = tt?._rowElementClass?.ROW_HEIGHT;
+    if (!tt || typeof tt.currentIndex !== "number" || tt.currentIndex < 0)
+      return;
+    if (!row_height || typeof tt.scrollTo !== "function") return;
+    const visible_height = tt.clientHeight;
+    const top_of_row = row_height * tt.currentIndex;
+    let target;
+    if (position === "top") target = top_of_row;
+    else if (position === "bottom")
+      target = top_of_row + row_height - visible_height;
+    else target = top_of_row + row_height / 2 - visible_height / 2;
+    tt.scrollTo({ top: target, behavior: "instant" });
+  };
+
   window.tk = tk;
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------
@@ -465,6 +487,12 @@
     }
     if (e.id === "folderTree") tk.expand_folder_tree(e);
   };
+
+  window.tk_scroll_top = () => tk.reposition_row(tk.get_thread_tree(), "top");
+  window.tk_scroll_center = () =>
+    tk.reposition_row(tk.get_thread_tree(), "center");
+  window.tk_scroll_bottom = () =>
+    tk.reposition_row(tk.get_thread_tree(), "bottom");
 
   window.tk_folder_search = () => {
     const focused = tk.get_focused_element();
