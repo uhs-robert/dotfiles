@@ -202,6 +202,7 @@
    */
   tk.peek_count = () => (tk.has_count() ? window.count : 1);
   tk.folder_search_active = false;
+  tk.folder_search_origin_uri = null;
   tk.search_term = "";
   tk.reset_count = () => {
     window.count = undefined;
@@ -473,6 +474,20 @@
   };
 
   /**
+   * @param {Element} ft - the folder tree
+   * @param {string} uri - folder URI to select, if a row for it is currently visible
+   */
+  tk.select_folder_row_by_uri = (ft, uri) => {
+    for (let i = 0; i < ft.rowCount; i++) {
+      if (ft.getRowAtIndex(i)?.uri === uri) {
+        ft.selectedIndex = i;
+        ft.scrollToIndex?.(i);
+        return;
+      }
+    }
+  };
+
+  /**
    * Re-highlights matches for the term typed so far; the tree stays expanded so row indices don't shift per keystroke.
    * @param {Element} ft - the folder tree
    * @param {string} term - search term typed so far
@@ -490,6 +505,7 @@
     const ft = tk.get_folder_tree();
     if (!ft) return;
     const fdoc = ft.ownerDocument;
+    tk.folder_search_origin_uri = ft.getRowAtIndex(ft.selectedIndex)?.uri ?? null;
     tk.ensure_search_style(fdoc);
     tk.clear_search_highlights(fdoc);
     tk.expand_folder_tree(ft);
@@ -732,6 +748,9 @@
     const had_search =
       tk.folder_search_active ||
       !!(window.folderSearchMatches && window.folderSearchMatches.length);
+    // True only when escape cancels a still-typing search - accepting one
+    // commits its selection, so a later escape must not second-guess it.
+    const cancelling_active_search = tk.folder_search_active;
     tk.folder_search_active = false;
     tk.search_term = "";
     if (fdoc) {
@@ -744,7 +763,10 @@
       const ft = tk.get_folder_tree();
       if (ft) {
         ft.focus();
-        const sel_uri = ft.getRowAtIndex(ft.selectedIndex)?.uri;
+        const sel_uri =
+          cancelling_active_search && tk.folder_search_origin_uri
+            ? tk.folder_search_origin_uri
+            : ft.getRowAtIndex(ft.selectedIndex)?.uri;
         const snapshot = tk.snapshot_folder_rows(ft);
         const sel_idx = snapshot.findIndex((r) => r.uri === sel_uri);
         const keep = tk.keep_ancestors(
@@ -755,8 +777,11 @@
           ft,
           (row) => keep.has(row.uri) || row.uri === sel_uri,
         );
+        if (cancelling_active_search && sel_idx !== -1)
+          tk.select_folder_row_by_uri(ft, sel_uri);
       }
     }
+    tk.folder_search_origin_uri = null;
     tk.repaint_mode();
   };
 
