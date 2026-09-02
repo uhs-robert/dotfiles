@@ -52,14 +52,12 @@ just sync-root-yazi   # regenerate root's Yazi keymap from the user's
 
 ## Betterbird / tbkeys
 
-Vim-style keybindings for Betterbird, provided by the tbkeys add-on. Two files matter:
+Vim-style keybindings for Betterbird, provided by the tbkeys add-on. Two files matter, both stowed to `~/.config/tbkeys/` by the `thunderbird` package and loaded automatically each time Betterbird starts:
 
-- `home/thunderbird/tbkeys/keys.json` - the keymap, one line per binding.
-- `home/thunderbird/.config/tbkeys/helpers.js` - the code the bindings call. Stowed to `~/.config/tbkeys/` by the `thunderbird` package, and loaded automatically each time Betterbird starts.
+- `home/thunderbird/.config/tbkeys/keys.json` - the keymap, one line per binding. This is the authoritative copy; Betterbird's autoconfig pushes it into the add-on's own storage and reapplies it on startup, so the Options page never needs a manual paste.
+- `home/thunderbird/.config/tbkeys/helpers.js` - the code the bindings call.
 
-After editing `helpers.js`, restart Betterbird.
-
-After editing `keys.json`, paste its contents into the add-on's options page (Add-ons Manager, tbkeys, Options). That file is a tracked copy, not something the add-on reads from disk. The same is true of `quicktext.json`.
+After editing either file, restart Betterbird. `quicktext.json` remains a manual-paste tracked copy (Add-ons Manager, Quicktext, Options) - that import is out of scope here.
 
 Betterbird upgrades wipe the startup file that loads `helpers.js`, so `install.sh` sets up a pacman hook that puts it back automatically. Nothing to do after an upgrade.
 
