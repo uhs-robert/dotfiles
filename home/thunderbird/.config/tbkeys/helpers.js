@@ -317,13 +317,14 @@
     tt.scrollTo({ top: target, behavior: "instant" });
   };
 
-  // -- unread thread navigation ----------------------------------------------
+  // -- row stepping -----------------------------------------------------------
 
   /**
-   * Selects the count'th next/previous row with an unread header, stopping at the folder's edge without wrapping or crossing folders; extends the visual selection like j/k when in visual mode.
+   * Selects the count'th next/previous row matching predicate, stopping at the folder's edge without wrapping or crossing folders; extends the visual selection like j/k when in visual mode.
    * @param {number} direction - 1 for next, -1 for previous
+   * @param {Function} predicate - (hdr, idx, view) => boolean, tested per row
    */
-  tk.step_unread = (direction) => {
+  tk.step_matching = (direction, predicate) => {
     const tt = tk.get_thread_tree();
     const view = tt?.view;
     if (!tt || !view) {
@@ -340,8 +341,7 @@
     let found = start;
     for (let remaining = tk.peek_count(); remaining > 0; remaining--) {
       for (idx += direction; idx >= 0 && idx < row_count; idx += direction) {
-        const hdr = view.getMsgHdrAt(idx);
-        if (hdr && !hdr.isRead) break;
+        if (predicate(view.getMsgHdrAt(idx), idx, view)) break;
       }
       if (idx < 0 || idx >= row_count) break;
       found = idx;
@@ -590,8 +590,10 @@
     }
   };
 
-  window.tk_next_unread_thread = () => tk.step_unread(1);
-  window.tk_prev_unread_thread = () => tk.step_unread(-1);
+  window.tk_next_unread_thread = () =>
+    tk.step_matching(1, (hdr) => hdr && !hdr.isRead);
+  window.tk_prev_unread_thread = () =>
+    tk.step_matching(-1, (hdr) => hdr && !hdr.isRead);
 
   window.tk_search_next = () => {
     if (!tk.folder_search_step(1)) window.goDoCommand("cmd_findAgain");
