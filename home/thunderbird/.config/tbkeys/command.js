@@ -56,7 +56,17 @@
 
   // Folder names may contain spaces, so move/open treat everything after the
   // command name as one token rather than splitting args on whitespace.
-  const complete_folder_names = () => tk.all_folders().map((f) => f.name);
+  let folder_names = null;
+
+  /**
+   * Enumerating every account's descendants on each keystroke is the one
+   * expensive completion source, so it is held for one command-line session.
+   * @returns {string[]} every folder name, cached until the bar closes
+   */
+  const complete_folder_names = () => {
+    folder_names ??= tk.all_folders().map((f) => f.name);
+    return folder_names;
+  };
 
   tk.commands = {
     archive: {
@@ -343,7 +353,7 @@
     bar.style.cssText =
       "position:fixed; left:0; right:0; bottom:0; z-index:2147483647; " +
       "display:flex; flex-direction:column; align-items:stretch; " +
-      "background:#0C0E13; border-top:1px solid #333; " +
+      `background:${tk.whichkey_colors.bg}; border-top:1px solid #333; ` +
       "font:12px monospace; color:#fff;";
 
     const menu = doc.createElement("div");
@@ -373,6 +383,7 @@
 
   tk.close_command_bar = () => {
     tk.command_completion = null;
+    folder_names = null;
     window.document.getElementById("tbkeys-command-bar")?.remove();
   };
 
