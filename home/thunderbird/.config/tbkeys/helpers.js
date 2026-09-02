@@ -816,6 +816,11 @@
     return WHICHKEY_TEXT_TAGS.has(el.tagName?.toLowerCase?.() ?? "");
   };
 
+  const WHICHKEY_BG = "#141C24";
+  const WHICHKEY_HEADER_COLOR = "#8A93A0";
+  const WHICHKEY_KEY_COLOR = "#D8CF7F";
+  const WHICHKEY_GROUP_COLOR = "#FFA0A0";
+
   /**
    * @returns {Element} the injected which-key panel, creating it if absent
    */
@@ -827,25 +832,49 @@
     el.id = "tbkeys-whichkey";
     el.style.cssText =
       "position:fixed; right:12px; bottom:32px; z-index:2147483647; " +
-      "background:#222; color:#fff; border:1px solid #666; " +
-      "font:12px monospace; padding:6px 10px; white-space:pre; " +
+      `background:${WHICHKEY_BG}; border:1px solid #333; ` +
+      "font:12px monospace; padding:6px 10px; " +
       "pointer-events:none; display:none;";
     (doc.body ?? doc.documentElement).appendChild(el);
     return el;
   };
 
   /**
-   * Shows the next valid keys and labels under the current chord prefix.
+   * @param {Document} doc - owner document to create the row in
+   * @param {string} text - row text
+   * @param {string} color - CSS color for the row
+   * @returns {Element} a single which-key row
+   */
+  tk.whichkey_row = (doc, text, color) => {
+    const row = doc.createElement("div");
+    row.textContent = text;
+    row.style.color = color;
+    return row;
+  };
+
+  /**
+   * Shows the next valid keys and labels under the current chord prefix;
+   * a further chord leader is colored like a "+group" entry, a plain
+   * command like a regular key.
    * @param {string[]} path - keys pressed so far in this chord
    * @param {Object} children - trie children of the current node
    */
   tk.render_whichkey = (path, children) => {
     const el = tk.ensure_whichkey_panel();
-    const lines = [path.join(" ")];
+    const doc = el.ownerDocument;
+    el.textContent = "";
+    el.appendChild(tk.whichkey_row(doc, path.join(" "), WHICHKEY_HEADER_COLOR));
     for (const [key, node] of Object.entries(children)) {
-      lines.push(`  ${key}  ${node.label ?? "..."}`);
+      const is_group = !!node.children;
+      const label = (is_group ? "+" : "") + (node.label ?? "...");
+      el.appendChild(
+        tk.whichkey_row(
+          doc,
+          `  ${key}  ${label}`,
+          is_group ? WHICHKEY_GROUP_COLOR : WHICHKEY_KEY_COLOR,
+        ),
+      );
     }
-    el.textContent = lines.join("\n");
     el.style.display = "block";
   };
 
@@ -855,14 +884,25 @@
    */
   tk.render_whichkey_full = () => {
     const el = tk.ensure_whichkey_panel();
-    const lines = ["? -- all commands --"];
+    const doc = el.ownerDocument;
+    el.textContent = "";
+    el.appendChild(
+      tk.whichkey_row(doc, "? -- all commands --", WHICHKEY_HEADER_COLOR),
+    );
     for (const key of Object.keys(tk.whichkey_trie.children ?? {})) {
-      lines.push(`  ${key}  +${tk.whichkey_group_labels[key] ?? "..."}`);
+      el.appendChild(
+        tk.whichkey_row(
+          doc,
+          `  ${key}  +${tk.whichkey_group_labels[key] ?? "..."}`,
+          WHICHKEY_GROUP_COLOR,
+        ),
+      );
     }
     for (const [key, label] of WHICHKEY_SINGLES) {
-      lines.push(`  ${key}  ${label}`);
+      el.appendChild(
+        tk.whichkey_row(doc, `  ${key}  ${label}`, WHICHKEY_KEY_COLOR),
+      );
     }
-    el.textContent = lines.join("\n");
     el.style.display = "block";
     tk.whichkey_full_shown = true;
   };
