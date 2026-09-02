@@ -3,6 +3,8 @@
 (function () {
   "use strict";
 
+  window.tk?.whichkey_teardown?.();
+
   const tk = {};
   const PROJECTS_FOLDER = "Projects";
   const MARK_PREF = "tbkeys.folder_marks";
@@ -665,6 +667,198 @@
       tt._selectSingle(found);
     }
   };
+
+  // -- which-key overlay for chord prefixes --------------------------------
+
+  // Explicit sequence -> label table, kept separate from keys.json so labels
+  // stay human-written instead of derived from tk_* function names.
+  const WHICHKEY_ENTRIES = [
+    ["g f", "Focus folder tree"],
+    ["g g", "Go to top"],
+    ["g i", "Go to inbox"],
+    ["g t", "Go to trash"],
+    ["g d", "Go to drafts"],
+    ["g m", "Focus message pane"],
+    ["g s", "Go to sent"],
+    ["g p", "Go to projects"],
+    ["g o", "Find folder"],
+    ["m R", "Mark all read"],
+    ["m r", "Mark read"],
+    ["m u", "Mark unread"],
+    ["m j", "Toggle junk"],
+    ["m s", "Mark starred"],
+    ["m p", "Move to Projects"],
+    ["z M", "Collapse all"],
+    ["z R", "Expand all"],
+    ["z z", "Scroll to center"],
+    ["z t", "Scroll to top"],
+    ["z b", "Scroll to bottom"],
+    ["f u", "View unread"],
+    ["f a", "View all"],
+    ["f s", "Toggle starred filter"],
+    ["t m", "Toggle message pane"],
+    ["t f", "Toggle folder pane"],
+    ["] u", "Next unread thread"],
+    ["[ u", "Previous unread thread"],
+    ["] U", "Next unread (any folder)"],
+    ["[ U", "Previous unread (any folder)"],
+    ["] s", "Next starred"],
+    ["[ s", "Previous starred"],
+    ["] t", "Next thread root"],
+    ["[ t", "Previous thread root"],
+    ["] a", "Next attachment"],
+    ["[ a", "Previous attachment"],
+    ["d d", "Delete"],
+    ...[...MARK_LETTERS].map((l) => [`M ${l}`, `Set folder mark ${l}`]),
+    ...[...MARK_LETTERS].map((l) => [`' ${l}`, `Jump to folder mark ${l}`]),
+  ];
+
+  /**
+   * Builds a prefix trie from sequence/label pairs; each node holds `children`
+   * (keyed by the next key) when it has descendants and `label` when a
+   * sequence ends there. Supports chords of any depth, not just two keys.
+   * @param {[string, string][]} entries - space-joined sequence to label pairs
+   * @returns {Object} trie root node
+   */
+  tk.build_whichkey_trie = (entries) => {
+    const root = {};
+    for (const [seq, label] of entries) {
+      let node = root;
+      for (const key of seq.split(" ")) {
+        node.children ??= {};
+        node.children[key] ??= {};
+        node = node.children[key];
+      }
+      node.label = label;
+    }
+    return root;
+  };
+  tk.whichkey_trie = tk.build_whichkey_trie(WHICHKEY_ENTRIES);
+  tk.whichkey_node = tk.whichkey_trie;
+  tk.whichkey_path = [];
+  tk.whichkey_timer = null;
+
+  const WHICHKEY_TEXT_TAGS = new Set([
+    "input",
+    "textarea",
+    "select",
+    "html:input",
+    "html:textarea",
+    "search-textbox",
+    "xul:search-textbox",
+    "moz-input-search",
+    "browser",
+  ]);
+
+  /**
+   * @param {Element} el - event target to check
+   * @returns {boolean} true if key events there should be left alone (text entry)
+   */
+  tk.is_whichkey_text_target = (el) => {
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    return WHICHKEY_TEXT_TAGS.has(el.tagName?.toLowerCase?.() ?? "");
+  };
+
+  /**
+   * @returns {Element} the injected which-key panel, creating it if absent
+   */
+  tk.ensure_whichkey_panel = () => {
+    const doc = window.document;
+    let el = doc.getElementById("tbkeys-whichkey");
+    if (el) return el;
+    el = doc.createElement("div");
+    el.id = "tbkeys-whichkey";
+    el.style.cssText =
+      "position:fixed; right:12px; bottom:32px; z-index:2147483647; " +
+      "background:#222; color:#fff; border:1px solid #666; " +
+      "font:12px monospace; padding:6px 10px; white-space:pre; " +
+      "pointer-events:none; display:none;";
+    (doc.body ?? doc.documentElement).appendChild(el);
+    return el;
+  };
+
+  /**
+   * Shows the next valid keys and labels under the current chord prefix.
+   * @param {string[]} path - keys pressed so far in this chord
+   * @param {Object} children - trie children of the current node
+   */
+  tk.render_whichkey = (path, children) => {
+    const el = tk.ensure_whichkey_panel();
+    const lines = [path.join(" ")];
+    for (const [key, node] of Object.entries(children)) {
+      lines.push(`  ${key}  ${node.label ?? "..."}`);
+    }
+    el.textContent = lines.join("\n");
+    el.style.display = "block";
+  };
+
+  /**
+   * Hides the which-key panel and resets the chord walk back to the trie root.
+   */
+  tk.hide_whichkey = () => {
+    const el = window.document.getElementById("tbkeys-whichkey");
+    if (el) el.style.display = "none";
+    if (tk.whichkey_timer) {
+      window.clearTimeout(tk.whichkey_timer);
+      tk.whichkey_timer = null;
+    }
+    tk.whichkey_node = tk.whichkey_trie;
+    tk.whichkey_path = [];
+  };
+
+  /**
+   * Passive capture-phase keydown observer that mirrors chord progress into
+   * the which-key panel without touching default behavior, Mousetrap, or
+   * tbkeys - it only ever reads window.event state it does not own.
+   * @param {KeyboardEvent} e
+   */
+  tk.whichkey_handler = (e) => {
+    if (
+      e.ctrlKey ||
+      e.altKey ||
+      e.metaKey ||
+      tk.is_whichkey_text_target(e.target)
+    ) {
+      if (tk.whichkey_node !== tk.whichkey_trie) tk.hide_whichkey();
+      return;
+    }
+    if (e.key === "Escape") {
+      tk.hide_whichkey();
+      return;
+    }
+    const next = tk.whichkey_node.children?.[e.key];
+    if (!next) {
+      if (tk.whichkey_node !== tk.whichkey_trie) tk.hide_whichkey();
+      return;
+    }
+    tk.whichkey_path.push(e.key);
+    tk.whichkey_node = next;
+    if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
+    if (next.children) {
+      tk.render_whichkey(tk.whichkey_path, next.children);
+      // Matches Mousetrap's own 1000ms sequence-reset delay so the overlay
+      // never outlives the pending chord it is describing.
+      tk.whichkey_timer = window.setTimeout(tk.hide_whichkey, 1000);
+    } else {
+      tk.hide_whichkey();
+    }
+  };
+
+  window.addEventListener("keydown", tk.whichkey_handler, {
+    capture: true,
+    passive: true,
+  });
+
+  tk.whichkey_teardown = () => {
+    window.removeEventListener("keydown", tk.whichkey_handler, {
+      capture: true,
+    });
+    window.removeEventListener("unload", tk.whichkey_teardown);
+    if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
+    window.document.getElementById("tbkeys-whichkey")?.remove();
+  };
+  window.addEventListener("unload", tk.whichkey_teardown, { once: true });
 
   window.tk = tk;
 
