@@ -45,11 +45,45 @@
     tk.show_folder(tk.lookup_folder(url));
   };
 
+  const JUMP_LIST_MAX = 100;
+  tk.jump_back_stack = [];
+  tk.jump_forward_stack = [];
+  tk.jumping = false;
+
   /**
    * @param {Object} folder - folder to switch the current tab to, or null to no-op
    */
   tk.show_folder = (folder) => {
-    if (folder) window.gTabmail?.currentAbout3Pane?.displayFolder?.(folder);
+    if (!folder) return;
+    const pane = window.gTabmail?.currentAbout3Pane;
+    if (!pane) return;
+    const current_uri = pane.gFolder?.URI;
+    if (!tk.jumping && current_uri && current_uri !== folder.URI) {
+      tk.jump_back_stack.push(current_uri);
+      if (tk.jump_back_stack.length > JUMP_LIST_MAX) tk.jump_back_stack.shift();
+      tk.jump_forward_stack = [];
+    }
+    pane.displayFolder?.(folder);
+  };
+
+  /**
+   * Moves the current folder URI onto `to` and jumps to `uri` without recording new jump-list history.
+   * @param {string} uri - folder URI to jump to
+   * @param {string[]} to - the stack (back or forward) to push the current folder onto
+   */
+  tk.jump_to = (uri, to) => {
+    const pane = window.gTabmail?.currentAbout3Pane;
+    const current_uri = pane?.gFolder?.URI;
+    if (current_uri) {
+      to.push(current_uri);
+      if (to.length > JUMP_LIST_MAX) to.shift();
+    }
+    tk.jumping = true;
+    try {
+      tk.display_folder(uri);
+    } finally {
+      tk.jumping = false;
+    }
   };
 
   /**
@@ -563,6 +597,15 @@
       return;
     }
     tk.show_folder(folder);
+  };
+
+  window.tk_jump_back = () => {
+    const uri = tk.jump_back_stack.pop();
+    if (uri) tk.jump_to(uri, tk.jump_forward_stack);
+  };
+  window.tk_jump_forward = () => {
+    const uri = tk.jump_forward_stack.pop();
+    if (uri) tk.jump_to(uri, tk.jump_back_stack);
   };
 
   window.tk_collapse_all = () => {

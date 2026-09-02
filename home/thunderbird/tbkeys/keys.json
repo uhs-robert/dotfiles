@@ -89,5 +89,7 @@
   "ctrl+d": "func:tk_page_down",
   "g g": "func:tk_goto_top",
   "G": "func:tk_goto_bottom",
-  ".": "func:tk_repeat_last"
+  ".": "func:tk_repeat_last",
+  "ctrl+o": "func:tk_jump_back",
+  "ctrl+i": "func:tk_jump_forward"
 }
