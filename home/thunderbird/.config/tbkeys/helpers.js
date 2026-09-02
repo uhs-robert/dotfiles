@@ -600,6 +600,11 @@
   window.tk_prev_thread_root = () =>
     tk.step_matching(-1, (hdr, idx, view) => view.isContainer(idx));
 
+  const has_attachment = (hdr) =>
+    !!(hdr && hdr.flags & window.Ci?.nsMsgMessageFlags?.Attachment);
+  window.tk_next_attachment = () => tk.step_matching(1, has_attachment);
+  window.tk_prev_attachment = () => tk.step_matching(-1, has_attachment);
+
   window.tk_search_next = () => {
     if (!tk.folder_search_step(1)) window.goDoCommand("cmd_findAgain");
   };

@@ -28,6 +28,8 @@
   "[ U": "cmd:cmd_previousUnreadMsg",
   "] t": "func:tk_next_thread_root",
   "[ t": "func:tk_prev_thread_root",
+  "] a": "func:tk_next_attachment",
+  "[ a": "func:tk_prev_attachment",
   "t m": "cmd:cmd_toggleMessagePane",
   "t f": "cmd:cmd_toggleFolderPane",
   "o": "cmd:cmd_openMessage",
