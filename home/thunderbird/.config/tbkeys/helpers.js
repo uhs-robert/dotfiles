@@ -5,6 +5,9 @@
 
   const tk = {};
   const PROJECTS_FOLDER = "Projects";
+  const MARK_PREF = "tbkeys.folder_marks";
+  // Excludes d, f, g, m, z: chord leaders elsewhere in keys.json.
+  const MARK_LETTERS = "abcehijklnopqrstuvwxy";
 
   // -- window/tree accessors --------------------------------------------
 
@@ -104,6 +107,57 @@
       }
     }
     return partial;
+  };
+
+  // -- folder marks ---------------------------------------------------------
+
+  /**
+   * @returns {Object} letter to folder URI map, parsed from a single JSON pref
+   */
+  tk.load_marks = () => {
+    try {
+      const raw = window.Services?.prefs?.getStringPref?.(MARK_PREF, "{}");
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  /**
+   * @param {Object} marks - letter to folder URI map to persist
+   */
+  tk.save_marks = (marks) => {
+    window.Services?.prefs?.setStringPref?.(MARK_PREF, JSON.stringify(marks));
+  };
+
+  /**
+   * @param {string} letter - mark letter to set on the currently displayed folder
+   */
+  tk.set_mark = (letter) => {
+    const uri = window.gTabmail?.currentAbout3Pane?.gFolder?.URI;
+    if (!uri) return;
+    const marks = tk.load_marks();
+    marks[letter] = uri;
+    tk.save_marks(marks);
+  };
+
+  /**
+   * Jumps to the folder stored under `letter`, reporting an unset mark or a folder that no longer exists.
+   * @param {string} letter - mark letter to jump to
+   */
+  tk.jump_to_mark = (letter) => {
+    const uri = tk.load_marks()[letter];
+    if (!uri) {
+      window.alert(`Mark "${letter}" is not set`);
+      return;
+    }
+    const folder = tk.lookup_folder(uri);
+    if (!folder) {
+      window.alert(`Mark "${letter}" points to a folder that no longer exists`);
+      return;
+    }
+    tk.show_folder(folder);
   };
 
   /**
@@ -461,6 +515,11 @@
 
   for (let i = 0; i <= 9; i++) {
     window[`tk_digit_${i}`] = tk.digit(i);
+  }
+
+  for (const letter of MARK_LETTERS) {
+    window[`tk_mark_set_${letter}`] = () => tk.set_mark(letter);
+    window[`tk_mark_jump_${letter}`] = () => tk.jump_to_mark(letter);
   }
 
   window.tk_toggle_visual = () => {
