@@ -50,6 +50,7 @@
   "g m": "func:tk_focus_message_pane",
   "g s": "func:tk_goto_sent",
   "g p": "func:tk_goto_projects",
+  "g o": "func:tk_goto_folder",
   "f u": "cmd:cmd_viewUnreadMsgs",
   "f a": "cmd:cmd_viewAllMsgs",
   "f s": "func:tk_toggle_starred_filter",
