@@ -182,6 +182,7 @@
   tk.filter_all = () => {
     tk.reset_count();
     const pane = current_pane();
+    if (!pane) return "No message pane to filter";
     const controller = pane?.commandController;
     if (!controller) return "No message pane command controller";
     controller.doCommand("cmd_viewAllMsgs");
