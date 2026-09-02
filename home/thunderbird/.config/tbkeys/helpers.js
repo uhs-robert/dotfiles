@@ -77,16 +77,16 @@
   tk.jump_to = (uri, to) => {
     const pane = window.gTabmail?.currentAbout3Pane;
     const current_uri = pane?.gFolder?.URI;
-    if (current_uri) {
-      to.push(current_uri);
-      if (to.length > JUMP_LIST_MAX) to.shift();
-    }
+    const was_jumping = tk.jumping;
     tk.jumping = true;
     try {
       tk.display_folder(uri);
     } finally {
-      tk.jumping = false;
+      tk.jumping = was_jumping;
     }
+    if (!current_uri || pane?.gFolder?.URI === current_uri) return;
+    to.push(current_uri);
+    if (to.length > JUMP_LIST_MAX) to.shift();
   };
 
   /**
@@ -135,6 +135,7 @@
    * @param {string} letter - mark letter to set on the currently displayed folder
    */
   tk.set_mark = (letter) => {
+    tk.reset_count();
     const uri = window.gTabmail?.currentAbout3Pane?.gFolder?.URI;
     if (!uri) return;
     const marks = tk.load_marks();
@@ -147,12 +148,18 @@
    * @param {string} letter - mark letter to jump to
    */
   tk.jump_to_mark = (letter) => {
+    tk.reset_count();
     const uri = tk.load_marks()[letter];
-    if (!uri) {
+    if (typeof uri !== "string" || !uri) {
       window.alert(`Mark "${letter}" is not set`);
       return;
     }
-    const folder = tk.lookup_folder(uri);
+    let folder = null;
+    try {
+      folder = tk.lookup_folder(uri);
+    } catch (e) {
+      folder = null;
+    }
     if (!folder) {
       window.alert(`Mark "${letter}" points to a folder that no longer exists`);
       return;
@@ -648,6 +655,7 @@
   window.tk_goto_projects = () =>
     tk.show_folder(tk.find_folder_by_name(PROJECTS_FOLDER));
   window.tk_goto_folder = () => {
+    tk.reset_count();
     const name = window.prompt("Go to folder:");
     if (!name) return;
     const folder = tk.find_folder_by_name(name);
@@ -659,12 +667,22 @@
   };
 
   window.tk_jump_back = () => {
-    const uri = tk.jump_back_stack.pop();
-    if (uri) tk.jump_to(uri, tk.jump_forward_stack);
+    const n = tk.peek_count();
+    tk.reset_count();
+    for (let i = 0; i < n; i++) {
+      const uri = tk.jump_back_stack.pop();
+      if (!uri) return;
+      tk.jump_to(uri, tk.jump_forward_stack);
+    }
   };
   window.tk_jump_forward = () => {
-    const uri = tk.jump_forward_stack.pop();
-    if (uri) tk.jump_to(uri, tk.jump_back_stack);
+    const n = tk.peek_count();
+    tk.reset_count();
+    for (let i = 0; i < n; i++) {
+      const uri = tk.jump_forward_stack.pop();
+      if (!uri) return;
+      tk.jump_to(uri, tk.jump_back_stack);
+    }
   };
 
   window.tk_collapse_all = () => {
