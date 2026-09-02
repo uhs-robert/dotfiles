@@ -347,11 +347,8 @@
     tk.whichkey_full_shown = false;
     if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
     if (next.children) {
-      // Mousetrap holds back a standalone binding while that key is the
-      // prefix of a pending sequence, so keys.json's "unset" never runs and
-      // the leader reaches Thunderbird's own shortcut. Cancel it on the
-      // keypress rather than here: keydown cancels the keypress outright,
-      // and Mousetrap matches plain-character sequences on keypress.
+      // Cancelling on keydown would take the keypress with it, and Mousetrap
+      // needs that keypress to start a plain-character sequence.
       if (tk.is_mail_window()) {
         tk.suppress_keypress = true;
         tk.snapshot_read_state();

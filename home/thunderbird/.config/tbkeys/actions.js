@@ -5,18 +5,19 @@
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------
 
-  // Restores the read state sampled when the chord opened, in case the
-  // leader key still reached Thunderbird's own shortcut; chords that set
-  // read state themselves skip it and just overwrite.
+  // Repetition is opt-in: a count only means anything where the acted-on row
+  // leaves the view. Every chord consumes the count either way.
   const m_chord =
-    (apply, restore = true) =>
+    (apply, { restore = true, repeat = false } = {}) =>
     () => {
       const tt = tk.get_thread_tree();
       const range = tk.resolve_action_range(tt);
       if (restore) tk.restore_read_state();
       else tk.read_snapshot = null;
+      const times = repeat ? range.count : 1;
+      tk.effective_count = times;
       let cursor;
-      for (let i = 0; i < range.count; i++) cursor = apply(tt, range);
+      for (let i = 0; i < times; i++) cursor = apply(tt, range);
       if (range.is_visual)
         tk.finish_visual_action(tt, cursor ?? range.cursor_index);
     };
@@ -37,11 +38,14 @@
   );
   window.tk_mark_read = m_chord(
     (tt) => tk.run_view_command(tt, "markMessagesRead"),
-    false,
+    {
+      restore: false,
+      repeat: true,
+    },
   );
   window.tk_mark_unread = m_chord(
     (tt) => tk.run_view_command(tt, "markMessagesUnread"),
-    false,
+    { restore: false, repeat: true },
   );
   window.tk_mark_flagged = m_chord((tt, range) =>
     tk.run_view_command(
