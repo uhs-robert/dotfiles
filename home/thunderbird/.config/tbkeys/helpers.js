@@ -234,8 +234,7 @@
   tk.repaint_mode = () => {
     const el = tk.ensure_mode_indicator();
     if (!el) return;
-    const parts = [];
-    if (tk.is_visual()) parts.push("-- VISUAL --");
+    const parts = [tk.is_visual() ? "-- VISUAL --" : "-- NORMAL --"];
     if (tk.has_count()) parts.push(String(window.count));
     el.setAttribute("value", parts.join(" "));
   };
