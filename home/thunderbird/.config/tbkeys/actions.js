@@ -5,25 +5,21 @@
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------
 
-  window.tk_mark_all_read = () => {
-    const tt = tk.get_thread_tree();
-    const hdr = tk.get_current_hdr(tt);
-    tk.toggle_read_state(hdr);
-    window.goDoCommand("cmd_markAllRead");
-  };
-  // The read-state nudge is a single-row habit carried over from the original
-  // inline bindings; over a range it would rewrite every selected message.
-  const mark_over_range = (cmd) => () => {
-    const tt = tk.get_thread_tree();
-    const range = tk.resolve_action_range(tt);
-    if (range.is_visual) {
-      window.goDoCommand(cmd);
-      tk.finish_visual_action(tt, range.cursor_index);
-      return;
-    }
-    tk.toggle_read_state(range.anchor_hdr);
-    tk.repeat_command(cmd, range.count);
-  };
+  // An m chord runs after the leaked m keypress has already flipped read
+  // state, so it undoes that flip first - unless it sets read state itself,
+  // or . is replaying it with no keypress to answer for.
+  const m_chord =
+    (apply, compensate = true) =>
+    () => {
+      const tt = tk.get_thread_tree();
+      const range = tk.resolve_action_range(tt);
+      if (compensate && !tk.replaying)
+        tk.undo_leaked_read_toggle(tt, range.anchor_hdr);
+      let cursor;
+      for (let i = 0; i < range.count; i++) cursor = apply(tt, range);
+      if (range.is_visual)
+        tk.finish_visual_action(tt, cursor ?? range.cursor_index);
+    };
 
   const act_over_range = (cmd) => () => {
     const tt = tk.get_thread_tree();
@@ -36,40 +32,40 @@
     tk.repeat_command(cmd, range.count);
   };
 
-  window.tk_mark_read = mark_over_range("cmd_markAsRead");
-  window.tk_mark_unread = mark_over_range("cmd_markAsUnread");
-  window.tk_mark_flagged = mark_over_range("cmd_markAsFlagged");
-  window.tk_delete = act_over_range("cmd_delete");
-  window.tk_archive = act_over_range("cmd_archive");
-
-  window.tk_mark_junk_toggle = () => {
-    const tt = tk.get_thread_tree();
-    const range = tk.resolve_action_range(tt);
-    if (!range.anchor_hdr) {
-      if (range.is_visual) tk.finish_visual_action(tt, range.cursor_index);
-      return;
-    }
+  window.tk_mark_all_read = m_chord(() =>
+    window.goDoCommand("cmd_markAllRead"),
+  );
+  window.tk_mark_read = m_chord(
+    (tt) => tk.run_view_command(tt, "markMessagesRead"),
+    false,
+  );
+  window.tk_mark_unread = m_chord(
+    (tt) => tk.run_view_command(tt, "markMessagesUnread"),
+    false,
+  );
+  window.tk_mark_flagged = m_chord((tt, range) =>
+    tk.run_view_command(
+      tt,
+      range.anchor_hdr?.isFlagged ? "unflagMessages" : "flagMessages",
+    ),
+  );
+  window.tk_mark_junk_toggle = m_chord((tt, range) => {
+    if (!range.anchor_hdr) return;
     const is_junk = range.anchor_hdr.getStringProperty("junkscore") === "100";
-    if (!range.is_visual) tk.toggle_read_state(range.anchor_hdr);
-    window.goDoCommand(is_junk ? "cmd_markAsNotJunk" : "cmd_markAsJunk");
-    if (range.is_visual) tk.finish_visual_action(tt, range.cursor_index);
-  };
-  window.tk_move_to_projects = () => {
-    const tt = tk.get_thread_tree();
-    if (!tt) return;
-    const range = tk.resolve_action_range(tt);
+    tk.run_view_command(tt, is_junk ? "unjunk" : "junk");
+  });
+  window.tk_move_to_projects = m_chord((tt, range) => {
     const folder = tk.find_folder_by_name(tk.PROJECTS_FOLDER);
-    if (!folder) {
-      if (range.is_visual) tk.finish_visual_action(tt, range.cursor_index);
-      return;
-    }
-    if (!range.is_visual) tk.toggle_read_state(range.anchor_hdr);
-    tt.view?.doCommandWithFolder?.(
+    if (!folder) return;
+    tt?.view?.doCommandWithFolder?.(
       window.Ci.nsMsgViewCommandType.moveMessages,
       folder,
     );
-    if (range.is_visual) tk.finish_visual_action(tt, range.top_index);
-  };
+    return range.top_index;
+  });
+
+  window.tk_delete = act_over_range("cmd_delete");
+  window.tk_archive = act_over_range("cmd_archive");
 
   window.tk_repeat_last = () => {
     const last = tk.last_action;
@@ -78,7 +74,12 @@
       return;
     }
     if (!tk.has_count()) window.count = last.count;
-    window[last.name]();
+    tk.replaying = true;
+    try {
+      window[last.name]();
+    } finally {
+      tk.replaying = false;
+    }
   };
 
   [

@@ -113,7 +113,7 @@
     tk.repaint_mode();
   };
 
-  // -- message read-state toggling ----------------------------------------
+  // -- message state commands ---------------------------------------------
 
   /**
    * @param {Element} tt - the thread tree
@@ -122,11 +122,26 @@
   tk.get_current_hdr = (tt) => tt?.view?.getMsgHdrAt?.(tt.currentIndex);
 
   /**
-   * @param {Object} hdr - message header to toggle, or undefined/null to no-op
+   * Runs an nsMsgViewCommandType command over the view's whole current selection. These name the state to reach rather than toggling, so a command that fires more than once still lands where it was aimed.
+   * @param {Element} tt - the thread tree
+   * @param {string} name - nsMsgViewCommandType member name
    */
-  tk.toggle_read_state = (hdr) => {
-    if (hdr)
-      window.goDoCommand(hdr.isRead ? "cmd_markAsUnread" : "cmd_markAsRead");
+  tk.run_view_command = (tt, name) => {
+    const cmd = window.Ci?.nsMsgViewCommandType?.[name];
+    if (cmd !== undefined) tt?.view?.doCommand?.(cmd);
+  };
+
+  /**
+   * Cancels the read-state flip Thunderbird performs when the bare m keypress leaks past tbkeys, which it does whenever m opens a chord: Mousetrap suppresses the standalone "m" binding while a sequence is pending, so its unset never runs to swallow the key.
+   * @param {Element} tt - the thread tree
+   * @param {Object} hdr - header the flip landed on, or undefined/null to no-op
+   */
+  tk.undo_leaked_read_toggle = (tt, hdr) => {
+    if (!hdr) return;
+    tk.run_view_command(
+      tt,
+      hdr.isRead ? "markMessagesUnread" : "markMessagesRead",
+    );
   };
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------
