@@ -13,13 +13,14 @@
   /**
    * Resolves which messages a message action should target: the visual range when active, reasserting the tree selection to match it, or the current row repeated by count otherwise. Consumes any pending count prefix either way.
    * @param {Element} tt - the thread tree
-   * @returns {{is_visual: boolean, count: number, anchor_hdr: Object, top_index: number, cursor_index: number}}
+   * @returns {{is_visual: boolean, count: number, anchor_hdr: (Object|undefined), top_index: (number|undefined), cursor_index: (number|undefined)}} - only is_visual and count are guaranteed; the rest are absent when there is no tree or no row to act on
    */
   tk.resolve_action_range = (tt) => {
     const is_visual = tk.is_visual();
     if (!is_visual) {
       const count = tk.peek_count();
       tk.reset_count();
+      tk.effective_count = count;
       return {
         is_visual,
         count,
@@ -29,6 +30,7 @@
       };
     }
     tk.reset_count();
+    tk.effective_count = 1;
     const last = (tt?.view?.rowCount ?? 0) - 1;
     const raw_anchor =
       typeof window.visualAnchor === "number"

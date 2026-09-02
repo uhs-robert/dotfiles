@@ -86,16 +86,21 @@
   // -- last-action recording for . -----------------------------------------
 
   tk.last_action = null;
+  tk.effective_count = null;
 
   /**
-   * Wraps window[name] so invoking it records itself (and the count it saw) as the last action, for . to replay; delegates to the original with no behavior change.
+   * Wraps window[name] so invoking it records itself as the last action, for . to replay; delegates to the original with no behavior change. Records the count the action actually consumed, which a visual-mode range caps at 1, rather than the count that was merely pending when it started.
    * @param {string} name - name of a window.tk_* function to wrap in place
    */
   tk.record_action = (name) => {
     const original = window[name];
     window[name] = (...args) => {
       tk.last_action = { name, count: tk.peek_count() };
-      return original(...args);
+      tk.effective_count = null;
+      const result = original(...args);
+      if (typeof tk.effective_count === "number")
+        tk.last_action.count = tk.effective_count;
+      return result;
     };
   };
 
