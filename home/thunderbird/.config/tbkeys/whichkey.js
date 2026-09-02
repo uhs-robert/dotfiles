@@ -74,7 +74,7 @@
   tk.whichkey_path = [];
   tk.whichkey_timer = null;
   tk.whichkey_full_shown = false;
-  tk.suppress_keypress = false;
+  tk.suppress_keypress = null;
 
   // Group labels for the "?" full command list, shown as "+Label" per
   // leader key; only leaders that actually have children in the trie above.
@@ -131,15 +131,22 @@
     ["shift+l", "Focus thread tree"],
   ];
 
+  // Mirrors the tag list in tbkeys' own stopCallback: several of these are
+  // custom elements whose shadow DOM retargets events to the host.
   const WHICHKEY_TEXT_TAGS = new Set([
     "input",
     "textarea",
     "select",
+    "textbox",
     "html:input",
     "html:textarea",
+    "search-bar",
     "search-textbox",
     "xul:search-textbox",
+    "global-search-bar",
     "moz-input-search",
+    "account-hub-container",
+    "imconversation",
     "browser",
   ]);
 
@@ -299,7 +306,7 @@
    */
   tk.abort_chord = () => {
     tk.read_snapshot = null;
-    tk.suppress_keypress = false;
+    tk.suppress_keypress = null;
     tk.hide_whichkey();
   };
 
@@ -350,7 +357,7 @@
       // Cancelling on keydown would take the keypress with it, and Mousetrap
       // needs that keypress to start a plain-character sequence.
       if (tk.is_mail_window()) {
-        tk.suppress_keypress = true;
+        tk.suppress_keypress = e.key;
         tk.snapshot_read_state();
       }
       tk.render_whichkey(tk.whichkey_path, next.children);
@@ -367,8 +374,10 @@
    * @param {KeyboardEvent} e
    */
   tk.whichkey_keypress_handler = (e) => {
-    if (!tk.suppress_keypress) return;
-    tk.suppress_keypress = false;
+    const key = tk.suppress_keypress;
+    tk.suppress_keypress = null;
+    if (key !== e.key || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (tk.is_whichkey_text_target(e.target)) return;
     e.preventDefault();
   };
 
