@@ -9,6 +9,8 @@
     insert: "-- INSERT --",
   };
 
+  const QUICK_FILTER_ID = "qfb-qs-textbox";
+
   /**
    * @returns {Element} the injected mode/count indicator, or null where the mail status bar is absent (e.g. compose windows)
    */
@@ -88,11 +90,40 @@
       ? window.setTimeout(tk.sync_insert_mode, 0)
       : tk.sync_insert_mode();
 
+  /**
+   * @param {Element} el - element to check
+   * @returns {boolean} true if the element or an ancestor is the quick filter input
+   */
+  tk.is_quick_filter = (el) => {
+    for (let node = el; node; node = node.parentElement) {
+      if (node.id === QUICK_FILTER_ID) return true;
+    }
+    return false;
+  };
+
+  /**
+   * Sends focus to the thread tree when Enter is pressed in the quick filter, which filters as you type and has nothing left to submit.
+   * @param {KeyboardEvent} e
+   */
+  tk.quick_filter_enter_handler = (e) => {
+    if (e.key !== "Enter" || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (!tk.is_quick_filter(e.target)) return;
+    e.preventDefault();
+    window.tk_focus_thread_tree?.();
+    tk.sync_insert_mode();
+  };
+
   window.addEventListener("focusin", tk.focus_handler, { capture: true });
   window.addEventListener("focusout", tk.focus_handler, { capture: true });
+  window.addEventListener("keydown", tk.quick_filter_enter_handler, {
+    capture: true,
+  });
 
   tk.ui_teardown = () => {
     window.removeEventListener("focusin", tk.focus_handler, { capture: true });
     window.removeEventListener("focusout", tk.focus_handler, { capture: true });
+    window.removeEventListener("keydown", tk.quick_filter_enter_handler, {
+      capture: true,
+    });
   };
 })(window.tk);
