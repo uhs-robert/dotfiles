@@ -595,6 +595,11 @@
   window.tk_prev_unread_thread = () =>
     tk.step_matching(-1, (hdr) => hdr && !hdr.isRead);
 
+  window.tk_next_thread_root = () =>
+    tk.step_matching(1, (hdr, idx, view) => view.isContainer(idx));
+  window.tk_prev_thread_root = () =>
+    tk.step_matching(-1, (hdr, idx, view) => view.isContainer(idx));
+
   window.tk_search_next = () => {
     if (!tk.folder_search_step(1)) window.goDoCommand("cmd_findAgain");
   };
