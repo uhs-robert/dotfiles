@@ -236,7 +236,12 @@
     if (!el) return;
     const parts = [tk.is_visual() ? "-- VISUAL --" : "-- NORMAL --"];
     if (tk.has_count()) parts.push(String(window.count));
-    el.setAttribute("value", parts.join(" "));
+    const text = parts.join(" ");
+    if (el.namespaceURI?.includes("there.is.only.xul")) {
+      el.setAttribute("value", text);
+    } else {
+      el.textContent = text;
+    }
   };
 
   /**
@@ -1058,4 +1063,5 @@
     "tk_mark_unread",
     "tk_mark_flagged",
   ].forEach(tk.record_action);
+  tk.repaint_mode();
 })();
