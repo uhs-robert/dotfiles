@@ -74,6 +74,7 @@
   tk.whichkey_path = [];
   tk.whichkey_timer = null;
   tk.whichkey_full_shown = false;
+  tk.suppress_keypress = false;
 
   // Group labels for the "?" full command list, shown as "+Label" per
   // leader key; only leaders that actually have children in the trie above.
@@ -298,6 +299,7 @@
    */
   tk.abort_chord = () => {
     tk.read_snapshot = null;
+    tk.suppress_keypress = false;
     tk.hide_whichkey();
   };
 
@@ -347,9 +349,11 @@
     if (next.children) {
       // Mousetrap holds back a standalone binding while that key is the
       // prefix of a pending sequence, so keys.json's "unset" never runs and
-      // the leader reaches Thunderbird's own shortcut. Swallow it here.
+      // the leader reaches Thunderbird's own shortcut. Cancel it on the
+      // keypress rather than here: keydown cancels the keypress outright,
+      // and Mousetrap matches plain-character sequences on keypress.
       if (tk.is_mail_window()) {
-        e.preventDefault();
+        tk.suppress_keypress = true;
         tk.snapshot_read_state();
       }
       tk.render_whichkey(tk.whichkey_path, next.children);
@@ -361,10 +365,26 @@
     }
   };
 
+  /**
+   * Cancels the native shortcut for a leader key that whichkey_handler has just seen open a chord. Runs on keypress so the event still reaches Mousetrap, which preventDefault does not block and which needs the keypress to start a plain-character sequence.
+   * @param {KeyboardEvent} e
+   */
+  tk.whichkey_keypress_handler = (e) => {
+    if (!tk.suppress_keypress) return;
+    tk.suppress_keypress = false;
+    e.preventDefault();
+  };
+
   window.addEventListener("keydown", tk.whichkey_handler, { capture: true });
+  window.addEventListener("keypress", tk.whichkey_keypress_handler, {
+    capture: true,
+  });
 
   tk.whichkey_teardown = () => {
     window.removeEventListener("keydown", tk.whichkey_handler, {
+      capture: true,
+    });
+    window.removeEventListener("keypress", tk.whichkey_keypress_handler, {
       capture: true,
     });
     window.removeEventListener("unload", tk.whichkey_teardown);
