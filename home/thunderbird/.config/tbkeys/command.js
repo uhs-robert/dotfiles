@@ -27,7 +27,7 @@
 
   // -- command registry -------------------------------------------------------
 
-  tk.command_aliases = { a: "archive", mv: "move" };
+  tk.command_aliases = { mv: "move" };
 
   /**
    * @param {string} name - command name or alias, already lowercased
