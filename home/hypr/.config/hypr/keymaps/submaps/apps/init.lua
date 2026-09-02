@@ -36,6 +36,8 @@ Submap.define({
     { "J",         Cmd.bottom_terminal("lazyjournal"),   "Journal (lazyjournal)" },
     -- { "K",         Apps.open("kate"),                    "Kate" },
     { "M",         Apps.focus_or_launch(APP.betterbird), "Mail" },
+    { "N",         Cmd.bottom_terminal("nightshift", true), "Nightshift" },
+    { "SHIFT + N", Cmd.bottom_terminal("nightshift budget", true), "Nightshift" },
     -- { "SHIFT + N", Cmd.term("newsboat"),                  "Newsboat" },
     { "P",         Apps.focus_or_launch(APP.protonplus), "ProtonPlus" },
     { "SHIFT + P", Cmd.bottom_terminal("gping", true),   "Ping (gping)" },
