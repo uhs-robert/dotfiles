@@ -142,10 +142,12 @@
       .getElementById("tabmail-tabs")
       ?.advanceSelectedTab?.(1, true);
 
-  window.tk_toggle_starred_filter = () =>
+  window.tk_toggle_starred_filter = () => {
+    tk.reset_count();
     window.gTabmail?.currentAbout3Pane?.document
       ?.getElementById("qfb-starred")
       ?.click();
+  };
 
   for (const name of Object.keys(tk.SORT_COLUMNS)) {
     window[`tk_sort_${name}`] = () => {

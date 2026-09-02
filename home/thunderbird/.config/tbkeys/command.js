@@ -61,6 +61,7 @@
   // The view filter and the quick filter bar are separate constraints, so
   // "all" has to drop both or a tag or starred filter survives it.
   const filter_all = () => {
+    tk.reset_count();
     window.goDoCommand("cmd_viewAllMsgs");
     window.gTabmail?.currentAbout3Pane?.quickFilterBar?._resetFilterState?.();
   };
