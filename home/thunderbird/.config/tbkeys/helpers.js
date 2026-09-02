@@ -210,15 +210,19 @@
    * @returns {Element} the injected mode/count indicator, or null where the mail status bar is absent (e.g. compose windows)
    */
   tk.ensure_mode_indicator = () => {
-    const bar = window.document?.getElementById("status-bar");
-    if (!bar) return null;
-    let el = window.document.getElementById("tbkeys-mode-indicator");
+    const doc = window.document;
+    const host =
+      doc?.getElementById("statusTextBox") ?? doc?.getElementById("status-bar");
+    if (!host) return null;
+    let el = doc.getElementById("tbkeys-mode-indicator");
     if (el) return el;
-    el = window.document.createElement("label");
+    el = doc.createXULElement
+      ? doc.createXULElement("label")
+      : doc.createElement("label");
     el.id = "tbkeys-mode-indicator";
     el.className = "statusbarpanel";
-    el.style.marginInlineStart = "6px";
-    bar.appendChild(el);
+    el.setAttribute("crop", "end");
+    host.insertBefore(el, host.firstChild);
     return el;
   };
 
@@ -233,7 +237,7 @@
     const parts = [];
     if (tk.is_visual()) parts.push("-- VISUAL --");
     if (tk.has_count()) parts.push(String(window.count));
-    el.textContent = parts.join(" ");
+    el.setAttribute("value", parts.join(" "));
   };
 
   /**
