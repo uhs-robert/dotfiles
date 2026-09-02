@@ -27,7 +27,7 @@
 
   // -- command registry -------------------------------------------------------
 
-  tk.command_aliases = { mv: "move" };
+  tk.command_aliases = {};
 
   /**
    * @param {string} name - command name or alias, already lowercased
@@ -47,6 +47,13 @@
     starred: () => window.tk_toggle_starred_filter(),
   };
 
+  // Shared with focus's complete(), so run and completion never drift apart.
+  const PANES = {
+    folder: () => window.tk_focus_folder_tree(),
+    thread: () => window.tk_focus_thread_tree(),
+    message: () => window.tk_focus_message_pane(),
+  };
+
   // Folder names may contain spaces, so move/open treat everything after the
   // command name as one token rather than splitting args on whitespace.
   const complete_folder_names = () => tk.all_folders().map((f) => f.name);
@@ -58,6 +65,26 @@
       run: ({ args }) => {
         if (args.length) return tk.commands.archive.usage;
         window.tk_archive();
+      },
+    },
+    delete: {
+      usage: "delete",
+      description: "Delete the current message or visual selection",
+      run: ({ args }) => {
+        if (args.length) return tk.commands.delete.usage;
+        window.tk_delete();
+      },
+    },
+    focus: {
+      usage: "focus <folder|thread|message>",
+      description: "Move focus to a pane",
+      complete: () => Object.keys(PANES),
+      run: ({ args }) => {
+        if (!args.length) return tk.commands.focus.usage;
+        const fn = Object.hasOwn(PANES, args[0]) ? PANES[args[0]] : null;
+        if (!fn)
+          return `Unknown pane "${args[0]}" (valid: ${Object.keys(PANES).join(", ")})`;
+        fn();
       },
     },
     move: {
@@ -79,7 +106,7 @@
       complete: () => Object.keys(FILTERS),
       run: ({ args }) => {
         if (!args.length) return tk.commands.filter.usage;
-        const fn = FILTERS[args[0]];
+        const fn = Object.hasOwn(FILTERS, args[0]) ? FILTERS[args[0]] : null;
         if (!fn)
           return `Unknown filter "${args[0]}" (valid: ${Object.keys(FILTERS).join(", ")})`;
         fn();
