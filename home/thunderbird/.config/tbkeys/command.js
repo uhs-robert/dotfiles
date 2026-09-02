@@ -27,7 +27,7 @@
 
   // -- command registry -------------------------------------------------------
 
-  tk.command_aliases = { a: "archive", mv: "move", e: "open" };
+  tk.command_aliases = { a: "archive", mv: "move" };
 
   /**
    * @param {string} name - command name or alias, already lowercased
@@ -407,16 +407,24 @@
   };
 
   /**
-   * @param {InputEvent} e
+   * Recomputes the menu from `value` with nothing highlighted; an empty value
+   * lists every command, so ":" opens onto the full set.
+   * @param {string} value - raw command-line input
    */
-  tk.command_input_input = (e) => {
-    const value = e.target.value;
-    const computed = value ? tk.compute_completion(value) : null;
+  tk.refresh_completion = (value) => {
+    const computed = tk.compute_completion(value);
     tk.command_completion =
       computed && computed.candidates.length
         ? { ...computed, index: -1 }
         : null;
     tk.render_command_menu();
+  };
+
+  /**
+   * @param {InputEvent} e
+   */
+  tk.command_input_input = (e) => {
+    tk.refresh_completion(e.target.value);
   };
 
   /**
@@ -479,8 +487,7 @@
     tk.ensure_command_bar();
     const input = window.document.getElementById("tbkeys-command-input");
     input.value = "";
-    tk.command_completion = null;
-    tk.render_command_menu();
+    tk.refresh_completion("");
     input.onkeydown = tk.command_input_keydown;
     input.oninput = tk.command_input_input;
     input.onfocusout = tk.command_input_focusout;
