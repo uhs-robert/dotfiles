@@ -737,6 +737,62 @@
   tk.whichkey_node = tk.whichkey_trie;
   tk.whichkey_path = [];
   tk.whichkey_timer = null;
+  tk.whichkey_full_shown = false;
+
+  // Group labels for the "?" full command list, shown as "+Label" per
+  // leader key; only leaders that actually have children in the trie above.
+  tk.whichkey_group_labels = {
+    g: "Go",
+    m: "Mark",
+    z: "Scroll/Fold",
+    f: "Filter view",
+    t: "Toggle pane",
+    "[": "Previous",
+    "]": "Next",
+    d: "Delete",
+    M: "Set folder mark",
+    "'": "Jump folder mark",
+  };
+
+  // Single-key (non-chord) bindings shown by "?" alongside the chord
+  // leaders above; kept in sync with keys.json by hand, same as WHICHKEY_ENTRIES.
+  const WHICHKEY_SINGLES = [
+    ["esc", "Cancel / normal mode"],
+    ["h", "Left / back"],
+    ["j", "Down"],
+    ["k", "Up"],
+    ["l", "Right / open"],
+    ["o", "Open message"],
+    ["v", "Toggle visual mode"],
+    ["F", "Forward"],
+    ["r", "Reply"],
+    ["R", "Reply all"],
+    ["x", "Archive"],
+    ["c", "New message"],
+    ["q", "Close message / refresh"],
+    ["u", "Undo"],
+    ["/", "Search"],
+    ["n", "Next search match"],
+    ["N", "Previous search match"],
+    [";", "Open conversation"],
+    ["G", "Go to bottom"],
+    [".", "Repeat last action"],
+    ["0-9", "Count prefix"],
+    ["ctrl+h", "Close message / refresh"],
+    ["ctrl+j", "Next tab"],
+    ["ctrl+k", "Previous tab"],
+    ["ctrl+l", "Open message"],
+    ["ctrl+u", "Page up"],
+    ["ctrl+d", "Page down"],
+    ["ctrl+o", "Jump back"],
+    ["ctrl+i", "Jump forward"],
+    ["ctrl+x", "Close tab/window"],
+    ["ctrl+c", "Close tab/window"],
+    ["alt+h", "Focus thread tree"],
+    ["alt+l", "Focus message pane"],
+    ["shift+h", "Focus folder tree"],
+    ["shift+l", "Focus thread tree"],
+  ];
 
   const WHICHKEY_TEXT_TAGS = new Set([
     "input",
@@ -794,6 +850,24 @@
   };
 
   /**
+   * Shows every chord leader (as "+Label") and every single-key command,
+   * for the "?" full command list.
+   */
+  tk.render_whichkey_full = () => {
+    const el = tk.ensure_whichkey_panel();
+    const lines = ["? -- all commands --"];
+    for (const key of Object.keys(tk.whichkey_trie.children ?? {})) {
+      lines.push(`  ${key}  +${tk.whichkey_group_labels[key] ?? "..."}`);
+    }
+    for (const [key, label] of WHICHKEY_SINGLES) {
+      lines.push(`  ${key}  ${label}`);
+    }
+    el.textContent = lines.join("\n");
+    el.style.display = "block";
+    tk.whichkey_full_shown = true;
+  };
+
+  /**
    * Hides the which-key panel and resets the chord walk back to the trie root.
    */
   tk.hide_whichkey = () => {
@@ -805,6 +879,7 @@
     }
     tk.whichkey_node = tk.whichkey_trie;
     tk.whichkey_path = [];
+    tk.whichkey_full_shown = false;
   };
 
   /**
@@ -820,20 +895,31 @@
       e.metaKey ||
       tk.is_whichkey_text_target(e.target)
     ) {
-      if (tk.whichkey_node !== tk.whichkey_trie) tk.hide_whichkey();
+      if (tk.whichkey_node !== tk.whichkey_trie || tk.whichkey_full_shown)
+        tk.hide_whichkey();
       return;
     }
     if (e.key === "Escape") {
       tk.hide_whichkey();
       return;
     }
+    if (e.key === "?" && tk.whichkey_node === tk.whichkey_trie) {
+      if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
+      tk.render_whichkey_full();
+      // Longer than a chord's 1000ms - this is a reference list to read, not
+      // a fast-moving prompt.
+      tk.whichkey_timer = window.setTimeout(tk.hide_whichkey, 4000);
+      return;
+    }
     const next = tk.whichkey_node.children?.[e.key];
     if (!next) {
-      if (tk.whichkey_node !== tk.whichkey_trie) tk.hide_whichkey();
+      if (tk.whichkey_node !== tk.whichkey_trie || tk.whichkey_full_shown)
+        tk.hide_whichkey();
       return;
     }
     tk.whichkey_path.push(e.key);
     tk.whichkey_node = next;
+    tk.whichkey_full_shown = false;
     if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
     if (next.children) {
       tk.render_whichkey(tk.whichkey_path, next.children);
@@ -884,19 +970,6 @@
     window.gTabmail?.currentAbout3Pane?.document
       ?.getElementById("qfb-starred")
       ?.click();
-
-  window.tk_quickmove_goto = () => {
-    const extension = window.ExtensionParent?.GlobalManager?.getExtension?.(
-      "quickmove@mozilla.kewis.ch",
-    );
-    if (!extension) {
-      window.alert(
-        "Quick Folder Move not installed or disabled, check about:addons",
-      );
-      return;
-    }
-    extension.shortcuts?.onCommand?.("goto");
-  };
 
   for (let i = 0; i <= 9; i++) {
     window[`tk_digit_${i}`] = tk.digit(i);
