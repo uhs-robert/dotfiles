@@ -903,12 +903,16 @@
       tk.hide_whichkey();
       return;
     }
+    if (tk.whichkey_full_shown) {
+      // Any key dismisses the full list rather than falling through to
+      // chord tracking - it's a reference view, not a chord in progress.
+      tk.hide_whichkey();
+      return;
+    }
     if (e.key === "?" && tk.whichkey_node === tk.whichkey_trie) {
-      if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
+      // No auto-hide timer - this is a reference list to read, dismissed
+      // only by Esc or the next keypress (handled above).
       tk.render_whichkey_full();
-      // Longer than a chord's 1000ms - this is a reference list to read, not
-      // a fast-moving prompt.
-      tk.whichkey_timer = window.setTimeout(tk.hide_whichkey, 4000);
       return;
     }
     const next = tk.whichkey_node.children?.[e.key];
