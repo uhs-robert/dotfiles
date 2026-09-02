@@ -11,59 +11,64 @@
     tk.toggle_read_state(hdr);
     window.goDoCommand("cmd_markAllRead");
   };
-  window.tk_mark_read = () => {
+  // The read-state nudge is a single-row habit carried over from the original
+  // inline bindings; over a range it would rewrite every selected message.
+  const mark_over_range = (cmd) => () => {
     const tt = tk.get_thread_tree();
-    const hdr = tk.get_current_hdr(tt);
-    tk.toggle_read_state(hdr);
-    const n = tk.peek_count();
-    tk.reset_count();
-    tk.repeat_command("cmd_markAsRead", n);
+    const range = tk.resolve_action_range(tt);
+    if (range.is_visual) {
+      window.goDoCommand(cmd);
+      tk.finish_visual_action(tt, range.cursor_index);
+      return;
+    }
+    tk.toggle_read_state(range.anchor_hdr);
+    tk.repeat_command(cmd, range.count);
   };
-  window.tk_mark_unread = () => {
+
+  const act_over_range = (cmd) => () => {
     const tt = tk.get_thread_tree();
-    const hdr = tk.get_current_hdr(tt);
-    tk.toggle_read_state(hdr);
-    const n = tk.peek_count();
-    tk.reset_count();
-    tk.repeat_command("cmd_markAsUnread", n);
+    const range = tk.resolve_action_range(tt);
+    if (range.is_visual) {
+      window.goDoCommand(cmd);
+      tk.finish_visual_action(tt, range.top_index);
+      return;
+    }
+    tk.repeat_command(cmd, range.count);
   };
-  window.tk_mark_flagged = () => {
-    const tt = tk.get_thread_tree();
-    const hdr = tk.get_current_hdr(tt);
-    tk.toggle_read_state(hdr);
-    const n = tk.peek_count();
-    tk.reset_count();
-    tk.repeat_command("cmd_markAsFlagged", n);
-  };
-  window.tk_delete = () => {
-    const n = tk.peek_count();
-    tk.reset_count();
-    tk.repeat_command("cmd_delete", n);
-  };
-  window.tk_archive = () => {
-    const n = tk.peek_count();
-    tk.reset_count();
-    tk.repeat_command("cmd_archive", n);
-  };
+
+  window.tk_mark_read = mark_over_range("cmd_markAsRead");
+  window.tk_mark_unread = mark_over_range("cmd_markAsUnread");
+  window.tk_mark_flagged = mark_over_range("cmd_markAsFlagged");
+  window.tk_delete = act_over_range("cmd_delete");
+  window.tk_archive = act_over_range("cmd_archive");
+
   window.tk_mark_junk_toggle = () => {
     const tt = tk.get_thread_tree();
-    const hdr = tk.get_current_hdr(tt);
-    if (!hdr) return;
-    const is_junk = hdr.getStringProperty("junkscore") === "100";
-    tk.toggle_read_state(hdr);
+    const range = tk.resolve_action_range(tt);
+    if (!range.anchor_hdr) {
+      if (range.is_visual) tk.finish_visual_action(tt, range.cursor_index);
+      return;
+    }
+    const is_junk = range.anchor_hdr.getStringProperty("junkscore") === "100";
+    if (!range.is_visual) tk.toggle_read_state(range.anchor_hdr);
     window.goDoCommand(is_junk ? "cmd_markAsNotJunk" : "cmd_markAsJunk");
+    if (range.is_visual) tk.finish_visual_action(tt, range.cursor_index);
   };
   window.tk_move_to_projects = () => {
     const tt = tk.get_thread_tree();
     if (!tt) return;
-    const hdr = tk.get_current_hdr(tt);
-    tk.toggle_read_state(hdr);
+    const range = tk.resolve_action_range(tt);
     const folder = tk.find_folder_by_name(tk.PROJECTS_FOLDER);
-    if (!folder) return;
+    if (!folder) {
+      if (range.is_visual) tk.finish_visual_action(tt, range.cursor_index);
+      return;
+    }
+    if (!range.is_visual) tk.toggle_read_state(range.anchor_hdr);
     tt.view?.doCommandWithFolder?.(
       window.Ci.nsMsgViewCommandType.moveMessages,
       folder,
     );
+    if (range.is_visual) tk.finish_visual_action(tt, range.top_index);
   };
 
   window.tk_repeat_last = () => {
