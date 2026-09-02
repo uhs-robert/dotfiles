@@ -816,10 +816,11 @@
     return WHICHKEY_TEXT_TAGS.has(el.tagName?.toLowerCase?.() ?? "");
   };
 
-  const WHICHKEY_BG = "#141C24";
+  const WHICHKEY_BG = "#0C0E13";
   const WHICHKEY_HEADER_COLOR = "#8A93A0";
   const WHICHKEY_KEY_COLOR = "#D8CF7F";
   const WHICHKEY_GROUP_COLOR = "#FFA0A0";
+  const WHICHKEY_LABEL_COLOR = "#B0C8DE";
 
   /**
    * @returns {Element} the injected which-key panel, creating it if absent
@@ -843,9 +844,9 @@
    * @param {Document} doc - owner document to create the row in
    * @param {string} text - row text
    * @param {string} color - CSS color for the row
-   * @returns {Element} a single which-key row
+   * @returns {Element} a plain, single-color which-key row
    */
-  tk.whichkey_row = (doc, text, color) => {
+  tk.whichkey_text_row = (doc, text, color) => {
     const row = doc.createElement("div");
     row.textContent = text;
     row.style.color = color;
@@ -853,9 +854,29 @@
   };
 
   /**
+   * @param {Document} doc - owner document to create the row in
+   * @param {string} key - key character(s), always colored WHICHKEY_KEY_COLOR
+   * @param {string} label - description, colored `label_color`
+   * @param {string} label_color - CSS color for the label half
+   * @returns {Element} a which-key row with the key and label colored separately
+   */
+  tk.whichkey_entry_row = (doc, key, label, label_color) => {
+    const row = doc.createElement("div");
+    const key_span = doc.createElement("span");
+    key_span.textContent = `  ${key}  `;
+    key_span.style.color = WHICHKEY_KEY_COLOR;
+    const label_span = doc.createElement("span");
+    label_span.textContent = label;
+    label_span.style.color = label_color;
+    row.appendChild(key_span);
+    row.appendChild(label_span);
+    return row;
+  };
+
+  /**
    * Shows the next valid keys and labels under the current chord prefix;
-   * a further chord leader is colored like a "+group" entry, a plain
-   * command like a regular key.
+   * a further chord leader is labeled like a "+group" entry, a plain
+   * command like a regular label.
    * @param {string[]} path - keys pressed so far in this chord
    * @param {Object} children - trie children of the current node
    */
@@ -863,15 +884,18 @@
     const el = tk.ensure_whichkey_panel();
     const doc = el.ownerDocument;
     el.textContent = "";
-    el.appendChild(tk.whichkey_row(doc, path.join(" "), WHICHKEY_HEADER_COLOR));
+    el.appendChild(
+      tk.whichkey_text_row(doc, path.join(" "), WHICHKEY_HEADER_COLOR),
+    );
     for (const [key, node] of Object.entries(children)) {
       const is_group = !!node.children;
       const label = (is_group ? "+" : "") + (node.label ?? "...");
       el.appendChild(
-        tk.whichkey_row(
+        tk.whichkey_entry_row(
           doc,
-          `  ${key}  ${label}`,
-          is_group ? WHICHKEY_GROUP_COLOR : WHICHKEY_KEY_COLOR,
+          key,
+          label,
+          is_group ? WHICHKEY_GROUP_COLOR : WHICHKEY_LABEL_COLOR,
         ),
       );
     }
@@ -887,20 +911,21 @@
     const doc = el.ownerDocument;
     el.textContent = "";
     el.appendChild(
-      tk.whichkey_row(doc, "? -- all commands --", WHICHKEY_HEADER_COLOR),
+      tk.whichkey_text_row(doc, "? -- all commands --", WHICHKEY_HEADER_COLOR),
     );
     for (const key of Object.keys(tk.whichkey_trie.children ?? {})) {
       el.appendChild(
-        tk.whichkey_row(
+        tk.whichkey_entry_row(
           doc,
-          `  ${key}  +${tk.whichkey_group_labels[key] ?? "..."}`,
+          key,
+          `+${tk.whichkey_group_labels[key] ?? "..."}`,
           WHICHKEY_GROUP_COLOR,
         ),
       );
     }
     for (const [key, label] of WHICHKEY_SINGLES) {
       el.appendChild(
-        tk.whichkey_row(doc, `  ${key}  ${label}`, WHICHKEY_KEY_COLOR),
+        tk.whichkey_entry_row(doc, key, label, WHICHKEY_LABEL_COLOR),
       );
     }
     el.style.display = "block";
