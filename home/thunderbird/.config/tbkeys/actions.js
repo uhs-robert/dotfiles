@@ -5,16 +5,16 @@
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------
 
-  // An m chord runs after the leaked m keypress has already flipped read
-  // state, so it undoes that flip first - unless it sets read state itself,
-  // or . is replaying it with no keypress to answer for.
+  // Restores the read state sampled when the chord opened, in case the
+  // leader key still reached Thunderbird's own shortcut; chords that set
+  // read state themselves skip it and just overwrite.
   const m_chord =
-    (apply, compensate = true) =>
+    (apply, restore = true) =>
     () => {
       const tt = tk.get_thread_tree();
       const range = tk.resolve_action_range(tt);
-      if (compensate && !tk.replaying)
-        tk.undo_leaked_read_toggle(tt, range.anchor_hdr);
+      if (restore) tk.restore_read_state();
+      else tk.read_snapshot = null;
       let cursor;
       for (let i = 0; i < range.count; i++) cursor = apply(tt, range);
       if (range.is_visual)
@@ -74,12 +74,7 @@
       return;
     }
     if (!tk.has_count()) window.count = last.count;
-    tk.replaying = true;
-    try {
-      window[last.name]();
-    } finally {
-      tk.replaying = false;
-    }
+    window[last.name]();
   };
 
   [

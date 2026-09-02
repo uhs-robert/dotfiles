@@ -131,17 +131,29 @@
     if (cmd !== undefined) tt?.view?.doCommand?.(cmd);
   };
 
+  tk.read_snapshot = null;
+
   /**
-   * Cancels the read-state flip Thunderbird performs when the bare m keypress leaks past tbkeys, which it does whenever m opens a chord: Mousetrap suppresses the standalone "m" binding while a sequence is pending, so its unset never runs to swallow the key.
-   * @param {Element} tt - the thread tree
-   * @param {Object} hdr - header the flip landed on, or undefined/null to no-op
+   * Records the read state of every selected message as a chord opens. Suppressing the leader key should stop Thunderbird flipping it at all, so this only matters wherever preventDefault fails to reach the native shortcut.
    */
-  tk.undo_leaked_read_toggle = (tt, hdr) => {
-    if (!hdr) return;
-    tk.run_view_command(
-      tt,
-      hdr.isRead ? "markMessagesUnread" : "markMessagesRead",
-    );
+  tk.snapshot_read_state = () => {
+    const hdrs = tk.get_thread_tree()?.view?.getSelectedMsgHdrs?.() ?? [];
+    tk.read_snapshot = hdrs.length
+      ? hdrs.map((hdr) => ({ hdr, is_read: hdr.isRead }))
+      : null;
+  };
+
+  /**
+   * Restores the read state sampled when the chord opened, then clears it. Writes each header back through its own folder rather than issuing one selection-wide command, so a selection that has since changed, or was never uniform, still lands on exactly what was sampled.
+   */
+  tk.restore_read_state = () => {
+    const snapshot = tk.read_snapshot;
+    tk.read_snapshot = null;
+    if (!snapshot) return;
+    for (const { hdr, is_read } of snapshot) {
+      if (hdr.isRead !== is_read)
+        hdr.folder?.markMessagesRead?.([hdr], is_read);
+    }
   };
 
   // -- flat tk_* functions for keys.json "func:" bindings ------------------

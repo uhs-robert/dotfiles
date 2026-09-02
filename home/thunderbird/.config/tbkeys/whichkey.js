@@ -1,7 +1,8 @@
-// Passive which-key overlay for pending chord prefixes: chord trie/metadata,
-// delay/timer state, and transient rendering. Visualization only - never
-// touches Mousetrap or tbkeys keyboard dispatch. Loaded last, so it also
-// fires the initial repaint once every module has populated window.tk.
+// Which-key overlay for pending chord prefixes: chord trie/metadata, delay/
+// timer state, and transient rendering. Never touches Mousetrap or tbkeys
+// dispatch; its one non-passive act is suppressing a chord leader's native
+// Thunderbird shortcut, which tbkeys itself cannot swallow. Loaded last, so
+// it also fires the initial repaint once every module has populated window.tk.
 (function (tk) {
   "use strict";
 
@@ -146,10 +147,20 @@
    * @returns {boolean} true if key events there should be left alone (text entry)
    */
   tk.is_whichkey_text_target = (el) => {
-    if (!el) return false;
-    if (el.isContentEditable) return true;
-    return WHICHKEY_TEXT_TAGS.has(el.tagName?.toLowerCase?.() ?? "");
+    for (let node = el; node; node = node.parentElement) {
+      if (node.isContentEditable) return true;
+      if (WHICHKEY_TEXT_TAGS.has(node.tagName?.toLowerCase?.() ?? ""))
+        return true;
+    }
+    return false;
   };
+
+  /**
+   * @returns {boolean} true in the 3-pane mail window, false in compose windows
+   */
+  tk.is_mail_window = () =>
+    window.document?.documentElement?.getAttribute("windowtype") ===
+    "mail:3pane";
 
   const WHICHKEY_BG = "#0C0E13";
   const WHICHKEY_HEADER_COLOR = "#8A93A0";
@@ -283,9 +294,17 @@
   };
 
   /**
-   * Passive capture-phase keydown observer that mirrors chord progress into
-   * the which-key panel without touching default behavior, Mousetrap, or
-   * tbkeys - it only ever reads window.event state it does not own.
+   * Abandons a chord without running one: drops the read-state sample too, so a later chord cannot consume it. Completing a chord goes through hide_whichkey instead, leaving the sample for the action to restore from.
+   */
+  tk.abort_chord = () => {
+    tk.read_snapshot = null;
+    tk.hide_whichkey();
+  };
+
+  /**
+   * Capture-phase keydown observer that mirrors chord progress into the
+   * which-key panel and suppresses a chord leader's native Thunderbird
+   * shortcut. Never touches Mousetrap or tbkeys state it does not own.
    * @param {KeyboardEvent} e
    */
   tk.whichkey_handler = (e) => {
@@ -296,17 +315,17 @@
       tk.is_whichkey_text_target(e.target)
     ) {
       if (tk.whichkey_node !== tk.whichkey_trie || tk.whichkey_full_shown)
-        tk.hide_whichkey();
+        tk.abort_chord();
       return;
     }
     if (e.key === "Escape") {
-      tk.hide_whichkey();
+      tk.abort_chord();
       return;
     }
     if (tk.whichkey_full_shown) {
       // Any key dismisses the full list rather than falling through to
       // chord tracking - it's a reference view, not a chord in progress.
-      tk.hide_whichkey();
+      tk.abort_chord();
       return;
     }
     if (e.key === "?" && tk.whichkey_node === tk.whichkey_trie) {
@@ -318,7 +337,7 @@
     const next = tk.whichkey_node.children?.[e.key];
     if (!next) {
       if (tk.whichkey_node !== tk.whichkey_trie || tk.whichkey_full_shown)
-        tk.hide_whichkey();
+        tk.abort_chord();
       return;
     }
     tk.whichkey_path.push(e.key);
@@ -326,19 +345,23 @@
     tk.whichkey_full_shown = false;
     if (tk.whichkey_timer) window.clearTimeout(tk.whichkey_timer);
     if (next.children) {
+      // Mousetrap holds back a standalone binding while that key is the
+      // prefix of a pending sequence, so keys.json's "unset" never runs and
+      // the leader reaches Thunderbird's own shortcut. Swallow it here.
+      if (tk.is_mail_window()) {
+        e.preventDefault();
+        tk.snapshot_read_state();
+      }
       tk.render_whichkey(tk.whichkey_path, next.children);
       // Matches Mousetrap's own 1000ms sequence-reset delay so the overlay
       // never outlives the pending chord it is describing.
-      tk.whichkey_timer = window.setTimeout(tk.hide_whichkey, 1000);
+      tk.whichkey_timer = window.setTimeout(tk.abort_chord, 1000);
     } else {
       tk.hide_whichkey();
     }
   };
 
-  window.addEventListener("keydown", tk.whichkey_handler, {
-    capture: true,
-    passive: true,
-  });
+  window.addEventListener("keydown", tk.whichkey_handler, { capture: true });
 
   tk.whichkey_teardown = () => {
     window.removeEventListener("keydown", tk.whichkey_handler, {
