@@ -129,9 +129,10 @@
     const input = doc.createElement("input");
     input.id = "tbkeys-command-input";
     input.type = "text";
+    input.setAttribute("aria-label", "tbkeys command");
     input.style.cssText =
       "flex:1; font:inherit; background:#222; color:#fff; " +
-      "border:1px solid #666; padding:2px 4px; outline:none;";
+      "border:1px solid #666; padding:2px 4px;";
     bar.appendChild(label);
     bar.appendChild(input);
     (doc.body ?? doc.documentElement).appendChild(bar);
