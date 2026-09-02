@@ -147,17 +147,33 @@
     "moz-input-search",
     "account-hub-container",
     "imconversation",
-    "browser",
   ]);
 
+  // Held apart from the text tags: a browser is opaque to us rather than a
+  // text field, and everything in the 3-pane sits inside one.
+  const WHICHKEY_OPAQUE_TAGS = new Set(["browser"]);
+
   /**
-   * @param {Element} el - event target to check
-   * @returns {boolean} true if key events there should be left alone (text entry)
+   * @param {Element} el - element to check
+   * @returns {boolean} true if the element or an ancestor takes typed text
    */
-  tk.is_whichkey_text_target = (el) => {
+  tk.is_text_input = (el) => {
     for (let node = el; node; node = node.parentElement) {
       if (node.isContentEditable) return true;
       if (WHICHKEY_TEXT_TAGS.has(node.tagName?.toLowerCase?.() ?? ""))
+        return true;
+    }
+    return false;
+  };
+
+  /**
+   * @param {Element} el - event target to check
+   * @returns {boolean} true if key events there should be left alone
+   */
+  tk.is_whichkey_text_target = (el) => {
+    if (tk.is_text_input(el)) return true;
+    for (let node = el; node; node = node.parentElement) {
+      if (WHICHKEY_OPAQUE_TAGS.has(node.tagName?.toLowerCase?.() ?? ""))
         return true;
     }
     return false;
@@ -317,6 +333,7 @@
    * @param {KeyboardEvent} e
    */
   tk.whichkey_handler = (e) => {
+    tk.sync_insert_mode?.();
     if (
       e.ctrlKey ||
       e.altKey ||

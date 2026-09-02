@@ -5,6 +5,7 @@
   "use strict";
 
   window.tk?.whichkey_teardown?.();
+  window.tk?.ui_teardown?.();
   window.tk = {};
 })();
 

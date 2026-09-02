@@ -1,6 +1,13 @@
-// Persistent mode/count/status indicator in the mail window's status bar.
+// Persistent mode/count/status indicator in the mail window's status bar,
+// and the insert-mode tracking that follows focus in and out of text fields.
 (function (tk) {
   "use strict";
+
+  const MODE_LABELS = {
+    normal: "-- NORMAL --",
+    visual: "-- VISUAL --",
+    insert: "-- INSERT --",
+  };
 
   /**
    * @returns {Element} the injected mode/count indicator, or null where the mail status bar is absent (e.g. compose windows)
@@ -30,7 +37,7 @@
   tk.repaint_mode = () => {
     const el = tk.ensure_mode_indicator();
     if (!el) return;
-    const parts = [tk.is_visual() ? "-- VISUAL --" : "-- NORMAL --"];
+    const parts = [MODE_LABELS[window.vim] ?? MODE_LABELS.normal];
     if (tk.has_count()) parts.push(String(window.count));
     if (tk.folder_search_active) {
       const matches = window.folderSearchMatches || [];
@@ -43,5 +50,49 @@
     } else {
       el.textContent = text;
     }
+  };
+
+  // -- insert mode ----------------------------------------------------------
+
+  tk.mode_before_insert = null;
+
+  /**
+   * @returns {boolean} true when focus sits in a field that takes typed text, in either the chrome window or the 3-pane document
+   */
+  tk.is_text_focus = () =>
+    !!(
+      tk.is_text_input?.(window.document?.activeElement) ||
+      tk.is_text_input?.(tk.get_inbox_doc()?.activeElement)
+    );
+
+  /**
+   * Enters insert mode while a text field holds focus and returns to the mode that was current before it, so a visual selection survives a trip through the filter box.
+   */
+  tk.sync_insert_mode = () => {
+    const in_text = tk.is_text_focus();
+    if (in_text) {
+      if (window.vim === "insert") return;
+      tk.mode_before_insert = window.vim ?? "normal";
+      window.vim = "insert";
+    } else {
+      if (window.vim !== "insert") return;
+      window.vim = tk.mode_before_insert ?? "normal";
+      tk.mode_before_insert = null;
+    }
+    tk.repaint_mode();
+  };
+
+  // focusout fires before activeElement moves, so recheck on the next tick.
+  tk.focus_handler = (e) =>
+    e.type === "focusout"
+      ? window.setTimeout(tk.sync_insert_mode, 0)
+      : tk.sync_insert_mode();
+
+  window.addEventListener("focusin", tk.focus_handler, { capture: true });
+  window.addEventListener("focusout", tk.focus_handler, { capture: true });
+
+  tk.ui_teardown = () => {
+    window.removeEventListener("focusin", tk.focus_handler, { capture: true });
+    window.removeEventListener("focusout", tk.focus_handler, { capture: true });
   };
 })(window.tk);
