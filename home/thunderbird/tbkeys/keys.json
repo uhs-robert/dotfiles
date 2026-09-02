@@ -22,6 +22,8 @@
   "[": "unset",
   "] u": "func:tk_next_unread_thread",
   "[ u": "func:tk_prev_unread_thread",
+  "] s": "cmd:cmd_nextFlaggedMsg",
+  "[ s": "cmd:cmd_previousFlaggedMsg",
   "t m": "cmd:cmd_toggleMessagePane",
   "t f": "cmd:cmd_toggleFolderPane",
   "o": "cmd:cmd_openMessage",
