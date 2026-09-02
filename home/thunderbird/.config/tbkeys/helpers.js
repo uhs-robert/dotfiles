@@ -317,6 +317,35 @@
     tt.scrollTo({ top: target, behavior: "instant" });
   };
 
+  /**
+   * Runs a Thunderbird navigation command count times, then resyncs visual-mode state from where the selection landed; leaves visual mode if the command crossed into another folder.
+   * @param {string} cmd - goDoCommand command id that moves the selection
+   */
+  tk.run_navigation_command = (cmd) => {
+    const folder_before =
+      window.gTabmail?.currentAbout3Pane?.gFolder?.URI ?? null;
+    const n = tk.peek_count();
+    tk.reset_count();
+    tk.repeat_command(cmd, n);
+    if (!tk.is_visual()) return;
+    const tt = tk.get_thread_tree();
+    const folder_after =
+      window.gTabmail?.currentAbout3Pane?.gFolder?.URI ?? null;
+    if (folder_before !== folder_after) {
+      window.vim = "normal";
+      window.visualAnchor = undefined;
+      window.visualEnd = undefined;
+      return;
+    }
+    if (typeof tt?.currentIndex !== "number" || tt.currentIndex < 0) return;
+    const anchor =
+      typeof window.visualAnchor === "number"
+        ? window.visualAnchor
+        : tt.currentIndex;
+    tt._selectRange(anchor, tt.currentIndex, false);
+    window.visualEnd = tt.currentIndex;
+  };
+
   // -- row stepping -----------------------------------------------------------
 
   /**
@@ -599,6 +628,14 @@
     tk.step_matching(1, (hdr, idx, view) => view.isContainer(idx));
   window.tk_prev_thread_root = () =>
     tk.step_matching(-1, (hdr, idx, view) => view.isContainer(idx));
+
+  window.tk_next_starred = () => tk.run_navigation_command("cmd_nextFlaggedMsg");
+  window.tk_prev_starred = () =>
+    tk.run_navigation_command("cmd_previousFlaggedMsg");
+  window.tk_next_unread_any_folder = () =>
+    tk.run_navigation_command("cmd_nextUnreadMsg");
+  window.tk_prev_unread_any_folder = () =>
+    tk.run_navigation_command("cmd_previousUnreadMsg");
 
   const has_attachment = (hdr) =>
     !!(hdr && hdr.flags & window.Ci?.nsMsgMessageFlags?.Attachment);
