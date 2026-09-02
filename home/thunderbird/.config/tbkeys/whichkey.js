@@ -375,7 +375,10 @@
       // needs that keypress to start a plain-character sequence.
       if (tk.is_mail_window()) {
         tk.suppress_keypress = e.key;
-        tk.snapshot_read_state();
+        // m is the only leader whose native shortcut writes read state, and
+        // only an m chord ever restores, so a wider sample could only go stale.
+        if (tk.whichkey_path.length === 1 && e.key === "m")
+          tk.snapshot_read_state();
       }
       tk.render_whichkey(tk.whichkey_path, next.children);
       // Matches Mousetrap's own 1000ms sequence-reset delay so the overlay
