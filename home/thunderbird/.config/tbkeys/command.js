@@ -324,7 +324,7 @@
     },
     edit: {
       usage: "edit",
-      description: "Edit the current plain-text compose body in Neovim",
+      description: "Edit the current compose body in Neovim",
       run: ({ args }) => {
         if (args.length) return tk.commands.edit.usage;
         window.tk_edit_compose_external?.();

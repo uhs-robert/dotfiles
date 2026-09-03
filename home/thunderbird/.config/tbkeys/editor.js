@@ -297,6 +297,7 @@
           if (edited !== original.value) apply_body(editor, original, edited);
           report(edited === original.value ? "no changes" : "updated compose body");
         } catch (error) {
+          cleanup(session);
           report(`could not apply result (${error})`);
         } finally {
           if (!original.html) cleanup(session);
@@ -393,8 +394,11 @@
     if (
       window.__tbkeys_one_command_normal &&
       !["Control", "Alt", "Shift", "Meta"].includes(event.key)
-    )
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
       return_to_insert();
+    }
   };
 
   let inner_editor_window = null;

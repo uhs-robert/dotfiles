@@ -70,9 +70,9 @@ Module responsibilities, following a one-way dependency direction (later modules
 - `navigation.js` - higher-level stepping (unread/thread/starred/attachment), focus switching, and tab navigation.
 - `actions.js` - message mutations (read/unread/flag/junk/delete/archive/move) and `.` repeat-last-action.
 - `yank.js` - non-mutating message metadata/content yanks and privileged clipboard writes.
+- `editor.js` - the compose bridge: secure per-window temp files, asynchronous Kitty/Neovim/Pandoc sessions, conflict detection, Markdown-to-HTML conversion, and compose-editor write-back. Plain-text compose opens as text; HTML compose opens as Markdown.
 - `search.js` - incremental folder search (state, input, highlighting, matching, accept/cancel/step) and `tk_escape`, since escape is mostly search cleanup.
 - `command.js` - the Vim-style `:` command line: input UI, parser, and a declarative command registry (`archive`, `move`, `filter`, `open`, `edit`) that calls into the existing folder/action helpers rather than duplicating them.
-- `editor.js` - the compose bridge: secure per-window temp files, asynchronous Kitty/Neovim/Pandoc sessions, conflict detection, Markdown-to-HTML conversion, and compose-editor write-back. Plain-text compose opens as text; HTML compose opens as Markdown.
 - `ui.js` - the persistent mode/count/status indicator and lightweight transient feedback.
 - `whichkey.js` - the passive which-key overlay: chord trie, timers, and transient rendering. Loaded last, and fires the initial `tk.repaint_mode()` once every module is in place. Visualization only - it never touches Mousetrap or tbkeys keyboard dispatch.
 
