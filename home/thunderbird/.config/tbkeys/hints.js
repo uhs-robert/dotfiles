@@ -86,18 +86,22 @@
           const Cc = window.Cc ?? window.Components?.classes;
           const Ci = window.Ci ?? window.Components?.interfaces;
           if (!value) throw new Error("target has no copyable value");
-          Cc?.["@mozilla.org/widget/clipboardhelper;1"]
-            ?.getService(Ci?.nsIClipboardHelper)?.copyString(value);
+          const helper = Cc?.["@mozilla.org/widget/clipboardhelper;1"]
+            ?.getService(Ci?.nsIClipboardHelper);
+          if (!helper?.copyString) throw new Error("clipboard service unavailable");
+          helper.copyString(value);
           tk.show_status?.(`YANKED ${anchor?.href ? "URL" : "target text"}`);
-        } catch (_) { tk.show_status?.("YANK FAILED: target has no copyable value"); }
+        } catch (error) {
+          tk.show_status?.(`YANK FAILED: ${error.message ?? error}`);
+        }
       },
     };
   };
 
-  const discover = () => {
+  const discover = (docs) => {
     const targets = [];
     const elements = new Set();
-    for (const doc of documents()) {
+    for (const doc of docs) {
       for (const element of doc.querySelectorAll?.(TARGET_SELECTOR) ?? []) {
         if (elements.has(element) || !visible(element, doc)) continue;
         const target = target_for(element, doc);
@@ -214,11 +218,12 @@
 
   const open = (action, phase = "target") => {
     close();
-    const targets = discover();
+    const docs = documents();
+    const targets = discover(docs);
     if (!targets.length) return tk.show_status?.("HINT: no visible actionable targets");
     labels(targets.length).forEach((label, i) => { targets[i].label = label; });
     session = { targets, action, phase, query: "", listeners: [], close };
-    for (const doc of documents()) {
+    for (const doc of docs) {
       doc.addEventListener("keydown", key_handler, true);
       doc.addEventListener("keypress", keypress_handler, true);
       session.listeners.push([doc, key_handler, keypress_handler]);
