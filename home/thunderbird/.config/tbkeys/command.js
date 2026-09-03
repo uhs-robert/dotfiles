@@ -609,6 +609,7 @@
     if (!input || !entries.length) return false;
 
     if (direction < 0) {
+      if (command_history.index === 0) return false;
       if (command_history.index === null) command_history.draft = input.value;
       command_history.index =
         command_history.index === null
