@@ -362,6 +362,29 @@
     tk.hide_whichkey();
   };
 
+  // Standalone modifier keydowns (fired when the modifier itself is
+  // pressed, e.g. holding Shift before the character key lands) per the
+  // UI Events KeyboardEvent.key modifier key values. None of these are
+  // ever a trie key or a real chord step, so they must not be treated as
+  // an unmatched key and must not abort an in-progress chord.
+  const WHICHKEY_MODIFIER_KEYS = new Set([
+    "Alt",
+    "AltGraph",
+    "CapsLock",
+    "Control",
+    "Fn",
+    "FnLock",
+    "Hyper",
+    "Meta",
+    "NumLock",
+    "ScrollLock",
+    "Shift",
+    "Super",
+    "Symbol",
+    "SymbolLock",
+    "OS",
+  ]);
+
   /**
    * Capture-phase keydown observer that mirrors chord progress into the
    * which-key panel and suppresses a chord leader's native Thunderbird
@@ -370,6 +393,7 @@
    */
   tk.whichkey_handler = (e) => {
     tk.sync_insert_mode?.();
+    if (WHICHKEY_MODIFIER_KEYS.has(e.key)) return;
     if (
       e.ctrlKey ||
       e.altKey ||
