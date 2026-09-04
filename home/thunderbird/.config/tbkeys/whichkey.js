@@ -393,7 +393,6 @@
    */
   tk.whichkey_handler = (e) => {
     tk.sync_insert_mode?.();
-    if (WHICHKEY_MODIFIER_KEYS.has(e.key)) return;
     if (
       e.ctrlKey ||
       e.altKey ||
@@ -414,6 +413,7 @@
       tk.abort_chord();
       return;
     }
+    if (WHICHKEY_MODIFIER_KEYS.has(e.key)) return;
     if (e.key === "?" && tk.whichkey_node === tk.whichkey_trie) {
       // No auto-hide timer - this is a reference list to read, dismissed
       // only by Esc or the next keypress (handled above).
