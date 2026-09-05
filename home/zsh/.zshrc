@@ -209,6 +209,13 @@ alias lla='ls -la'
 alias lt='ls --tree'
 # Lsd end
 
+# Nightshift
+if [[ -n ${SSH_CONNECTION:-} || -n ${SSH_CLIENT:-} ]]; then
+	alias ns='nightshift'
+else
+	alias ns='ssh nightshift'
+fi
+
 # Just
 alias j='just'
 
