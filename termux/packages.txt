@@ -1,0 +1,17 @@
+git
+openssh
+zsh
+stow
+fzf
+neovim
+yazi
+topgrade
+lazygit
+difftastic
+ripgrep
+fd
+bat
+eza
+jq
+tmux
+fastfetch

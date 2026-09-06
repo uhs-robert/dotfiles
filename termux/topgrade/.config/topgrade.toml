@@ -1,0 +1,14 @@
+[misc]
+only = ["custom_commands", "git_repos"]
+
+[commands]
+"Termux packages" = "pkg update -y && pkg upgrade -y"
+"LazyVim plugins" = "nvim --headless '+Lazy! sync' +qa"
+"Yazi packages" = "ya pkg upgrade"
+
+[git]
+pull_predefined = false
+# Git's --ff-only leaves divergent local work for manual resolution.
+arguments = "--ff-only"
+# Exclude hidden application caches managed by LazyVim and Yazi themselves.
+repos = ["~/[!.]*/**/.git/..", "~/.local/share/zsh/plugins/*"]
