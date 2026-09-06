@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+fonts_dir="${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
+destination="$fonts_dir/MapleMono-NF"
+api="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
+base="https://github.com/subframe7536/maple-font/releases/download"
+
+version=$(curl --fail --location --silent --show-error --retry 2 \
+    --connect-timeout 15 --max-time 120 "$api" | jq -er '.tag_name')
+url="$base/$version/MapleMono-NF.zip"
+
+mkdir -p -- "$fonts_dir"
+temporary=$(mktemp -d "$fonts_dir/.MapleMono-NF.XXXXXX")
+trap 'rm -rf -- "$temporary"' EXIT
+
+archive="$temporary/MapleMono-NF.zip"
+staged="$temporary/font"
+mkdir -- "$staged"
+
+curl --fail --location --silent --show-error --retry 2 \
+    --connect-timeout 15 --max-time 120 --output "$archive" "$url"
+unzip -q "$archive" -d "$staged"
+rm -- "$archive"
+
+find "$staged" -type f \( -name '*.ttf' -o -name '*.otf' \) -print -quit | grep -q . || {
+    printf 'MapleMono NF archive contains no font files.\n' >&2
+    exit 1
+}
+
+if [[ -d "$destination" ]] && diff -qr "$staged" "$destination" >/dev/null 2>&1; then
+    printf 'MapleMono NF %s is already current.\n' "$version"
+    exit 0
+fi
+
+backup="$temporary/previous"
+if [[ -e "$destination" ]]; then
+    mv -- "$destination" "$backup"
+fi
+
+if ! mv -- "$staged" "$destination"; then
+    [[ ! -e "$backup" ]] || mv -- "$backup" "$destination"
+    exit 1
+fi
+
+fc-cache -f
+printf 'Updated MapleMono NF to %s.\n' "$version"
