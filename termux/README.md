@@ -1,82 +1,35 @@
 # Termux
 
-Standalone mobile SSH environment. Requires a current supported [Termux](https://github.com/termux/termux-app#installation) installation, network access, and the default `~/.config` location. Keep the checkout in Termux home, not Android shared storage (Stow needs symlinks).
+Standalone mobile SSH environment for Termux.
 
 ## Install
 
-In a fresh Termux session, run:
+In a fresh Termux session:
 
 ```sh
 pkg update -y && pkg install -y git && git clone https://github.com/uhs-robert/dotfiles.git ~/dotfiles && bash ~/dotfiles/termux/install.sh
 ```
 
-For an existing checkout, run `bash ~/dotfiles/termux/install.sh`. No submodules or Arch installer are needed. The installer prompts for an SSH key passphrase only when creating a key, prints public keys, sets Zsh as the default shell, and reloads Termux settings. Run `exec zsh` afterward.
+Already have the repo? Just run `bash ~/dotfiles/termux/install.sh` again.
 
-All packages in `packages.txt` come from the [official Termux repository](https://github.com/termux/termux-packages/tree/master/packages). `zsh-autosuggestions` is installed as a package if available; otherwise it is cloned from [upstream](https://github.com/zsh-users/zsh-autosuggestions) into `~/.local/share/zsh/plugins/`. [fzf-tab](https://github.com/Aloxaf/fzf-tab) is cloned there too. No shell framework or compiled fallback is required. Failed downloads or unavailable packages stop installation; fix the reported error and rerun.
+Follow the prompts. When it's done, run `exec zsh`.
 
-## SSH
-
-The installer copies `~/.ssh/config.example` to `~/.ssh/config` only if absent. Replace its documentation-only hosts with real entries using `v ~/.ssh/config`. Real connection details stay outside the checkout. Keep short, literal `Host` aliases directly in that file; the picker does not expand `Include` files or `Match` blocks.
-
-Add the public key printed by the installer to the server's `~/.ssh/authorized_keys`. For a server with password login enabled:
+Add your SSH hosts in `~/.ssh/config` (`v ~/.ssh/config`), then copy your key to each server:
 
 ```sh
 ssh-copy-id -i ~/.ssh/id_ed25519.pub your-host-alias
 ```
 
-Use the appropriate existing `.pub` path if you already have a key. Private keys never leave the phone.
+Connect with `s` to fuzzy-pick a host, or `ssh alias` directly.
 
-- `s`: fuzzy-select an alias and connect. Escape cancels.
-- `ssh <Tab>`: fuzzy host completion through fzf-tab.
-- `ssh alias`: connect directly.
+## Features
 
-Wildcard, negated, and catch-all Host patterns are excluded. No persistent connections, keepalives, or automatic SSH sessions are configured.
+Kept minimal on purpose, no LSP, no autocomplete, no linters, just a fast terminal. But a few nice touches for readability on a phone screen:
 
-## Everyday use
-
-| Command/key | Action |
-| --- | --- |
-| `v` | Neovim |
-| `y` | Yazi; return the shell to its final directory |
-| `lg` | LazyGit, with Difftastic and a raw Git fallback |
-| `up` | Topgrade updates |
-| Zsh `Esc` | Vi normal mode |
-| Zsh `Ctrl-r` | Search persistent command history |
-| Neovim `<Space><Space>` / `<Space>,` | Find files / buffers |
-| Neovim `<Space>gg` | Standard LazyVim LazyGit workflow |
-| Yazi `gs` / `gd` / `gr` / `gy` | SSH directory / checkout / Git root / Yazi config |
-| Yazi `gl` / `gw` / `cm` | LazyGit / changed files / permissions |
-| Yazi `.` | Toggle hidden files |
-| Yazi `Tp` / `Tf` | Toggle / maximize preview |
-| Yazi `Ctrl-d` / `Ctrl-u` / `+` / `-` | Scroll / zoom preview |
-
-Fastfetch runs on interactive Zsh startup. Neovim keeps LazyVim navigation, which-key, Git integration, and Oasis Night, but disables Mason, LSP, completion engines, formatters, linters, and Tree-sitter plugins. It uses built-in completion (`Ctrl-n` / `Ctrl-p`) and syntax highlighting. The Termux Neovim package may itself ship parsers; this profile installs none. Avoid enabling language extras through `LazyExtras` if you want to keep the profile minimal.
-
-Yazi's six curated plugins are restored from `yazi/.config/yazi/package.toml` with `ya pkg install`. The installer copies that manifest into the local configuration on first run so upgrades do not dirty the checkout. The Oasis Night Dark flavor is bundled, including its upstream license.
-
-The existing HeliBoard PC-style layout is deployed to `~/.termux/heliboard/`. Import its JSONC files manually through **HeliBoard → Settings → Layouts → Custom layouts → Add layout**. Termux's extra-key row is deployed automatically; HeliBoard cannot be configured by `termux-reload-settings`.
-
-Termux uses the bundled [Oasis Night Dark colors](https://github.com/uhs-robert/oasis.nvim/blob/main/extras/termux/themes/dark/oasis_night_dark.properties) at `~/.termux/colors.properties` (upstream blob `89ad845c65312873fb9c1f1b896b85a32cd6422b`; MIT license included with the bundled Yazi flavor). The installer downloads [ProFontIIx Nerd Font Regular](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/ProFont/profontiix) to `~/.termux/font.ttf`. No font build or JSON configuration is required.
-
-The font stays local, outside Git. `bash ~/.local/bin/termux-update-font` downloads the current upstream `master` font, checks its TrueType header, and atomically replaces it only when changed. The first replaced font is saved as `~/.termux/font.ttf.bak`; failed downloads leave the current font intact. Existing font symlinks are replaced without changing their targets. Termux settings reload after a font change.
-
-## Updates and safe reruns
-
-`up` runs only Termux package updates, LazyVim plugin sync, Yazi package upgrades, ProFontIIx Nerd Font updates, and Git pulls. Git discovery is limited to `~/dotfiles`, repositories under `~/Development`, and `~/.local/share/zsh/plugins/*`, avoiding Android shared storage and plugins managed by LazyVim and Yazi. Git pulls use `--ff-only`; divergent or dirty work requiring intervention is reported rather than reset. Neovim's mutable lockfile lives under its state directory.
-
-Rerunning the installer preserves existing SSH configuration and keys (including nonstandard key filenames), existing plugin checkouts, and the local Yazi manifest. Existing `.pub` files also prevent key generation. An existing private key without a `.pub` file is used to print its public half and may prompt for its passphrase. Review unused public keys yourself if no working private key remains.
-
-Stow checks all packages before linking any of them. Conflicting files cause a clear failure; back them up and move them manually, then rerun. The installer never adopts or overwrites them. A partial plugin download can be removed manually after inspecting the reported directory. Re-running Neovim sync can update its plugins.
-
-Every configuration directory is an independent Stow package:
-
-```sh
-stow --dir="$HOME/dotfiles/termux" --target="$HOME" --no-folding zsh
-stow --dir="$HOME/dotfiles/termux" --target="$HOME" --delete zsh
-```
-
-Available packages: `zsh ssh neovim yazi lazygit topgrade termux`. Use `--no-folding` when stowing so runtime files remain local. Unstowing SSH preserves the real configuration and keys; unstowing Yazi preserves its copied manifest and downloaded plugins. To customize tracked configuration without changing the checkout, unstow its package and copy the required files locally.
-
-## Verification
-
-`python3 termux/tests/bootstrap.py` exercises bootstrap reruns, conflicts, and SSH preservation using real Stow and SSH tools with mocked Termux package/application commands. Requires Bash, Zsh, Git, GNU Stow, and OpenSSH. Application startup and the Android keyboard still need a device smoke test.
+- Nerd Font
+- Dark theme (Oasis Night)
+- `lsd` for readable `ls` output
+- Fuzzy shell tab completion via `fzf-tab`
+- Fastfetch on startup
+- Neovim (LazyVim), Yazi, and LazyGit set up out of the box
+- `up` uses topgrade to keep everything updated
