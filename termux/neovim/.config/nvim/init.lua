@@ -1,7 +1,6 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.lazyvim_picker = "snacks"
-vim.g.lazyvim_cmp = "blink"
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   local output = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable",
