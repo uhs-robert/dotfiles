@@ -47,4 +47,12 @@ y() {
 }
 alias v=nvim lg=lazygit up=topgrade
 PROMPT='%F{blue}%1~%f %(?.%F{green}.%F{red})%#%f '
+
+alias ls='lsd'
+alias l='lsd -l'
+alias ll='lsd -lh'
+alias la='lsd -a'
+alias lla='lsd -la'
+alias lt='lsd --tree'
+
 command -v fastfetch >/dev/null && fastfetch

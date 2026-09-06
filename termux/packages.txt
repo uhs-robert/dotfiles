@@ -11,6 +11,7 @@ lazygit
 difftastic
 ripgrep
 fd
+lsd
 bat
 eza
 jq
