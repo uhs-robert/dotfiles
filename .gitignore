@@ -108,6 +108,9 @@ home/yazi/.config/yazi/plugins/*
 # ⚠️ Security: Hidden sensitive config
 # ────────────────────────────────────────────────
 .ssh/
+!termux/ssh/.ssh/
+termux/ssh/.ssh/*
+!termux/ssh/.ssh/config.example
 .gnupg/
 .aws/
 .gcloud/

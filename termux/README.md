@@ -67,8 +67,8 @@ Stow checks all packages before linking any of them. Conflicting files cause a c
 Every configuration directory is an independent Stow package:
 
 ```sh
-stow --dir=~/dotfiles/termux --target="$HOME" --no-folding zsh
-stow --dir=~/dotfiles/termux --target="$HOME" --delete zsh
+stow --dir="$HOME/dotfiles/termux" --target="$HOME" --no-folding zsh
+stow --dir="$HOME/dotfiles/termux" --target="$HOME" --delete zsh
 ```
 
 Available packages: `zsh ssh neovim yazi lazygit topgrade termux`. Use `--no-folding` when stowing so runtime files remain local. Unstowing SSH preserves the real configuration and keys; unstowing Yazi preserves its copied manifest and downloaded plugins. To customize tracked configuration without changing the checkout, unstow its package and copy the required files locally.
