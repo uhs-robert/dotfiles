@@ -56,9 +56,13 @@ Yazi's six curated plugins are restored from `yazi/.config/yazi/package.toml` wi
 
 The existing HeliBoard PC-style layout is deployed to `~/.termux/heliboard/`. Import its JSONC files manually through **HeliBoard → Settings → Layouts → Custom layouts → Add layout**. Termux's extra-key row is deployed automatically; HeliBoard cannot be configured by `termux-reload-settings`.
 
+Termux uses the bundled [Oasis Night Dark colors](https://github.com/uhs-robert/oasis.nvim/blob/main/extras/termux/themes/dark/oasis_night_dark.properties) at `~/.termux/colors.properties` (upstream blob `89ad845c65312873fb9c1f1b896b85a32cd6422b`; MIT license included with the bundled Yazi flavor). The installer downloads [ProFontIIx Nerd Font Regular](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/ProFont/profontiix) to `~/.termux/font.ttf`. No font build or JSON configuration is required.
+
+The font stays local, outside Git. `bash ~/.local/bin/termux-update-font` downloads the current upstream `master` font, checks its TrueType header, and atomically replaces it only when changed. The first replaced font is saved as `~/.termux/font.ttf.bak`; failed downloads leave the current font intact. Existing font symlinks are replaced without changing their targets. Termux settings reload after a font change.
+
 ## Updates and safe reruns
 
-`up` runs only Termux package updates, LazyVim plugin sync, Yazi package upgrades, and Git pulls. Git repositories in non-hidden home directories (plus Zsh plugins) use `--ff-only`; divergent or dirty work requiring intervention is reported rather than reset. Git discovery uses `~/[!.]*/**/.git/..`; hidden application caches are excluded to avoid pulling plugins managed by LazyVim and Yazi. It can be slow in a large home directory. Replace it with explicit repository paths in your local Topgrade config if needed. Neovim's mutable lockfile lives under its state directory.
+`up` runs only Termux package updates, LazyVim plugin sync, Yazi package upgrades, ProFontIIx Nerd Font updates, and Git pulls. Git discovery is limited to `~/dotfiles`, repositories under `~/Development`, and `~/.local/share/zsh/plugins/*`, avoiding Android shared storage and plugins managed by LazyVim and Yazi. Git pulls use `--ff-only`; divergent or dirty work requiring intervention is reported rather than reset. Neovim's mutable lockfile lives under its state directory.
 
 Rerunning the installer preserves existing SSH configuration and keys (including nonstandard key filenames), existing plugin checkouts, and the local Yazi manifest. Existing `.pub` files also prevent key generation. An existing private key without a `.pub` file is used to print its public half and may prompt for its passphrase. Review unused public keys yourself if no working private key remains.
 

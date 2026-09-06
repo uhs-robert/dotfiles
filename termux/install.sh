@@ -23,6 +23,7 @@ stow_args=(--dir="$platform_dir" --target="$HOME" --no-folding)
 stow "${stow_args[@]}" --simulate "${stow_packages[@]}" ||
     fail 'Stow conflict: back up and move the reported files, then rerun.'
 stow "${stow_args[@]}" "${stow_packages[@]}"
+bash "$HOME/.local/bin/termux-update-font"
 
 clone_plugin() {
     local name=$1 url=$2 destination="$HOME/.local/share/zsh/plugins/$1"

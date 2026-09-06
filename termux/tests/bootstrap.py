@@ -32,6 +32,19 @@ with tempfile.TemporaryDirectory(prefix='termux test ') as temporary:
     for name in ('pkg', 'chsh', 'termux-reload-settings', 'ya', 'nvim'):
         executable(bins / name, 'printf "%s\\n" "$0 $*" >> "$HOME/calls"\n')
     executable(bins / 'apt-cache', 'exit 100\n')
+    executable(bins / 'curl', r'''while (( $# )); do
+    if [[ $1 == --output ]]; then
+        case ${FONT_DOWNLOAD_MODE:-valid} in
+            failed) printf partial > "$2"; exit 18 ;;
+            invalid) printf '<html>error</html>' > "$2"; exit 0 ;;
+        esac
+        printf '\000\001\000\000mock-font-data' > "$2"
+        exit 0
+    fi
+    shift
+done
+exit 1
+''')
     executable(bins / 'git', '''if [[ $1 == clone ]]; then
     destination=${@: -1}
     origin=${@: -2:1}
@@ -74,8 +87,37 @@ fi
     assert '# local change' in manifest.read_text()
     assert (fresh / '.zshrc').is_symlink()
     assert (fresh / '.termux/heliboard/main.jsonc').exists()
+    assert (fresh / '.termux/colors.properties').is_symlink()
+    assert (fresh / '.termux/font.ttf').read_bytes().startswith(b'\x00\x01\x00\x00')
+    assert not (fresh / '.termux/font.ttf').is_symlink()
     assert not (checkout / 'zsh/.local').exists()
     print('PASS: fresh bootstrap and safe rerun, paths containing spaces')
+
+    font = fresh / '.termux/font.ttf'
+    font_updater = ['bash', str(fresh / '.local/bin/termux-update-font')]
+    original_font = font.read_bytes()
+    calls = (fresh / 'calls').read_text()
+    run(font_updater, env)
+    assert (fresh / 'calls').read_text() == calls
+    for mode in ('failed', 'invalid'):
+        run(font_updater, dict(env, FONT_DOWNLOAD_MODE=mode), success=False)
+        assert font.read_bytes() == original_font
+        assert not list((fresh / '.termux').glob('.font.*'))
+    previous_font = fresh / 'previous.ttf'
+    previous_font.write_bytes(b'previous custom font')
+    font.unlink()
+    font.symlink_to(previous_font)
+    run(font_updater, env)
+    assert not font.is_symlink()
+    assert font.read_bytes() == original_font
+    assert previous_font.read_bytes() == b'previous custom font'
+    backup = fresh / '.termux/font.ttf.bak'
+    assert backup.read_bytes() == previous_font.read_bytes()
+    font.write_bytes(b'another version')
+    run(font_updater, env)
+    assert backup.read_bytes() == previous_font.read_bytes()
+    assert (fresh / 'calls').read_text().count('termux-reload-settings') == calls.count('termux-reload-settings') + 2
+    print('PASS: font no-op, failed/invalid downloads, atomic replacement, backup and symlink safety')
 
     conflict, conflict_env = home('conflict')
     (conflict / '.zshrc').write_text('keep me\n')

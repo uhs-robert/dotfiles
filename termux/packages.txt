@@ -1,4 +1,5 @@
 git
+curl
 openssh
 zsh
 stow
