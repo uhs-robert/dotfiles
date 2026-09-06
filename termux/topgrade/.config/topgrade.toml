@@ -10,5 +10,5 @@ only = ["custom_commands", "git_repos"]
 pull_predefined = false
 # Git's --ff-only leaves divergent local work for manual resolution.
 arguments = "--ff-only"
-# Exclude hidden application caches managed by LazyVim and Yazi themselves.
-repos = ["~/[!.]*/**/.git/..", "~/.local/share/zsh/plugins/*"]
+# Limit discovery to checkout directories and Zsh plugins, avoiding ~/storage.
+repos = ["~/dotfiles", "~/Development/**/.git/..", "~/.local/share/zsh/plugins/*"]
