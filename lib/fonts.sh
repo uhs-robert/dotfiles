@@ -58,6 +58,7 @@ _install_maple_mono_nf() {
     sudo rm -rf "$dest"
     sudo cp -a "$staged" "$dest"
     rm -rf "$legacy_dest"
+    sudo fc-cache -f "$_MAPLE_FONTS_DIR"
     success "MapleMono NF installed system-wide"
   else
     warn "Failed to download or extract MapleMono NF from $url"
@@ -87,7 +88,7 @@ install_fonts() {
 
   _install_maple_mono_nf
 
-  sudo fc-cache -f
+  fc-cache -f
   success "Fonts installed"
 
   warn "Note: 'The Last Shuriken' (used in hyprlock) requires manual installation"
