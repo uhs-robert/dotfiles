@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Installs Nerd Fonts and MapleMono NF to ~/.local/share/fonts.
+# Installs Nerd Fonts locally and MapleMono NF system-wide.
 
 FONTS_DIR="$HOME/.local/share/fonts"
+_MAPLE_FONTS_DIR="/usr/local/share/fonts"
 _NF_API="https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest"
 _NF_BASE="https://github.com/ryanoasis/nerd-fonts/releases/download"
 _MAPLE_API="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
@@ -29,11 +30,15 @@ _install_nerd_font() {
 }
 
 _install_maple_mono_nf() {
-  local dest="$FONTS_DIR/MapleMono-NF"
+  local dest="$_MAPLE_FONTS_DIR/MapleMono-NF"
+  local legacy_dest="$FONTS_DIR/MapleMono-NF"
+
   if [[ -d "$dest" && -n "$(ls -A "$dest" 2>/dev/null)" ]]; then
+    rm -rf "$legacy_dest"
     warn "MapleMono NF already present, skipping"
     return
   fi
+
   info "Fetching MapleMono NF release..."
   local version
   version=$(_latest_tag "$_MAPLE_API")
@@ -41,17 +46,25 @@ _install_maple_mono_nf() {
     warn "Could not fetch MapleMono NF version"
     return 1
   }
-  mkdir -p "$dest"
-  local tmp
+
+  local tmp staged
   tmp=$(mktemp -d)
+  staged="$tmp/font"
+  mkdir -p "$staged"
+
   local url="$_MAPLE_BASE/${version}/MapleMono-NF.zip"
-  if curl -fsSL "$url" -o "$tmp/MapleMono-NF.zip"; then
-    unzip -q "$tmp/MapleMono-NF.zip" -d "$dest"
-    success "MapleMono NF installed"
+  if curl -fsSL "$url" -o "$tmp/MapleMono-NF.zip" && unzip -q "$tmp/MapleMono-NF.zip" -d "$staged"; then
+    sudo mkdir -p "$_MAPLE_FONTS_DIR"
+    sudo rm -rf "$dest"
+    sudo cp -a "$staged" "$dest"
+    rm -rf "$legacy_dest"
+    success "MapleMono NF installed system-wide"
   else
-    warn "Failed to download MapleMono NF from $url"
-    rm -rf "$dest"
+    warn "Failed to download or extract MapleMono NF from $url"
+    rm -rf "$tmp"
+    return 1
   fi
+
   rm -rf "$tmp"
 }
 
@@ -74,7 +87,7 @@ install_fonts() {
 
   _install_maple_mono_nf
 
-  fc-cache -f
+  sudo fc-cache -f
   success "Fonts installed"
 
   warn "Note: 'The Last Shuriken' (used in hyprlock) requires manual installation"
