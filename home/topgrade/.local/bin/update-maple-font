@@ -31,10 +31,13 @@ find "$staged" -type f \( -name '*.ttf' -o -name '*.otf' \) -print -quit | grep 
 sudo mkdir -p -- "$fonts_dir"
 
 if [[ -d "$destination" ]] && diff -qr "$staged" "$destination" >/dev/null 2>&1; then
-    rm -rf -- "$legacy_destination"
-    sudo fc-cache -f "$fonts_dir"
-    fc-cache -f
-    printf 'MapleMono NF %s is already current.\n' "$version"
+    if [[ -e "$legacy_destination" ]]; then
+        rm -rf -- "$legacy_destination"
+        fc-cache -f
+        printf 'MapleMono NF %s is current; removed legacy user-local copy.\n' "$version"
+    else
+        printf 'MapleMono NF %s is already current.\n' "$version"
+    fi
     exit 0
 fi
 
