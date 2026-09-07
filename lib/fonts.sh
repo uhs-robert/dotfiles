@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
-# Installs Nerd Fonts locally and MapleMono NF system-wide.
+# Installs MapleMono NF system-wide and removes legacy user-local font copies.
 
-FONTS_DIR="$HOME/.local/share/fonts"
-_MAPLE_FONTS_DIR="/usr/local/share/fonts"
-_NF_API="https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest"
-_NF_BASE="https://github.com/ryanoasis/nerd-fonts/releases/download"
+_SYSTEM_FONTS_DIR="/usr/local/share/fonts"
+_LEGACY_FONTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
 _MAPLE_API="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
 _MAPLE_BASE="https://github.com/subframe7536/maple-font/releases/download"
 
@@ -12,29 +10,36 @@ _latest_tag() {
   curl -fsSL "$1" | jq -r '.tag_name'
 }
 
-_install_nerd_font() {
-  local name="$1" version="$2"
-  local dest="$FONTS_DIR/$name"
-  if [[ -d "$dest" && -n "$(ls -A "$dest" 2>/dev/null)" ]]; then
-    warn "Font $name already present, skipping"
-    return
+_cleanup_legacy_fonts() {
+  local removed=false
+  local font
+  for font in \
+    CascadiaCode \
+    JetBrainsMono \
+    Iosevka \
+    Mononoki \
+    ProggyClean \
+    ProFont \
+    NerdFontsSymbolsOnly \
+    Terminus \
+    Ubuntu \
+    MapleMono-NF; do
+    if [[ -e "$_LEGACY_FONTS_DIR/$font" ]]; then
+      rm -rf -- "$_LEGACY_FONTS_DIR/$font"
+      removed=true
+    fi
+  done
+
+  if [[ "$removed" == true ]]; then
+    fc-cache -f
+    success "Removed legacy user-local font copies"
   fi
-  mkdir -p "$dest"
-  local url="$_NF_BASE/$version/${name}.tar.xz"
-  if ! curl -fsSL "$url" | tar -xJ -C "$dest"; then
-    warn "Failed to download $name from $url"
-    rm -rf "$dest"
-    return 1
-  fi
-  success "Installed font: $name"
 }
 
 _install_maple_mono_nf() {
-  local dest="$_MAPLE_FONTS_DIR/MapleMono-NF"
-  local legacy_dest="$FONTS_DIR/MapleMono-NF"
+  local dest="$_SYSTEM_FONTS_DIR/MapleMono-NF"
 
   if [[ -d "$dest" && -n "$(ls -A "$dest" 2>/dev/null)" ]]; then
-    rm -rf "$legacy_dest"
     warn "MapleMono NF already present, skipping"
     return
   fi
@@ -54,11 +59,11 @@ _install_maple_mono_nf() {
 
   local url="$_MAPLE_BASE/${version}/MapleMono-NF.zip"
   if curl -fsSL "$url" -o "$tmp/MapleMono-NF.zip" && unzip -q "$tmp/MapleMono-NF.zip" -d "$staged"; then
-    sudo mkdir -p "$_MAPLE_FONTS_DIR"
+    sudo mkdir -p "$_SYSTEM_FONTS_DIR"
     sudo rm -rf "$dest"
     sudo cp -a "$staged" "$dest"
-    rm -rf "$legacy_dest"
-    sudo fc-cache -f "$_MAPLE_FONTS_DIR"
+    sudo fc-cache -f "$_SYSTEM_FONTS_DIR"
+    fc-cache -f
     success "MapleMono NF installed system-wide"
   else
     warn "Failed to download or extract MapleMono NF from $url"
@@ -70,26 +75,12 @@ _install_maple_mono_nf() {
 }
 
 install_fonts() {
-  info "Installing fonts..."
-  require_cmd curl unzip tar
-  mkdir -p "$FONTS_DIR"
+  info "Installing custom fonts..."
+  require_cmd curl unzip jq
 
-  info "Fetching Nerd Fonts release..."
-  local nf_version
-  nf_version=$(_latest_tag "$_NF_API")
-  if [[ -z "$nf_version" ]]; then
-    warn "Could not fetch Nerd Fonts version, skipping Nerd Fonts"
-  else
-    info "Nerd Fonts $nf_version"
-    while IFS= read -r font; do
-      _install_nerd_font "$font" "$nf_version"
-    done < <(read_ini_section fonts.ini NERD_FONTS)
-  fi
-
+  _cleanup_legacy_fonts
   _install_maple_mono_nf
 
-  fc-cache -f
   success "Fonts installed"
-
   warn "Note: 'The Last Shuriken' (used in hyprlock) requires manual installation"
 }
