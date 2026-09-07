@@ -32,7 +32,8 @@ sudo mkdir -p -- "$fonts_dir"
 
 if [[ -d "$destination" ]] && diff -qr "$staged" "$destination" >/dev/null 2>&1; then
     rm -rf -- "$legacy_destination"
-    sudo fc-cache -f
+    sudo fc-cache -f "$fonts_dir"
+    fc-cache -f
     printf 'MapleMono NF %s is already current.\n' "$version"
     exit 0
 fi
@@ -51,5 +52,6 @@ fi
 
 sudo rm -rf -- "$backup"
 rm -rf -- "$legacy_destination"
-sudo fc-cache -f
+sudo fc-cache -f "$fonts_dir"
+fc-cache -f
 printf 'Updated MapleMono NF to %s.\n' "$version"
