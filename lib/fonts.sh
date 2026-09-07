@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Installs MapleMono NF system-wide and removes legacy user-local font copies.
+# Installs MapleMono NF system-wide.
 
 _SYSTEM_FONTS_DIR="/usr/local/share/fonts"
-_LEGACY_FONTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fonts"
 _MAPLE_API="https://api.github.com/repos/subframe7536/maple-font/releases/latest"
 _MAPLE_BASE="https://github.com/subframe7536/maple-font/releases/download"
 
@@ -10,41 +9,10 @@ _latest_tag() {
   curl -fsSL "$1" | jq -r '.tag_name'
 }
 
-_cleanup_legacy_nerd_fonts() {
-  local removed=false
-  local font
-  for font in \
-    CascadiaCode \
-    JetBrainsMono \
-    Iosevka \
-    Mononoki \
-    ProggyClean \
-    ProFont \
-    NerdFontsSymbolsOnly \
-    Terminus \
-    Ubuntu; do
-    if [[ -e "$_LEGACY_FONTS_DIR/$font" ]]; then
-      rm -rf -- "$_LEGACY_FONTS_DIR/$font"
-      removed=true
-    fi
-  done
-
-  if [[ "$removed" == true ]]; then
-    fc-cache -f
-    success "Removed legacy user-local Nerd Font copies"
-  fi
-}
-
 _install_maple_mono_nf() {
   local dest="$_SYSTEM_FONTS_DIR/MapleMono-NF"
-  local legacy_dest="$_LEGACY_FONTS_DIR/MapleMono-NF"
 
   if [[ -d "$dest" && -n "$(ls -A "$dest" 2>/dev/null)" ]]; then
-    if [[ -e "$legacy_dest" ]]; then
-      rm -rf -- "$legacy_dest"
-      fc-cache -f
-      success "Removed legacy user-local MapleMono NF copy"
-    fi
     warn "MapleMono NF already present, skipping"
     return
   fi
@@ -67,7 +35,6 @@ _install_maple_mono_nf() {
     sudo mkdir -p "$_SYSTEM_FONTS_DIR"
     sudo rm -rf "$dest"
     sudo cp -a "$staged" "$dest"
-    rm -rf -- "$legacy_dest"
     sudo fc-cache -f "$_SYSTEM_FONTS_DIR"
     fc-cache -f
     success "MapleMono NF installed system-wide"
@@ -84,7 +51,6 @@ install_fonts() {
   info "Installing custom fonts..."
   require_cmd curl unzip jq
 
-  _cleanup_legacy_nerd_fonts
   _install_maple_mono_nf
 
   success "Fonts installed"
