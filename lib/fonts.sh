@@ -10,7 +10,7 @@ _latest_tag() {
   curl -fsSL "$1" | jq -r '.tag_name'
 }
 
-_cleanup_legacy_fonts() {
+_cleanup_legacy_nerd_fonts() {
   local removed=false
   local font
   for font in \
@@ -22,8 +22,7 @@ _cleanup_legacy_fonts() {
     ProFont \
     NerdFontsSymbolsOnly \
     Terminus \
-    Ubuntu \
-    MapleMono-NF; do
+    Ubuntu; do
     if [[ -e "$_LEGACY_FONTS_DIR/$font" ]]; then
       rm -rf -- "$_LEGACY_FONTS_DIR/$font"
       removed=true
@@ -32,14 +31,20 @@ _cleanup_legacy_fonts() {
 
   if [[ "$removed" == true ]]; then
     fc-cache -f
-    success "Removed legacy user-local font copies"
+    success "Removed legacy user-local Nerd Font copies"
   fi
 }
 
 _install_maple_mono_nf() {
   local dest="$_SYSTEM_FONTS_DIR/MapleMono-NF"
+  local legacy_dest="$_LEGACY_FONTS_DIR/MapleMono-NF"
 
   if [[ -d "$dest" && -n "$(ls -A "$dest" 2>/dev/null)" ]]; then
+    if [[ -e "$legacy_dest" ]]; then
+      rm -rf -- "$legacy_dest"
+      fc-cache -f
+      success "Removed legacy user-local MapleMono NF copy"
+    fi
     warn "MapleMono NF already present, skipping"
     return
   fi
@@ -62,6 +67,7 @@ _install_maple_mono_nf() {
     sudo mkdir -p "$_SYSTEM_FONTS_DIR"
     sudo rm -rf "$dest"
     sudo cp -a "$staged" "$dest"
+    rm -rf -- "$legacy_dest"
     sudo fc-cache -f "$_SYSTEM_FONTS_DIR"
     fc-cache -f
     success "MapleMono NF installed system-wide"
@@ -78,7 +84,7 @@ install_fonts() {
   info "Installing custom fonts..."
   require_cmd curl unzip jq
 
-  _cleanup_legacy_fonts
+  _cleanup_legacy_nerd_fonts
   _install_maple_mono_nf
 
   success "Fonts installed"
