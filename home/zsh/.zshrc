@@ -14,7 +14,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
+# one of the themes listed below instead of looking in $ZSH/themes/
 # If set to an empty array, this variable will have no effect.
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
@@ -45,9 +45,7 @@ DISABLE_AUTO_TITLE="true"
 ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+# You can also set it to another string if you want a different waiting indicator.
 COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
@@ -55,12 +53,8 @@ COMPLETION_WAITING_DOTS="true"
 # much, much faster.
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-# Uncomment the following line if you want to change the command execution time
+# Uncomment the following line to change the command execution time
 # stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
 HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
@@ -130,6 +124,27 @@ ssh() {
       TERM=xterm-256color command ssh "$@"
       ;;
   esac
+}
+
+# SSH fuzzy host picker
+ssh_hosts() {
+  [[ -r "$HOME/.ssh/config" ]] || return 0
+  awk '
+    { sub(/#.*/, ""); sub(/^[ \t]*/, ""); sub(/^[Hh][Oo][Ss][Tt][ \t]*=[ \t]*/, "Host ") }
+    tolower($1) == "host" {
+      for (i = 2; i <= NF; i++) {
+        host = $i
+        gsub(/^[\047"]|[\047"]$/, "", host)
+        if (host != "" && host !~ /[!*?\[]/ && host !~ /^-/) print host
+      }
+    }
+  ' "$HOME/.ssh/config" | sort -u
+}
+
+s() {
+  local host
+  host=$(ssh_hosts | fzf --prompt='SSH > ' --height=60% --layout=reverse) || return
+  [[ -n "$host" ]] && ssh "$host" "$@"
 }
 
 export VISUAL="$EDITOR"
