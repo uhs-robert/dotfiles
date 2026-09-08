@@ -1,6 +1,6 @@
 # Add deno completions to search path
 if [[ ":$FPATH:" != *":$HOME/.zsh/completions:"* ]]; then export FPATH="$HOME/.zsh/completions:$FPATH"; fi
-nightshift completion zsh > "${fpath[1]}/_nightshift"
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
@@ -177,6 +177,11 @@ alias lt='ls --tree'
 # Lsd end
 
 # Nightshift
+if command -v nightshift >/dev/null; then
+	eval "$(nightshift completion zsh)"
+	compdef _nightshift nightshift
+fi
+
 if [[ -n ${SSH_CONNECTION:-} || -n ${SSH_CLIENT:-} ]]; then
 	alias ns='nightshift'
 else
