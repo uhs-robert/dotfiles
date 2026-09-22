@@ -54,5 +54,10 @@ Item {
             font.family: Theme.font_family
             font.pixelSize: Theme.font_size
         }
+
+        PowerButton {
+            island: right_island
+            island_color: right_island.bg_color
+        }
     }
 }

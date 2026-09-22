@@ -42,5 +42,6 @@ ShellRoot {
     }
 
     ClockPopup {}
+    PowerPopup {}
     PopupIpc {}
 }
