@@ -14,6 +14,7 @@ Popup {
     implicitHeight: confirm ? 60 : 148
 
     readonly property var actions: ["Lock", "Logout", "Reboot", "Power Off"]
+    readonly property var glyphs: ["󰌾", "󰍃", "󰜉", "󰐥"]
     readonly property var glyph_colors: [Theme.fg_core, Theme.info, Theme.warning, Theme.theme_label]
 
     property int selected: 0
@@ -85,14 +86,25 @@ Popup {
                     radius: 6
                     color: index === root.selected ? Theme.bg_surface : "transparent"
 
-                    Text {
+                    RowLayout {
                         anchors.left: parent.left
                         anchors.leftMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
-                        text: row.modelData
-                        color: root.glyph_colors[row.index]
-                        font.family: Theme.font_family
-                        font.pixelSize: Theme.font_size
+                        spacing: 8
+
+                        Text {
+                            text: root.glyphs[row.index]
+                            color: root.glyph_colors[row.index]
+                            font.family: Theme.font_family
+                            font.pixelSize: Theme.font_size
+                        }
+
+                        Text {
+                            text: row.modelData
+                            color: Theme.fg_core
+                            font.family: Theme.font_family
+                            font.pixelSize: Theme.font_size
+                        }
                     }
 
                     MouseArea {
@@ -106,13 +118,41 @@ Popup {
             }
         }
 
-        Text {
+        RowLayout {
             anchors.centerIn: parent
             visible: root.confirm
-            text: root.actions[root.selected] + "? y/n"
-            color: Theme.fg_core
-            font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+            spacing: 12
+
+            Text {
+                text: root.glyphs[root.selected] + " " + root.actions[root.selected] + "?"
+                color: root.glyph_colors[root.selected]
+                font.family: Theme.font_family
+                font.pixelSize: Theme.font_size
+            }
+
+            Text {
+                text: "Yes"
+                color: Theme.ok
+                font.family: Theme.font_family
+                font.pixelSize: Theme.font_size
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: root.run(root.selected)
+                }
+            }
+
+            Text {
+                text: "No"
+                color: Theme.error
+                font.family: Theme.font_family
+                font.pixelSize: Theme.font_size
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: root.confirm = false
+                }
+            }
         }
     }
 }

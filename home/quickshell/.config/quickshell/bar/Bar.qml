@@ -33,8 +33,8 @@ Item {
         cap_left: true
         cap_right: true
 
-        Component.onCompleted: Popups.register_default("clock", center_island, center_island.bg_color)
-        onClicked: Popups.toggle("clock", center_island, center_island.bg_color)
+        Component.onCompleted: Popups.register_default("clock", center_island.body_item, center_island.bg_color)
+        onClicked: Popups.toggle("clock", center_island.body_item, center_island.bg_color)
 
         Clock {
             compact: root.compact
@@ -56,7 +56,7 @@ Item {
         }
 
         PowerButton {
-            island: right_island
+            island: right_island.body_item
             island_color: right_island.bg_color
         }
     }

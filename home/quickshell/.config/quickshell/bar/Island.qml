@@ -7,10 +7,12 @@ Item {
     id: root
 
     property color bg_color: "#232634"
+    property color cap_right_color: bg_color
     property bool cap_left: false
     property bool cap_right: false
     default property alias content: layout.children
 
+    readonly property alias body_item: body
     readonly property int cap_width: height / 2
 
     signal clicked
@@ -64,7 +66,7 @@ Item {
 
         ShapePath {
             strokeWidth: -1
-            fillColor: root.bg_color
+            fillColor: root.cap_right_color
             startX: 0
             startY: 0
             PathLine { x: root.cap_width; y: 0 }

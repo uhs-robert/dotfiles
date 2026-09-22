@@ -11,7 +11,7 @@ Row {
 
     SystemClock {
         id: clock
-        precision: SystemClock.Seconds
+        precision: root.compact ? SystemClock.Minutes : SystemClock.Seconds
     }
 
     function pad2(n) {
