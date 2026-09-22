@@ -17,11 +17,9 @@ Item {
         bg_color: Theme.bg_core
         cap_right: true
 
-        Text {
-            text: "left"
-            color: Theme.fg_core
-            font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+        Workspaces {
+            screen_name: root.screen_name
+            compact: root.compact
         }
     }
 
