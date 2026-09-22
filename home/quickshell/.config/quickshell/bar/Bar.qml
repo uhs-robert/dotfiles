@@ -51,12 +51,7 @@ Item {
         bg_color: Theme.bg_core
         cap_left: true
 
-        Text {
-            text: "right"
-            color: Theme.fg_core
-            font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
-        }
+        Tray {}
 
         PowerButton {
             island: right_island.body_item
