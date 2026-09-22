@@ -35,6 +35,7 @@ ShellRoot {
 
                 Bar {
                     anchors.fill: parent
+                    screen_name: modelData.name
                 }
             }
         }

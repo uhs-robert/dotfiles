@@ -6,6 +6,9 @@ import "../services"
 Item {
     id: root
 
+    property string screen_name: ""
+    readonly property bool compact: screen_name.indexOf("eDP") === 0
+
     Island {
         id: left_island
         anchors.left: parent.left
