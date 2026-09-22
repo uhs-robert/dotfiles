@@ -16,10 +16,15 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         bg_color: Theme.bg_core
         cap_right: true
+        cap_right_color: submap.submap_name !== "" ? submap.submap_color : left_island.bg_color
 
         Workspaces {
             screen_name: root.screen_name
             compact: root.compact
+        }
+
+        Submap {
+            id: submap
         }
     }
 
