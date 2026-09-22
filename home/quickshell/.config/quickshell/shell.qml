@@ -41,6 +41,6 @@ ShellRoot {
         }
     }
 
-    TestPopup {}
+    ClockPopup {}
     PopupIpc {}
 }

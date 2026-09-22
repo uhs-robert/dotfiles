@@ -2,6 +2,7 @@
 import QtQuick
 import "../theme"
 import "../services"
+import "modules"
 
 Item {
     id: root
@@ -32,14 +33,11 @@ Item {
         cap_left: true
         cap_right: true
 
-        Component.onCompleted: Popups.register_default("test", center_island)
-        onClicked: Popups.toggle("test", center_island)
+        Component.onCompleted: Popups.register_default("clock", center_island, center_island.bg_color)
+        onClicked: Popups.toggle("clock", center_island, center_island.bg_color)
 
-        Text {
-            text: "center"
-            color: Theme.fg_core
-            font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+        Clock {
+            compact: root.compact
         }
     }
 
