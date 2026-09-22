@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/bar/Bar.qml
 import QtQuick
 import "../theme"
+import "../services"
 
 Item {
     id: root
@@ -27,6 +28,9 @@ Item {
         bg_color: Theme.bg_mantle
         cap_left: true
         cap_right: true
+
+        Component.onCompleted: Popups.register_default("test", center_island)
+        onClicked: Popups.toggle("test", center_island)
 
         Text {
             text: "center"

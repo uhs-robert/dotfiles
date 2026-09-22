@@ -13,6 +13,8 @@ Item {
 
     readonly property int cap_width: height / 2
 
+    signal clicked
+
     height: 30
     width: body.width + (cap_left ? cap_width : 0) + (cap_right ? cap_width : 0)
 
@@ -28,6 +30,11 @@ Item {
             id: layout
             anchors.centerIn: parent
             spacing: 8
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.clicked()
         }
     }
 

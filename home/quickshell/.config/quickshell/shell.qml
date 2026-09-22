@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import "./bar"
+import "./popups"
 
 ShellRoot {
     id: root
@@ -37,4 +38,6 @@ ShellRoot {
             }
         }
     }
+
+    TestPopup {}
 }
