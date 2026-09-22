@@ -53,6 +53,12 @@ Item {
 
         Tray {}
 
+        Volume {
+            compact: root.compact
+            island: right_island.body_item
+            island_color: right_island.bg_color
+        }
+
         PowerButton {
             island: right_island.body_item
             island_color: right_island.bg_color
