@@ -207,7 +207,7 @@ install_steam() {
 install_nvidia() {
   confirm "Install Nvidia drivers?" || return 0
   info "Installing Nvidia drivers..."
-  sudo pacman -S --needed --noconfirm nvidia-utils libva-nvidia-driver nvidia-settings
+  sudo pacman -S --needed --noconfirm nvidia-utils libva-nvidia-driver nvidia-settings nvidia-prime
   if confirm "Use nvidia-dkms instead of nvidia (for zen/lts/custom kernels)?"; then
     sudo pacman -S --needed --noconfirm nvidia-dkms linux-headers
   else
