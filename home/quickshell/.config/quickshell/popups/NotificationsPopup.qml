@@ -77,7 +77,7 @@ Popup {
     }
 
     function build_apps_rows() {
-        const groups = {};
+        const groups = Object.create(null);
         for (const e of NotificationState.history) {
             const name = e.notification ? e.notification.appName : "Unknown";
             const icon = e.notification ? e.notification.appIcon : "";
@@ -394,7 +394,7 @@ Popup {
                             visible: row_item.modelData.type === "entry"
                             width: row_item.width
                             entry: row_item.modelData.type === "entry" ? row_item.modelData.entry : null
-                            selected: row_item.modelData.type === "entry" && root.entry_rows[root.selected] && root.entry_rows[root.selected].entry === row_item.modelData.entry
+                            selected: !!(row_item.modelData.type === "entry" && root.entry_rows[root.selected] && root.entry_rows[root.selected].entry === row_item.modelData.entry)
                             onSelect_requested: root.select_entry(row_item.modelData.entry)
                             onInvoke_requested: NotificationState.invoke_default(row_item.modelData.entry)
                         }

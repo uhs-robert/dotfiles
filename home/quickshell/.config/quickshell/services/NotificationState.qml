@@ -17,6 +17,7 @@ Singleton {
 
     readonly property int timeout_normal_ms: 5000
     readonly property int timeout_low_ms: 3000
+    readonly property int max_visible_toasts: 5
 
     NotificationServer {
         id: server
@@ -38,14 +39,37 @@ Singleton {
     }
 
     function handle_notification(n) {
+        const suppressed = root.dnd && n.urgency !== NotificationUrgency.Critical;
+        if (n.transient && suppressed) return;
         n.tracked = true;
-        const entry = { id: n.id, notification: n, time: Date.now(), timer: null, read: false };
-        n.closed.connect(() => root.remove_entry(entry));
-        if (!n.transient) root.history = [entry].concat(root.history);
+        // A replaces_id update arrives as a new generation with the same id.
+        for (const old of root.history.concat(root.toasts).filter(e => e.id === n.id)) root.remove_entry(old);
 
-        if (root.dnd && n.urgency !== NotificationUrgency.Critical) return;
+        const entry = root.make_entry(n, false);
+        if (!n.transient) root.history = [entry].concat(root.history);
+        if (suppressed) return;
         root.toasts = [entry].concat(root.toasts);
-        root.start_timeout(entry, n);
+        root.sync_timers();
+    }
+
+    function make_entry(n, read) {
+        const entry = { id: n.id, notification: n, time: Date.now(), timer: null, read: read, on_closed: null };
+        entry.on_closed = () => root.remove_entry(entry);
+        n.closed.connect(entry.on_closed);
+        return entry;
+    }
+
+    // Only visible toasts count down; queued ones wait for a slot so a burst never expires unseen.
+    function sync_timers() {
+        root.toasts.forEach((entry, i) => {
+            if (i >= root.max_visible_toasts) {
+                if (entry.timer) entry.timer.stop();
+            } else if (!entry.timer) {
+                root.start_timeout(entry, entry.notification);
+            } else if (!entry.timer.running && !entry.paused) {
+                entry.timer.restart();
+            }
+        });
     }
 
     function start_timeout(entry, n) {
@@ -74,6 +98,16 @@ Singleton {
         root.toasts = root.toasts.filter(e => e !== entry);
         root.history = root.history.filter(e => e !== entry);
         root.stop_timer(entry);
+        root.disconnect_entry(entry);
+        root.sync_timers();
+    }
+
+    function disconnect_entry(entry) {
+        if (!entry.on_closed || !entry.notification) return;
+        try {
+            entry.notification.closed.disconnect(entry.on_closed);
+        } catch (e) {}
+        entry.on_closed = null;
     }
 
     function dismiss(entry) {
@@ -89,6 +123,7 @@ Singleton {
     function hide_toast(entry) {
         root.toasts = root.toasts.filter(e => e !== entry);
         root.stop_timer(entry);
+        root.sync_timers();
     }
 
     function hide_latest_toast() {
@@ -100,10 +135,12 @@ Singleton {
     }
 
     function pause_toast(entry) {
+        entry.paused = true;
         if (entry.timer) entry.timer.stop();
     }
 
     function resume_toast(entry) {
+        entry.paused = false;
         if (entry.timer) entry.timer.restart();
     }
 
@@ -143,8 +180,6 @@ Singleton {
         path: root.state_dir + "/notifications.json"
         printErrors: false
         blockLoading: true
-        watchChanges: true
-        onFileChanged: reload()
         onLoaded: {
             try {
                 const parsed = JSON.parse(text());
@@ -166,13 +201,20 @@ Singleton {
         root.restore_tracked();
     }
 
+    // Tracked notifications outlive this singleton on reload; drop its handlers so they don't pile up.
+    Component.onDestruction: {
+        for (const entry of root.history.concat(root.toasts)) root.disconnect_entry(entry);
+    }
+
     // keepOnReload keeps the server's notifications across a qs reload, but this singleton's lists start empty.
     function restore_tracked() {
         const restored = [];
-        for (const n of server.trackedNotifications.values) {
-            const entry = { id: n.id, notification: n, time: Date.now(), timer: null, read: true };
-            n.closed.connect(() => root.remove_entry(entry));
-            restored.push(entry);
+        for (const n of server.trackedNotifications.values.slice()) {
+            if (n.transient) {
+                n.expire();
+                continue;
+            }
+            restored.push(root.make_entry(n, true));
         }
         root.history = restored.reverse().concat(root.history);
     }

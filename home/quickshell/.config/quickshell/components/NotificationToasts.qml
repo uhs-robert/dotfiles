@@ -17,7 +17,7 @@ PanelWindow {
     }
     screen: root.focused_screen
 
-    readonly property var visible_toasts: NotificationState.toasts.slice(0, 5)
+    readonly property var visible_toasts: NotificationState.toasts.slice(0, NotificationState.max_visible_toasts)
     visible: root.visible_toasts.length > 0
 
     WlrLayershell.namespace: "quickshell-toast"
