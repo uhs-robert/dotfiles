@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell.Services.UPower
 import "../../theme"
 import "../../services"
+import "../../components"
 
 Item {
     id: root
@@ -12,6 +13,10 @@ Item {
     property string screen_name: ""
     property Item island: null
     property color island_color: Theme.bg_core
+
+    WheelStepper {
+        id: wheel_stepper
+    }
 
     readonly property var device: UPower.displayDevice
     readonly property bool has_battery: !!device && device.ready && device.isLaptopBattery
@@ -97,6 +102,10 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: Popups.toggle("battery", root.island, root.island_color, root.screen_name)
-        onWheel: wheel => Backlight.bump(wheel.angleDelta.y > 0 ? 1 : -1)
+        onWheel: wheel => {
+            const notches = wheel_stepper.consume(wheel.angleDelta.y || wheel.pixelDelta.y);
+            if (notches === 0) return;
+            Backlight.set_percent(wheel_stepper.snap_by(Backlight.percent, notches, 1, 100));
+        }
     }
 }

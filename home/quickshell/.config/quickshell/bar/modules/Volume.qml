@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.Pipewire
 import "../../theme"
 import "../../services"
+import "../../components"
 
 Item {
     id: root
@@ -13,6 +14,10 @@ Item {
     property string screen_name: ""
     property Item island: null
     property color island_color: Theme.bg_core
+
+    WheelStepper {
+        id: wheel_stepper
+    }
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -91,8 +96,10 @@ Item {
         }
         onWheel: wheel => {
             if (!root.sink || !root.sink.ready || !root.sink.audio) return;
-            const step = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
-            root.sink.audio.volume = Math.max(0, Math.min(1, root.sink.audio.volume + step));
+            const notches = wheel_stepper.consume(wheel.angleDelta.y || wheel.pixelDelta.y);
+            if (notches === 0) return;
+            const pct = wheel_stepper.snap_by(Math.round(root.sink.audio.volume * 100), notches, 0, 100);
+            root.sink.audio.volume = pct / 100;
         }
     }
 }

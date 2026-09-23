@@ -11,6 +11,10 @@ Popup {
     id: root
 
     popup_name: "battery"
+
+    WheelStepper {
+        id: stepper
+    }
     implicitWidth: 260
     implicitHeight: 20 + 20 + (root.time_label !== "" ? 18 : 0) + (root.rate > 0 ? 18 : 0) + 10
         + 26 + (Backlight.has_kbd ? 26 : 0)
@@ -100,12 +104,12 @@ Popup {
                 root.selected = Math.max(0, root.selected - 1);
                 event.accepted = true;
             } else if (event.key === Qt.Key_L) {
-                if (row && row.kind === "brightness") Backlight.bump(1);
-                else if (row && row.kind === "kbd") Backlight.kbd_bump(1);
+                if (row && row.kind === "brightness") Backlight.set_percent(stepper.snap(Backlight.percent, 1, 1, 100));
+                else if (row && row.kind === "kbd") Backlight.kbd_set_percent(stepper.snap(Backlight.kbd_percent, 1, 0, 100));
                 event.accepted = true;
             } else if (event.key === Qt.Key_H) {
-                if (row && row.kind === "brightness") Backlight.bump(-1);
-                else if (row && row.kind === "kbd") Backlight.kbd_bump(-1);
+                if (row && row.kind === "brightness") Backlight.set_percent(stepper.snap(Backlight.percent, -1, 1, 100));
+                else if (row && row.kind === "kbd") Backlight.kbd_set_percent(stepper.snap(Backlight.kbd_percent, -1, 0, 100));
                 event.accepted = true;
             } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && row && row.kind === "profile") {
                 PowerProfiles.profile = root.profiles[row.index].value;

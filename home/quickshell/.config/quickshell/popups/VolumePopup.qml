@@ -11,6 +11,10 @@ Popup {
     id: root
 
     popup_name: "volume"
+
+    WheelStepper {
+        id: stepper
+    }
     implicitWidth: 320
     implicitHeight: 24 + rows.length * 28 + (streams.length === 0 ? 22 : 0)
 
@@ -53,6 +57,12 @@ Popup {
         node.audio.volume = Math.max(0, Math.min(1, node.audio.volume + delta));
     }
 
+    function adjust_snap(node, direction) {
+        if (!node || !node.ready || !node.audio) return;
+        const pct = stepper.snap(Math.round(node.audio.volume * 100), direction, 0, 100);
+        node.audio.volume = pct / 100;
+    }
+
     function toggle_mute(node) {
         if (!node || !node.audio) return;
         node.audio.muted = !node.audio.muted;
@@ -78,10 +88,10 @@ Popup {
                 root.selected = Math.max(0, root.selected - 1);
                 event.accepted = true;
             } else if (event.key === Qt.Key_L && row && root.is_slider_row(row.type)) {
-                root.adjust(row.node, 0.05);
+                root.adjust_snap(row.node, 1);
                 event.accepted = true;
             } else if (event.key === Qt.Key_H && row && root.is_slider_row(row.type)) {
-                root.adjust(row.node, -0.05);
+                root.adjust_snap(row.node, -1);
                 event.accepted = true;
             } else if (event.key === Qt.Key_M && row) {
                 root.toggle_mute(row.node);
