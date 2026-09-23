@@ -8,6 +8,7 @@ Item {
     id: root
 
     property bool compact: false
+    property string screen_name: ""
     property Item island: null
     property color island_color: Theme.bg_core
 
@@ -16,7 +17,7 @@ Item {
     readonly property real percent: has_battery ? device.percentage * 100 : 0
     readonly property int state: has_battery ? device.state : UPowerDeviceState.Unknown
     readonly property bool charging: state === UPowerDeviceState.Charging || state === UPowerDeviceState.PendingCharge
-    readonly property var level_glyphs: ["", "", "", "", ""]
+    readonly property var level_glyphs: ["", "", "", "", ""]
 
     visible: has_battery
     implicitWidth: has_battery ? row.implicitWidth : 0
@@ -24,7 +25,7 @@ Item {
 
     readonly property string glyph: {
         if (state === UPowerDeviceState.FullyCharged) return "󱟢";
-        if (charging) return "";
+        if (charging) return "";
         if (percent <= 20) return level_glyphs[0];
         if (percent <= 40) return level_glyphs[1];
         if (percent <= 60) return level_glyphs[2];
@@ -53,7 +54,7 @@ Item {
         return Math.round(percent) + "%";
     }
 
-    Component.onCompleted: Popups.register_default("battery", root.island, root.island_color)
+    onIslandChanged: if (root.island) Popups.register_default("battery", root.island, root.island_color, root.screen_name)
 
     Rectangle {
         anchors.fill: parent
@@ -92,7 +93,7 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: Popups.toggle("battery", root.island, root.island_color)
+        onClicked: Popups.toggle("battery", root.island, root.island_color, root.screen_name)
         onWheel: wheel => Backlight.bump(wheel.angleDelta.y > 0 ? 1 : -1)
     }
 }

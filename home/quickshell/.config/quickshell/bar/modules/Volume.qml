@@ -9,6 +9,7 @@ Item {
     id: root
 
     property bool compact: false
+    property string screen_name: ""
     property Item island: null
     property color island_color: Theme.bg_core
 
@@ -24,10 +25,10 @@ Item {
     readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
 
     readonly property string glyph: {
-        if (root.muted) return "";
-        if (root.volume <= 0.33) return "";
-        if (root.volume <= 0.66) return "";
-        return "";
+        if (root.muted) return "";
+        if (root.volume <= 0.33) return "";
+        if (root.volume <= 0.66) return "";
+        return "";
     }
 
     readonly property string tooltip_text: {
@@ -36,7 +37,7 @@ Item {
         return label + " // " + Math.round(root.volume * 100) + "%";
     }
 
-    Component.onCompleted: Popups.register_default("volume", root.island, root.island_color)
+    onIslandChanged: if (root.island) Popups.register_default("volume", root.island, root.island_color, root.screen_name)
 
     Rectangle {
         anchors.fill: parent
@@ -82,7 +83,7 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 if (root.sink && root.sink.audio) root.sink.audio.muted = !root.sink.audio.muted;
             } else {
-                Popups.toggle("volume", root.island, root.island_color);
+                Popups.toggle("volume", root.island, root.island_color, root.screen_name);
             }
         }
         onWheel: wheel => {

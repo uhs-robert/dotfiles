@@ -1,0 +1,9 @@
+[
+  {
+    "match": "*",
+    "compact": false,
+    "left": ["start", "workspaces"],
+    "center": ["clock"],
+    "right": ["tray", "volume", "battery", "system", "network", "bluetooth"]
+  }
+]

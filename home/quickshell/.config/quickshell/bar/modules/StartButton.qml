@@ -9,6 +9,7 @@ Item {
     id: root
 
     property bool compact: false
+    property string screen_name: ""
     property Item island: null
     property color island_color: "transparent"
 
@@ -34,7 +35,7 @@ Item {
         source: Quickshell.iconPath("start-here-archlinux", "start-here")
     }
 
-    Component.onCompleted: Popups.register_default("start", root.island, root.island_color)
+    onIslandChanged: if (root.island) Popups.register_default("start", root.island, root.island_color, root.screen_name)
 
     MouseArea {
         anchors.fill: parent
@@ -43,7 +44,7 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 Quickshell.execDetached(["sh", "-c", "~/.config/hypr/theme/switch.lua"]);
             } else {
-                Popups.toggle("start", root.island, root.island_color);
+                Popups.toggle("start", root.island, root.island_color, root.screen_name);
             }
         }
     }

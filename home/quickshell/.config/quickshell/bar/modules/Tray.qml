@@ -8,6 +8,10 @@ import "../../services"
 Row {
     id: root
 
+    // Accepted for parity with Bar.qml's module wiring; the icon row itself has no compact form yet.
+    property bool compact: false
+    property string screen_name: ""
+
     spacing: 10
     visible: SystemTray.items.values.length > 0
 
