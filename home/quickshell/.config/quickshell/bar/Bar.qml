@@ -67,12 +67,6 @@ Item {
             island_color: right_island.bg_color
         }
 
-        Brightness {
-            compact: root.compact
-            island: right_island.body_item
-            island_color: right_island.bg_color
-        }
-
         Hardware {
             compact: root.compact
         }

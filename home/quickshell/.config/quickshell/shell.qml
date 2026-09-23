@@ -55,7 +55,6 @@ ShellRoot {
     StartPopup {}
     VolumePopup {}
     BatteryPopup {}
-    BrightnessPopup {}
     PopupIpc {}
     BrightnessIpc {}
 }

@@ -63,5 +63,6 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: Popups.toggle("battery", root.island, root.island_color)
+        onWheel: wheel => Backlight.bump(wheel.angleDelta.y > 0 ? 1 : -1)
     }
 }
