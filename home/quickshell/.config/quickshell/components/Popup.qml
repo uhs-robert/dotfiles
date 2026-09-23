@@ -2,19 +2,22 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import "../services"
 
-PopupWindow {
+PanelWindow {
     id: root
 
     property string popup_name: ""
     property real preferred_width: 260
+    // Set while a native menu from this popup is open, so the focus grab doesn't close us.
+    property bool suspend_grab: false
 
     implicitWidth: preferred_width
     default property alias content: content_scope.data
 
     color: "transparent"
-    visible: Popups.open_name === root.popup_name
+    visible: Popups.open_name === root.popup_name && Popups.open_screen_name !== ""
 
     // The anchor is the island's body; its parent is the Island, which knows which end caps it has.
     readonly property var island: Popups.open_anchor ? Popups.open_anchor.parent : null
@@ -23,10 +26,15 @@ PopupWindow {
     // cap_right-only = a left island, flush with the screen's left edge; cap_left-only = a right island.
     readonly property string side: (island_cap_left && island_cap_right) ? "center" : island_cap_right ? "left" : island_cap_left ? "right" : "center"
 
-    anchor.item: Popups.open_anchor
-    anchor.edges: side === "right" ? (Edges.Bottom | Edges.Right) : side === "left" ? (Edges.Bottom | Edges.Left) : Edges.Bottom
-    anchor.gravity: side === "right" ? (Edges.Bottom | Edges.Left) : side === "left" ? (Edges.Bottom | Edges.Right) : Edges.Bottom
-    anchor.adjustment: PopupAdjustment.SlideX | PopupAdjustment.FlipY
+    // A layer surface pinned to the screen edge: xdg popups landed a few px short of it.
+    screen: Quickshell.screens.find(s => s.name === Popups.open_screen_name) || null
+    anchors.top: true
+    anchors.left: side === "left"
+    anchors.right: side === "right"
+    exclusiveZone: 0
+    WlrLayershell.namespace: "quickshell-popup"
+    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     // Reads as the island unfolding downward: its color, joined flush at the top.
     Rectangle {
@@ -57,10 +65,15 @@ PopupWindow {
     }
 
     // Grabbing before the backing surface is mapped is a no-op, so defer one tick.
+    onSuspend_grabChanged: {
+        focus_grab.active = root.visible && !root.suspend_grab;
+        if (!root.suspend_grab && root.visible) content_scope.forceActiveFocus();
+    }
+
     onVisibleChanged: {
         if (visible) {
             content_scope.forceActiveFocus();
-            Qt.callLater(() => focus_grab.active = root.visible);
+            Qt.callLater(() => focus_grab.active = root.visible && !root.suspend_grab);
         } else {
             focus_grab.active = false;
         }
