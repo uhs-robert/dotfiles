@@ -27,14 +27,11 @@ PanelWindow {
     property real island_x: 0
     property real island_w: 0
     property real island_h: 0
-    property real body_x: 0
-    property real body_w: 0
     property real cap_w: 0
     property bool cap_left: false
     property bool cap_right: false
 
     // Popups add this to their implicitHeight: content starts below the strip the island occupies.
-    readonly property real strip_height: island_h
 
     // cap_right-only = a left island, flush with the screen's left edge; cap_left-only = a right island.
     readonly property string side: (cap_left && cap_right) ? "center" : cap_right ? "left" : cap_left ? "right" : "center"
@@ -66,18 +63,7 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: root.wanted && !root.suspend_grab ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand
 
-    // The island body stays out of the mask so its clicks still reach the bar underneath.
-    mask: Region {
-        item: shape_bounds
-
-        Region {
-            x: Math.round(root.body_x)
-            y: 0
-            width: Math.round(root.body_w)
-            height: Math.round(root.island_h)
-            intersection: Intersection.Subtract
-        }
-    }
+    mask: Region { item: shape_bounds }
 
     function latch_island() {
         const body = root.held_anchor;
@@ -86,8 +72,6 @@ PanelWindow {
             root.island_x = root.screen_w / 2;
             root.island_w = 0;
             root.island_h = 0;
-            root.body_x = root.island_x;
-            root.body_w = 0;
             root.cap_w = 0;
             root.cap_left = false;
             root.cap_right = false;
@@ -95,12 +79,9 @@ PanelWindow {
         }
         // The bar window spans the screen from 0,0, so its window coords are screen coords.
         const island_pos = island.mapToItem(null, 0, 0);
-        const body_pos = body.mapToItem(null, 0, 0);
         root.island_x = island_pos.x;
         root.island_w = island.width;
         root.island_h = island.height;
-        root.body_x = body_pos.x;
-        root.body_w = body.width;
         root.cap_w = island.cap_width || 0;
         root.cap_left = island.cap_left === true;
         root.cap_right = island.cap_right === true;
@@ -161,8 +142,7 @@ PanelWindow {
         ShapePath {
             strokeWidth: -1
             fillColor: root.held_color
-            // One simple outline that walks around the island body, so the bar's own modules show through.
-            startX: root.body_x + root.body_w
+            startX: root.cur_x
             startY: 0
             PathLine { x: root.cur_x + root.cur_w; y: 0 }
             PathLine { x: root.cur_x + root.cur_w - root.slant_r; y: root.cur_h - root.corner }
@@ -170,18 +150,14 @@ PanelWindow {
             PathLine { x: root.cur_x + root.slant_l + root.corner; y: root.cur_h }
             PathArc { x: root.cur_x + root.slant_l; y: root.cur_h - root.corner; radiusX: root.corner; radiusY: root.corner }
             PathLine { x: root.cur_x; y: 0 }
-            PathLine { x: root.body_x; y: 0 }
-            PathLine { x: root.body_x; y: Math.max(0, root.island_h - 1) }
-            PathLine { x: root.body_x + root.body_w; y: Math.max(0, root.island_h - 1) }
-            PathLine { x: root.body_x + root.body_w; y: 0 }
         }
     }
 
     Item {
         x: root.panel_x
-        y: root.island_h
+        y: 0
         width: root.panel_w
-        height: Math.max(0, root.panel_h - root.island_h)
+        height: root.panel_h
         clip: true
         opacity: root.content_opacity
 

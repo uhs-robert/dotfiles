@@ -12,7 +12,7 @@ MenuFrame {
 
     popup_name: "weather"
     preferred_width: 760
-    implicitHeight: root.strip_height + content.implicitHeight + 24
+    implicitHeight: content.implicitHeight + 24
 
     readonly property var base_tab_names: ["Daily", "Hourly", "Precipitation", "Sun & Moon", "Air"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
