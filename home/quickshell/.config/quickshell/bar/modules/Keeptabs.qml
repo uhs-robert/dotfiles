@@ -51,15 +51,6 @@ Item {
                 font.pixelSize: /[-]|[\uDB80-\uDBFF]/.test(modelData.text) ? Theme.glyph_size : Theme.font_size
             }
         }
-
-        Text {
-            visible: ClaudeUsageState.warning
-            readonly property int peak: Math.max(0, ...ClaudeUsageState.warnings.map(r => r.percent))
-            text: "  \u{f071} " + peak + "%"
-            color: peak >= 95 ? Theme.error : Theme.warning
-            font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
-        }
     }
 
     HoverHandler {
