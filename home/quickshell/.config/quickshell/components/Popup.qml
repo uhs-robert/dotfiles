@@ -58,6 +58,7 @@ PanelWindow {
             visible = true;
             open_anim.restart();
             content_scope.forceActiveFocus();
+            focus_grab.armed_ms = Date.now();
             Qt.callLater(() => focus_grab.active = root.visible && root.wanted && !root.suspend_grab);
         } else if (visible) {
             focus_grab.active = false;
@@ -138,8 +139,10 @@ PanelWindow {
 
     HyprlandFocusGrab {
         id: focus_grab
+        property double armed_ms: 0
         windows: [root]
-        onCleared: Popups.close()
+        // Closing releases the previous grab; its cleared event can land just after a quick reopen.
+        onCleared: if (Date.now() - armed_ms > 150) Popups.close()
     }
 
     onSuspend_grabChanged: {
