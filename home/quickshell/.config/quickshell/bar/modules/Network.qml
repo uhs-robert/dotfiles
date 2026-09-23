@@ -81,7 +81,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: mouse => {
             if (mouse.button === Qt.RightButton) Quickshell.execDetached(["nm-connection-editor"]);
-            else Quickshell.execDetached(["kitty", "-e", "nmtui"]);
+            else Popups.toggle("network", root.island, root.island_color, root.screen_name);
         }
     }
 
