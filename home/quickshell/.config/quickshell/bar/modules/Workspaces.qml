@@ -45,7 +45,7 @@ Item {
     }
 
     function close_toplevel(address) {
-        Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.window.close({ address = '0x" + address + "' })"]);
+        Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.window.close({ window = 'address:0x" + address + "' })"]);
     }
 
     // The workspace/toplevel models can lag behind these events; nudge a resync.
