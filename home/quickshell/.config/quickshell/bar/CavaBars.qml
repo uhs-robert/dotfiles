@@ -10,7 +10,7 @@ Item {
     property bool active: MediaState.playing
     readonly property int bar_count: CavaState.bar_count
 
-    height: 4
+    height: 6
     opacity: root.active ? 1 : 0
     visible: opacity > 0
 
@@ -31,7 +31,7 @@ Item {
                 anchors.bottom: parent.bottom
                 width: root.width / root.bar_count
                 height: 1 + level * (root.height - 1)
-                color: Theme.theme_secondary
+                color: Theme.theme_primary
                 opacity: 0.5 + 0.5 * level
             }
         }
