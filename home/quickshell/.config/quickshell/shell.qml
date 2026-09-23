@@ -43,7 +43,7 @@ ShellRoot {
     }
 
     ClockPopup {}
-    PowerPopup {}
+    StartPopup {}
     VolumePopup {}
     BatteryPopup {}
     BrightnessPopup {}

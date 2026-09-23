@@ -1,4 +1,4 @@
-// home/quickshell/.config/quickshell/popups/PowerPopup.qml
+// home/quickshell/.config/quickshell/popups/StartPopup.qml
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -9,31 +9,39 @@ import "../services"
 Popup {
     id: root
 
-    popup_name: "power"
+    popup_name: "start"
     implicitWidth: 180
-    implicitHeight: confirm ? 60 : 148
+    implicitHeight: confirm ? 60 : 180
 
-    readonly property var actions: ["Lock", "Logout", "Reboot", "Power Off"]
-    readonly property var glyphs: ["󰌾", "󰍃", "󰜉", "󰐥"]
-    readonly property var glyph_colors: [Theme.fg_core, Theme.info, Theme.warning, Theme.theme_label]
+    readonly property var actions: ["Apps", "Lock", "Logout", "Reboot", "Power Off"]
+    readonly property var glyphs: ["󰣇", "󰌾", "󰍃", "󰜉", "󰐥"]
+    readonly property var glyph_colors: [Theme.green, Theme.fg_core, Theme.info, Theme.warning, Theme.theme_label]
 
     property int selected: 0
     property bool confirm: false
 
-    readonly property bool is_open: Popups.open_name === "power"
+    readonly property bool is_open: Popups.open_name === "start"
     onIs_openChanged: if (is_open) {
         selected = 0;
         confirm = false;
     }
 
+    function choose(index) {
+        selected = index;
+        if (index === 0) run(0);
+        else confirm = true;
+    }
+
     function run(index) {
         if (index === 0) {
-            Quickshell.execDetached(["sh", "-c", "~/.config/hypr/scripts/hyprlock-screenshot.lua"]);
+            Quickshell.execDetached(["hyprctl", "dispatch", "LayerRules.exec_without_animation('rofi -show drun -theme ~/.config/rofi/themes/oasis-start.rasi')"]);
         } else if (index === 1) {
-            Quickshell.execDetached(["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch \"hl.dsp.exit()\""]);
+            Quickshell.execDetached(["sh", "-c", "~/.config/hypr/scripts/hyprlock-screenshot.lua"]);
         } else if (index === 2) {
-            Quickshell.execDetached(["systemctl", "reboot"]);
+            Quickshell.execDetached(["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch \"hl.dsp.exit()\""]);
         } else if (index === 3) {
+            Quickshell.execDetached(["systemctl", "reboot"]);
+        } else if (index === 4) {
             Quickshell.execDetached(["systemctl", "poweroff"]);
         }
         Popups.close();
@@ -63,7 +71,7 @@ Popup {
                 root.selected = (root.selected - 1 + root.actions.length) % root.actions.length;
                 event.accepted = true;
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                root.confirm = true;
+                root.choose(root.selected);
                 event.accepted = true;
             }
         }
@@ -109,10 +117,7 @@ Popup {
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            root.selected = row.index;
-                            root.confirm = true;
-                        }
+                        onClicked: root.choose(row.index)
                     }
                 }
             }

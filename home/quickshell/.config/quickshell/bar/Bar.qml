@@ -20,6 +20,8 @@ Item {
 
         StartButton {
             compact: root.compact
+            island: left_island.body_item
+            island_color: left_island.bg_color
         }
 
         Workspaces {
@@ -77,11 +79,6 @@ Item {
 
         Hardware {
             compact: root.compact
-        }
-
-        PowerButton {
-            island: right_island.body_item
-            island_color: right_island.bg_color
         }
     }
 }
