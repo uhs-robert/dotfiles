@@ -30,7 +30,7 @@ Rectangle {
         anchors.centerIn: parent
         text: root.icon
         color: root.primary ? Theme.bg_core : (root.active ? Theme.theme_primary : Theme.fg_core)
-        font.family: Theme.font_family
+        font.family: Style.font_family
         font.pixelSize: root.primary ? root.diameter * 0.42 : root.diameter * 0.5
     }
 
@@ -51,7 +51,7 @@ Rectangle {
             anchors.centerIn: parent
             text: root.badge
             color: Theme.bg_core
-            font.family: Theme.font_family
+            font.family: Style.font_family
             font.pixelSize: 8
             font.bold: true
         }

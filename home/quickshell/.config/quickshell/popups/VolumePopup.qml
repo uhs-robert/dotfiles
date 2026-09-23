@@ -132,20 +132,17 @@ Popup {
                     width: rows_list.width
                     spacing: 2
 
-                    Text {
+                    MenuSection {
                         visible: row_wrap.index === 0 || root.section_of(root.rows[row_wrap.index - 1].type) !== root.section_of(row_wrap.modelData.type)
                         topPadding: row_wrap.index === 0 ? 0 : 6
-                        text: root.section_of(row_wrap.modelData.type)
-                        color: Theme.fg_muted
-                        font.family: Theme.font_family
-                        font.pixelSize: Theme.popup_font_size - 3
+                        label: root.section_of(row_wrap.modelData.type)
                     }
 
-                    Rectangle {
+                    MenuRow {
+                        id: vol_row
                         width: row_wrap.width
                         height: 22
-                        radius: 4
-                        color: row_wrap.index === root.selected ? Theme.bg_surface : "transparent"
+                        selected: row_wrap.index === root.selected
 
                         RowLayout {
                             visible: !root.is_slider_row(row_wrap.modelData.type)
@@ -158,9 +155,9 @@ Popup {
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                                 text: row_wrap.modelData.node.description || row_wrap.modelData.node.name
-                                color: (row_wrap.modelData.node === Pipewire.defaultAudioSink || row_wrap.modelData.node === Pipewire.defaultAudioSource) ? Theme.theme_secondary : Theme.fg_core
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 1
+                                color: vol_row.fg((row_wrap.modelData.node === Pipewire.defaultAudioSink || row_wrap.modelData.node === Pipewire.defaultAudioSource) ? Theme.theme_secondary : Theme.fg_core)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 1
                             }
                         }
 
@@ -184,13 +181,14 @@ Popup {
                                 Layout.preferredWidth: 90
                                 elide: Text.ElideRight
                                 text: row_wrap.modelData.type === "stream" ? (row_wrap.modelData.node.properties["application.name"] || row_wrap.modelData.node.name) : (row_wrap.modelData.node.description || row_wrap.modelData.node.name)
-                                color: Theme.fg_core
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 1
+                                color: vol_row.fg(Theme.fg_core)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 1
                             }
 
                             Slider {
                                 Layout.fillWidth: true
+                                on_selection: vol_row.selected
                                 value: row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0
                                 onMoved: v => {
                                     if (row_wrap.modelData.node.audio) row_wrap.modelData.node.audio.volume = v;
@@ -199,9 +197,9 @@ Popup {
 
                             Text {
                                 text: row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted ? "" : ""
-                                color: Theme.theme_primary
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 1
+                                color: vol_row.fg(Theme.theme_primary)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 1
 
                                 MouseArea {
                                     anchors.fill: parent
@@ -218,8 +216,8 @@ Popup {
                 Layout.topMargin: 6
                 text: "No apps playing"
                 color: Theme.fg_dim
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 2
             }
         }
     }

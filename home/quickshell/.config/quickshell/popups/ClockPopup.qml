@@ -101,7 +101,7 @@ Popup {
     // Equal-width columns need the exact available width, not a guess, so the grid never clips.
     readonly property real grid_column_spacing: 4
     readonly property real available_cell_width: (content.width - grid_column_spacing * 7) / 8
-    readonly property int grid_font_size: available_cell_width < 20 ? Theme.popup_font_size - 2 : Theme.popup_font_size - 1
+    readonly property int grid_font_size: available_cell_width < 20 ? Style.font_size - 2 : Style.font_size - 1
 
     Item {
         id: content
@@ -148,8 +148,8 @@ Popup {
                 Layout.alignment: Qt.AlignHCenter
                 text: Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMMM yyyy")
                 color: Theme.fg_core
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size
                 font.bold: true
             }
 
@@ -168,8 +168,8 @@ Popup {
 
                         text: Timezones.abbrevs[index] || "..."
                         color: is_active ? Theme.theme_secondary : Theme.fg_muted
-                        font.family: Theme.font_family
-                        font.pixelSize: Theme.popup_font_size - 2
+                        font.family: Style.font_family
+                        font.pixelSize: Style.font_size - 2
                         font.bold: is_active
                         font.underline: is_active
 
@@ -199,7 +199,7 @@ Popup {
                         horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideNone
                         text: modelData.text
-                        font.family: Theme.font_family
+                        font.family: Style.font_family
                         font.pixelSize: modelData.kind === "header" || modelData.kind === "weeknum" ? root.grid_font_size - 1 : root.grid_font_size
                         color: modelData.kind === "header" ? Theme.fg_muted : modelData.kind === "weeknum" ? Theme.fg_dim : modelData.is_today ? Theme.theme_accent : (modelData.in_month ? Theme.fg_core : Theme.fg_muted)
                         font.underline: modelData.kind === "day" && modelData.is_today === true

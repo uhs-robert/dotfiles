@@ -90,15 +90,15 @@ Popup {
             Repeater {
                 model: root.actions
 
-                Rectangle {
+                MenuRow {
                     id: row
                     required property int index
                     required property string modelData
 
                     Layout.fillWidth: true
                     height: 28
-                    radius: 6
-                    color: index === root.selected ? Theme.bg_surface : "transparent"
+                    base_radius: 6
+                    selected: index === root.selected
 
                     RowLayout {
                         anchors.left: parent.left
@@ -108,16 +108,16 @@ Popup {
 
                         Text {
                             text: root.glyphs[row.index]
-                            color: root.glyph_colors[row.index]
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size
+                            color: row.fg(root.glyph_colors[row.index])
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size
                         }
 
                         Text {
                             text: row.modelData
-                            color: Theme.fg_core
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size
+                            color: row.fg(Theme.fg_core)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size
                         }
                     }
 
@@ -139,15 +139,15 @@ Popup {
             Text {
                 text: root.glyphs[root.selected] + " " + root.actions[root.selected] + "?"
                 color: root.glyph_colors[root.selected]
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size
             }
 
             Text {
                 text: "Yes"
                 color: Theme.ok
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size
 
                 MouseArea {
                     anchors.fill: parent
@@ -158,8 +158,8 @@ Popup {
             Text {
                 text: "No"
                 color: Theme.error
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size
 
                 MouseArea {
                     anchors.fill: parent

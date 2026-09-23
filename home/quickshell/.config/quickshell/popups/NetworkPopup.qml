@@ -237,15 +237,15 @@ Popup {
                     Layout.fillWidth: true
                     text: "Wi-Fi"
                     color: Theme.fg_strong
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 1
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 1
                 }
 
                 Text {
                     text: Networking.wifiEnabled ? "On" : "Off"
                     color: Networking.wifiEnabled ? Theme.theme_primary : Theme.fg_dim
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 2
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 2
                 }
             }
 
@@ -256,32 +256,32 @@ Popup {
                         + (root.wifi_ipv4 ? "  " + root.wifi_ipv4 : "")
                     : ""
                 color: Theme.theme_secondary
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 2
             }
 
             Text {
                 visible: !!root.wired_device && root.wired_device.connected
                 text: root.wired_device ? "Wired: " + root.wired_device.name + (root.wired_ipv4 ? "  " + root.wired_ipv4 : "") : ""
                 color: Theme.theme_secondary
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 2
             }
 
             Text {
                 visible: root.status_text !== ""
                 text: root.status_text
                 color: Theme.fg_muted
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 3
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 3
             }
 
             Text {
                 visible: root.forget_confirm
                 text: "Forget " + (root.forget_target ? root.forget_target.name : "this network") + "? y/n"
                 color: Theme.error
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 2
             }
 
             ListView {
@@ -293,7 +293,7 @@ Popup {
                 model: root.nav_rows
                 currentIndex: root.selected
 
-                delegate: Rectangle {
+                delegate: MenuRow {
                     id: net_row
                     required property var modelData
                     required property int index
@@ -302,8 +302,7 @@ Popup {
 
                     width: network_list.width
                     height: 24
-                    radius: 4
-                    color: net_row.index === root.selected ? Theme.bg_surface : "transparent"
+                    selected: net_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
@@ -314,34 +313,34 @@ Popup {
                         Text {
                             visible: !net_row.is_advanced
                             text: root.signal_glyph(net_row.modelData.signalStrength || 0)
-                            color: net_row.modelData.connected ? Theme.theme_primary : Theme.fg_core
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 1
+                            color: net_row.fg(net_row.modelData.connected ? Theme.theme_primary : Theme.fg_core)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 1
                         }
 
                         Text {
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                             text: net_row.is_advanced ? "Advanced…" : net_row.modelData.name
-                            color: net_row.modelData.connected ? Theme.theme_secondary : Theme.fg_core
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 1
+                            color: net_row.fg(net_row.modelData.connected ? Theme.theme_secondary : Theme.fg_core)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 1
                         }
 
                         Text {
                             visible: !net_row.is_advanced && net_row.modelData.security !== WifiSecurityType.Open
                             text: ""
-                            color: Theme.fg_muted
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 2
+                            color: net_row.fg(Theme.fg_muted)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 2
                         }
 
                         Text {
                             visible: !net_row.is_advanced && net_row.modelData.known
                             text: ""
-                            color: Theme.fg_muted
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 2
+                            color: net_row.fg(Theme.fg_muted)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 2
                         }
                     }
 
@@ -369,8 +368,8 @@ Popup {
             Text {
                 text: root.password_target ? "Password for " + root.password_target.name : ""
                 color: Theme.fg_strong
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 1
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 1
             }
 
             Rectangle {
@@ -386,8 +385,8 @@ Popup {
                     focus: root.password_mode
                     echoMode: root.password_visible ? TextInput.Normal : TextInput.Password
                     color: Theme.fg_core
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 1
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 1
                     text: root.password_text
                     onTextChanged: root.password_text = text
 
@@ -409,16 +408,16 @@ Popup {
             Text {
                 text: "Tab: show/hide  Enter: connect  Esc: cancel"
                 color: Theme.fg_dim
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 3
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 3
             }
 
             Text {
                 visible: root.status_text !== ""
                 text: root.status_text
                 color: Theme.fg_muted
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 3
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 3
             }
         }
     }

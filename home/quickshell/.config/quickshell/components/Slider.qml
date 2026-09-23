@@ -6,6 +6,7 @@ Item {
     id: root
 
     property real value: 0
+    property bool on_selection: false
     signal moved(real value)
 
     implicitHeight: 14
@@ -20,14 +21,14 @@ Item {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         height: 6
-        radius: 3
+        radius: Style.radius(3)
         color: Theme.bg_surface
 
         Rectangle {
             width: track.width * Math.max(0, Math.min(1, root.value))
             height: parent.height
             radius: parent.radius
-            color: Theme.theme_primary
+            color: root.on_selection && Style.selection_inverse ? Style.selection_fg : Theme.theme_primary
         }
     }
 

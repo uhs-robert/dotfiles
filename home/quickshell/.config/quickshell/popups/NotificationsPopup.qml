@@ -181,7 +181,7 @@ Popup {
                 Text {
                     text: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
                     color: NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
-                    font.family: Theme.font_family
+                    font.family: Style.font_family
                     font.pixelSize: 40
                 }
 
@@ -197,8 +197,8 @@ Popup {
                         text: "Notifications"
                         color: Theme.fg_core
                         font.bold: true
-                        font.family: Theme.font_family
-                        font.pixelSize: Theme.popup_font_size + 6
+                        font.family: Style.font_family
+                        font.pixelSize: Style.font_size + 6
                     }
 
                     Text {
@@ -207,8 +207,8 @@ Popup {
                         elide: Text.ElideRight
                         text: NotificationState.unread + " unread · " + NotificationState.history.length + " total"
                         color: Theme.fg_muted
-                        font.family: Theme.font_family
-                        font.pixelSize: Theme.popup_font_size - 2
+                        font.family: Style.font_family
+                        font.pixelSize: Style.font_size - 2
                     }
                 }
 
@@ -238,32 +238,17 @@ Popup {
                 Repeater {
                     model: root.tabs
 
-                    Rectangle {
+                    MenuTab {
                         id: tab_chip
                         required property string modelData
                         required property int index
 
                         Layout.fillWidth: true
-                        height: 28
-                        radius: 4
-                        color: tab_chip.index === root.current_tab ? Theme.bg_surface : "transparent"
-
-                        Text {
-                            anchors.centerIn: parent
-                            width: parent.width - 8
-                            horizontalAlignment: Text.AlignHCenter
-                            elide: Text.ElideRight
-                            text: tab_chip.modelData
-                            color: tab_chip.index === root.current_tab ? Theme.theme_secondary : Theme.fg_muted
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 1
-                            font.bold: tab_chip.index === root.current_tab
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: root.set_tab(tab_chip.index)
-                        }
+                        implicitHeight: 28
+                        label: tab_chip.modelData
+                        active: tab_chip.index === root.current_tab
+                        font_size: Style.font_size - 1
+                        onClicked: root.set_tab(tab_chip.index)
                     }
                 }
             }
@@ -282,7 +267,7 @@ Popup {
                         Layout.alignment: Qt.AlignHCenter
                         text: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
                         color: Theme.fg_dim
-                        font.family: Theme.font_family
+                        font.family: Style.font_family
                         font.pixelSize: 48
                     }
 
@@ -290,8 +275,8 @@ Popup {
                         Layout.alignment: Qt.AlignHCenter
                         text: root.current_tab === 2 ? "Nothing critical" : "All caught up"
                         color: Theme.fg_dim
-                        font.family: Theme.font_family
-                        font.pixelSize: Theme.popup_font_size
+                        font.family: Style.font_family
+                        font.pixelSize: Style.font_size
                     }
                 }
 
@@ -319,8 +304,8 @@ Popup {
                             text: row_item.modelData.type === "day" ? row_item.modelData.label : ""
                             color: Theme.fg_dim
                             font.bold: true
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 2
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 2
                         }
 
                         RowLayout {
@@ -344,8 +329,8 @@ Popup {
                                 text: row_item.modelData.type === "app_header" ? row_item.modelData.name + "  ·  " + row_item.modelData.count : ""
                                 color: Theme.fg_muted
                                 font.bold: true
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 1
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 1
                             }
                         }
 
@@ -377,44 +362,24 @@ Popup {
                     Repeater {
                         model: root.sub_views
 
-                        Rectangle {
+                        MenuTab {
                             id: sub_chip
                             required property string modelData
                             required property int index
-                            readonly property bool active: sub_chip.index === root.current_sub
 
-                            implicitWidth: sub_label.implicitWidth + 20
-                            implicitHeight: 24
-                            radius: 12
-                            color: sub_chip.active ? Theme.bg_surface : "transparent"
-
-                            Text {
-                                id: sub_label
-                                anchors.centerIn: parent
-                                text: sub_chip.modelData
-                                color: sub_chip.active ? Theme.theme_secondary : Theme.fg_muted
-                                font.bold: sub_chip.active
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 3
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: root.step_sub(1)
-                            }
+                            base_radius: 12
+                            label: sub_chip.modelData
+                            active: sub_chip.index === root.current_sub
+                            font_size: Style.font_size - 3
+                            onClicked: root.step_sub(1)
                         }
                     }
                 }
             }
 
-            Text {
+            MenuFooter {
                 Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                elide: Text.ElideRight
                 text: "[ ] tabs · 1-3 select · Tab order · j/k move · gg/G first/last · Enter open · d/x dismiss · C clear all · D dnd"
-                color: Theme.fg_dim
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 4
             }
         }
     }

@@ -143,23 +143,22 @@ Popup {
                 visible: root.items.length === 0
                 text: "No tray apps"
                 color: Theme.fg_dim
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 2
             }
 
             Repeater {
                 id: item_repeater
                 model: root.items
 
-                Rectangle {
+                MenuRow {
                     id: item_row
                     required property var modelData
                     required property int index
 
                     Layout.fillWidth: true
                     height: 26
-                    radius: 4
-                    color: item_row.index === root.selected ? Theme.bg_surface : "transparent"
+                    selected: item_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
@@ -176,9 +175,9 @@ Popup {
 
                         Text {
                             text: root.app_name(item_row.modelData)
-                            color: Theme.fg_core
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 1
+                            color: item_row.fg(Theme.fg_core)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 1
                         }
 
                         Text {
@@ -187,9 +186,9 @@ Popup {
                             maximumLineCount: 1
                             wrapMode: Text.NoWrap
                             text: root.detail(item_row.modelData)
-                            color: Theme.fg_dim
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 3
+                            color: item_row.fg(Theme.fg_dim)
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 3
                         }
                     }
 

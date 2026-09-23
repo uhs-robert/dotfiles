@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/popups/weather/AlertsView.qml
 import QtQuick
 import QtQuick.Layouts
+import "../../components"
 import "../../theme"
 import "../../services"
 
@@ -50,22 +51,21 @@ Item {
                 visible: root.alerts.length === 0
                 text: "No active alerts"
                 color: Theme.fg_dim
-                font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 1
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 1
             }
 
             Repeater {
                 model: root.alerts
 
-                Rectangle {
+                MenuRow {
                     id: alert_row
                     required property var modelData
                     required property int index
 
                     Layout.fillWidth: true
                     height: 36
-                    radius: 4
-                    color: alert_row.index === root.alert_cursor ? Theme.bg_surface : "transparent"
+                    selected: alert_row.index === root.alert_cursor
 
                     RowLayout {
                         anchors.fill: parent
@@ -86,15 +86,15 @@ Item {
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                                 text: alert_row.modelData.event
-                                color: alert_row.index === root.alert_cursor ? Theme.theme_secondary : Theme.fg_core
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 2
+                                color: alert_row.fg(alert_row.index === root.alert_cursor ? Theme.theme_secondary : Theme.fg_core)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 2
                             }
                             Text {
                                 text: alert_row.modelData.severity
-                                color: Theme.fg_muted
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 4
+                                color: alert_row.fg(Theme.fg_muted)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 4
                             }
                         }
                     }
@@ -129,8 +129,8 @@ Item {
                     wrapMode: Text.WordWrap
                     text: root.selected ? root.selected.headline || root.selected.event : ""
                     color: root.selected ? WeatherState.alert_color(root.selected.severity) : Theme.fg_core
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size
                     font.bold: true
                 }
 
@@ -139,8 +139,8 @@ Item {
                     elide: Text.ElideRight
                     text: root.selected ? root.fmt_time(root.selected.onset) + " – " + root.fmt_time(root.selected.ends) + "  ·  " + root.selected.area : ""
                     color: Theme.fg_muted
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 3
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 3
                 }
 
                 Text {
@@ -149,8 +149,8 @@ Item {
                     wrapMode: Text.WordWrap
                     text: root.selected ? root.unwrap(root.selected.description) : ""
                     color: Theme.fg_core
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 2
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 2
                 }
 
                 Text {
@@ -160,8 +160,8 @@ Item {
                     wrapMode: Text.WordWrap
                     text: root.selected ? "What to do: " + root.unwrap(root.selected.instruction) : ""
                     color: Theme.fg_core
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 2
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 2
                 }
             }
         }

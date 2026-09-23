@@ -111,8 +111,8 @@ Item {
                     elide: Text.ElideRight
                     text: (root.notification ? root.notification.appName : "") + "  ·  " + (root.entry ? root.relative_time(root.entry.time) : "")
                     color: Theme.fg_muted
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 1
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 1
                 }
 
                 Text {
@@ -122,8 +122,8 @@ Item {
                     text: root.notification ? root.notification.summary : ""
                     color: Theme.fg_core
                     font.bold: true
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size + 1
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size + 1
                 }
 
                 Text {
@@ -137,8 +137,8 @@ Item {
                     textFormat: Text.StyledText
                     text: root.notification ? root.notification.body : ""
                     color: Theme.fg_muted
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size
                 }
 
                 Flow {
@@ -169,8 +169,8 @@ Item {
                                 horizontalAlignment: Text.AlignHCenter
                                 text: action_chip.modelData.text
                                 color: Theme.theme_secondary
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 3
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 3
                             }
 
                             MouseArea {

@@ -106,7 +106,7 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-    readonly property int line_height: 3
+    readonly property int line_height: Style.accent_height
     property real line_progress: 0
     property real drop_progress: 0
 
@@ -155,7 +155,7 @@ PanelWindow {
         x: root.edge_x(w)
         width: w
         height: root.line_height
-        color: Theme.theme_primary
+        color: Style.accent_color
         opacity: root.line_progress > 0 ? 1 : 0
         z: 1
     }
@@ -174,9 +174,11 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: root.held_color
-                bottomLeftRadius: 10
-                bottomRightRadius: 10
+                color: Style.frame_follows_island ? root.held_color : Style.frame_color
+                bottomLeftRadius: Style.frame_radius
+                bottomRightRadius: Style.frame_radius
+                border.width: Style.frame_border_width
+                border.color: Style.frame_border_color
             }
 
             FocusScope {
