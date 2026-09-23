@@ -177,7 +177,7 @@ Item {
                                 anchors.fill: parent
                                 onClicked: {
                                     root.select_requested();
-                                    action_chip.modelData.invoke();
+                                    NotificationState.invoke_action(root.entry, action_chip.modelData);
                                 }
                             }
                         }

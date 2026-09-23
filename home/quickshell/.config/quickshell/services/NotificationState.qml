@@ -25,7 +25,7 @@ Singleton {
         persistenceSupported: true
         bodySupported: true
         bodyMarkupSupported: true
-        bodyHyperlinksSupported: true
+        bodyHyperlinksSupported: false
         bodyImagesSupported: true
         imageSupported: true
         actionsSupported: true
@@ -43,7 +43,10 @@ Singleton {
         if (n.transient && suppressed) return;
         n.tracked = true;
         // A replaces_id update arrives as a new generation with the same id.
-        for (const old of root.history.concat(root.toasts).filter(e => e.id === n.id)) root.remove_entry(old);
+        for (const old of root.history.concat(root.toasts).filter(e => e.id === n.id)) {
+            if (old.notification && old.notification !== n) old.notification.tracked = false;
+            root.remove_entry(old);
+        }
 
         const entry = root.make_entry(n, false);
         if (!n.transient) root.history = [entry].concat(root.history);
@@ -159,8 +162,15 @@ Singleton {
 
     function invoke_default(entry) {
         const action = root.find_default_action(entry.notification);
-        if (action) action.invoke();
-        root.hide_toast(entry);
+        if (action) root.invoke_action(entry, action);
+        else root.hide_toast(entry);
+    }
+
+    // Per spec an invoked action closes the notification unless the app marked it resident.
+    function invoke_action(entry, action) {
+        action.invoke();
+        if (entry.notification && entry.notification.resident) root.hide_toast(entry);
+        else root.dismiss(entry);
     }
 
     function mark_read() {

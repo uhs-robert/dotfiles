@@ -208,8 +208,7 @@ Rectangle {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                action_chip.modelData.invoke();
-                                root.close_animated("hide");
+                                NotificationState.invoke_action(root.entry, action_chip.modelData);
                             }
                         }
                     }
