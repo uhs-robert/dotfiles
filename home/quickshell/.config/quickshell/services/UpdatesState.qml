@@ -122,10 +122,27 @@ Singleton {
         upgrade_proc.running = true;
     }
 
+    // Hyprland's term wrapper normalizes every terminal to `term -e cmd`, but may hand the
+    // window to a running instance and exit at once, so the refresh waits on topgrade itself.
     Process {
         id: upgrade_proc
-        command: ["env", "-u", "TMUX", "-u", "TMUX_PANE", "sh", "-c", "exec \"${TERMINAL:-kitty}\" topgrade"]
-        onExited: {
+        command: ["env", "-u", "TMUX", "-u", "TMUX_PANE", "sh", "-c", "t=\"$HOME/.config/hypr/scripts/term\"; [ -x \"$t\" ] || t=\"${TERMINAL:-kitty}\"; exec \"$t\" -e topgrade"]
+        onExited: upgrade_watch.start()
+    }
+
+    Timer {
+        id: upgrade_watch
+        interval: 10000
+        repeat: true
+        onTriggered: if (!upgrade_check.running) upgrade_check.running = true
+    }
+
+    Process {
+        id: upgrade_check
+        command: ["pgrep", "-x", "topgrade"]
+        onExited: code => {
+            if (code === 0) return;
+            upgrade_watch.stop();
             root.upgrade_running = false;
             root.refresh();
         }
