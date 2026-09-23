@@ -9,6 +9,7 @@ Item {
 
     property string screen_name: ""
     readonly property bool compact: screen_name.indexOf("eDP") === 0
+    readonly property real center_width: center_island.body_item.width
 
     Island {
         id: left_island
@@ -16,8 +17,6 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         bg_color: Theme.bg_core
         cap_right: true
-        cap_right_color: submap.visible ? submap.submap_color : left_island.bg_color
-        pad_right: submap.visible ? 0 : 8
 
         StartButton {
             compact: root.compact
@@ -28,10 +27,6 @@ Item {
         Workspaces {
             screen_name: root.screen_name
             compact: root.compact
-        }
-
-        Submap {
-            id: submap
         }
     }
 

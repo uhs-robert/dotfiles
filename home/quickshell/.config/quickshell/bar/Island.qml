@@ -7,10 +7,8 @@ Item {
     id: root
 
     property color bg_color: "#232634"
-    property color cap_right_color: bg_color
     property bool cap_left: false
     property bool cap_right: false
-    property int pad_right: 8
     default property alias content: layout.children
 
     readonly property alias body_item: body
@@ -26,7 +24,7 @@ Item {
 
         x: cap_left ? root.cap_width : 0
         height: root.height
-        width: layout.implicitWidth + 8 + root.pad_right
+        width: layout.implicitWidth + 16
         color: root.bg_color
 
         // Declared before the layout so module MouseAreas stack above it.
@@ -69,7 +67,7 @@ Item {
 
         ShapePath {
             strokeWidth: -1
-            fillColor: root.cap_right_color
+            fillColor: root.bg_color
             startX: 0
             startY: 0
             PathLine { x: root.cap_width; y: 0 }

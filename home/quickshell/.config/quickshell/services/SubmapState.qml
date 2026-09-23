@@ -1,14 +1,15 @@
-// home/quickshell/.config/quickshell/bar/modules/Submap.qml
+// home/quickshell/.config/quickshell/services/SubmapState.qml
+pragma Singleton
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
-import "../../theme"
+import "../theme"
 
-Rectangle {
+Singleton {
     id: root
 
     property string submap_name: ""
+    readonly property bool active: submap_name !== ""
 
     // Keyed by the `name =` field in hypr/keymaps/submaps/*/init.lua.
     readonly property var color_map: ({
@@ -32,31 +33,11 @@ Rectangle {
 
     readonly property color submap_color: color_map[submap_name] || Theme.theme_secondary
 
-    visible: submap_name !== ""
-    implicitWidth: label.implicitWidth + 16
-    Layout.fillHeight: true
-    color: submap_color
-
     Connections {
         target: Hyprland
 
         function onRawEvent(event) {
             if (event.name === "submap") root.submap_name = event.data;
         }
-    }
-
-    Text {
-        id: label
-        anchors.centerIn: parent
-        text: root.submap_name
-        color: Theme.bg_core
-        font.family: Theme.font_family
-        font.pixelSize: Theme.font_size
-        font.bold: true
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: Hyprland.dispatch("hl.dsp.submap('reset')")
     }
 }
