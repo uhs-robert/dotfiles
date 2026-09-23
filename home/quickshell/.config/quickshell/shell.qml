@@ -55,6 +55,7 @@ ShellRoot {
     StartPopup {}
     VolumePopup {}
     BatteryPopup {}
+    BluetoothPopup {}
     PopupIpc {}
     BrightnessIpc {}
 }

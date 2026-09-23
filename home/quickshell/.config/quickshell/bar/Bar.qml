@@ -70,5 +70,11 @@ Item {
         Hardware {
             compact: root.compact
         }
+
+        Bluetooth {
+            compact: root.compact
+            island: right_island.body_item
+            island_color: right_island.bg_color
+        }
     }
 }
