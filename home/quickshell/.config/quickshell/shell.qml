@@ -57,6 +57,7 @@ ShellRoot {
     BatteryPopup {}
     BluetoothPopup {}
     SystemPopup {}
+    TrayPopup {}
     PopupIpc {}
     BrightnessIpc {}
     BarTooltip {}
