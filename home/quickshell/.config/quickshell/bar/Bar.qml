@@ -59,6 +59,12 @@ Item {
             island_color: right_island.bg_color
         }
 
+        Battery {
+            compact: root.compact
+            island: right_island.body_item
+            island_color: right_island.bg_color
+        }
+
         PowerButton {
             island: right_island.body_item
             island_color: right_island.bg_color
