@@ -121,8 +121,8 @@ Popup {
                 }
 
                 Text {
-                    text: UpdatesState.checking ? "Checking…" : (UpdatesState.last_checked > 0 ? "Checked " + Qt.formatTime(new Date(UpdatesState.last_checked), "HH:mm") : "Never checked")
-                    color: Theme.fg_muted
+                    text: UpdatesState.checking ? "Checking…" : UpdatesState.error ? UpdatesState.error : (UpdatesState.last_checked > 0 ? "Checked " + Qt.formatTime(new Date(UpdatesState.last_checked), "HH:mm") : "Never checked")
+                    color: UpdatesState.error && !UpdatesState.checking ? Theme.warning : Theme.fg_muted
                     font.family: Theme.font_family
                     font.pixelSize: Theme.popup_font_size - 3
                 }

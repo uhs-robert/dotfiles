@@ -74,7 +74,8 @@ Singleton {
         if (!root.official_done || !root.aur_done) return;
         root.checking = false;
         root.last_checked = Date.now();
-        root.error = (root.official_failed && root.aur_failed) ? "checkupdates and paru both failed" : "";
+        const failed = [root.official_failed ? "checkupdates" : "", root.aur_failed ? "paru" : ""].filter(n => !!n);
+        root.error = failed.length ? failed.join(" and ") + " failed, showing the last results" : "";
         if (root.pending_refresh) {
             root.pending_refresh = false;
             root.refresh();
