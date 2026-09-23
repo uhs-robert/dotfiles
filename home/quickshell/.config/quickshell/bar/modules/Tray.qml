@@ -15,6 +15,7 @@ Item {
     property color island_color: Theme.bg_core
 
     readonly property int count: SystemTray.items.values.length
+    readonly property bool needs_attention: SystemTray.items.values.some(i => i.status === Status.NeedsAttention)
     readonly property string tooltip_text: root.count + " tray app" + (root.count === 1 ? "" : "s")
 
     visible: root.count > 0
@@ -33,23 +34,28 @@ Item {
 
     RowLayout {
         id: row
-        spacing: 4
+        spacing: 2
 
         Text {
             Layout.alignment: Qt.AlignVCenter
-            text: ""
+            text: ""
             color: Theme.theme_primary
             font.family: Theme.font_family
             font.pixelSize: Theme.glyph_size
+            rotation: Popups.open_name === "tray" ? -90 : 0
+
+            Behavior on rotation {
+                NumberAnimation { duration: 180; easing.type: Easing.InOutCubic }
+            }
         }
 
-        Text {
-            Layout.alignment: Qt.AlignVCenter
-            visible: !root.compact
-            text: root.count
-            color: Theme.fg_core
-            font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+        Rectangle {
+            Layout.alignment: Qt.AlignTop
+            visible: root.needs_attention
+            implicitWidth: 5
+            implicitHeight: 5
+            radius: 2.5
+            color: Theme.theme_accent
         }
     }
 
