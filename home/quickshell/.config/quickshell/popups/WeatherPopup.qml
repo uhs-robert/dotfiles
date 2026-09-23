@@ -97,8 +97,8 @@ Popup {
                     }
 
                     Text {
-                        text: WeatherState.has_data ? WeatherState.current.cond : "Loading…"
-                        color: Theme.fg_core
+                        text: WeatherState.has_data ? WeatherState.current.cond : WeatherState.loading ? "Loading…" : "Unavailable: " + WeatherState.error
+                        color: WeatherState.has_data || WeatherState.loading ? Theme.fg_core : Theme.warning
                         font.family: Theme.font_family
                         font.pixelSize: Theme.popup_font_size - 1
                     }

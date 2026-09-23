@@ -38,6 +38,7 @@ Singleton {
     property bool warned_once: false
     property double last_attempt_ms: 0
     property int utc_offset: 0
+    property string fetch_key: ""
 
     readonly property int refresh_interval_ms: 900000
     readonly property int request_timeout_ms: 10000
@@ -119,6 +120,7 @@ Singleton {
         if (!force && root.last_success_ms > 0 && (now - root.last_success_ms) < root.min_refresh_gap_ms) return;
         root.loading = true;
         root.last_attempt_ms = now;
+        root.fetch_key = JSON.stringify(root.settings);
         root.start_fetch();
     }
 
@@ -193,6 +195,11 @@ Singleton {
     }
 
     function handle_forecast(blob, location_name) {
+        if (root.fetch_key !== JSON.stringify(root.settings)) {
+            root.loading = false;
+            root.refresh(true);
+            return;
+        }
         try {
             const parsed = root.parse_blob(blob, location_name);
             root.apply_data(parsed);
