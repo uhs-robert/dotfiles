@@ -1,7 +1,6 @@
 // home/quickshell/.config/quickshell/bar/modules/StartButton.qml
 import QtQuick
 import Quickshell
-import Quickshell.Widgets
 import "../../theme"
 import "../../services"
 
@@ -28,11 +27,20 @@ Item {
         id: hover_handler
     }
 
-    IconImage {
+    // Load the SVG file directly: the icon provider returns a small raster that blurs when scaled.
+    Image {
         id: icon
+        readonly property int implicitSize: root.compact ? 22 : 26
+        readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
+
         anchors.centerIn: parent
-        implicitSize: root.compact ? 22 : 26
-        source: Quickshell.iconPath("start-here-archlinux", "start-here")
+        width: implicitSize
+        height: implicitSize
+        sourceSize.width: Math.ceil(implicitSize * dpr)
+        sourceSize.height: Math.ceil(implicitSize * dpr)
+        source: status === Image.Error ? Quickshell.iconPath("start-here-archlinux", "start-here") : "file:///usr/share/icons/Papirus/64x64/apps/start-here-archlinux.svg"
+        smooth: true
+        mipmap: true
     }
 
     onIslandChanged: if (root.island) Popups.register_default("start", root.island, root.island_color, root.screen_name)
