@@ -89,7 +89,7 @@ Item {
         }
         ctx.globalAlpha = 1;
         ctx.fillStyle = Theme.fg_muted;
-        ctx.font = (Style.font_size - 2) + "px " + Style.font_family;
+        ctx.font = (Style.font_size - 2) + "px \"" + Style.font_family + "\"";
         ctx.textAlign = "left";
         for (const b of root.day_boundaries) {
             ctx.fillText(b.label, b.index * root.hour_col_w + 3, 12);

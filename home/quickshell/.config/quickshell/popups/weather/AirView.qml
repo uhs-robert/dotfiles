@@ -100,7 +100,7 @@ Item {
                 const max_v = Math.max(100, ...rows.map(r => r.aqi));
                 const col_w = w / rows.length;
 
-                ctx.font = (Style.font_size - 3) + "px " + Style.font_family;
+                ctx.font = (Style.font_size - 3) + "px \"" + Style.font_family + "\"";
                 ctx.textAlign = "center";
 
                 for (let i = 0; i < rows.length; i++) {

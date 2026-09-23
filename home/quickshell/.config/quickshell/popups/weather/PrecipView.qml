@@ -59,7 +59,7 @@ Item {
                 ctx.lineTo(w, margin_top + chart_h);
                 ctx.stroke();
 
-                ctx.font = (Style.font_size - 2) + "px " + Style.font_family;
+                ctx.font = (Style.font_size - 2) + "px \"" + Style.font_family + "\"";
                 ctx.textAlign = "center";
 
                 for (let i = 0; i < rows.length; i++) {
