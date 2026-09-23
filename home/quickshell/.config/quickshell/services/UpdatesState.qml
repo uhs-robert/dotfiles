@@ -124,7 +124,7 @@ Singleton {
 
     Process {
         id: upgrade_proc
-        command: ["sh", "-c", "exec \"${TERMINAL:-kitty}\" topgrade"]
+        command: ["env", "-u", "TMUX", "-u", "TMUX_PANE", "sh", "-c", "exec \"${TERMINAL:-kitty}\" topgrade"]
         onExited: {
             root.upgrade_running = false;
             root.refresh();
