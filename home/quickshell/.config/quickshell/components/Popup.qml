@@ -32,6 +32,12 @@ PopupWindow {
         focus: true
 
         Keys.onEscapePressed: Popups.close()
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Q) {
+                Popups.close();
+                event.accepted = true;
+            }
+        }
     }
 
     HyprlandFocusGrab {
