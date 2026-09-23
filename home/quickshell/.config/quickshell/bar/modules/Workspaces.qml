@@ -87,11 +87,32 @@ Item {
                 radius: height / 2
                 color: modelData.active ? Theme.theme_primary : Theme.bg_surface
 
+                // Runs once per switch: the new pill stretches with a slight overshoot and pops.
+                Behavior on width {
+                    NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.6 }
+                }
+                Behavior on color {
+                    ColorAnimation { duration: 260; easing.type: Easing.InOutQuad }
+                }
+
+                readonly property bool is_active: modelData.active
+                onIs_activeChanged: if (is_active) pop_anim.restart()
+
+                SequentialAnimation {
+                    id: pop_anim
+                    NumberAnimation { target: pill; property: "scale"; to: 1.15; duration: 120; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: pill; property: "scale"; to: 1.0; duration: 260; easing.type: Easing.OutElastic; easing.amplitude: 1.2; easing.period: 0.5 }
+                }
+
                 Rectangle {
                     anchors.fill: parent
                     radius: parent.radius
                     color: Theme.fg_core
-                    opacity: !modelData.active && pill_hover.hovered ? 0.1 : 0
+                    opacity: !pill.modelData.active && pill_hover.hovered ? 0.1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 150 }
+                    }
                 }
 
                 MouseArea {
