@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.SystemTray
+import Quickshell.Hyprland
 import Quickshell.Widgets
 import "../components"
 import "../theme"
@@ -12,7 +13,7 @@ Popup {
     id: root
 
     popup_name: "tray"
-    implicitWidth: 240
+    fallback_width: 300
     implicitHeight: Math.max(1, SystemTray.items.values.length) * 26 + 24
 
     readonly property var items: SystemTray.items.values
@@ -28,26 +29,75 @@ Popup {
         id: menu_anchor
     }
 
+    function norm(str) {
+        return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    // Tray ids and window classes rarely match exactly (Betterbird_systray_icon vs eu.betterbird.Betterbird).
+    function window_for(item_data) {
+        const id = norm(item_data.id).replace(/systrayicon$|trayicon$|tray$/, "");
+        const title = norm(item_data.title);
+        for (const t of Hyprland.toplevels.values) {
+            const cls = norm(t.lastIpcObject && t.lastIpcObject.class ? t.lastIpcObject.class : (t.wayland ? t.wayland.appId : ""));
+            if (!cls) continue;
+            if (cls === id || cls === title || (id.length >= 3 && (cls.includes(id) || id.includes(cls)))) return t;
+        }
+        return null;
+    }
+
+    // Some apps put status text in the title (Betterbird: "1 unread message\nInbox: 1").
+    function app_name(item_data) {
+        const title = item_data.title || "";
+        if (title && title.indexOf("\n") < 0 && title.length <= 24) return title;
+        const id = (item_data.id || "").replace(/[_-]?(systray|tray)[_-]?icon$/i, "");
+        return id ? id.charAt(0).toUpperCase() + id.slice(1) : title.split("\n")[0];
+    }
+
+    function detail(item_data) {
+        const line = (item_data.tooltipTitle || item_data.title || "").split("\n")[0];
+        return line === root.app_name(item_data) ? "" : line;
+    }
+
+    function focus_window(t) {
+        Hyprland.dispatch("hl.dsp.focus({ window = 'address:0x" + t.address + "' })");
+    }
+
     function activate_row(item_data) {
         if (!item_data) return;
         if (item_data.onlyMenu) {
             root.open_menu(item_data);
             return;
         }
-        item_data.activate();
         Popups.close();
+        const win = root.window_for(item_data);
+        if (win) {
+            root.focus_window(win);
+            return;
+        }
+        item_data.activate();
+        refocus_timer.item_data = item_data;
+        refocus_timer.restart();
+    }
+
+    // An app hidden to the tray has no window until activate() maps it.
+    Timer {
+        id: refocus_timer
+        property var item_data: null
+        interval: 400
+        onTriggered: {
+            Hyprland.refreshToplevels();
+            const win = item_data ? root.window_for(item_data) : null;
+            if (win) root.focus_window(win);
+        }
     }
 
     // Native app menus and our own focus-grabbed popup both want focus; hand off by
     // closing the popup first and re-anchoring the menu to the still-live tray island.
     function open_menu(item_data) {
         if (!item_data || !item_data.menu) return;
-        if (menu_anchor.visible && menu_anchor.menu === item_data.menu) {
-            menu_anchor.close();
-            return;
-        }
         const island_item = Popups.open_anchor;
         if (!island_item) return;
+        if (menu_anchor.visible) menu_anchor.close();
         Popups.close();
         menu_anchor.anchor.item = island_item;
         menu_anchor.anchor.edges = Edges.Bottom;
@@ -118,12 +168,21 @@ Popup {
                         }
 
                         Text {
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            text: item_row.modelData.tooltipTitle || item_row.modelData.title || item_row.modelData.id
+                            text: root.app_name(item_row.modelData)
                             color: Theme.fg_core
                             font.family: Theme.font_family
                             font.pixelSize: Theme.popup_font_size - 1
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                            wrapMode: Text.NoWrap
+                            text: root.detail(item_row.modelData)
+                            color: Theme.fg_dim
+                            font.family: Theme.font_family
+                            font.pixelSize: Theme.popup_font_size - 3
                         }
                     }
 
