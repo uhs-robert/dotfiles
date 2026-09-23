@@ -12,6 +12,7 @@ Item {
     property bool compact: false
 
     readonly property int icon_size: compact ? 16 : 19
+    readonly property int pill_height: compact ? 20 : 22
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -68,57 +69,61 @@ Item {
 
     Row {
         id: row
-        spacing: root.compact ? 4 : 8
+        spacing: root.compact ? 6 : 8
 
         Repeater {
             model: root.workspace_list
 
-            RowLayout {
-                id: ws_row
+            Rectangle {
+                id: pill
                 required property var modelData
 
-                spacing: root.compact ? 2 : 4
+                readonly property bool is_empty: modelData.toplevels.values.length === 0
 
-                Text {
-                    text: ws_row.modelData.id
-                    color: ws_row.modelData.active ? Theme.theme_secondary : Theme.theme_primary
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.font_size
+                height: root.pill_height
+                width: is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
+                radius: height / 2
+                color: modelData.active ? Theme.theme_primary : Theme.bg_surface
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + ws_row.modelData.id + "' })")
-                    }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + pill.modelData.id + "' })")
                 }
 
-                Repeater {
-                    model: ws_row.modelData.toplevels.values
+                Row {
+                    id: icons
+                    anchors.centerIn: parent
+                    spacing: 2
 
-                    Rectangle {
-                        id: icon_bg
-                        required property var modelData
+                    Repeater {
+                        model: pill.modelData.toplevels.values
 
-                        width: root.icon_size + 4
-                        height: root.icon_size + 4
-                        radius: 4
-                        color: modelData.activated ? Theme.bg_surface : "transparent"
+                        Item {
+                            id: icon_item
+                            required property var modelData
 
-                        Image {
-                            anchors.centerIn: parent
-                            width: root.icon_size
-                            height: root.icon_size
-                            source: root.icon_for(root.class_of(icon_bg.modelData))
-                            smooth: true
-                        }
+                            width: root.icon_size + 4
+                            height: root.icon_size + 4
 
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-                            onClicked: mouse => {
-                                if (mouse.button === Qt.LeftButton) {
-                                    root.focus_toplevel(ws_row.modelData.id, icon_bg.modelData.address);
-                                } else if (mouse.button === Qt.MiddleButton) {
-                                    root.close_toplevel(icon_bg.modelData.address);
+                            Image {
+                                anchors.centerIn: parent
+                                width: root.icon_size
+                                height: root.icon_size
+                                sourceSize.width: root.icon_size * 2
+                                sourceSize.height: root.icon_size * 2
+                                source: root.icon_for(root.class_of(icon_item.modelData))
+                                smooth: true
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                                onClicked: mouse => {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        root.focus_toplevel(pill.modelData.id, icon_item.modelData.address);
+                                    } else if (mouse.button === Qt.MiddleButton) {
+                                        root.close_toplevel(icon_item.modelData.address);
+                                    }
                                 }
                             }
                         }
