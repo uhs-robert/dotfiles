@@ -40,6 +40,17 @@ Item {
             NumberAnimation { target: glyph; property: "opacity"; from: 1; to: 0.5; duration: 500; easing.type: Easing.InOutQuad }
             NumberAnimation { target: glyph; property: "opacity"; from: 0.5; to: 1; duration: 500; easing.type: Easing.InOutQuad }
         }
+
+        RotationAnimation {
+            id: spin_animation
+            target: glyph
+            running: VoxtypeState.transcribing
+            loops: Animation.Infinite
+            from: 0
+            to: 360
+            duration: 1000
+            onRunningChanged: if (!running) glyph.rotation = 0
+        }
     }
 
     HoverHandler {
