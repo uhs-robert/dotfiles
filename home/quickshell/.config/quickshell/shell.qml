@@ -37,6 +37,7 @@ ShellRoot {
 
                 PopupScrim {
                     screen: screen_scope.modelData
+                    screen_name: screen_scope.modelData.name
                 }
 
                 SubmapTab {

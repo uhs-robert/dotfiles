@@ -75,10 +75,10 @@ Item {
         bottomRightRadius: root.corner
 
         // Declared before the layout so module MouseAreas stack above it.
+        // Also soaks up presses on an open panel, so the bar's close-on-press area under it never sees them.
         MouseArea {
             anchors.fill: parent
-            enabled: root.morph === 0
-            onClicked: root.clicked()
+            onClicked: if (root.morph === 0) root.clicked()
         }
 
         RowLayout {
@@ -123,6 +123,7 @@ Item {
                     readonly property bool held: root.held_panel === panel_loader.modelData
                     property bool used: false
 
+                    sourceComponent: root.panel_map[panel_loader.modelData]
                     active: panel_loader.used
                     visible: panel_loader.held
                     focus: panel_loader.held
@@ -140,7 +141,10 @@ Item {
                         panel_loader.sync_held();
                     }
                     onItemChanged: panel_loader.sync_held()
-                    onLoaded: if (panel_loader.item.hasOwnProperty("is_open")) panel_loader.item.is_open = Qt.binding(() => root.expanded && panel_loader.held)
+                    onLoaded: {
+                        panel_loader.item.focus = true;
+                        if (panel_loader.item.hasOwnProperty("is_open")) panel_loader.item.is_open = Qt.binding(() => root.expanded && panel_loader.held);
+                    }
                 }
             }
         }

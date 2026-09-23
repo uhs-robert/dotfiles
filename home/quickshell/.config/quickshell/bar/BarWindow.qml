@@ -1,7 +1,6 @@
 // home/quickshell/.config/quickshell/bar/BarWindow.qml
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
 import "../services"
 
@@ -24,11 +23,30 @@ PanelWindow {
     // Setting exclusiveZone would flip this back to Normal; BarReserve holds the space instead.
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
-    WlrLayershell.keyboardFocus: root.expanded ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    // Exclusive only for a moment: an already-mapped surface flipped to OnDemand never receives focus, and a lasting Exclusive blocks clicks elsewhere.
+    property int focus_mode: WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.focus_mode
 
+    onExpandedChanged: {
+        if (root.expanded) {
+            root.focus_mode = WlrKeyboardFocus.Exclusive;
+            focus_release.restart();
+        } else {
+            focus_release.stop();
+            root.focus_mode = WlrKeyboardFocus.None;
+        }
+    }
+
+    Timer {
+        id: focus_release
+        interval: 80
+        onTriggered: if (root.expanded) root.focus_mode = WlrKeyboardFocus.OnDemand
+    }
+
+    // While a panel is open the whole screen takes input, so a press outside it closes it.
     mask: Region {
         width: root.width
-        height: bar.bar_height
+        height: root.expanded ? root.height : bar.bar_height
 
         Region {
             x: bar.mask_x
@@ -37,50 +55,17 @@ PanelWindow {
         }
     }
 
+    MouseArea {
+        anchors.fill: parent
+        enabled: root.expanded
+        acceptedButtons: Qt.AllButtons
+        onPressed: Popups.close()
+    }
+
     Bar {
         id: bar
         anchors.fill: parent
         screen_name: root.screen_name
         rule: root.rule
-    }
-
-    onExpandedChanged: {
-        root.grab_ready = false;
-        if (!root.expanded) return;
-        root.grab_retries = 0;
-        grab_delay.restart();
-    }
-
-    // Armed a beat after opening: on a quick reopen Hyprland hasn't moved keyboard focus back yet and clears a grab taken at once.
-    property bool grab_ready: false
-    property int grab_retries: 0
-    property double grab_armed_ms: 0
-    Timer {
-        id: grab_delay
-        interval: 60
-        onTriggered: {
-            root.grab_armed_ms = Date.now();
-            root.grab_ready = true;
-        }
-    }
-
-    // A clear right after arming means focus hadn't returned yet, so re-arm instead of closing.
-    function grab_cleared() {
-        if (root.expanded && root.grab_retries < 2 && Date.now() - root.grab_armed_ms < 300) {
-            root.grab_retries += 1;
-            root.grab_ready = false;
-            grab_delay.restart();
-            return;
-        }
-        Popups.close();
-    }
-
-    Loader {
-        active: root.expanded && root.grab_ready
-        sourceComponent: HyprlandFocusGrab {
-            active: true
-            windows: [root]
-            onCleared: root.grab_cleared()
-        }
     }
 }
