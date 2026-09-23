@@ -58,10 +58,9 @@ PanelWindow {
             visible = true;
             open_anim.restart();
             content_scope.forceActiveFocus();
-            focus_grab.armed_ms = Date.now();
-            Qt.callLater(() => focus_grab.active = root.visible && root.wanted && !root.suspend_grab);
+            grab_ready = false;
+            grab_delay.restart();
         } else if (visible) {
-            focus_grab.active = false;
             open_anim.stop();
             close_anim.restart();
         }
@@ -137,16 +136,22 @@ PanelWindow {
         }
     }
 
-    HyprlandFocusGrab {
-        id: focus_grab
-        property double armed_ms: 0
-        windows: [root]
-        // Closing releases the previous grab; its cleared event can land just after a quick reopen.
-        onCleared: if (Date.now() - armed_ms > 150) Popups.close()
+    // Armed a beat after opening: on a quick reopen Hyprland hasn't moved keyboard focus back yet and clears a grab taken at once.
+    property bool grab_ready: false
+    Timer {
+        id: grab_delay
+        interval: 60
+        onTriggered: root.grab_ready = true
     }
 
-    onSuspend_grabChanged: {
-        focus_grab.active = root.visible && root.wanted && !root.suspend_grab;
-        if (!root.suspend_grab && root.visible) content_scope.forceActiveFocus();
+    Loader {
+        active: root.visible && root.wanted && root.grab_ready && !root.suspend_grab
+        sourceComponent: HyprlandFocusGrab {
+            active: true
+            windows: [root]
+            onCleared: Popups.close()
+        }
     }
+
+    onSuspend_grabChanged: if (!root.suspend_grab && root.visible) content_scope.forceActiveFocus()
 }
