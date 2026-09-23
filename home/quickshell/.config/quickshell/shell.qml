@@ -47,6 +47,12 @@ ShellRoot {
                     line_width: bar.center_width
                     bar_present: screen_scope.has_bar
                 }
+
+                CavaStrip {
+                    screen: screen_scope.modelData
+                    strip_width: bar.center_width
+                    bar_present: screen_scope.has_bar && bar.has_center
+                }
             }
         }
     }
@@ -62,6 +68,7 @@ ShellRoot {
     KeeptabsPopup {}
     WeatherPopup {}
     UpdatesPopup {}
+    MediaPopup {}
     NotificationsPopup {}
     PopupIpc {}
     BrightnessIpc {}

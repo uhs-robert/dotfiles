@@ -11,6 +11,7 @@ Item {
     property var rule: null
     readonly property bool compact: BarConfig.compact_for(root.rule, root.screen_name)
     readonly property real center_width: center_island.body_item.width
+    readonly property bool has_center: root.center_entries.length > 0
 
     readonly property var module_map: ({
         start: start_component,
@@ -26,7 +27,8 @@ Item {
         keeptabs: keeptabs_component,
         updates: updates_component,
         voxtype: voxtype_component,
-        notifications: notifications_component
+        notifications: notifications_component,
+        media: media_component
     })
 
     // Resolves a bars.json module list into loadable entries, skipping unknown names.
@@ -70,6 +72,7 @@ Item {
     Component { id: updates_component; Updates { compact: root.compact; screen_name: root.screen_name } }
     Component { id: voxtype_component; Voxtype { compact: root.compact } }
     Component { id: notifications_component; Notifications { compact: root.compact; screen_name: root.screen_name } }
+    Component { id: media_component; Media { compact: root.compact; screen_name: root.screen_name } }
 
     Island {
         id: left_island
@@ -147,6 +150,9 @@ Item {
         const island = has_clock(root.left_entries) ? left_island : has_clock(root.center_entries) ? center_island : has_clock(root.right_entries) ? right_island : null;
         for (const i of [left_island, center_island, right_island]) Popups.unregister("clock", root.screen_name, i.body_item);
         if (island) Popups.register_default("clock", island.body_item, island.bg_color, root.screen_name);
+        // Media has no bar module by default; its popup drops from the center island.
+        Popups.unregister("media", root.screen_name, center_island.body_item);
+        if (root.has_center) Popups.register_default("media", center_island.body_item, center_island.bg_color, root.screen_name);
     }
 
     onLeft_entriesChanged: sync_clock_anchor()
