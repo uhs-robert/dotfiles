@@ -42,11 +42,14 @@ Singleton {
         onTriggered: root.refresh(false)
     }
 
-    // A finished agent is exactly when usage just moved.
+    // A finished agent is exactly when usage just moved; the tooltip lists each session's state.
+    property int done_count: 0
     Connections {
         target: KeeptabsState
-        function onState_classChanged() {
-            if (KeeptabsState.state_class === "done" && Power.on_ac) root.refresh(true);
+        function onTooltipChanged() {
+            const count = KeeptabsState.tooltip.split("\n").filter(l => l.startsWith("DONE")).length;
+            if (count > root.done_count && Power.on_ac) root.refresh(true);
+            root.done_count = count;
         }
     }
 
