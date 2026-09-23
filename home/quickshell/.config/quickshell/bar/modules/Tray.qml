@@ -40,11 +40,11 @@ Row {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                 onClicked: mouse => {
                     if (mouse.button === Qt.RightButton) {
-                        menu_anchor.open();
+                        if (menu_anchor.visible) menu_anchor.close(); else menu_anchor.open();
                     } else if (mouse.button === Qt.MiddleButton) {
                         icon_root.modelData.secondaryActivate();
                     } else if (icon_root.modelData.onlyMenu) {
-                        menu_anchor.open();
+                        if (menu_anchor.visible) menu_anchor.close(); else menu_anchor.open();
                     } else {
                         icon_root.modelData.activate();
                     }
