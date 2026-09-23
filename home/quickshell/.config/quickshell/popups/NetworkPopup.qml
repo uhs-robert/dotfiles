@@ -58,6 +58,8 @@ Popup {
 
     property int selected: 0
     property bool forget_confirm: false
+    // Captured when f is pressed: rescans reorder the list while the prompt is up.
+    property var forget_target: null
     property bool password_mode: false
     property var password_target: null
     property string password_text: ""
@@ -182,11 +184,12 @@ Popup {
 
             if (root.forget_confirm) {
                 if (event.key === Qt.Key_Y) {
-                    const row = root.nav_rows[root.selected];
-                    if (row && !row.advanced) row.forget();
+                    if (root.forget_target) root.forget_target.forget();
                     root.forget_confirm = false;
+                    root.forget_target = null;
                 } else if (event.key === Qt.Key_N || event.key === Qt.Key_Escape) {
                     root.forget_confirm = false;
+                    root.forget_target = null;
                 }
                 event.accepted = true;
                 return;
@@ -208,6 +211,7 @@ Popup {
                 root.start_scan();
                 event.accepted = true;
             } else if (event.key === Qt.Key_F && row && !row.advanced && row.known) {
+                root.forget_target = row;
                 root.forget_confirm = true;
                 event.accepted = true;
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
@@ -274,7 +278,7 @@ Popup {
 
             Text {
                 visible: root.forget_confirm
-                text: "Forget this network? y/n"
+                text: "Forget " + (root.forget_target ? root.forget_target.name : "this network") + "? y/n"
                 color: Theme.error
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size - 2
