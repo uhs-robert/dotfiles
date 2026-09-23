@@ -13,6 +13,10 @@ Item {
     property color island_color: Theme.bg_core
 
     readonly property bool shown: KeeptabsState.available
+    readonly property string tooltip_text: {
+        const usage = ClaudeUsageState.rows.map(r => r.label + ": " + r.percent + "%").join("\n");
+        return KeeptabsState.tooltip.replace(/\t/g, "  ") + (usage ? "\n\n" + usage : "");
+    }
     visible: shown
     implicitWidth: shown ? row.implicitWidth : 0
     implicitHeight: row.implicitHeight
@@ -47,12 +51,21 @@ Item {
                 font.pixelSize: /[-]|[\uDB80-\uDBFF]/.test(modelData.text) ? Theme.glyph_size : Theme.font_size
             }
         }
+
+        Text {
+            visible: ClaudeUsageState.warning
+            readonly property int peak: Math.max(0, ...ClaudeUsageState.warnings.map(r => r.percent))
+            text: "  \u{f071} " + peak + "%"
+            color: peak >= 95 ? Theme.error : Theme.warning
+            font.family: Theme.font_family
+            font.pixelSize: Theme.font_size
+        }
     }
 
     HoverHandler {
         id: hover_handler
         onHoveredChanged: {
-            if (hovered) Tooltip.show(root, KeeptabsState.tooltip.replace(/\t/g, "  "));
+            if (hovered) Tooltip.show(root, root.tooltip_text);
             else Tooltip.hide();
         }
     }

@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// `claude -p /usage` on demand only; the Usage tab triggers refresh(), nothing polls in the background.
+// `claude -p /usage`, refreshed every 10 min only on AC while agents run, and when one finishes.
 Singleton {
     id: root
 
@@ -15,6 +15,40 @@ Singleton {
 
     readonly property int max_age_ms: 300000
     readonly property int timeout_ms: 60000
+    readonly property int poll_ms: 600000
+
+    // Warn once per reset window: session at 80%, any weekly limit at 90%.
+    readonly property var warnings: root.rows.filter(r => r.percent >= (/session/i.test(r.label) ? 80 : 90))
+    readonly property bool warning: root.warnings.length > 0
+    property var warned: ({})
+
+    onWarningsChanged: {
+        const next = {};
+        for (const r of root.warnings) {
+            const key = r.label + "|" + r.resets;
+            next[key] = true;
+            if (root.warned[key]) continue;
+            const urgency = r.percent >= 95 ? "critical" : "normal";
+            Quickshell.execDetached(["notify-send", "-a", "Claude usage", "-u", urgency, r.label + " at " + r.percent + "%", r.resets ? "Resets " + r.resets : ""]);
+        }
+        root.warned = next;
+    }
+
+    Timer {
+        interval: root.poll_ms
+        running: Power.on_ac && KeeptabsState.available
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.refresh(false)
+    }
+
+    // A finished agent is exactly when usage just moved.
+    Connections {
+        target: KeeptabsState
+        function onState_classChanged() {
+            if (KeeptabsState.state_class === "done" && Power.on_ac) root.refresh(true);
+        }
+    }
 
     // Matches "Current session: 15% used · resets Aug 31, 11pm (America/New_York)" and the
     // dash variant; the reset clause is optional so a line with no reset still parses.
@@ -41,7 +75,7 @@ Singleton {
 
     Process {
         id: fetch_proc
-        command: ["env", "-u", "TMUX", "-u", "TMUX_PANE", "claude", "-p", "/usage", "--output-format", "json"]
+        command: ["env", "-u", "TMUX", "-u", "TMUX_PANE", "claude", "-p", "/usage", "--output-format", "json", "--no-session-persistence"]
         onExited: code => {
             timeout_timer.stop();
             root.loading = false;
