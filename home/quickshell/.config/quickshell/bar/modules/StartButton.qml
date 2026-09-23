@@ -17,7 +17,7 @@ Item {
     IconImage {
         id: icon
         anchors.centerIn: parent
-        implicitSize: root.compact ? 20 : 24
+        implicitSize: root.compact ? 22 : 26
         source: Quickshell.iconPath("start-here-archlinux", "start-here")
     }
 
