@@ -17,7 +17,8 @@ Popup {
     }
     preferred_width: 320
     footer_hint: "j/k move · h/l adjust · m mute · Enter default · q close"
-    readonly property int max_visible_rows: 10
+    // The list fits its rows and only scrolls past most of the screen height.
+    readonly property real max_list_height: (root.screen ? root.screen.height : 1080) * 0.6
     body_height: content.implicitHeight + 24
 
     readonly property var output_devices: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio)
@@ -119,7 +120,7 @@ Popup {
             ListView {
                 id: rows_list
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * Style.px(26))
+                Layout.preferredHeight: Math.min(contentHeight, root.max_list_height)
                 clip: true
                 spacing: 2
                 model: root.rows
