@@ -64,7 +64,7 @@ Item {
             }
         }
         onWheel: wheel => {
-            if (!root.sink || !root.sink.audio) return;
+            if (!root.sink || !root.sink.ready || !root.sink.audio) return;
             const step = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
             root.sink.audio.volume = Math.max(0, Math.min(1, root.sink.audio.volume + step));
         }

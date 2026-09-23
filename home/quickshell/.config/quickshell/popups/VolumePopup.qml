@@ -49,7 +49,7 @@ Popup {
     }
 
     function adjust(node, delta) {
-        if (!node || !node.audio) return;
+        if (!node || !node.ready || !node.audio) return;
         node.audio.volume = Math.max(0, Math.min(1, node.audio.volume + delta));
     }
 
