@@ -59,6 +59,7 @@ PanelWindow {
             open_anim.restart();
             content_scope.forceActiveFocus();
             grab_ready = false;
+            grab_retries = 0;
             grab_delay.restart();
         } else if (visible) {
             open_anim.stop();
@@ -138,10 +139,26 @@ PanelWindow {
 
     // Armed a beat after opening: on a quick reopen Hyprland hasn't moved keyboard focus back yet and clears a grab taken at once.
     property bool grab_ready: false
+    property int grab_retries: 0
+    property double grab_armed_ms: 0
     Timer {
         id: grab_delay
         interval: 60
-        onTriggered: root.grab_ready = true
+        onTriggered: {
+            root.grab_armed_ms = Date.now();
+            root.grab_ready = true;
+        }
+    }
+
+    // A clear right after arming means focus hadn't returned yet, so re-arm instead of closing.
+    function grab_cleared() {
+        if (root.wanted && root.grab_retries < 2 && Date.now() - root.grab_armed_ms < 300) {
+            root.grab_retries += 1;
+            root.grab_ready = false;
+            grab_delay.restart();
+            return;
+        }
+        Popups.close();
     }
 
     Loader {
@@ -149,7 +166,7 @@ PanelWindow {
         sourceComponent: HyprlandFocusGrab {
             active: true
             windows: [root]
-            onCleared: Popups.close()
+            onCleared: root.grab_cleared()
         }
     }
 
