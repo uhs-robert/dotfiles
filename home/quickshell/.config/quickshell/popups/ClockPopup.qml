@@ -98,6 +98,12 @@ Popup {
             } else if (event.key === Qt.Key_K) {
                 root.view_year -= 1;
                 event.accepted = true;
+            } else if (event.key === Qt.Key_BracketRight) {
+                Timezones.cycle(1);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_BracketLeft) {
+                Timezones.cycle(-1);
+                event.accepted = true;
             } else if (event.key === Qt.Key_T) {
                 root.go_today();
                 event.accepted = true;
