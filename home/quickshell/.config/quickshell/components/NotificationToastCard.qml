@@ -50,6 +50,7 @@ Rectangle {
     color: Theme.bg_mantle
     border.width: 1
     border.color: Theme.ui_border
+    clip: true
 
     opacity: 0
     Component.onCompleted: enter_anim.start()
@@ -115,14 +116,17 @@ Rectangle {
 
         ColumnLayout {
             Layout.fillWidth: true
+            Layout.minimumWidth: 0
             spacing: 2
 
             RowLayout {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 spacing: 6
 
                 Text {
                     Layout.fillWidth: true
+                    Layout.minimumWidth: 0
                     elide: Text.ElideRight
                     text: (root.notification ? root.notification.appName : "") + "  ·  " + root.relative_time
                     color: Theme.fg_muted
@@ -146,29 +150,33 @@ Rectangle {
 
             Text {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 elide: Text.ElideRight
                 text: root.notification ? root.notification.summary : ""
                 color: Theme.fg_core
                 font.bold: true
                 font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 1
+                font.pixelSize: Theme.popup_font_size + 1
             }
 
             Text {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 visible: root.notification && root.notification.body !== ""
                 maximumLineCount: 4
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
-                textFormat: Text.RichText
+                // StyledText (unlike RichText) elides correctly and still renders <b>/<i>/etc.
+                textFormat: Text.StyledText
                 text: root.notification ? root.notification.body : ""
                 color: Theme.fg_muted
                 font.family: Theme.font_family
-                font.pixelSize: Theme.popup_font_size - 3
+                font.pixelSize: Theme.popup_font_size
             }
 
-            RowLayout {
+            Flow {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 Layout.topMargin: 2
                 visible: root.actions.length > 0
                 spacing: 6
@@ -180,7 +188,7 @@ Rectangle {
                         id: action_chip
                         required property var modelData
 
-                        implicitWidth: action_label.implicitWidth + 16
+                        implicitWidth: Math.min(action_label.implicitWidth + 16, layout.width)
                         implicitHeight: 22
                         radius: 11
                         color: Theme.bg_surface
@@ -188,6 +196,9 @@ Rectangle {
                         Text {
                             id: action_label
                             anchors.centerIn: parent
+                            elide: Text.ElideRight
+                            width: Math.min(implicitWidth, layout.width - 16)
+                            horizontalAlignment: Text.AlignHCenter
                             text: action_chip.modelData.text
                             color: Theme.theme_secondary
                             font.family: Theme.font_family
