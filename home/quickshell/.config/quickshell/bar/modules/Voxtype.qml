@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/bar/modules/Voxtype.qml
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import "../../theme"
 import "../../services"
@@ -26,7 +27,7 @@ Item {
     Text {
         id: glyph
         anchors.verticalCenter: parent.verticalCenter
-        text: root.glyphs[VoxtypeState.state] || root.glyphs.idle
+        text: root.glyphs[VoxtypeState.transcribing ? "idle" : VoxtypeState.state] || root.glyphs.idle
         color: root.glyph_color
         font.family: Theme.font_family
         font.pixelSize: Theme.glyph_size
@@ -40,16 +41,39 @@ Item {
             NumberAnimation { target: glyph; property: "opacity"; from: 1; to: 0.5; duration: 500; easing.type: Easing.InOutQuad }
             NumberAnimation { target: glyph; property: "opacity"; from: 0.5; to: 1; duration: 500; easing.type: Easing.InOutQuad }
         }
+    }
 
-        RotationAnimation {
-            id: spin_animation
-            target: glyph
-            running: VoxtypeState.transcribing
+    Shape {
+        id: ring
+        readonly property real diameter: glyph.implicitHeight + 2
+        anchors.centerIn: glyph
+        width: diameter
+        height: diameter
+        visible: VoxtypeState.transcribing
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeColor: root.glyph_color
+            strokeWidth: 2
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+
+            PathAngleArc {
+                centerX: ring.diameter / 2
+                centerY: ring.diameter / 2
+                radiusX: ring.diameter / 2 - 1
+                radiusY: ring.diameter / 2 - 1
+                startAngle: 0
+                sweepAngle: 100
+            }
+        }
+
+        RotationAnimation on rotation {
+            running: ring.visible
             loops: Animation.Infinite
             from: 0
             to: 360
             duration: 1000
-            onRunningChanged: if (!running) glyph.rotation = 0
         }
     }
 
