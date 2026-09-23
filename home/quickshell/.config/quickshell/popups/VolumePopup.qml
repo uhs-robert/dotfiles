@@ -114,7 +114,7 @@ Popup {
                         text: root.section_of(row_wrap.modelData.type)
                         color: Theme.fg_muted
                         font.family: Theme.font_family
-                        font.pixelSize: Theme.font_size - 3
+                        font.pixelSize: Theme.popup_font_size - 3
                     }
 
                     Rectangle {
@@ -136,7 +136,7 @@ Popup {
                                 text: row_wrap.modelData.node.description || row_wrap.modelData.node.name
                                 color: (row_wrap.modelData.node === Pipewire.defaultAudioSink || row_wrap.modelData.node === Pipewire.defaultAudioSource) ? Theme.theme_secondary : Theme.fg_core
                                 font.family: Theme.font_family
-                                font.pixelSize: Theme.font_size - 1
+                                font.pixelSize: Theme.popup_font_size - 1
                             }
                         }
 
@@ -162,7 +162,7 @@ Popup {
                                 text: row_wrap.modelData.type === "stream" ? (row_wrap.modelData.node.properties["application.name"] || row_wrap.modelData.node.name) : (row_wrap.modelData.node.description || row_wrap.modelData.node.name)
                                 color: Theme.fg_core
                                 font.family: Theme.font_family
-                                font.pixelSize: Theme.font_size - 1
+                                font.pixelSize: Theme.popup_font_size - 1
                             }
 
                             Slider {
@@ -177,7 +177,7 @@ Popup {
                                 text: row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted ? "" : ""
                                 color: Theme.theme_primary
                                 font.family: Theme.font_family
-                                font.pixelSize: Theme.font_size - 1
+                                font.pixelSize: Theme.popup_font_size - 1
 
                                 MouseArea {
                                     anchors.fill: parent
@@ -195,7 +195,7 @@ Popup {
                 text: "No apps playing"
                 color: Theme.fg_dim
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size - 2
+                font.pixelSize: Theme.popup_font_size - 2
             }
         }
     }

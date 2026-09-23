@@ -104,14 +104,14 @@ Popup {
                             text: root.glyphs[row.index]
                             color: root.glyph_colors[row.index]
                             font.family: Theme.font_family
-                            font.pixelSize: Theme.font_size
+                            font.pixelSize: Theme.popup_font_size
                         }
 
                         Text {
                             text: row.modelData
                             color: Theme.fg_core
                             font.family: Theme.font_family
-                            font.pixelSize: Theme.font_size
+                            font.pixelSize: Theme.popup_font_size
                         }
                     }
 
@@ -132,14 +132,14 @@ Popup {
                 text: root.glyphs[root.selected] + " " + root.actions[root.selected] + "?"
                 color: root.glyph_colors[root.selected]
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size
+                font.pixelSize: Theme.popup_font_size
             }
 
             Text {
                 text: "Yes"
                 color: Theme.ok
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size
+                font.pixelSize: Theme.popup_font_size
 
                 MouseArea {
                     anchors.fill: parent
@@ -151,7 +151,7 @@ Popup {
                 text: "No"
                 color: Theme.error
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size
+                font.pixelSize: Theme.popup_font_size
 
                 MouseArea {
                     anchors.fill: parent

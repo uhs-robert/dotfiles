@@ -92,14 +92,14 @@ Popup {
                 text: Math.round(root.percent) + "%"
                 color: Theme.fg_strong
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size + 4
+                font.pixelSize: Theme.popup_font_size + 4
             }
 
             Text {
                 text: root.state_label
                 color: Theme.fg_muted
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size - 2
+                font.pixelSize: Theme.popup_font_size - 2
             }
 
             Text {
@@ -107,7 +107,7 @@ Popup {
                 text: root.time_label
                 color: Theme.fg_muted
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size - 2
+                font.pixelSize: Theme.popup_font_size - 2
             }
 
             Text {
@@ -115,7 +115,7 @@ Popup {
                 text: root.rate.toFixed(1) + " W"
                 color: Theme.fg_muted
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size - 2
+                font.pixelSize: Theme.popup_font_size - 2
             }
 
             Text {
@@ -124,7 +124,7 @@ Popup {
                 text: "power-profiles-daemon not running"
                 color: Theme.fg_dim
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size - 3
+                font.pixelSize: Theme.popup_font_size - 3
             }
 
             Repeater {
@@ -152,7 +152,7 @@ Popup {
                             text: profile_row.modelData.label
                             color: PowerProfiles.profile === profile_row.modelData.value ? Theme.theme_secondary : Theme.fg_core
                             font.family: Theme.font_family
-                            font.pixelSize: Theme.font_size - 1
+                            font.pixelSize: Theme.popup_font_size - 1
                         }
                     }
 

@@ -106,7 +106,7 @@ Popup {
                 text: Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMMM yyyy")
                 color: Theme.fg_core
                 font.family: Theme.font_family
-                font.pixelSize: Theme.font_size
+                font.pixelSize: Theme.popup_font_size
                 font.bold: true
             }
 
@@ -130,7 +130,7 @@ Popup {
                         text: modelData
                         color: Theme.fg_muted
                         font.family: Theme.font_family
-                        font.pixelSize: Theme.font_size - 2
+                        font.pixelSize: Theme.popup_font_size - 2
                     }
                 }
             }
@@ -150,7 +150,7 @@ Popup {
                         text: parent.modelData.week_num
                         color: Theme.fg_dim
                         font.family: Theme.font_family
-                        font.pixelSize: Theme.font_size - 2
+                        font.pixelSize: Theme.popup_font_size - 2
                     }
 
                     Repeater {
@@ -167,7 +167,7 @@ Popup {
                             text: modelData.getDate()
                             color: is_today ? Theme.theme_accent : (in_month ? Theme.fg_core : Theme.fg_muted)
                             font.family: Theme.font_family
-                            font.pixelSize: Theme.font_size - 1
+                            font.pixelSize: Theme.popup_font_size - 1
                             font.underline: is_today
                         }
                     }

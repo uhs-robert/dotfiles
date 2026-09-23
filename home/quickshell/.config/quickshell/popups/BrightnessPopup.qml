@@ -60,7 +60,7 @@ Popup {
                     text: "󰃠"
                     color: root.selected === 0 ? Theme.theme_primary : Theme.fg_dim
                     font.family: Theme.font_family
-                    font.pixelSize: Theme.font_size
+                    font.pixelSize: Theme.popup_font_size
                 }
 
                 Slider {
@@ -74,7 +74,7 @@ Popup {
                     text: Backlight.percent + "%"
                     color: Theme.fg_core
                     font.family: Theme.font_family
-                    font.pixelSize: Theme.font_size - 1
+                    font.pixelSize: Theme.popup_font_size - 1
                 }
             }
 
@@ -87,7 +87,7 @@ Popup {
                     text: "󰌌"
                     color: root.selected === 1 ? Theme.theme_primary : Theme.fg_dim
                     font.family: Theme.font_family
-                    font.pixelSize: Theme.font_size
+                    font.pixelSize: Theme.popup_font_size
                 }
 
                 Slider {
@@ -101,7 +101,7 @@ Popup {
                     text: Backlight.kbd_percent + "%"
                     color: Theme.fg_core
                     font.family: Theme.font_family
-                    font.pixelSize: Theme.font_size - 1
+                    font.pixelSize: Theme.popup_font_size - 1
                 }
             }
         }
