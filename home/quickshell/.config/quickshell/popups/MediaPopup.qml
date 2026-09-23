@@ -121,6 +121,7 @@ Popup {
                             anchors.fill: parent
                             radius: 12
                             visible: false
+                            layer.enabled: true
                         }
 
                         Image {
@@ -131,7 +132,7 @@ Popup {
                             source: root.player ? root.player.trackArtUrl : ""
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
-                            layer.enabled: false
+                            layer.enabled: true
                         }
 
                         MultiEffect {
@@ -140,6 +141,8 @@ Popup {
                             source: art_image
                             maskEnabled: true
                             maskSource: art_mask
+                            maskThresholdMin: 0.5
+                            maskSpreadAtMin: 1.0
                         }
                     }
 
@@ -311,7 +314,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
                 elide: Text.ElideRight
-                text: "Tab switches player · space play/pause · h/l seek -5/+5s · H/L prev/next track · q close"
+                text: "Tab player · space play · h/l seek · H/L track · q close"
                 color: Theme.fg_dim
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size - 4
