@@ -14,7 +14,8 @@ Popup {
 
     popup_name: "tray"
     preferred_width: 300
-    implicitHeight: content.implicitHeight + 24
+    footer_hint: "j/k move · Enter open · m/l menu · q close"
+    body_height: content.implicitHeight + 24
 
     readonly property var items: SystemTray.items.values
 
@@ -157,12 +158,12 @@ Popup {
                     required property int index
 
                     Layout.fillWidth: true
-                    height: 26
+                    height: Style.px(26)
                     selected: item_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 6
+                        anchors.leftMargin: 6 + item_row.inset
                         anchors.rightMargin: 6
                         spacing: 8
 

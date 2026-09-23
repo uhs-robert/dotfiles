@@ -241,7 +241,7 @@ Item {
                             anchors.fill: parent
                             visible: hour_col.index === root.hour_cursor
                             color: Theme.bg_surface
-                            radius: 3
+                            radius: Style.radius(3)
                         }
 
                         Image {

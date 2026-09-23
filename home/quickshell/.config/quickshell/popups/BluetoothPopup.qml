@@ -11,7 +11,8 @@ Popup {
 
     popup_name: "bluetooth"
     preferred_width: 260
-    implicitHeight: content.implicitHeight + 24
+    footer_hint: "j/k move · Enter connect · p power · q close"
+    body_height: content.implicitHeight + 24
 
     readonly property var adapter: QsBt.Bluetooth.defaultAdapter
     readonly property bool has_adapter: !!adapter
@@ -100,12 +101,12 @@ Popup {
 
                     Layout.fillWidth: true
                     Layout.topMargin: device_row.index === 0 ? 6 : 0
-                    height: 22
+                    height: Style.px(22)
                     selected: device_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 6
+                        anchors.leftMargin: 6 + device_row.inset
                         anchors.rightMargin: 6
                         spacing: 6
 

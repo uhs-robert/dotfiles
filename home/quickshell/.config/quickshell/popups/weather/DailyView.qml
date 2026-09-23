@@ -76,7 +76,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: -2
-                        radius: 4
+                        radius: Style.radius(4)
                         color: Theme.bg_surface
                         visible: day_col.index === root.day_cursor
                     }
@@ -101,7 +101,7 @@ Item {
                                 anchors.bottom: parent.bottom
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.55
-                                radius: 2
+                                radius: Style.radius(2)
                                 color: Theme.blue
                                 opacity: 0.35
                                 height: (Math.max(0, Math.min(100, day_col.modelData.pop)) / 100) * parent.height
@@ -111,7 +111,7 @@ Item {
                                 id: inner_band
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.3
-                                radius: 2
+                                radius: Style.radius(2)
                                 color: Theme.yellow
                                 y: root.inner_top_y(day_col.modelData)
                                 height: Math.max(4, root.inner_bottom_y(day_col.modelData) - root.inner_top_y(day_col.modelData))
@@ -155,7 +155,7 @@ Item {
                                 anchors.bottom: parent.bottom
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.5
-                                radius: 2
+                                radius: Style.radius(2)
                                 color: Theme.cyan
                                 opacity: 0.5
                                 height: (day_col.modelData.wind_speed_max / root.wind_max) * (parent.height - 36)
@@ -189,7 +189,7 @@ Item {
                                 anchors.bottom: parent.bottom
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.5
-                                radius: 2
+                                radius: Style.radius(2)
                                 color: WeatherState.uv_color(day_col.modelData.uv_max)
                                 opacity: 0.7
                                 height: Math.min(1, day_col.modelData.uv_max / 12) * (parent.height - 18)
@@ -215,7 +215,7 @@ Item {
                                 anchors.bottom: parent.bottom
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.5
-                                radius: 2
+                                radius: Style.radius(2)
                                 color: Theme.yellow
                                 opacity: 0.55
                                 height: Math.min(1, day_col.modelData.sunshine_hours / 14) * (parent.height - 18)

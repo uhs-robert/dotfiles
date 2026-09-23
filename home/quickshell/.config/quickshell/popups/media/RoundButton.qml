@@ -42,7 +42,7 @@ Rectangle {
         anchors.bottomMargin: -1
         width: 12
         height: 12
-        radius: 6
+        radius: Style.radius(6)
         color: Theme.theme_primary
         border.width: 1
         border.color: Theme.bg_mantle

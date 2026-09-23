@@ -12,7 +12,7 @@ Popup {
 
     popup_name: "weather"
     preferred_width: 760
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
     readonly property var base_tab_names: ["Daily", "Hourly", "Precipitation", "Sun & Moon", "Air"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
@@ -31,7 +31,7 @@ Popup {
     property int hour_cursor: 0
     property int alert_cursor: 0
 
-    readonly property int content_height: 400
+    readonly property int content_height: Style.px(400)
 
     onCurrent_subChanged: {
         if (root.current_tab === 0) root.daily_sub = root.current_sub;
@@ -237,7 +237,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.has_alerts ? 28 : 0
                 visible: root.has_alerts
-                radius: 4
+                radius: Style.radius(4)
                 color: Theme.bg_surface
 
                 RowLayout {
@@ -248,7 +248,7 @@ Popup {
                     Rectangle {
                         Layout.preferredWidth: 8
                         Layout.preferredHeight: 8
-                        radius: 4
+                        radius: Style.radius(4)
                         color: WeatherState.alerts.length > 0 ? WeatherState.alert_color(WeatherState.alerts[0].severity) : Theme.fg_dim
                     }
 
@@ -285,9 +285,10 @@ Popup {
                         required property int index
 
                         Layout.fillWidth: true
-                        implicitHeight: 26
+                        implicitHeight: Style.px(26)
                         label: tab_chip.modelData
                         active: tab_chip.index === root.current_tab
+                        key: tab_chip.index < 9 ? String(tab_chip.index + 1) : ""
                         onClicked: root.set_tab(tab_chip.index)
                     }
                 }

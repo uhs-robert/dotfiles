@@ -11,9 +11,9 @@ Popup {
 
     popup_name: "updates"
     preferred_width: 520
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
-    readonly property int content_height: 320
+    readonly property int content_height: Style.px(320)
     sub_views: ["Official (" + UpdatesState.official.length + ")", "AUR (" + UpdatesState.aur.length + ")"]
     jumps_enabled: true
     readonly property var current_list: root.current_sub === 0 ? UpdatesState.official : UpdatesState.aur
@@ -136,12 +136,12 @@ Popup {
                         required property int index
 
                         width: row_list.width
-                        height: 30
+                        height: Style.px(30)
                         selected: update_row.index === root.selected
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 8
+                            anchors.leftMargin: 8 + update_row.inset
                             anchors.rightMargin: 8
                             spacing: 8
 

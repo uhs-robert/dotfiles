@@ -9,8 +9,10 @@ Popup {
     id: root
 
     popup_name: "clock"
+    title: Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMM yyyy").toUpperCase()
     preferred_width: 320
-    implicitHeight: content.implicitHeight + 24
+    footer_hint: "h/l month · j/k year · t/gg today · [ ] zone · q close"
+    body_height: content.implicitHeight + 24
 
     property date today: new Date()
     property int view_year: today.getFullYear()
@@ -145,6 +147,7 @@ Popup {
             spacing: 8
 
             Text {
+                visible: !root.has_title
                 Layout.alignment: Qt.AlignHCenter
                 text: Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMMM yyyy")
                 color: Theme.fg_core
@@ -167,11 +170,20 @@ Popup {
                         readonly property bool is_active: index === Timezones.index
 
                         text: Timezones.abbrevs[index] || "..."
-                        color: is_active ? Theme.theme_secondary : Theme.fg_muted
+                        color: is_active ? (Style.marker_fill ? Style.title_fg : Theme.theme_secondary) : Theme.fg_muted
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size - 2
                         font.bold: is_active
-                        font.underline: is_active
+                        font.underline: is_active && !Style.marker_fill
+
+                        Rectangle {
+                            z: -1
+                            visible: zone_label.is_active && Style.marker_fill
+                            anchors.fill: parent
+                            anchors.leftMargin: -4
+                            anchors.rightMargin: -4
+                            color: Style.title_bg
+                        }
 
                         MouseArea {
                             anchors.fill: parent
@@ -192,7 +204,9 @@ Popup {
                     model: root.flat_cells
 
                     Text {
+                        id: cell
                         required property var modelData
+                        readonly property bool marked: modelData.kind === "day" && modelData.is_today === true && Style.marker_fill
 
                         Layout.fillWidth: true
                         Layout.preferredWidth: 0
@@ -201,8 +215,16 @@ Popup {
                         text: modelData.text
                         font.family: Style.font_family
                         font.pixelSize: modelData.kind === "header" || modelData.kind === "weeknum" ? root.grid_font_size - 1 : root.grid_font_size
-                        color: modelData.kind === "header" ? Theme.fg_muted : modelData.kind === "weeknum" ? Theme.fg_dim : modelData.is_today ? Theme.theme_accent : (modelData.in_month ? Theme.fg_core : Theme.fg_muted)
-                        font.underline: modelData.kind === "day" && modelData.is_today === true
+                        color: cell.marked ? Style.title_fg : modelData.kind === "header" ? Theme.fg_muted : modelData.kind === "weeknum" ? Theme.fg_dim : modelData.is_today ? Theme.theme_accent : (modelData.in_month ? Theme.fg_core : Theme.fg_muted)
+                        font.underline: modelData.kind === "day" && modelData.is_today === true && !Style.marker_fill
+                        font.bold: cell.marked
+
+                        Rectangle {
+                            z: -1
+                            visible: cell.marked
+                            anchors.fill: parent
+                            color: Style.title_bg
+                        }
                     }
                 }
             }

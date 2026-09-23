@@ -16,8 +16,9 @@ Popup {
         id: stepper
     }
     preferred_width: 320
+    footer_hint: "j/k move · h/l adjust · m mute · Enter default · q close"
     readonly property int max_visible_rows: 10
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
     readonly property var output_devices: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio)
     readonly property var input_devices: Pipewire.nodes.values.filter(n => !n.isSink && !n.isStream && n.audio)
@@ -118,7 +119,7 @@ Popup {
             ListView {
                 id: rows_list
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * 26)
+                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * Style.px(26))
                 clip: true
                 spacing: 2
                 model: root.rows
@@ -141,13 +142,13 @@ Popup {
                     MenuRow {
                         id: vol_row
                         width: row_wrap.width
-                        height: 22
+                        height: Style.px(22)
                         selected: row_wrap.index === root.selected
 
                         RowLayout {
                             visible: !root.is_slider_row(row_wrap.modelData.type)
                             anchors.fill: parent
-                            anchors.leftMargin: 6
+                            anchors.leftMargin: 6 + vol_row.inset
                             anchors.rightMargin: 6
                             spacing: 6
 
@@ -173,12 +174,12 @@ Popup {
                         RowLayout {
                             visible: root.is_slider_row(row_wrap.modelData.type)
                             anchors.fill: parent
-                            anchors.leftMargin: 6
+                            anchors.leftMargin: 6 + vol_row.inset
                             anchors.rightMargin: 6
                             spacing: 6
 
                             Text {
-                                Layout.preferredWidth: 90
+                                Layout.preferredWidth: Style.px(90)
                                 elide: Text.ElideRight
                                 text: row_wrap.modelData.type === "stream" ? (row_wrap.modelData.node.properties["application.name"] || row_wrap.modelData.node.name) : (row_wrap.modelData.node.description || row_wrap.modelData.node.name)
                                 color: vol_row.fg(Theme.fg_core)

@@ -12,12 +12,12 @@ Popup {
 
     popup_name: "keeptabs"
     preferred_width: 340
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
     property var sessions: []
     property int selected: 0
     property bool stale: false
-    readonly property int content_height: 300
+    readonly property int content_height: Style.px(300)
 
     tabs: ["Agents", "Usage"]
     jumps_enabled: root.current_tab === 0
@@ -162,9 +162,10 @@ Popup {
                         required property int index
 
                         Layout.fillWidth: true
-                        implicitHeight: 26
+                        implicitHeight: Style.px(26)
                         label: tab_chip.modelData
                         active: tab_chip.index === root.current_tab
+                        key: tab_chip.index < 9 ? String(tab_chip.index + 1) : ""
                         onClicked: root.set_tab(tab_chip.index)
                     }
                 }
@@ -200,12 +201,12 @@ Popup {
                         readonly property bool has_context: session_row.modelData.context_pct !== null && session_row.modelData.context_pct !== undefined
 
                         width: session_list.width
-                        height: 46
+                        height: Style.px(46)
                         selected: session_row.index === root.selected
 
                         ColumnLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 6
+                            anchors.leftMargin: 6 + session_row.inset
                             anchors.rightMargin: 6
                             anchors.topMargin: 3
                             anchors.bottomMargin: 3
@@ -261,13 +262,13 @@ Popup {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: session_row.has_context ? 3 : 0
                                 visible: session_row.has_context
-                                radius: 1.5
+                                radius: Style.radius(1.5)
                                 color: Theme.bg_surface
 
                                 Rectangle {
                                     width: session_row.has_context ? parent.width * Math.max(0, Math.min(100, session_row.modelData.context_pct)) / 100 : 0
                                     height: parent.height
-                                    radius: 1.5
+                                    radius: Style.radius(1.5)
                                     color: session_row.has_context ? root.context_bar_color(session_row.modelData.context_pct) : "transparent"
                                 }
                             }
@@ -323,7 +324,7 @@ Popup {
 
                             width: ListView.view.width
                             height: 56
-                            radius: 4
+                            radius: Style.radius(4)
                             color: "transparent"
 
                             ColumnLayout {
@@ -358,13 +359,13 @@ Popup {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 8
-                                    radius: 4
+                                    radius: Style.radius(4)
                                     color: Theme.bg_surface
 
                                     Rectangle {
                                         width: parent.width * Math.max(0, Math.min(100, usage_row.modelData.percent)) / 100
                                         height: parent.height
-                                        radius: 4
+                                        radius: Style.radius(4)
                                         color: root.context_bar_color(usage_row.modelData.percent)
                                     }
                                 }

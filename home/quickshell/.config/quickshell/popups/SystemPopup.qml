@@ -11,7 +11,8 @@ Popup {
 
     popup_name: "system"
     preferred_width: 340
-    implicitHeight: content.implicitHeight + 24
+    footer_hint: "j/k move · Enter select · q close"
+    body_height: content.implicitHeight + 24
 
     readonly property var stat_rows: {
         const list = [
@@ -99,13 +100,13 @@ Popup {
                     readonly property bool is_btop: modelData.kind === "btop"
 
                     Layout.fillWidth: true
-                    height: 26
+                    height: Style.px(26)
                     clip: true
                     selected: stat_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 6
+                        anchors.leftMargin: 6 + stat_row.inset
                         anchors.rightMargin: 6
                         spacing: 8
 

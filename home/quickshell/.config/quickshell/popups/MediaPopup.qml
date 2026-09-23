@@ -14,7 +14,7 @@ Popup {
 
     popup_name: "media"
     preferred_width: 520
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
     readonly property var player: MediaState.active
     readonly property var players: MediaState.players
@@ -151,7 +151,7 @@ Popup {
                     Rectangle {
                         id: art_shadow_source
                         anchors.fill: parent
-                        radius: 12
+                        radius: Style.radius(12)
                         color: Theme.bg_shadow
                         visible: false
                         layer.enabled: true
@@ -171,7 +171,7 @@ Popup {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 12
+                        radius: Style.radius(12)
                         color: Theme.bg_surface
                         visible: !art_image.has_art || art_image.status !== Image.Ready
                     }
@@ -188,7 +188,7 @@ Popup {
                     Rectangle {
                         id: art_mask
                         anchors.fill: parent
-                        radius: 12
+                        radius: Style.radius(12)
                         visible: false
                         layer.enabled: true
                     }
@@ -226,7 +226,7 @@ Popup {
                         visible: !!root.player
                         implicitWidth: pill_label.implicitWidth + 16
                         implicitHeight: 20
-                        radius: 10
+                        radius: Style.radius(10)
                         color: Theme.bg_surface
 
                         Text {
@@ -290,7 +290,7 @@ Popup {
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width
                             height: 6
-                            radius: 3
+                            radius: Style.radius(3)
                             color: Theme.bg_surface
                             visible: progress_item.has_length
                         }
@@ -299,7 +299,7 @@ Popup {
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width * progress_item.ratio
                             height: 6
-                            radius: 3
+                            radius: Style.radius(3)
                             color: Theme.theme_primary
                             visible: progress_item.has_length
                         }
@@ -426,7 +426,7 @@ Popup {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignBottom
                                     height: cava_strip.active ? Math.max(2, cava_bar.level * 18) : 2
-                                    radius: 1
+                                    radius: Style.radius(1)
                                     color: Theme.theme_primary
                                     opacity: cava_strip.active ? 0.25 : 0
 

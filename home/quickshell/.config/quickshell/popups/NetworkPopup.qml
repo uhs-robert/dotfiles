@@ -13,9 +13,10 @@ Popup {
 
     popup_name: "network"
     preferred_width: 320
+    footer_hint: root.password_mode ? "" : root.forget_confirm ? "y forget · n keep" : "j/k move · Enter connect · f forget · w wifi · r scan · q close"
 
     readonly property int max_visible_rows: 8
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
     readonly property var wifi_device: {
         for (const d of Networking.devices.values) if (d.type === DeviceType.Wifi) return d;
@@ -287,7 +288,7 @@ Popup {
             ListView {
                 id: network_list
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * (24 + spacing))
+                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * (Style.px(24) + spacing))
                 clip: true
                 spacing: 4
                 model: root.nav_rows
@@ -301,12 +302,12 @@ Popup {
                     readonly property bool is_advanced: !!net_row.modelData.advanced
 
                     width: network_list.width
-                    height: 24
+                    height: Style.px(24)
                     selected: net_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 6
+                        anchors.leftMargin: 6 + net_row.inset
                         anchors.rightMargin: 6
                         spacing: 6
 
@@ -374,8 +375,8 @@ Popup {
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 26
-                radius: 4
+                height: Style.px(26)
+                radius: Style.radius(4)
                 color: Theme.bg_surface
 
                 TextInput {

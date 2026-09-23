@@ -11,7 +11,8 @@ Popup {
 
     popup_name: "start"
     preferred_width: 180
-    implicitHeight: content.implicitHeight + 24
+    footer_hint: root.confirm ? "y/Enter confirm · n/Esc back" : "j/k move · Enter run · q close"
+    body_height: content.implicitHeight + 24
 
     readonly property var actions: ["Apps", "Lock", "Logout", "Reboot", "Power Off"]
     readonly property var glyphs: ["󰣇", "󰌾", "󰍃", "󰜉", "󰐥"]
@@ -96,13 +97,13 @@ Popup {
                     required property string modelData
 
                     Layout.fillWidth: true
-                    height: 28
+                    height: Style.px(28)
                     base_radius: 6
                     selected: index === root.selected
 
                     RowLayout {
                         anchors.left: parent.left
-                        anchors.leftMargin: 8
+                        anchors.leftMargin: 8 + row.inset
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 8
 

@@ -64,18 +64,19 @@ Item {
                     required property int index
 
                     Layout.fillWidth: true
-                    height: 36
+                    height: Style.px(36)
                     selected: alert_row.index === root.alert_cursor
 
                     RowLayout {
                         anchors.fill: parent
                         anchors.margins: 4
+                        anchors.leftMargin: 4 + alert_row.inset
                         spacing: 6
 
                         Rectangle {
                             Layout.preferredWidth: 6
                             Layout.preferredHeight: 6
-                            radius: 3
+                            radius: Style.radius(3)
                             color: WeatherState.alert_color(alert_row.modelData.severity)
                         }
 

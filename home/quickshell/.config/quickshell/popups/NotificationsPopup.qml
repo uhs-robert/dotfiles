@@ -13,9 +13,9 @@ Popup {
 
     popup_name: "notifications"
     preferred_width: 640
-    implicitHeight: content.implicitHeight + 24
+    body_height: content.implicitHeight + 24
 
-    readonly property int content_height: 460
+    readonly property int content_height: Style.px(460)
     tabs: ["All", "Apps", "Critical"]
     // The sub-view is the tab's sort order; Popup keeps each tab's choice across tab switches.
     sub_views: root.current_tab === 1 ? ["Latest activity", "By name"] : ["Newest first", "Oldest first"]
@@ -244,9 +244,10 @@ Popup {
                         required property int index
 
                         Layout.fillWidth: true
-                        implicitHeight: 28
+                        implicitHeight: Style.px(28)
                         label: tab_chip.modelData
                         active: tab_chip.index === root.current_tab
+                        key: tab_chip.index < 9 ? String(tab_chip.index + 1) : ""
                         font_size: Style.font_size - 1
                         onClicked: root.set_tab(tab_chip.index)
                     }

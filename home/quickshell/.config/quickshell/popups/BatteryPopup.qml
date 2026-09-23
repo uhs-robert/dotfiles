@@ -16,7 +16,8 @@ Popup {
         id: stepper
     }
     preferred_width: 260
-    implicitHeight: content.implicitHeight + 24
+    footer_hint: "j/k move · h/l adjust · Enter profile · q close"
+    body_height: content.implicitHeight + 24
 
     readonly property var device: UPower.displayDevice
     readonly property bool has_battery: !!device && device.ready
@@ -159,12 +160,12 @@ Popup {
                 id: brightness_row
                 Layout.fillWidth: true
                 Layout.topMargin: 6
-                height: 22
+                height: Style.px(22)
                 selected: !!root.nav_rows[root.selected] && root.nav_rows[root.selected].kind === "brightness"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 6
+                    anchors.leftMargin: 6 + brightness_row.inset
                     anchors.rightMargin: 6
                     spacing: 8
 
@@ -196,12 +197,12 @@ Popup {
                 id: kbd_row
                 visible: Backlight.has_kbd
                 Layout.fillWidth: true
-                height: 22
+                height: Style.px(22)
                 selected: !!root.nav_rows[root.selected] && root.nav_rows[root.selected].kind === "kbd"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 6
+                    anchors.leftMargin: 6 + kbd_row.inset
                     anchors.rightMargin: 6
                     spacing: 8
 
@@ -250,12 +251,12 @@ Popup {
 
                     Layout.fillWidth: true
                     Layout.topMargin: profile_row.index === 0 ? 6 : 0
-                    height: 22
+                    height: Style.px(22)
                     selected: profile_row.nav_index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 6
+                        anchors.leftMargin: 6 + profile_row.inset
                         anchors.rightMargin: 6
                         spacing: 6
 
