@@ -30,29 +30,42 @@ Singleton {
         }
     }
 
+    // Slider drags fire faster than brightnessctl exits; absolute sets coalesce to the latest.
+    property var pending: []
+
+    function enqueue(cmd, key) {
+        if (key) pending = pending.filter(p => p.key !== key);
+        pending.push({ cmd: cmd, key: key });
+        drain();
+    }
+
+    function drain() {
+        if (write_proc.running || pending.length === 0) return;
+        write_proc.command = pending.shift().cmd;
+        write_proc.running = true;
+    }
+
     // brightnessctl clamps at 1% floor so a scroll or key never blacks out the screen.
     function bump(delta) {
-        bump_proc.command = delta > 0 ? ["brightnessctl", "set", "5%+"] : ["brightnessctl", "-n1", "set", "5%-"];
-        bump_proc.running = true;
+        const cmd = delta > 0 ? ["brightnessctl", "set", "5%+"] : ["brightnessctl", "-n1", "set", "5%-"];
+        root.enqueue(cmd, "");
     }
 
     function set_percent(pct) {
         const clamped = Math.max(1, Math.min(100, Math.round(pct)));
-        set_proc.command = ["brightnessctl", "set", clamped + "%"];
-        set_proc.running = true;
+        root.enqueue(["brightnessctl", "set", clamped + "%"], "screen");
     }
 
     function kbd_bump(delta) {
         const dev = root.kbd_device_dir.split("/").pop();
-        kbd_bump_proc.command = delta > 0 ? ["brightnessctl", "-d", dev, "set", "5%+"] : ["brightnessctl", "-d", dev, "-n0", "set", "5%-"];
-        kbd_bump_proc.running = true;
+        const cmd = delta > 0 ? ["brightnessctl", "-d", dev, "set", "5%+"] : ["brightnessctl", "-d", dev, "-n0", "set", "5%-"];
+        root.enqueue(cmd, "");
     }
 
     function kbd_set_percent(pct) {
         const dev = root.kbd_device_dir.split("/").pop();
         const clamped = Math.max(0, Math.min(100, Math.round(pct)));
-        kbd_set_proc.command = ["brightnessctl", "-d", dev, "set", clamped + "%"];
-        kbd_set_proc.running = true;
+        root.enqueue(["brightnessctl", "-d", dev, "set", clamped + "%"], "kbd");
     }
 
     Process {
@@ -89,10 +102,13 @@ Singleton {
         kbd_max_brightness_file.reload();
     }
 
-    Process { id: bump_proc; onExited: root.refresh() }
-    Process { id: set_proc; onExited: root.refresh() }
-    Process { id: kbd_bump_proc; onExited: root.refresh() }
-    Process { id: kbd_set_proc; onExited: root.refresh() }
+    Process {
+        id: write_proc
+        onExited: {
+            root.refresh();
+            root.drain();
+        }
+    }
 
     FileView {
         id: brightness_file
