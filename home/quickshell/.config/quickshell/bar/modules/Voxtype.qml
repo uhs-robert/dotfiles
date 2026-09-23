@@ -10,7 +10,7 @@ Item {
 
     property bool compact: false
 
-    readonly property var glyphs: ({ idle: "", recording: "", transcribing: "", stopped: "" })
+    readonly property var glyphs: ({ idle: "", stopped: "" })
     readonly property color glyph_color: VoxtypeState.recording ? Theme.theme_label : VoxtypeState.transcribing ? Theme.warning : VoxtypeState.state === "stopped" ? Theme.fg_dim : Theme.theme_primary
 
     implicitWidth: glyph.implicitWidth
@@ -27,7 +27,7 @@ Item {
     Text {
         id: glyph
         anchors.verticalCenter: parent.verticalCenter
-        text: root.glyphs[VoxtypeState.transcribing ? "idle" : VoxtypeState.state] || root.glyphs.idle
+        text: VoxtypeState.state === "stopped" ? root.glyphs.stopped : root.glyphs.idle
         color: root.glyph_color
         font.family: Theme.font_family
         font.pixelSize: Theme.glyph_size
