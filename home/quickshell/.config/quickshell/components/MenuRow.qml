@@ -18,6 +18,13 @@ Rectangle {
         return root.selected && Style.selection_inverse ? Style.selection_fg : c;
     }
 
+    DashedOutline {
+        visible: root.selected && Style.selection_outline.a > 0
+        anchors.fill: parent
+        anchors.margins: 1
+        color: Style.selection_outline
+    }
+
     Text {
         id: cursor_text
         visible: root.selected && Style.row_cursor !== "" && Style.caret_phase

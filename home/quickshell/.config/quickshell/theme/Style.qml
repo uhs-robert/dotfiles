@@ -26,8 +26,9 @@ Singleton {
             selection_bg: "transparent",
             selection_inverse: false,
             selection_fg: Theme.bg_crust,
-            caret_color: Theme.theme_primary,
+            caret_color: Theme.theme_secondary,
             caret_blink: true,
+            selection_outline: Qt.alpha(Theme.theme_secondary, 0.6),
             tab_active_bg: Theme.theme_secondary,
             tab_active_fg: Theme.bg_crust,
             tab_fg: Theme.fg_muted,
@@ -75,6 +76,7 @@ Singleton {
                 selection_fg: Theme.bg_crust,
                 caret_color: Theme.theme_primary,
                 caret_blink: false,
+                selection_outline: "transparent",
                 tab_active_bg: Theme.bg_surface,
                 tab_active_fg: Theme.theme_secondary,
                 tab_fg: Theme.fg_muted,
@@ -104,15 +106,7 @@ Singleton {
                 chip_active_fg: Theme.theme_secondary,
                 marker_fill: false
             },
-            "terminal": terminal,
-            "terminal_inverted": Object.assign({}, terminal, {
-                accent_color: Theme.theme_primary,
-                tab_active_bg: Theme.theme_primary,
-                title_bg: Theme.theme_primary,
-                caret_color: Theme.theme_secondary,
-                meter_on: Theme.theme_secondary,
-                chip_active_fg: Theme.theme_secondary
-            })
+            "terminal": terminal
         };
     }
 
@@ -134,6 +128,7 @@ Singleton {
     readonly property color selection_fg: root.active.selection_fg
     readonly property color caret_color: root.active.caret_color
     readonly property bool caret_blink: root.active.caret_blink
+    readonly property color selection_outline: root.active.selection_outline
     // Toggled by the open popup's blink timer; the caret is solid whenever it rests true.
     property bool caret_phase: true
     readonly property color tab_active_bg: root.active.tab_active_bg
