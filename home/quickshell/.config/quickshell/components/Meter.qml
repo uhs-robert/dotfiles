@@ -2,28 +2,34 @@
 import QtQuick
 import "../theme"
 
-Row {
+Item {
     id: root
 
     property real value: 0
     property bool hot: false
     readonly property int segment_count: 20
+    readonly property int gap: 2
+    readonly property real segment_width: Math.max(2, (width - gap * (segment_count - 1)) / segment_count)
 
-    spacing: 2
-    height: 10
+    implicitWidth: segment_count * 3 + gap * (segment_count - 1)
+    implicitHeight: 10
 
-    Repeater {
-        model: root.segment_count
+    Row {
+        spacing: root.gap
 
-        Rectangle {
-            required property int index
+        Repeater {
+            model: root.segment_count
 
-            width: 3
-            height: 10
-            radius: 1
-            color: index < Math.round(root.value * root.segment_count)
-                ? (root.hot ? Theme.theme_label : Theme.theme_primary)
-                : Theme.bg_surface
+            Rectangle {
+                required property int index
+
+                width: root.segment_width
+                height: root.implicitHeight
+                radius: 1
+                color: index < Math.round(root.value * root.segment_count)
+                    ? (root.hot ? Theme.theme_label : Theme.theme_primary)
+                    : Theme.bg_surface
+            }
         }
     }
 }

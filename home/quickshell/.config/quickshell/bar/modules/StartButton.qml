@@ -44,6 +44,7 @@ Item {
     }
 
     onIslandChanged: if (root.island) Popups.register_default("start", root.island, root.island_color, root.screen_name)
+    Component.onDestruction: Popups.unregister("start", root.screen_name, root.island)
 
     MouseArea {
         anchors.fill: parent

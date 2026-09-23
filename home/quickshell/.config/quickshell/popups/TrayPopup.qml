@@ -13,8 +13,8 @@ Popup {
     id: root
 
     popup_name: "tray"
-    fallback_width: 300
-    implicitHeight: Math.max(1, SystemTray.items.values.length) * 26 + 24
+    preferred_width: 300
+    implicitHeight: content.implicitHeight + 24
 
     readonly property var items: SystemTray.items.values
 
@@ -23,11 +23,6 @@ Popup {
 
     readonly property bool is_open: Popups.open_name === "tray"
     onIs_openChanged: if (is_open) root.selected = 0
-
-    // Anchored to the bar's tray island (not a popup row), so it survives us closing the popup below.
-    QsMenuAnchor {
-        id: menu_anchor
-    }
 
     function norm(str) {
         return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -65,7 +60,7 @@ Popup {
     function activate_row(item_data) {
         if (!item_data) return;
         if (item_data.onlyMenu) {
-            root.open_menu(item_data);
+            root.open_menu(item_data, item_repeater.itemAt(root.items.indexOf(item_data)));
             return;
         }
         Popups.close();
@@ -91,25 +86,27 @@ Popup {
         }
     }
 
-    // Native app menus and our own focus-grabbed popup both want focus; hand off by
-    // closing the popup first and re-anchoring the menu to the still-live tray island.
-    function open_menu(item_data) {
-        if (!item_data || !item_data.menu) return;
+    // The bar's own window, mapped through the island item so display() gets window-relative
+    // coordinates. Native menus and our focus-grabbed popup both want focus, so close ours first.
+    function open_menu(item_data, source_item) {
+        if (!item_data || !item_data.hasMenu) return;
         const island_item = Popups.open_anchor;
-        if (!island_item) return;
-        if (menu_anchor.visible) menu_anchor.close();
+        const anchor_item = source_item || island_item;
+        if (!island_item || !anchor_item) return;
+        const win_attached = island_item.QsWindow;
+        if (!win_attached || !win_attached.window) return;
         Popups.close();
-        menu_anchor.anchor.item = island_item;
-        menu_anchor.anchor.edges = Edges.Bottom;
-        menu_anchor.anchor.gravity = Edges.Bottom;
-        menu_anchor.menu = item_data.menu;
-        Qt.callLater(() => menu_anchor.open());
+        const point = win_attached.mapFromItem(anchor_item, 0, anchor_item.height);
+        item_data.display(win_attached.window, Math.round(point.x), Math.round(point.y));
     }
 
     Item {
         id: content
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: 12
+        implicitHeight: main_column.implicitHeight
         focus: true
 
         Keys.onPressed: event => {
@@ -124,13 +121,16 @@ Popup {
                 root.activate_row(item_data);
                 event.accepted = true;
             } else if (event.key === Qt.Key_M || event.key === Qt.Key_L) {
-                root.open_menu(item_data);
+                root.open_menu(item_data, item_repeater.itemAt(root.selected));
                 event.accepted = true;
             }
         }
 
         ColumnLayout {
-            anchors.fill: parent
+            id: main_column
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             spacing: 2
 
             Text {
@@ -142,6 +142,7 @@ Popup {
             }
 
             Repeater {
+                id: item_repeater
                 model: root.items
 
                 Rectangle {
@@ -192,7 +193,7 @@ Popup {
                         onClicked: mouse => {
                             root.selected = item_row.index;
                             if (mouse.button === Qt.RightButton) {
-                                root.open_menu(item_row.modelData);
+                                root.open_menu(item_row.modelData, item_row);
                             } else if (mouse.button === Qt.MiddleButton) {
                                 item_row.modelData.secondaryActivate();
                                 Popups.close();

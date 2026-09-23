@@ -38,6 +38,7 @@ Item {
     opacity: root.dim ? 0.4 : 1
 
     onIslandChanged: if (root.island) Popups.register_default("system", root.island, root.island_color, root.screen_name)
+    Component.onDestruction: Popups.unregister("system", root.screen_name, root.island)
 
     RowLayout {
         id: row

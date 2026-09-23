@@ -44,6 +44,7 @@ Item {
     }
 
     onIslandChanged: if (root.island) Popups.register_default("volume", root.island, root.island_color, root.screen_name)
+    Component.onDestruction: Popups.unregister("volume", root.screen_name, root.island)
 
     Rectangle {
         anchors.fill: parent

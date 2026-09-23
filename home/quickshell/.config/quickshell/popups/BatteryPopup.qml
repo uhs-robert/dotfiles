@@ -15,10 +15,8 @@ Popup {
     WheelStepper {
         id: stepper
     }
-    fallback_width: 260
-    implicitHeight: 20 + 20 + (root.time_label !== "" ? 18 : 0) + (root.rate > 0 ? 18 : 0) + 10
-        + 26 + (Backlight.has_kbd ? 26 : 0)
-        + (root.ppd_available ? root.profiles.length * 26 : 22) + 24
+    preferred_width: 260
+    implicitHeight: content.implicitHeight + 24
 
     readonly property var device: UPower.displayDevice
     readonly property bool has_battery: !!device && device.ready
@@ -91,8 +89,11 @@ Popup {
 
     Item {
         id: content
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: 12
+        implicitHeight: main_column.implicitHeight
         focus: true
 
         Keys.onPressed: event => {
@@ -118,7 +119,10 @@ Popup {
         }
 
         ColumnLayout {
-            anchors.fill: parent
+            id: main_column
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             spacing: 4
 
             Text {

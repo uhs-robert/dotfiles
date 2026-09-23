@@ -43,6 +43,7 @@ Item {
     }
 
     onIslandChanged: if (root.island) Popups.register_default("bluetooth", root.island, root.island_color, root.screen_name)
+    Component.onDestruction: Popups.unregister("bluetooth", root.screen_name, root.island)
 
     Rectangle {
         anchors.fill: parent

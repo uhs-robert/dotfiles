@@ -10,8 +10,8 @@ Popup {
     id: root
 
     popup_name: "system"
-    fallback_width: 260
-    implicitHeight: (SysStats.has_temp ? 4 : 3) * 30 + 24
+    preferred_width: 340
+    implicitHeight: content.implicitHeight + 24
 
     readonly property var stat_rows: {
         const list = [
@@ -61,8 +61,11 @@ Popup {
 
     Item {
         id: content
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: 12
+        implicitHeight: main_column.implicitHeight
         focus: true
 
         Keys.onPressed: event => {
@@ -79,7 +82,10 @@ Popup {
         }
 
         ColumnLayout {
-            anchors.fill: parent
+            id: main_column
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             spacing: 4
 
             Repeater {
@@ -95,6 +101,7 @@ Popup {
                     Layout.fillWidth: true
                     height: 26
                     radius: 4
+                    clip: true
                     color: stat_row.index === root.selected ? Theme.bg_surface : "transparent"
 
                     RowLayout {

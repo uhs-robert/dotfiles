@@ -62,6 +62,7 @@ Item {
     implicitHeight: net_row.implicitHeight
 
     onIslandChanged: if (root.island) Popups.register_default("network", root.island, root.island_color, root.screen_name)
+    Component.onDestruction: Popups.unregister("network", root.screen_name, root.island)
 
     RowLayout {
         id: net_row

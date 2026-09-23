@@ -23,6 +23,7 @@ Item {
     implicitHeight: row.implicitHeight
 
     onIslandChanged: if (root.island) Popups.register_default("tray", root.island, root.island_color, root.screen_name)
+    Component.onDestruction: Popups.unregister("tray", root.screen_name, root.island)
 
     Rectangle {
         anchors.fill: parent

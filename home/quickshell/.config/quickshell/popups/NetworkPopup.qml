@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Networking
 import "../components"
 import "../theme"
@@ -11,8 +12,10 @@ Popup {
     id: root
 
     popup_name: "network"
-    fallback_width: 300
-    implicitHeight: 300
+    preferred_width: 320
+
+    readonly property int max_visible_rows: 8
+    implicitHeight: content.implicitHeight + 24
 
     readonly property var wifi_device: {
         for (const d of Networking.devices.values) if (d.type === DeviceType.Wifi) return d;
@@ -60,6 +63,8 @@ Popup {
     property string password_text: ""
     property bool password_visible: false
     property string status_text: ""
+    property string wifi_ipv4: ""
+    property string wired_ipv4: ""
 
     readonly property bool is_open: Popups.open_name === "network"
     onIs_openChanged: if (is_open) {
@@ -68,12 +73,47 @@ Popup {
         root.password_mode = false;
         root.status_text = "";
         root.start_scan();
+        root.refresh_ip();
     }
     onNav_rowsChanged: if (root.selected >= root.nav_rows.length) root.selected = Math.max(0, root.nav_rows.length - 1);
 
     function start_scan() {
         if (root.wifi_device) root.wifi_device.scannerEnabled = true;
         scan_timer.restart();
+    }
+
+    // Quickshell.Networking has no IPv4 property, so read it once via `ip` instead of the MAC/BSSID.
+    function refresh_ip() {
+        root.wifi_ipv4 = "";
+        root.wired_ipv4 = "";
+        if (root.active_wifi_network && root.wifi_device && root.wifi_device.name) {
+            wifi_ip_proc.command = ["ip", "-4", "-o", "addr", "show", "dev", root.wifi_device.name];
+            wifi_ip_proc.running = true;
+        }
+        if (root.wired_device && root.wired_device.connected && root.wired_device.name) {
+            wired_ip_proc.command = ["ip", "-4", "-o", "addr", "show", "dev", root.wired_device.name];
+            wired_ip_proc.running = true;
+        }
+    }
+
+    Process {
+        id: wifi_ip_proc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const m = text.match(/inet (\d+\.\d+\.\d+\.\d+)/);
+                root.wifi_ipv4 = m ? m[1] : "";
+            }
+        }
+    }
+
+    Process {
+        id: wired_ip_proc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const m = text.match(/inet (\d+\.\d+\.\d+\.\d+)/);
+                root.wired_ipv4 = m ? m[1] : "";
+            }
+        }
     }
 
     // Scanning burns radio power; only run it briefly around an explicit open/rescan.
@@ -130,8 +170,11 @@ Popup {
 
     Item {
         id: content
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.margins: 12
+        implicitHeight: root.password_mode ? password_column.implicitHeight : main_column.implicitHeight
         focus: true
 
         Keys.onPressed: event => {
@@ -152,9 +195,11 @@ Popup {
             const row = root.nav_rows[root.selected];
             if (event.key === Qt.Key_J) {
                 root.selected = Math.min(root.nav_rows.length - 1, root.selected + 1);
+                network_list.positionViewAtIndex(root.selected, ListView.Contain);
                 event.accepted = true;
             } else if (event.key === Qt.Key_K) {
                 root.selected = Math.max(0, root.selected - 1);
+                network_list.positionViewAtIndex(root.selected, ListView.Contain);
                 event.accepted = true;
             } else if (event.key === Qt.Key_W) {
                 Networking.wifiEnabled = !Networking.wifiEnabled;
@@ -173,7 +218,10 @@ Popup {
         }
 
         ColumnLayout {
-            anchors.fill: parent
+            id: main_column
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             spacing: 6
             visible: !root.password_mode
 
@@ -201,7 +249,7 @@ Popup {
                 visible: !!root.active_wifi_network
                 text: root.active_wifi_network
                     ? root.active_wifi_network.name + "  " + Math.round(root.active_wifi_network.signalStrength * 100) + "%"
-                        + (root.wifi_device && root.wifi_device.address ? "  " + root.wifi_device.address : "")
+                        + (root.wifi_ipv4 ? "  " + root.wifi_ipv4 : "")
                     : ""
                 color: Theme.theme_secondary
                 font.family: Theme.font_family
@@ -210,7 +258,7 @@ Popup {
 
             Text {
                 visible: !!root.wired_device && root.wired_device.connected
-                text: root.wired_device ? "Wired: " + root.wired_device.name + (root.wired_device.address ? "  " + root.wired_device.address : "") : ""
+                text: root.wired_device ? "Wired: " + root.wired_device.name + (root.wired_ipv4 ? "  " + root.wired_ipv4 : "") : ""
                 color: Theme.theme_secondary
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size - 2
@@ -232,17 +280,23 @@ Popup {
                 font.pixelSize: Theme.popup_font_size - 2
             }
 
-            Repeater {
+            ListView {
+                id: network_list
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * (24 + spacing))
+                clip: true
+                spacing: 4
                 model: root.nav_rows
+                currentIndex: root.selected
 
-                Rectangle {
+                delegate: Rectangle {
                     id: net_row
                     required property var modelData
                     required property int index
 
                     readonly property bool is_advanced: !!net_row.modelData.advanced
 
-                    Layout.fillWidth: true
+                    width: network_list.width
                     height: 24
                     radius: 4
                     color: net_row.index === root.selected ? Theme.bg_surface : "transparent"
@@ -301,7 +355,10 @@ Popup {
         }
 
         ColumnLayout {
-            anchors.fill: parent
+            id: password_column
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             spacing: 8
             visible: root.password_mode
 
