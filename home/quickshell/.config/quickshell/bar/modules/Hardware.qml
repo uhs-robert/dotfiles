@@ -9,7 +9,7 @@ Row {
     id: root
 
     property bool compact: false
-    spacing: 10
+    spacing: 16
 
     readonly property bool dim: !Power.on_ac
 

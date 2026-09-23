@@ -77,7 +77,7 @@ Singleton {
     property color bright_white: "#FFFFF0"
 
     property string font_family: "Maple Mono NF"
-    property int font_size: 15
+    property int font_size: 13
 
     FileView {
         id: theme_file
