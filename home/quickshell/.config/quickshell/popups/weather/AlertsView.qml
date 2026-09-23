@@ -26,9 +26,10 @@ Item {
         return day + WeatherState.fmt_location_time(d);
     }
 
-    // NWS hard-wraps text near 70 columns; keep only its paragraph breaks.
+    // NWS hard-wraps prose near 70 columns; only join a line that continues in lowercase,
+    // so tables, lists and headings keep their breaks.
     function unwrap(text) {
-        return (text || "").replace(/-\n(?!\n)/g, "-").replace(/([^\n])\n(?!\n)/g, "$1 ").replace(/ {2,}/g, " ");
+        return (text || "").replace(/-\n(?=[a-z])/g, "-").replace(/([^\n])\n(?=[a-z])/g, "$1 ");
     }
 
     function scroll_detail(dir) {
