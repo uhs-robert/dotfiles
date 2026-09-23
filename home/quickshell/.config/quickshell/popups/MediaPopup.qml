@@ -43,7 +43,7 @@ Popup {
 
     function seek_ratio(ratio) {
         if (!root.player || !root.player.canSeek || !root.player.positionSupported) return;
-        const length = root.player.lengthSupported ? root.player.length : 0;
+        const length = MediaState.length_of(root.player);
         root.player.position = Math.max(0, Math.min(length, ratio * length));
     }
 
@@ -280,9 +280,10 @@ Popup {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 16
 
-                        readonly property bool has_length: !!root.player && root.player.lengthSupported && root.player.length > 0
+                        readonly property real track_length: MediaState.length_of(root.player)
+                        readonly property bool has_length: track_length > 0
                         readonly property real ratio: progress_item.has_length
-                            ? Math.max(0, Math.min(1, root.player.position / root.player.length)) : 0
+                            ? Math.max(0, Math.min(1, root.player.position / progress_item.track_length)) : 0
                         readonly property bool knob_active: seek_area.containsMouse || seek_area.pressed
 
                         Rectangle {
@@ -346,7 +347,7 @@ Popup {
                         Item { Layout.fillWidth: true }
 
                         Text {
-                            text: progress_item.has_length ? root.fmt_time(root.player.length) : "Live"
+                            text: progress_item.has_length ? root.fmt_time(progress_item.track_length) : "Live"
                             color: Theme.fg_dim
                             font.family: Theme.font_family
                             font.pixelSize: Theme.popup_font_size - 4

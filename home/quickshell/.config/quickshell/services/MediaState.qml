@@ -105,10 +105,41 @@ Singleton {
         if (root.active && root.active.canGoPrevious) root.active.previous();
     }
 
+    // Firefox reports length only on some updates (e.g. after a pause or seek), so keep the last real one per track.
+    property var known_lengths: ({})
+
+    function track_key(player) {
+        const meta = player.metadata || {};
+        return meta["xesam:url"] || player.trackTitle || "";
+    }
+
+    function length_of(player) {
+        if (!player) return 0;
+        if (player.lengthSupported && player.length > 0) return player.length;
+        return root.known_lengths[root.track_key(player)] || 0;
+    }
+
+    function remember_length(player) {
+        if (!player || !player.lengthSupported || player.length <= 0) return;
+        const key = root.track_key(player);
+        if (!key || root.known_lengths[key] === player.length) return;
+        const next = Object.assign({}, root.known_lengths);
+        next[key] = player.length;
+        root.known_lengths = next;
+    }
+
+    onActiveChanged: root.remember_length(root.active)
+
+    Connections {
+        target: root.active
+        function onLengthChanged() { root.remember_length(root.active); }
+        function onLengthSupportedChanged() { root.remember_length(root.active); }
+        function onMetadataChanged() { root.remember_length(root.active); }
+    }
+
     function seek_by(seconds) {
         if (!root.active || !root.active.canSeek || !root.active.positionSupported) return;
-        // Without lengthSupported, Quickshell reports length as the current position.
-        const max = root.active.lengthSupported ? root.active.length : Infinity;
+        const max = root.length_of(root.active) || Infinity;
         const target = Math.max(0, Math.min(max, root.active.position + seconds));
         root.active.position = target;
     }
