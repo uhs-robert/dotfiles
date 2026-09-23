@@ -48,93 +48,96 @@ Item {
         anchors.fill: parent
         spacing: 10
 
-        Canvas {
-            id: sun_canvas
+        RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
+            spacing: 12
 
-            Timer {
-                interval: 60000
-                running: root.is_today
-                repeat: true
-                onTriggered: sun_canvas.requestPaint()
+            Repeater {
+                model: [{ icon: WeatherState.sun_rise_icon, label: "Sunrise", time: root.day ? root.day.sunrise : "" }]
+                delegate: sun_end
             }
 
-            onPaint: {
-                const ctx = getContext("2d");
-                ctx.reset();
-                const w = width, h = height;
-                const cx = w / 2, cy = h - 30, r = Math.min(w / 2 - 20, h - 44);
+            Canvas {
+                id: sun_canvas
+                Layout.fillWidth: true
+                Layout.preferredHeight: 150
 
-                ctx.strokeStyle = Theme.fg_muted;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(cx, cy, r, Math.PI, 0, false);
-                ctx.stroke();
+                Timer {
+                    interval: 60000
+                    running: root.is_today
+                    repeat: true
+                    onTriggered: sun_canvas.requestPaint()
+                }
 
-                ctx.strokeStyle = Theme.fg_dim;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(cx - r - 16, cy);
-                ctx.lineTo(cx + r + 16, cy);
-                ctx.stroke();
+                onPaint: {
+                    const ctx = getContext("2d");
+                    ctx.reset();
+                    const w = width, h = height;
+                    const cx = w / 2, cy = h - 12, r = Math.min(w / 2 - 12, h - 24);
 
-                ctx.font = (Theme.popup_font_size + 4) + "px " + Theme.font_family;
-                ctx.fillStyle = Theme.fg_core;
-                ctx.textAlign = "left";
-                ctx.fillText(root.day ? (root.day.sunrise || "—") : "—", cx - r - 16, cy + 24);
-                ctx.textAlign = "right";
-                ctx.fillText(root.day ? (root.day.sunset || "—") : "—", cx + r + 16, cy + 24);
-
-                const frac = root.sun_fraction();
-                if (frac !== null) {
-                    const angle = Math.PI - frac * Math.PI;
-                    const px = cx + r * Math.cos(angle);
-                    const py = cy - r * Math.sin(angle);
-                    ctx.fillStyle = Theme.yellow;
+                    ctx.strokeStyle = Theme.fg_muted;
+                    ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(px, py, 8, 0, 2 * Math.PI);
-                    ctx.fill();
+                    ctx.arc(cx, cy, r, Math.PI, 0, false);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = Theme.fg_dim;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, cy);
+                    ctx.lineTo(w, cy);
+                    ctx.stroke();
+
+                    const frac = root.sun_fraction();
+                    if (frac !== null) {
+                        const angle = Math.PI - frac * Math.PI;
+                        ctx.fillStyle = Theme.yellow;
+                        ctx.beginPath();
+                        ctx.arc(cx + r * Math.cos(angle), cy - r * Math.sin(angle), 9, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+
+                onWidthChanged: requestPaint()
+
+                Connections {
+                    target: root
+                    function onDayChanged() { sun_canvas.requestPaint(); }
+                }
+
+                Column {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 20
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Day length"; color: Theme.fg_muted; font.family: Theme.font_family; font.pixelSize: Theme.popup_font_size - 3 }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.day_length(); color: Theme.fg_core; font.family: Theme.font_family; font.pixelSize: Theme.popup_font_size + 2 }
                 }
             }
 
-            Connections {
-                target: root
-                function onDayChanged() { sun_canvas.requestPaint(); }
+            Repeater {
+                model: [{ icon: WeatherState.sun_set_icon, label: "Sunset", time: root.day ? root.day.sunset : "" }]
+                delegate: sun_end
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 24
-
-            RowLayout {
-                spacing: 6
-                Image { Layout.preferredWidth: 28; Layout.preferredHeight: 28; source: WeatherState.sun_rise_icon; sourceSize.width: 56; sourceSize.height: 56 }
-                Text {
-                    text: "Rise " + (root.day ? (root.day.sunrise || "—") : "—")
-                    color: Theme.fg_core
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size
-                }
-            }
-
-            RowLayout {
-                spacing: 6
-                Image { Layout.preferredWidth: 28; Layout.preferredHeight: 28; source: WeatherState.sun_set_icon; sourceSize.width: 56; sourceSize.height: 56 }
-                Text {
-                    text: "Set " + (root.day ? (root.day.sunset || "—") : "—")
-                    color: Theme.fg_core
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size
-                }
-            }
+        Component {
+            id: sun_end
 
             ColumnLayout {
+                required property var modelData
+                Layout.alignment: Qt.AlignBottom
                 spacing: 0
-                Layout.fillWidth: true
-                Text { text: "Day length"; color: Theme.fg_muted; font.family: Theme.font_family; font.pixelSize: Theme.popup_font_size - 3 }
-                Text { text: root.day_length(); color: Theme.fg_core; font.family: Theme.font_family; font.pixelSize: Theme.popup_font_size }
+
+                Image {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: 56
+                    Layout.preferredHeight: 56
+                    source: modelData.icon
+                    sourceSize.width: 112
+                    sourceSize.height: 112
+                }
+                Text { Layout.alignment: Qt.AlignHCenter; text: modelData.label; color: Theme.fg_muted; font.family: Theme.font_family; font.pixelSize: Theme.popup_font_size - 3 }
+                Text { Layout.alignment: Qt.AlignHCenter; text: modelData.time || "—"; color: Theme.fg_core; font.family: Theme.font_family; font.pixelSize: Theme.popup_font_size + 4; font.bold: true }
             }
         }
 

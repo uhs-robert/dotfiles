@@ -58,6 +58,25 @@ Singleton {
     readonly property int min_refresh_gap_ms: 60000
     readonly property int retry_gap_ms: 120000
 
+    property var base_settings: ({})
+    property var local_settings: ({})
+
+    function apply_settings() {
+        const merged = Object.assign({}, root.default_settings, root.base_settings, root.local_settings);
+        const changed = root.has_data && JSON.stringify(root.settings) !== JSON.stringify(merged);
+        root.settings = merged;
+        if (changed) root.refresh(true);
+    }
+
+    function parse_settings(file, name) {
+        try {
+            return JSON.parse(file.text());
+        } catch (e) {
+            console.warn("Weather: invalid " + name + " (" + e + ")");
+            return null;
+        }
+    }
+
     FileView {
         id: settings_file
         path: Quickshell.shellDir + "/weather.json"
@@ -65,16 +84,30 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onLoaded: {
-            try {
-                const parsed = JSON.parse(text());
-                const changed = root.has_data && JSON.stringify(root.settings) !== JSON.stringify(Object.assign({}, root.default_settings, parsed));
-                root.settings = Object.assign({}, root.default_settings, parsed);
-                if (changed) root.refresh(true);
-            } catch (e) {
-                console.warn("Weather: invalid weather.json, keeping last config (" + e + ")");
-            }
+            const parsed = root.parse_settings(settings_file, "weather.json");
+            if (parsed) root.base_settings = parsed;
+            root.apply_settings();
         }
         onLoadFailed: error => console.warn("Weather: failed to load weather.json (" + error + "), using defaults")
+    }
+
+    // Untracked per-machine overrides, e.g. real coordinates kept out of the public repo.
+    FileView {
+        id: local_settings_file
+        path: Quickshell.shellDir + "/weather.local.json"
+        printErrors: false
+        blockLoading: true
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: {
+            const parsed = root.parse_settings(local_settings_file, "weather.local.json");
+            if (parsed) root.local_settings = parsed;
+            root.apply_settings();
+        }
+        onLoadFailed: error => {
+            root.local_settings = {};
+            root.apply_settings();
+        }
     }
 
     readonly property string cache_dir: {
@@ -109,6 +142,7 @@ Singleton {
     Component.onCompleted: {
         ensure_cache_dir.running = true;
         settings_file.reload();
+        local_settings_file.reload();
         cache_file.reload();
         root.refresh_if_due();
     }
@@ -614,7 +648,7 @@ Singleton {
         const phase = root.moon_phase_for_date(date_str);
         const frac = ((0.5 - phase) % 1 + 1) % 1;
         const days_ahead = frac * root.lunar_cycle_days;
-        const target = new Date(t0 + days_ahead * 86400000);
+        const target = new Date(t0 + 12 * 3600000 + days_ahead * 86400000);
         const shifted = new Date(target.getTime() + root.utc_offset * 1000);
         return root.month_names[shifted.getUTCMonth()] + " " + shifted.getUTCDate();
     }
@@ -745,10 +779,7 @@ Singleton {
 
     function pop_color(pop) {
         const p = Math.max(0, Math.min(100, pop));
-        if (p < 30) return Theme.fg_muted;
-        if (p < 60) return Theme.magenta;
-        if (p < 80) return Theme.bright_magenta;
-        return Theme.red;
+        return p < 60 ? Theme.blue : Theme.bright_blue;
     }
 
     function unit_symbol() {

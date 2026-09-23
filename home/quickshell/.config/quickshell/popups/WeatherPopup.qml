@@ -14,11 +14,10 @@ Popup {
     preferred_width: 760
     implicitHeight: content.implicitHeight + 24
 
-    // Alerts is appended only while there are active alerts, so 1-6 always name the same tab.
-    readonly property var base_tab_names: ["Now", "Daily", "Hourly", "Precipitation", "Sun & Moon", "Air"]
+    readonly property var base_tab_names: ["Daily", "Hourly", "Precipitation", "Sun & Moon", "Air"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
     readonly property var tab_names: root.has_alerts ? root.base_tab_names.concat(["Alerts"]) : root.base_tab_names
-    readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 6
+    readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 5
 
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
     readonly property var hourly_sub_names: ["Temperature", "Precipitation", "Wind", "UV", "Humidity"]
@@ -48,13 +47,13 @@ Popup {
     }
 
     function set_current_sub(i) {
-        if (root.current_tab === 1) root.daily_sub = Math.max(0, Math.min(root.daily_sub_names.length - 1, i));
-        else if (root.current_tab === 2) root.hourly_sub = Math.max(0, Math.min(root.hourly_sub_names.length - 1, i));
+        if (root.current_tab === 0) root.daily_sub = Math.max(0, Math.min(root.daily_sub_names.length - 1, i));
+        else if (root.current_tab === 1) root.hourly_sub = Math.max(0, Math.min(root.hourly_sub_names.length - 1, i));
     }
 
     function step_current_sub(delta) {
-        if (root.current_tab === 1) root.daily_sub = (root.daily_sub + delta + root.daily_sub_names.length) % root.daily_sub_names.length;
-        else if (root.current_tab === 2) root.hourly_sub = (root.hourly_sub + delta + root.hourly_sub_names.length) % root.hourly_sub_names.length;
+        if (root.current_tab === 0) root.daily_sub = (root.daily_sub + delta + root.daily_sub_names.length) % root.daily_sub_names.length;
+        else if (root.current_tab === 1) root.hourly_sub = (root.hourly_sub + delta + root.hourly_sub_names.length) % root.hourly_sub_names.length;
     }
 
     function move_day_cursor(dir, jump) {
@@ -88,14 +87,12 @@ Popup {
         }
     }
 
-    // h/l (and H/L for a bigger jump) move through time; what that means depends on the tab.
     function move_time(dir, jump) {
-        if (root.current_tab === 1 || root.current_tab === 4) root.move_day_cursor(dir, jump);
-        else if (root.current_tab === 2) root.move_hour_cursor(dir, jump, WeatherState.hours.length, true);
-        else if (root.current_tab === 3) root.move_hour_cursor(dir, jump, Math.min(12, WeatherState.hours.length), false);
-        else if (root.current_tab === 5) root.move_hour_cursor(dir, jump, Math.min(24, WeatherState.aq_hours.length), false);
+        if (root.current_tab === 0 || root.current_tab === 3) root.move_day_cursor(dir, jump);
+        else if (root.current_tab === 1) root.move_hour_cursor(dir, jump, WeatherState.hours.length, true);
+        else if (root.current_tab === 2) root.move_hour_cursor(dir, jump, Math.min(12, WeatherState.hours.length), false);
+        else if (root.current_tab === 4) root.move_hour_cursor(dir, jump, Math.min(24, WeatherState.aq_hours.length), false);
         else if (root.on_alerts_tab) root.move_alert_cursor(dir, jump);
-        // "Now" tab: no-op.
     }
 
     function go_now() {
@@ -106,21 +103,20 @@ Popup {
     }
 
     function go_end() {
-        if (root.current_tab === 1 || root.current_tab === 4) {
+        if (root.current_tab === 0 || root.current_tab === 3) {
             root.day_cursor = Math.max(0, WeatherState.days.length - 1);
-        } else if (root.current_tab === 2) {
+        } else if (root.current_tab === 1) {
             root.hour_cursor = Math.max(0, WeatherState.hours.length - 1);
             if (hourly_view) hourly_view.scroll_to_cursor();
-        } else if (root.current_tab === 3) {
+        } else if (root.current_tab === 2) {
             root.hour_cursor = Math.max(0, Math.min(11, WeatherState.hours.length - 1));
-        } else if (root.current_tab === 5) {
+        } else if (root.current_tab === 4) {
             root.hour_cursor = Math.max(0, Math.min(23, WeatherState.aq_hours.length - 1));
         } else if (root.on_alerts_tab) {
             root.alert_cursor = Math.max(0, WeatherState.alerts.length - 1);
         }
     }
 
-    // Enter in Daily: jump to Hourly at the selected day's current hour (today) or noon (other days).
     function jump_to_hour_for_selected_day() {
         const day = WeatherState.days[root.day_cursor];
         if (!day) return;
@@ -130,7 +126,7 @@ Popup {
         if (idx === -1) idx = hrs.findIndex(h => h.date === day.date);
         if (idx === -1) idx = 0;
         root.hour_cursor = idx;
-        root.set_tab(2);
+        root.set_tab(1);
         if (hourly_view) hourly_view.scroll_to_cursor();
     }
 
@@ -139,7 +135,7 @@ Popup {
     }
 
     function fmt_alert_time(iso) {
-        return iso ? WeatherState.format_hour(new Date(iso)) : "—";
+        return iso ? WeatherState.fmt_location_time(new Date(iso)) : "—";
     }
 
     // --- Single key handler: every popup shortcut is dispatched from here ---
@@ -157,13 +153,13 @@ Popup {
             root.set_tab(root.tab_names.length - 1);
             event.accepted = true;
         } else if (event.key === Qt.Key_BracketLeft) {
-            if (root.current_tab === 1 || root.current_tab === 2) { root.step_current_sub(-1); event.accepted = true; }
+            if (root.current_tab === 0 || root.current_tab === 1) { root.step_current_sub(-1); event.accepted = true; }
         } else if (event.key === Qt.Key_BracketRight) {
-            if (root.current_tab === 1 || root.current_tab === 2) { root.step_current_sub(1); event.accepted = true; }
+            if (root.current_tab === 0 || root.current_tab === 1) { root.step_current_sub(1); event.accepted = true; }
         } else if (event.key === Qt.Key_R) {
             WeatherState.refresh(true);
             event.accepted = true;
-        } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && root.current_tab === 1) {
+        } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && root.current_tab === 0) {
             root.jump_to_hour_for_selected_day();
             event.accepted = true;
         } else if (event.key === Qt.Key_G) {
@@ -356,10 +352,10 @@ Popup {
                 RowLayout {
                     anchors.fill: parent
                     spacing: 6
-                    visible: root.current_tab === 1 || root.current_tab === 2
+                    visible: root.current_tab === 0 || root.current_tab === 1
 
                     Repeater {
-                        model: root.current_tab === 1 ? root.daily_sub_names : root.current_tab === 2 ? root.hourly_sub_names : []
+                        model: root.current_tab === 0 ? root.daily_sub_names : root.current_tab === 1 ? root.hourly_sub_names : []
 
                         RowLayout {
                             id: sub_chip
@@ -370,8 +366,8 @@ Popup {
 
                             Text {
                                 text: sub_chip.modelData
-                                color: sub_chip.index === (root.current_tab === 1 ? root.daily_sub : root.hourly_sub) ? Theme.theme_secondary : Theme.fg_muted
-                                font.bold: sub_chip.index === (root.current_tab === 1 ? root.daily_sub : root.hourly_sub)
+                                color: sub_chip.index === (root.current_tab === 0 ? root.daily_sub : root.hourly_sub) ? Theme.theme_secondary : Theme.fg_muted
+                                font.bold: sub_chip.index === (root.current_tab === 0 ? root.daily_sub : root.hourly_sub)
                                 font.family: Theme.font_family
                                 font.pixelSize: Theme.popup_font_size - 3
 
@@ -379,7 +375,7 @@ Popup {
                             }
 
                             Text {
-                                visible: sub_chip.index < (root.current_tab === 1 ? root.daily_sub_names.length : root.hourly_sub_names.length) - 1
+                                visible: sub_chip.index < (root.current_tab === 0 ? root.daily_sub_names.length : root.hourly_sub_names.length) - 1
                                 text: "·"
                                 color: Theme.fg_dim
                                 font.family: Theme.font_family
@@ -392,7 +388,7 @@ Popup {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: root.current_tab === 4
+                    visible: root.current_tab === 3
                     readonly property var d: WeatherState.days[root.day_cursor]
                     text: d ? d.weekday + (d.weekday !== "Today" ? " (" + d.date.substr(5) + ")" : "") : ""
                     color: Theme.fg_muted
@@ -403,7 +399,7 @@ Popup {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: root.current_tab === 3 || root.current_tab === 5
+                    visible: root.current_tab === 2 || root.current_tab === 4
                     text: {
                         const hrs = root.current_tab === 3 ? WeatherState.hours.slice(0, 12) : WeatherState.aq_hours.slice(0, 24);
                         const r = hrs[Math.max(0, Math.min(hrs.length - 1, root.hour_cursor))];
@@ -415,19 +411,13 @@ Popup {
                 }
             }
 
-            // --- Content area: one fixed height for every tab, so switching tabs never resizes the popup ---
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.content_height
 
-                NowView {
-                    anchors.fill: parent
-                    visible: root.current_tab === 0
-                }
-
                 DailyView {
                     anchors.fill: parent
-                    visible: root.current_tab === 1
+                    visible: root.current_tab === 0
                     day_cursor: root.day_cursor
                     sub: root.daily_sub
                     on_select: function (i) { root.day_cursor = i; }
@@ -436,7 +426,7 @@ Popup {
                 HourlyView {
                     id: hourly_view
                     anchors.fill: parent
-                    visible: root.current_tab === 2
+                    visible: root.current_tab === 1
                     hour_cursor: root.hour_cursor
                     sub: root.hourly_sub
                     on_select: function (i) { root.hour_cursor = i; }
@@ -444,20 +434,20 @@ Popup {
 
                 PrecipView {
                     anchors.fill: parent
-                    visible: root.current_tab === 3
+                    visible: root.current_tab === 2
                     hour_cursor: root.hour_cursor
                     on_select: function (i) { root.hour_cursor = i; }
                 }
 
                 SunMoonView {
                     anchors.fill: parent
-                    visible: root.current_tab === 4
+                    visible: root.current_tab === 3
                     day_cursor: root.day_cursor
                 }
 
                 AirView {
                     anchors.fill: parent
-                    visible: root.current_tab === 5
+                    visible: root.current_tab === 4
                     hour_cursor: root.hour_cursor
                     on_select: function (i) { root.hour_cursor = i; }
                 }
@@ -479,7 +469,7 @@ Popup {
             }
 
             Text {
-                text: "Tab tabs · h/l move · H/L jump · [ ] view · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
+                text: "Tab tabs · 1-5 select · h/l move · H/L jump · [ ] view · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
                 color: Theme.fg_dim
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size - 4

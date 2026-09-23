@@ -60,7 +60,6 @@ function moon_position(date, lat, lng) {
 // Returns { rise, set } as Date objects (UTC instants), or { alwaysUp: true } / { alwaysDown: true }.
 function moon_times(date, lat, lng) {
     const t = new Date(date);
-    t.setUTCHours(0, 0, 0, 0);
 
     const hc = 0.133 * rad;
     let h0 = moon_position(t, lat, lng).altitude - hc;

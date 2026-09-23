@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/popups/weather/DailyView.qml
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import "../../theme"
 import "../../services"
 
@@ -19,7 +20,7 @@ Item {
     readonly property int headroom: 18
     readonly property int footroom: 18
     readonly property int band_range_h: root.bar_area_h - root.headroom - root.footroom
-    readonly property int icon_size: 38
+    readonly property int icon_size: 64
 
     readonly property var week_temp_range: {
         const days = WeatherState.days;
@@ -57,7 +58,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: root.bar_area_h + 16 + root.icon_size + 16 + 4
+            Layout.fillHeight: true
             spacing: 4
 
             Repeater {
@@ -85,14 +86,15 @@ Item {
                         onClicked: root.on_select(day_col.index)
                     }
 
-                    Column {
+                    ColumnLayout {
                         anchors.fill: parent
+                        anchors.margins: 2
                         spacing: 2
 
-                        // --- sub 0: temp band over shared week scale + precip chance ---
                         Item {
-                            width: parent.width
-                            height: root.bar_area_h
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredHeight: root.bar_area_h
                             visible: root.sub === 0
 
                             Rectangle {
@@ -134,10 +136,10 @@ Item {
                             }
                         }
 
-                        // --- sub 1: wind speed bar + gust marker + dominant direction ---
                         Item {
-                            width: parent.width
-                            height: root.bar_area_h
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredHeight: root.bar_area_h
                             visible: root.sub === 1
 
                             Text {
@@ -178,10 +180,10 @@ Item {
                             }
                         }
 
-                        // --- sub 2: max UV bar ---
                         Item {
-                            width: parent.width
-                            height: root.bar_area_h
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredHeight: root.bar_area_h
                             visible: root.sub === 2
 
                             Rectangle {
@@ -204,10 +206,10 @@ Item {
                             }
                         }
 
-                        // --- sub 3: sunshine hours bar ---
                         Item {
-                            width: parent.width
-                            height: root.bar_area_h
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredHeight: root.bar_area_h
                             visible: root.sub === 3
 
                             Rectangle {
@@ -231,7 +233,7 @@ Item {
                         }
 
                         Text {
-                            width: parent.width
+                            Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             text: day_col.modelData.pop + "%"
                             color: Theme.blue
@@ -239,18 +241,25 @@ Item {
                             font.pixelSize: Theme.popup_font_size - 2
                         }
 
-                        Image {
-                            anchors.horizontalCenter: parent.horizontalCenter
+                        Item {
+                            Layout.alignment: Qt.AlignHCenter
                             width: root.icon_size
                             height: root.icon_size
-                            sourceSize.width: root.icon_size * 2
-                            sourceSize.height: root.icon_size * 2
-                            source: WeatherState.icon_source(day_col.modelData.code, true)
-                            smooth: true
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: root.icon_size
+                                height: root.icon_size
+                                readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
+                                sourceSize.width: Math.ceil(root.icon_size * 2 * dpr)
+                                sourceSize.height: Math.ceil(root.icon_size * 2 * dpr)
+                                source: WeatherState.icon_source(day_col.modelData.code, true)
+                                smooth: true
+                            }
                         }
 
                         Text {
-                            width: parent.width
+                            Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             text: day_col.modelData.weekday
                             color: day_col.index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core

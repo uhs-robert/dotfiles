@@ -19,7 +19,7 @@ Item {
     function fmt_time(iso) {
         if (!iso) return "—";
         const d = new Date(iso);
-        return WeatherState.format_hour(d);
+        return WeatherState.fmt_location_time(d);
     }
 
     function scroll_detail(dir) {
