@@ -9,6 +9,7 @@ Item {
     property color bg_color: "#232634"
     property bool cap_left: false
     property bool cap_right: false
+    property real content_opacity: 1
     default property alias content: layout.children
 
     readonly property alias body_item: body
@@ -36,6 +37,7 @@ Item {
         RowLayout {
             id: layout
             x: 8
+            opacity: root.content_opacity
             height: parent.height
             spacing: 16
         }

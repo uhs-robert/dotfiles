@@ -21,6 +21,8 @@ PanelWindow {
 
     // Latched on open so the frame keeps its place and color while the close animation plays.
     property var held_anchor: null
+    property var held_island: null
+    property bool frame_shown: false
     property string held_screen_name: ""
     property color held_color: Theme.bg_mantle
 
@@ -94,6 +96,9 @@ PanelWindow {
                 morph = 0;
                 content_opacity = 0;
             }
+            const next_island = Popups.open_anchor ? Popups.open_anchor.parent : null;
+            if (held_island && held_island !== next_island) held_island.content_opacity = 1;
+            held_island = next_island;
             held_anchor = Popups.open_anchor;
             held_screen_name = Popups.open_screen_name;
             held_color = Popups.open_color;
@@ -110,20 +115,26 @@ PanelWindow {
         }
     }
 
+    // The island's own modules fade first, then the frame takes over in its exact shape, so the swap can't be seen.
     SequentialAnimation {
         id: open_anim
-        NumberAnimation { target: root; property: "morph"; to: 1; duration: 220; easing.type: Easing.OutCubic }
-        NumberAnimation { target: root; property: "content_opacity"; to: 1; duration: 120; easing.type: Easing.OutCubic }
+        NumberAnimation { target: root.held_island; property: "content_opacity"; to: 0; duration: 90; easing.type: Easing.OutCubic }
+        PropertyAction { target: root; property: "frame_shown"; value: true }
+        NumberAnimation { target: root; property: "morph"; to: 1; duration: 300; easing.type: Easing.InOutCubic }
+        NumberAnimation { target: root; property: "content_opacity"; to: 1; duration: 150; easing.type: Easing.OutCubic }
     }
 
     SequentialAnimation {
         id: close_anim
-        NumberAnimation { target: root; property: "content_opacity"; to: 0; duration: 120; easing.type: Easing.InCubic }
-        NumberAnimation { target: root; property: "morph"; to: 0; duration: 160; easing.type: Easing.InCubic }
+        NumberAnimation { target: root; property: "content_opacity"; to: 0; duration: 110; easing.type: Easing.InCubic }
+        NumberAnimation { target: root; property: "morph"; to: 0; duration: 240; easing.type: Easing.InOutCubic }
+        PropertyAction { target: root; property: "frame_shown"; value: false }
+        NumberAnimation { target: root.held_island; property: "content_opacity"; to: 1; duration: 120; easing.type: Easing.OutCubic }
         ScriptAction {
             script: {
                 root.visible = false;
                 root.held_anchor = null;
+                root.held_island = null;
             }
         }
     }
@@ -137,6 +148,7 @@ PanelWindow {
 
     Shape {
         anchors.fill: parent
+        visible: root.frame_shown
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
