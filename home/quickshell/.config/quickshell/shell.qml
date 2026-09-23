@@ -71,6 +71,7 @@ ShellRoot {
     PopupIpc {}
     BrightnessIpc {}
     NotificationsIpc {}
+    StyleIpc {}
     BarTooltip {}
     NotificationToasts {}
 }
