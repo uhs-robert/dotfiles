@@ -18,6 +18,10 @@ Item {
         cap_right: true
         cap_right_color: submap.submap_name !== "" ? submap.submap_color : left_island.bg_color
 
+        StartButton {
+            compact: root.compact
+        }
+
         Workspaces {
             screen_name: root.screen_name
             compact: root.compact
