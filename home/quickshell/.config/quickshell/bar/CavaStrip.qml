@@ -24,7 +24,8 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell-cava"
     anchors.top: true
     implicitWidth: root.strip_width
-    implicitHeight: 3
+    readonly property int strip_height: 6
+    implicitHeight: root.strip_height
     mask: Region {}
 
     onWantedChanged: {
@@ -56,13 +57,13 @@ PanelWindow {
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.strip_width
-        height: 3
+        height: root.strip_height
         opacity: root.opacity_level
 
         Row {
             anchors.left: parent.left
             anchors.top: parent.top
-            spacing: 1
+            spacing: 0
 
             Repeater {
                 model: root.bar_count
@@ -71,10 +72,10 @@ PanelWindow {
                     required property int index
                     readonly property real level: CavaState.levels[index] || 0
 
-                    width: (root.strip_width - (root.bar_count - 1)) / root.bar_count
-                    height: level * 3
+                    width: root.strip_width / root.bar_count
+                    height: 2 + level * (root.strip_height - 2)
                     color: Theme.theme_primary
-                    opacity: 0.35 + 0.5 * level
+                    opacity: 0.7 + 0.3 * level
                 }
             }
         }

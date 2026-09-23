@@ -104,12 +104,12 @@ Popup {
                             anchors.fill: parent
                             radius: 12
                             color: Theme.bg_surface
-                            visible: !art_image.visible || art_image.status !== Image.Ready
+                            visible: !art_image.has_art || art_image.status !== Image.Ready
                         }
 
                         Text {
                             anchors.centerIn: parent
-                            visible: !art_image.visible || art_image.status !== Image.Ready
+                            visible: !art_image.has_art || art_image.status !== Image.Ready
                             text: "\u{f001}"
                             color: Theme.fg_dim
                             font.family: Theme.font_family
@@ -125,8 +125,9 @@ Popup {
 
                         Image {
                             id: art_image
+                            readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
                             anchors.fill: parent
-                            visible: root.player && root.player.trackArtUrl !== ""
+                            visible: false
                             source: root.player ? root.player.trackArtUrl : ""
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
@@ -135,7 +136,7 @@ Popup {
 
                         MultiEffect {
                             anchors.fill: parent
-                            visible: art_image.visible && art_image.status === Image.Ready
+                            visible: art_image.has_art && art_image.status === Image.Ready
                             source: art_image
                             maskEnabled: true
                             maskSource: art_mask

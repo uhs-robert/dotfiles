@@ -150,9 +150,10 @@ Item {
         const island = has_clock(root.left_entries) ? left_island : has_clock(root.center_entries) ? center_island : has_clock(root.right_entries) ? right_island : null;
         for (const i of [left_island, center_island, right_island]) Popups.unregister("clock", root.screen_name, i.body_item);
         if (island) Popups.register_default("clock", island.body_item, island.bg_color, root.screen_name);
-        // Media has no bar module by default; its popup drops from the center island.
+        // Without a media module in bars.json, the media popup drops from the center island.
         Popups.unregister("media", root.screen_name, center_island.body_item);
-        if (root.has_center) Popups.register_default("media", center_island.body_item, center_island.bg_color, root.screen_name);
+        const has_media = [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "media"));
+        if (root.has_center && !has_media) Popups.register_default("media", center_island.body_item, center_island.bg_color, root.screen_name);
     }
 
     onLeft_entriesChanged: sync_clock_anchor()
