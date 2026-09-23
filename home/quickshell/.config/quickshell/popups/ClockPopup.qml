@@ -10,7 +10,7 @@ Popup {
 
     popup_name: "clock"
     implicitWidth: 260
-    implicitHeight: 260
+    implicitHeight: 284
 
     property date today: new Date()
     property int view_year: today.getFullYear()
@@ -130,6 +130,34 @@ Popup {
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size
                 font.bold: true
+            }
+
+            Row {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 10
+
+                Repeater {
+                    model: Timezones.zones
+
+                    Text {
+                        id: zone_label
+                        required property int index
+
+                        readonly property bool is_active: index === Timezones.index
+
+                        text: Timezones.abbrevs[index] || "..."
+                        color: is_active ? Theme.theme_secondary : Theme.fg_muted
+                        font.family: Theme.font_family
+                        font.pixelSize: Theme.popup_font_size - 2
+                        font.bold: is_active
+                        font.underline: is_active
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: Timezones.index = zone_label.index
+                        }
+                    }
+                }
             }
 
             RowLayout {
