@@ -13,7 +13,7 @@ Singleton {
     property var history: []
     property var toasts: []
     property bool dnd: false
-    property int unread: 0
+    readonly property int unread: history.filter(e => !e.read).length
 
     readonly property int timeout_normal_ms: 5000
     readonly property int timeout_low_ms: 3000
@@ -39,12 +39,9 @@ Singleton {
 
     function handle_notification(n) {
         n.tracked = true;
-        const entry = { id: n.id, notification: n, time: Date.now(), timer: null };
+        const entry = { id: n.id, notification: n, time: Date.now(), timer: null, read: false };
         n.closed.connect(() => root.remove_entry(entry));
-        if (!n.transient) {
-            root.history = [entry].concat(root.history);
-            root.unread += 1;
-        }
+        if (!n.transient) root.history = [entry].concat(root.history);
 
         if (root.dnd && n.urgency !== NotificationUrgency.Critical) return;
         root.toasts = [entry].concat(root.toasts);
@@ -52,7 +49,9 @@ Singleton {
     }
 
     function start_timeout(entry, n) {
-        let ms = n.expireTimeout > 0 ? n.expireTimeout : (n.urgency === NotificationUrgency.Critical ? 0 : n.urgency === NotificationUrgency.Low ? root.timeout_low_ms : root.timeout_normal_ms);
+        // expireTimeout is in ms: 0 means never, negative means the server default.
+        const fallback = n.urgency === NotificationUrgency.Critical ? 0 : n.urgency === NotificationUrgency.Low ? root.timeout_low_ms : root.timeout_normal_ms;
+        const ms = n.expireTimeout >= 0 ? n.expireTimeout : fallback;
         if (ms <= 0) return;
         const timer = timer_component.createObject(root, { interval: ms });
         timer.triggered.connect(() => {
@@ -74,7 +73,6 @@ Singleton {
     function remove_entry(entry) {
         root.toasts = root.toasts.filter(e => e !== entry);
         root.history = root.history.filter(e => e !== entry);
-        root.unread = Math.min(root.unread, root.history.length);
         root.stop_timer(entry);
     }
 
@@ -84,7 +82,8 @@ Singleton {
     }
 
     function clear_all() {
-        for (const entry of root.history.slice()) root.dismiss(entry);
+        const all = root.history.concat(root.toasts.filter(e => !root.history.includes(e)));
+        for (const entry of all) root.dismiss(entry);
     }
 
     function hide_toast(entry) {
@@ -128,7 +127,8 @@ Singleton {
     }
 
     function mark_read() {
-        root.unread = 0;
+        for (const e of root.history) e.read = true;
+        root.history = root.history.slice();
     }
 
     readonly property string state_dir: Quickshell.stateDir
@@ -170,7 +170,7 @@ Singleton {
     function restore_tracked() {
         const restored = [];
         for (const n of server.trackedNotifications.values) {
-            const entry = { id: n.id, notification: n, time: Date.now(), timer: null };
+            const entry = { id: n.id, notification: n, time: Date.now(), timer: null, read: true };
             n.closed.connect(() => root.remove_entry(entry));
             restored.push(entry);
         }
