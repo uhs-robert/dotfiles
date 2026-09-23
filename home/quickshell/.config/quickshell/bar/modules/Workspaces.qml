@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import "../../theme"
+import "../../services"
 
 Item {
     id: root
@@ -86,9 +87,20 @@ Item {
                 radius: height / 2
                 color: modelData.active ? Theme.theme_primary : Theme.bg_surface
 
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: Theme.fg_core
+                    opacity: !modelData.active && pill_hover.hovered ? 0.1 : 0
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + pill.modelData.id + "' })")
+                }
+
+                HoverHandler {
+                    id: pill_hover
                 }
 
                 Row {
@@ -121,6 +133,13 @@ Item {
                                     } else if (mouse.button === Qt.MiddleButton) {
                                         root.close_toplevel(icon_item.modelData.address);
                                     }
+                                }
+                            }
+
+                            HoverHandler {
+                                onHoveredChanged: {
+                                    if (hovered) Tooltip.show(icon_item, icon_item.modelData.title);
+                                    else Tooltip.hide();
                                 }
                             }
                         }

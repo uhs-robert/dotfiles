@@ -30,7 +30,26 @@ Item {
         return Theme.fg_core;
     }
 
+    readonly property string tooltip_text: {
+        if (!root.has_adapter) return "No adapter";
+        const lines = [root.adapter.name];
+        if (root.any_connected) {
+            for (const d of root.connected_devices) lines.push(d.name);
+        } else {
+            lines.push("No devices connected");
+        }
+        return lines.join("\n");
+    }
+
     Component.onCompleted: Popups.register_default("bluetooth", root.island, root.island_color)
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: -4
+        radius: 4
+        color: Theme.bg_surface
+        opacity: hover_handler.hovered ? 0.5 : 0
+    }
 
     Row {
         id: row
@@ -41,6 +60,14 @@ Item {
             color: root.glyph_color
             font.family: Theme.font_family
             font.pixelSize: Theme.font_size
+        }
+    }
+
+    HoverHandler {
+        id: hover_handler
+        onHoveredChanged: {
+            if (hovered) Tooltip.show(root, root.tooltip_text);
+            else Tooltip.hide();
         }
     }
 

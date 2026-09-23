@@ -50,6 +50,15 @@ Row {
     readonly property bool net_connected: root.wired_connected || root.wifi_connected
     readonly property color temp_color: SysStats.temp_c >= 80 ? Theme.theme_label : Theme.theme_primary
 
+    readonly property string net_tooltip: {
+        if (root.wired_connected) return "Wired: " + root.wired_device.name;
+        if (root.wifi_connected && root.active_wifi_network) {
+            return root.active_wifi_network.name + " (" + Math.round(root.active_wifi_network.signalStrength * 100) + "%)";
+        }
+        if (root.wifi_device) return "Wi-Fi: " + root.wifi_device.name;
+        return "Disconnected";
+    }
+
     Item {
         visible: !root.compact
         width: cpu_row.implicitWidth
@@ -78,6 +87,13 @@ Row {
         MouseArea {
             anchors.fill: parent
             onClicked: Quickshell.execDetached(["kitty", "btop"])
+        }
+
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) Tooltip.show(parent, "CPU " + SysStats.cpu_percent + "%");
+                else Tooltip.hide();
+            }
         }
     }
 
@@ -110,6 +126,13 @@ Row {
             anchors.fill: parent
             onClicked: Quickshell.execDetached(["kitty", "btop"])
         }
+
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) Tooltip.show(parent, "RAM " + SysStats.mem_used_gb.toFixed(1) + " / " + SysStats.mem_total_gb.toFixed(1) + " GB");
+                else Tooltip.hide();
+            }
+        }
     }
 
     Item {
@@ -141,6 +164,13 @@ Row {
             anchors.fill: parent
             onClicked: Quickshell.execDetached(["kitty", "btop"])
         }
+
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) Tooltip.show(parent, "Temperature " + SysStats.temp_c + "°C");
+                else Tooltip.hide();
+            }
+        }
     }
 
     Item {
@@ -165,6 +195,13 @@ Row {
             onClicked: mouse => {
                 if (mouse.button === Qt.RightButton) Quickshell.execDetached(["nm-connection-editor"]);
                 else Quickshell.execDetached(["kitty", "-e", "nmtui"]);
+            }
+        }
+
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) Tooltip.show(parent, root.net_tooltip);
+                else Tooltip.hide();
             }
         }
     }

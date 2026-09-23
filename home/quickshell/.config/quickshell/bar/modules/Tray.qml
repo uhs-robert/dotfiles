@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
+import "../../services"
 
 Row {
     id: root
@@ -49,6 +50,14 @@ Row {
                     }
                 }
                 onWheel: wheel => icon_root.modelData.scroll(wheel.angleDelta.y, false)
+            }
+
+            HoverHandler {
+                onHoveredChanged: {
+                    const label = icon_root.modelData.tooltipTitle || icon_root.modelData.title;
+                    if (hovered && label) Tooltip.show(icon_root, label);
+                    else Tooltip.hide();
+                }
             }
         }
     }

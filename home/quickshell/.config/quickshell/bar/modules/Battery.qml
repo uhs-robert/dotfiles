@@ -39,7 +39,29 @@ Item {
         return Theme.theme_primary;
     }
 
+    function format_time(seconds) {
+        if (seconds <= 0) return "";
+        const h = Math.floor(seconds / 3600);
+        const m = Math.round((seconds % 3600) / 60);
+        return h > 0 ? (h + "h " + m + "m") : (m + "m");
+    }
+
+    readonly property string tooltip_text: {
+        if (!has_battery) return "";
+        if (device.timeToEmpty > 0) return format_time(device.timeToEmpty) + " remaining";
+        if (device.timeToFull > 0) return format_time(device.timeToFull) + " until full";
+        return Math.round(percent) + "%";
+    }
+
     Component.onCompleted: Popups.register_default("battery", root.island, root.island_color)
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: -4
+        radius: 4
+        color: Theme.bg_surface
+        opacity: hover_handler.hovered ? 0.5 : 0
+    }
 
     Row {
         id: row
@@ -57,6 +79,14 @@ Item {
             color: Theme.fg_core
             font.family: Theme.font_family
             font.pixelSize: Theme.font_size
+        }
+    }
+
+    HoverHandler {
+        id: hover_handler
+        onHoveredChanged: {
+            if (hovered) Tooltip.show(root, root.tooltip_text);
+            else Tooltip.hide();
         }
     }
 

@@ -3,6 +3,7 @@
 import QtQuick
 import Quickshell
 import "./bar"
+import "./components"
 import "./popups"
 import "./services"
 
@@ -58,4 +59,5 @@ ShellRoot {
     BluetoothPopup {}
     PopupIpc {}
     BrightnessIpc {}
+    BarTooltip {}
 }

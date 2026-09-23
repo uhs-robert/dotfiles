@@ -9,6 +9,8 @@ Singleton {
 
     property real cpu_percent: 0
     property real mem_percent: 0
+    property real mem_used_gb: 0
+    property real mem_total_gb: 0
     property real temp_c: 0
 
     property string temp_path: ""
@@ -68,7 +70,11 @@ Singleton {
             const t = text();
             const total = Number(t.match(/MemTotal:\s+(\d+)/)[1]);
             const avail = Number(t.match(/MemAvailable:\s+(\d+)/)[1]);
-            if (total > 0) root.mem_percent = Math.round((1 - avail / total) * 100);
+            if (total > 0) {
+                root.mem_percent = Math.round((1 - avail / total) * 100);
+                root.mem_total_gb = total / 1048576;
+                root.mem_used_gb = (total - avail) / 1048576;
+            }
         }
     }
 

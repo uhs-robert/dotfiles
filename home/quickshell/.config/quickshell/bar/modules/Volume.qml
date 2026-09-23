@@ -30,7 +30,21 @@ Item {
         return "";
     }
 
+    readonly property string tooltip_text: {
+        if (!root.sink) return "No output device";
+        const label = root.sink.description || root.sink.name;
+        return label + " // " + Math.round(root.volume * 100) + "%";
+    }
+
     Component.onCompleted: Popups.register_default("volume", root.island, root.island_color)
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: -4
+        radius: 4
+        color: Theme.bg_surface
+        opacity: hover_handler.hovered ? 0.5 : 0
+    }
 
     Row {
         id: row
@@ -50,6 +64,14 @@ Item {
             color: Theme.fg_core
             font.family: Theme.font_family
             font.pixelSize: Theme.font_size
+        }
+    }
+
+    HoverHandler {
+        id: hover_handler
+        onHoveredChanged: {
+            if (hovered) Tooltip.show(root, root.tooltip_text);
+            else Tooltip.hide();
         }
     }
 
