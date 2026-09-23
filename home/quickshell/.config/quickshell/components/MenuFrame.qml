@@ -161,8 +161,8 @@ PanelWindow {
         ShapePath {
             strokeWidth: -1
             fillColor: root.held_color
-            fillRule: ShapePath.OddEvenFill
-            startX: root.cur_x
+            // One simple outline that walks around the island body, so the bar's own modules show through.
+            startX: root.body_x + root.body_w
             startY: 0
             PathLine { x: root.cur_x + root.cur_w; y: 0 }
             PathLine { x: root.cur_x + root.cur_w - root.slant_r; y: root.cur_h - root.corner }
@@ -170,13 +170,10 @@ PanelWindow {
             PathLine { x: root.cur_x + root.slant_l + root.corner; y: root.cur_h }
             PathArc { x: root.cur_x + root.slant_l; y: root.cur_h - root.corner; radiusX: root.corner; radiusY: root.corner }
             PathLine { x: root.cur_x; y: 0 }
-
-            // Hole over the island body so the bar's own modules show through; 1px short so no seam shows under it.
-            PathMove { x: root.body_x; y: 0 }
-            PathLine { x: root.body_x + root.body_w; y: 0 }
-            PathLine { x: root.body_x + root.body_w; y: Math.max(0, root.island_h - 1) }
-            PathLine { x: root.body_x; y: Math.max(0, root.island_h - 1) }
             PathLine { x: root.body_x; y: 0 }
+            PathLine { x: root.body_x; y: Math.max(0, root.island_h - 1) }
+            PathLine { x: root.body_x + root.body_w; y: Math.max(0, root.island_h - 1) }
+            PathLine { x: root.body_x + root.body_w; y: 0 }
         }
     }
 
