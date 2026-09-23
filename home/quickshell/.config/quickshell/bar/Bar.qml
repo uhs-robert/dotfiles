@@ -121,6 +121,16 @@ Item {
         }
     }
 
+    CavaBars {
+        parent: center_island.body_item
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 6
+        anchors.rightMargin: 6
+        active: MediaState.playing && root.has_center
+    }
+
     Island {
         id: right_island
         anchors.right: parent.right
