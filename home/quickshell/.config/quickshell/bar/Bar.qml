@@ -48,8 +48,9 @@ Item {
 
     // Sets island/screen/stat properties a module declares, after the Loader instantiates it.
     function wire_module(item, entry, island) {
-        if (item.hasOwnProperty("island")) item.island = island.body_item;
+        // Color first: setting island triggers the module's popup registration, which reads it.
         if (item.hasOwnProperty("island_color")) item.island_color = Qt.binding(() => island.bg_color);
+        if (item.hasOwnProperty("island")) item.island = island.body_item;
         if (entry.arg && item.hasOwnProperty("stat")) item.stat = entry.arg;
     }
 
@@ -74,7 +75,6 @@ Item {
         cap_right: true
         visible: root.left_entries.length > 0
 
-        Component.onCompleted: if (root.left_entries.some(e => e.base === "clock")) Popups.register_default("clock", left_island.body_item, left_island.bg_color, root.screen_name)
         onClicked: if (root.left_entries.some(e => e.base === "clock")) Popups.toggle("clock", left_island.body_item, left_island.bg_color, root.screen_name)
 
         Repeater {
@@ -97,7 +97,6 @@ Item {
         cap_right: true
         visible: root.center_entries.length > 0
 
-        Component.onCompleted: if (root.center_entries.some(e => e.base === "clock")) Popups.register_default("clock", center_island.body_item, center_island.bg_color, root.screen_name)
         onClicked: if (root.center_entries.some(e => e.base === "clock")) Popups.toggle("clock", center_island.body_item, center_island.bg_color, root.screen_name)
 
         Repeater {
@@ -119,7 +118,6 @@ Item {
         cap_left: true
         visible: root.right_entries.length > 0
 
-        Component.onCompleted: if (root.right_entries.some(e => e.base === "clock")) Popups.register_default("clock", right_island.body_item, right_island.bg_color, root.screen_name)
         onClicked: if (root.right_entries.some(e => e.base === "clock")) Popups.toggle("clock", right_island.body_item, right_island.bg_color, root.screen_name)
 
         Repeater {
@@ -133,5 +131,17 @@ Item {
         }
     }
 
+    // The clock has no module item of its own, so its popup anchor follows whichever island lists it.
+    function sync_clock_anchor() {
+        const has_clock = entries => entries.some(e => e.base === "clock");
+        const island = has_clock(root.left_entries) ? left_island : has_clock(root.center_entries) ? center_island : has_clock(root.right_entries) ? right_island : null;
+        for (const i of [left_island, center_island, right_island]) Popups.unregister("clock", root.screen_name, i.body_item);
+        if (island) Popups.register_default("clock", island.body_item, island.bg_color, root.screen_name);
+    }
+
+    onLeft_entriesChanged: sync_clock_anchor()
+    onCenter_entriesChanged: sync_clock_anchor()
+    onRight_entriesChanged: sync_clock_anchor()
+    Component.onCompleted: sync_clock_anchor()
     Component.onDestruction: Popups.unregister_screen(root.screen_name)
 }
