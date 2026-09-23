@@ -13,6 +13,10 @@ Singleton {
     property string tooltip: ""
     readonly property bool available: runs.length > 0
 
+    function decode(text) {
+        return text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"").replace(/&apos;|&#39;/g, "'").replace(/&amp;/g, "&");
+    }
+
     // Flattens keeptabs' pango spans into runs of {text, color, rise}, dropping its zero-width struts.
     function parse(markup) {
         const out = [];
@@ -28,7 +32,7 @@ Singleton {
             } else if (m[0] === "</span>") {
                 stack.pop();
             } else {
-                const text = m[2].replace(/​/g, "");
+                const text = root.decode(m[2].replace(/\u200b/g, ""));
                 if (!text) continue;
                 const top = stack.length ? stack[stack.length - 1] : { color: "", rise: 0 };
                 out.push({ text: text, color: top.color, rise: top.rise });
@@ -47,7 +51,7 @@ Singleton {
                     const data = JSON.parse(line);
                     root.runs = root.parse(data.text || "");
                     root.state_class = data.class || "idle";
-                    root.tooltip = data.tooltip || "";
+                    root.tooltip = root.decode(data.tooltip || "");
                 } catch (e) {
                     console.warn("keeptabs: " + e);
                 }
