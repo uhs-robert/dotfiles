@@ -141,10 +141,10 @@ Popup {
     // --- Single key handler: every popup shortcut is dispatched from here ---
     function handle_key(event) {
         if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
-            root.step_tab(-1);
+            if (root.current_tab === 0 || root.current_tab === 1) root.step_current_sub(-1);
             event.accepted = true;
         } else if (event.key === Qt.Key_Tab) {
-            root.step_tab(1);
+            if (root.current_tab === 0 || root.current_tab === 1) root.step_current_sub(1);
             event.accepted = true;
         } else if (event.key >= Qt.Key_1 && event.key < Qt.Key_1 + root.tab_names.length) {
             root.set_tab(event.key - Qt.Key_1);
@@ -153,9 +153,11 @@ Popup {
             root.set_tab(root.tab_names.length - 1);
             event.accepted = true;
         } else if (event.key === Qt.Key_BracketLeft) {
-            if (root.current_tab === 0 || root.current_tab === 1) { root.step_current_sub(-1); event.accepted = true; }
+            root.step_tab(-1);
+            event.accepted = true;
         } else if (event.key === Qt.Key_BracketRight) {
-            if (root.current_tab === 0 || root.current_tab === 1) { root.step_current_sub(1); event.accepted = true; }
+            root.step_tab(1);
+            event.accepted = true;
         } else if (event.key === Qt.Key_R) {
             WeatherState.refresh(true);
             event.accepted = true;
@@ -465,7 +467,7 @@ Popup {
             }
 
             Text {
-                text: "Tab tabs · 1-5 select · h/l move · H/L jump · [ ] view · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
+                text: "[ ] tabs · 1-5 select · Tab view · h/l move · H/L jump · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
                 color: Theme.fg_dim
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size - 4
