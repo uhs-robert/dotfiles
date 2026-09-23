@@ -36,24 +36,53 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-    // Reads as the island unfolding downward: its color, joined flush at the top.
-    Rectangle {
-        anchors.fill: parent
-        color: Popups.open_color
-        bottomLeftRadius: 10
-        bottomRightRadius: 10
+    property real grow: 0
+    readonly property real start_width: Popups.open_anchor ? Math.min(Popups.open_anchor.width, width) : width
+
+    // Runs once per open: grows from the island's width and edge to full size, then stops.
+    NumberAnimation {
+        id: grow_anim
+        target: root
+        property: "grow"
+        from: 0
+        to: 1
+        duration: 220
+        easing.type: Easing.OutCubic
     }
 
-    FocusScope {
-        id: content_scope
-        anchors.fill: parent
-        focus: true
+    Item {
+        id: reveal
+        readonly property real w: root.start_width + (root.width - root.start_width) * root.grow
+        width: w
+        height: root.height * root.grow
+        x: root.side === "right" ? root.width - w : root.side === "left" ? 0 : (root.width - w) / 2
+        clip: true
 
-        Keys.onEscapePressed: Popups.close()
-        Keys.onPressed: event => {
-            if (event.key === Qt.Key_Q) {
-                Popups.close();
-                event.accepted = true;
+        Item {
+            x: -reveal.x
+            width: root.width
+            height: root.height
+
+            // Reads as the island unfolding downward: its color, joined flush at the top.
+            Rectangle {
+                anchors.fill: parent
+                color: Popups.open_color
+                bottomLeftRadius: 10
+                bottomRightRadius: 10
+            }
+
+            FocusScope {
+                id: content_scope
+                anchors.fill: parent
+                focus: true
+
+                Keys.onEscapePressed: Popups.close()
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Q) {
+                        Popups.close();
+                        event.accepted = true;
+                    }
+                }
             }
         }
     }
@@ -72,6 +101,7 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
+            grow_anim.restart();
             content_scope.forceActiveFocus();
             Qt.callLater(() => focus_grab.active = root.visible && !root.suspend_grab);
         } else {
