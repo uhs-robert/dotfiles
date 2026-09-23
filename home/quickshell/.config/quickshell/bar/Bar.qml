@@ -16,7 +16,8 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         bg_color: Theme.bg_core
         cap_right: true
-        cap_right_color: submap.submap_name !== "" ? submap.submap_color : left_island.bg_color
+        cap_right_color: submap.visible ? submap.submap_color : left_island.bg_color
+        pad_right: submap.visible ? 0 : 8
 
         StartButton {
             compact: root.compact

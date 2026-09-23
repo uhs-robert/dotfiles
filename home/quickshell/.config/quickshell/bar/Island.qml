@@ -10,6 +10,7 @@ Item {
     property color cap_right_color: bg_color
     property bool cap_left: false
     property bool cap_right: false
+    property int pad_right: 8
     default property alias content: layout.children
 
     readonly property alias body_item: body
@@ -25,7 +26,7 @@ Item {
 
         x: cap_left ? root.cap_width : 0
         height: root.height
-        width: layout.implicitWidth + 16
+        width: layout.implicitWidth + 8 + root.pad_right
         color: root.bg_color
 
         // Declared before the layout so module MouseAreas stack above it.
@@ -36,7 +37,8 @@ Item {
 
         RowLayout {
             id: layout
-            anchors.centerIn: parent
+            x: 8
+            height: parent.height
             spacing: 16
         }
     }

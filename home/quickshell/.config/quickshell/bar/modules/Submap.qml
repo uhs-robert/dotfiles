@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/bar/modules/Submap.qml
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import "../../theme"
@@ -32,9 +33,8 @@ Rectangle {
     readonly property color submap_color: color_map[submap_name] || Theme.theme_secondary
 
     visible: submap_name !== ""
-    width: visible ? label.implicitWidth + 12 : 0
-    height: 20
-    radius: 4
+    implicitWidth: label.implicitWidth + 16
+    Layout.fillHeight: true
     color: submap_color
 
     Connections {
@@ -51,7 +51,8 @@ Rectangle {
         text: root.submap_name
         color: Theme.bg_core
         font.family: Theme.font_family
-        font.pixelSize: Theme.font_size - 3
+        font.pixelSize: Theme.font_size
+        font.bold: true
     }
 
     MouseArea {
