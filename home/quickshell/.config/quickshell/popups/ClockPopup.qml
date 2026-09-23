@@ -15,6 +15,7 @@ Popup {
     property date today: new Date()
     property int view_year: today.getFullYear()
     property int view_month: today.getMonth()
+    property real last_g_ms: 0
 
     readonly property bool is_open: Popups.open_name === "clock"
     onIs_openChanged: if (is_open) go_today()
@@ -91,8 +92,23 @@ Popup {
             } else if (event.key === Qt.Key_L) {
                 root.next_month();
                 event.accepted = true;
+            } else if (event.key === Qt.Key_J) {
+                root.view_year += 1;
+                event.accepted = true;
+            } else if (event.key === Qt.Key_K) {
+                root.view_year -= 1;
+                event.accepted = true;
             } else if (event.key === Qt.Key_T) {
                 root.go_today();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_G) {
+                const now = Date.now();
+                if (now - root.last_g_ms < 500) {
+                    root.go_today();
+                    root.last_g_ms = 0;
+                } else {
+                    root.last_g_ms = now;
+                }
                 event.accepted = true;
             }
         }
