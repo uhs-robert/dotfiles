@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/bar/modules/Volume.qml
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Pipewire
 import "../../theme"
@@ -47,19 +48,21 @@ Item {
         opacity: hover_handler.hovered ? 0.5 : 0
     }
 
-    Row {
+    RowLayout {
         id: row
         spacing: 6
 
         Text {
+            Layout.alignment: Qt.AlignVCenter
             text: root.glyph
             color: Theme.theme_primary
             opacity: root.muted ? 0.5 : 1
             font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+            font.pixelSize: Theme.glyph_size
         }
 
         Text {
+            Layout.alignment: Qt.AlignVCenter
             visible: !root.compact
             text: Math.round(root.volume * 100) + "%"
             color: Theme.fg_core

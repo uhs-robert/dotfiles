@@ -60,7 +60,7 @@ Item {
             text: root.glyph
             color: root.glyph_color
             font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+            font.pixelSize: Theme.glyph_size
         }
     }
 

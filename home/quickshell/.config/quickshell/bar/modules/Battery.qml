@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/bar/modules/Battery.qml
 import QtQuick
+import QtQuick.Layouts
 import Quickshell.Services.UPower
 import "../../theme"
 import "../../services"
@@ -64,18 +65,20 @@ Item {
         opacity: hover_handler.hovered ? 0.5 : 0
     }
 
-    Row {
+    RowLayout {
         id: row
         spacing: 6
 
         Text {
+            Layout.alignment: Qt.AlignVCenter
             text: root.glyph
             color: root.glyph_color
             font.family: Theme.font_family
-            font.pixelSize: Theme.font_size
+            font.pixelSize: Theme.glyph_size
         }
 
         Text {
+            Layout.alignment: Qt.AlignVCenter
             text: Math.round(root.percent) + "%"
             color: Theme.fg_core
             font.family: Theme.font_family
