@@ -23,7 +23,9 @@ Item {
 
     readonly property string tooltip_text: {
         if (!has_data) return "Weather unavailable";
-        const lines = [current.cond, "Feels like " + Math.round(current.feels) + "°" + WeatherState.unit_symbol()];
+        const lines = [];
+        for (const a of WeatherState.alerts) lines.push(a.event);
+        lines.push(current.cond, "Feels like " + Math.round(current.feels) + "°" + WeatherState.unit_symbol());
         if (WeatherState.location_name) lines.push(WeatherState.location_name);
         if (WeatherState.stale) lines.push("Stale data" + (WeatherState.error ? ": " + WeatherState.error : ""));
         return lines.join("\n");
@@ -44,20 +46,38 @@ Item {
         id: row
         spacing: 4
 
-        Image {
-            id: icon
-            readonly property int implicit_size: root.compact ? 14 : 16
-            readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
-
+        Item {
             Layout.alignment: Qt.AlignVCenter
-            visible: root.has_data
-            width: visible ? implicit_size : 0
-            height: implicit_size
-            sourceSize.width: Math.ceil(implicit_size * dpr)
-            sourceSize.height: Math.ceil(implicit_size * dpr)
-            source: root.has_data ? WeatherState.icon_source(root.current.code, root.current.is_day) : ""
-            smooth: true
-            mipmap: true
+            implicitWidth: icon.width
+            implicitHeight: icon.height
+
+            Image {
+                id: icon
+                readonly property int implicit_size: root.compact ? 14 : 16
+                readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
+
+                visible: root.has_data
+                width: visible ? implicit_size : 0
+                height: implicit_size
+                sourceSize.width: Math.ceil(implicit_size * dpr)
+                sourceSize.height: Math.ceil(implicit_size * dpr)
+                source: root.has_data ? WeatherState.icon_source(root.current.code, root.current.is_day) : ""
+                smooth: true
+                mipmap: true
+            }
+
+            Rectangle {
+                visible: WeatherState.alerts.length > 0
+                width: 6
+                height: 6
+                radius: 3
+                anchors.right: icon.right
+                anchors.top: icon.top
+                anchors.margins: -1
+                color: WeatherState.alerts.length > 0 ? WeatherState.alert_color(WeatherState.alerts[0].severity) : Theme.error
+                border.color: Theme.bg_core
+                border.width: 1
+            }
         }
 
         Text {

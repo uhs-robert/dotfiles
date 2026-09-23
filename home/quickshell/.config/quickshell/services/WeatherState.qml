@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "../theme"
+import "Astro.js" as Astro
 
 // One shared Open-Meteo fetch for every bar. Ported from the Waybar Ruby weather
 // script (get_weather.rb) so the module has no Ruby dependency.
@@ -14,7 +15,7 @@ Singleton {
         latitude: "auto",
         longitude: "auto",
         unit: "fahrenheit",
-        time_format: "24h",
+        time_format: "12h",
         days: 7
     })
 
@@ -39,6 +40,18 @@ Singleton {
     property double last_attempt_ms: 0
     property int utc_offset: 0
     property string fetch_key: ""
+    property real lat: 0
+    property real lon: 0
+
+    property var aq_current: null
+    property var aq_hours: []
+    property bool aq_has_data: false
+    property bool aq_loading: false
+    property string aq_error: ""
+
+    property var alerts: []
+    property bool alerts_has_data: false
+    property string alerts_error: ""
 
     readonly property int refresh_interval_ms: 900000
     readonly property int request_timeout_ms: 10000
@@ -158,16 +171,20 @@ Singleton {
     }
 
     function fetch_forecast(lat, lon, location_name) {
+        root.lat = lat;
+        root.lon = lon;
+
         const unit_c = root.settings.unit === "celsius";
         const days_count = Math.max(1, Math.min(16, root.settings.days || 7));
         const params = {
             latitude: lat,
             longitude: lon,
-            current: "temperature_2m,apparent_temperature,is_day,precipitation,weather_code",
-            hourly: "temperature_2m,precipitation_probability,precipitation,weather_code,is_day",
-            daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset",
+            current: "temperature_2m,apparent_temperature,is_day,precipitation,weather_code,relative_humidity_2m,dew_point_2m,pressure_msl,visibility,uv_index,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+            hourly: "temperature_2m,precipitation_probability,precipitation,weather_code,is_day,apparent_temperature,relative_humidity_2m,uv_index,wind_speed_10m,wind_direction_10m,wind_gusts_10m,dew_point_2m,pressure_msl,visibility,cloud_cover",
+            daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunshine_duration",
             temperature_unit: unit_c ? "celsius" : "fahrenheit",
             precipitation_unit: unit_c ? "mm" : "inch",
+            wind_speed_unit: unit_c ? "kmh" : "mph",
             timezone: "auto",
             forecast_days: days_count
         };
@@ -180,7 +197,7 @@ Singleton {
             if (xhr.status === 200) {
                 try {
                     const data = JSON.parse(xhr.responseText);
-                    root.handle_forecast(data, location_name);
+                    root.handle_forecast(data, location_name, lat, lon);
                 } catch (e) {
                     root.fail("forecast parse error: " + e);
                 }
@@ -192,23 +209,26 @@ Singleton {
         xhr.ontimeout = () => root.fail("forecast request timed out");
         xhr.open("GET", "https://api.open-meteo.com/v1/forecast?" + query);
         xhr.send();
+
+        root.fetch_air_quality(lat, lon);
+        root.fetch_alerts(lat, lon);
     }
 
-    function handle_forecast(blob, location_name) {
+    function handle_forecast(blob, location_name, lat, lon) {
         if (root.fetch_key !== JSON.stringify(root.settings)) {
             root.loading = false;
             root.refresh(true);
             return;
         }
         try {
-            const parsed = root.parse_blob(blob, location_name);
+            const parsed = root.parse_blob(blob, location_name, lat, lon);
             root.apply_data(parsed);
             root.last_success_ms = Date.now();
             root.loading = false;
             root.error = "";
             root.stale = false;
             root.warned_once = false;
-            cache_file.setText(JSON.stringify(parsed));
+            root.save_cache();
         } catch (e) {
             root.fail("parse error: " + e);
         }
@@ -224,6 +244,138 @@ Singleton {
         }
     }
 
+    // Air quality is fetched separately: a failure here never marks the main forecast stale.
+    function fetch_air_quality(lat, lon) {
+        root.aq_loading = true;
+        const params = {
+            latitude: lat,
+            longitude: lon,
+            current: "us_aqi,pm2_5,pm10,ozone",
+            hourly: "us_aqi",
+            forecast_days: 2,
+            timezone: "auto"
+        };
+        const query = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
+
+        const xhr = new XMLHttpRequest();
+        xhr.timeout = root.request_timeout_ms;
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            root.aq_loading = false;
+            if (xhr.status === 200) {
+                try {
+                    root.handle_air_quality(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    root.aq_error = "air quality parse error: " + e;
+                }
+            } else {
+                root.aq_error = "air quality request failed: " + xhr.status;
+            }
+        };
+        xhr.onerror = () => { root.aq_loading = false; root.aq_error = "air quality network error"; };
+        xhr.ontimeout = () => { root.aq_loading = false; root.aq_error = "air quality request timed out"; };
+        xhr.open("GET", "https://air-quality-api.open-meteo.com/v1/air-quality?" + query);
+        xhr.send();
+    }
+
+    function handle_air_quality(blob) {
+        const cur = blob.current || {};
+        root.aq_current = {
+            aqi: Math.round(root.parse_num(cur.us_aqi, -1)),
+            pm25: root.parse_num(cur.pm2_5, 0),
+            pm10: root.parse_num(cur.pm10, 0),
+            ozone: root.parse_num(cur.ozone, 0)
+        };
+
+        const hourly = blob.hourly || {};
+        const times = hourly.time || [];
+        const aqis = hourly.us_aqi || [];
+        const now_local = new Date(cur.time || Date.now());
+        const all = [];
+        for (let i = 0; i < times.length; i++) {
+            all.push({ dt: new Date(times[i]).toISOString(), aqi: Math.round(root.parse_num(aqis[i], 0)) });
+        }
+        let next = all.filter(h => new Date(h.dt) >= now_local);
+        if (next.length === 0 && all.length > 0) next = all;
+        root.aq_hours = next.slice(0, 24);
+        root.aq_has_data = true;
+        root.aq_error = "";
+        root.save_cache();
+    }
+
+    // US National Weather Service active alerts for this point. A failure or a non-US
+    // location (404/empty) just means no alerts; it never marks the forecast stale.
+    function fetch_alerts(lat, lon) {
+        const xhr = new XMLHttpRequest();
+        xhr.timeout = root.request_timeout_ms;
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            if (xhr.status === 200) {
+                try {
+                    root.handle_alerts(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    root.alerts_error = "alerts parse error: " + e;
+                }
+            } else {
+                root.alerts = [];
+                root.alerts_has_data = true;
+                root.alerts_error = "";
+            }
+        };
+        xhr.onerror = () => { root.alerts = []; root.alerts_has_data = true; };
+        xhr.ontimeout = () => { root.alerts = []; root.alerts_has_data = true; };
+        xhr.open("GET", "https://api.weather.gov/alerts/active?point=" + lat.toFixed(4) + "," + lon.toFixed(4));
+        try {
+            xhr.setRequestHeader("User-Agent", "quickshell-weather (dotfiles)");
+            xhr.setRequestHeader("Accept", "application/geo+json");
+        } catch (e) {
+            console.warn("Weather: could not set alert request headers (" + e + ")");
+        }
+        xhr.send();
+    }
+
+    readonly property var alert_severity_rank: ({ Extreme: 0, Severe: 1, Moderate: 2, Minor: 3, Unknown: 4 })
+
+    function handle_alerts(geojson) {
+        const features = geojson.features || [];
+        const now = Date.now();
+        const list = [];
+        for (const f of features) {
+            const p = f.properties || {};
+            const ends = p.ends || p.expires || "";
+            if (ends && new Date(ends).getTime() < now) continue;
+            list.push({
+                event: p.event || "Alert",
+                severity: p.severity || "Unknown",
+                urgency: p.urgency || "Unknown",
+                headline: p.headline || "",
+                description: p.description || "",
+                instruction: p.instruction || "",
+                onset: p.onset || p.effective || "",
+                ends: ends,
+                area: p.areaDesc || "",
+                sender: p.senderName || ""
+            });
+        }
+        list.sort((a, b) => {
+            const ra = root.alert_severity_rank[a.severity] !== undefined ? root.alert_severity_rank[a.severity] : 4;
+            const rb = root.alert_severity_rank[b.severity] !== undefined ? root.alert_severity_rank[b.severity] : 4;
+            if (ra !== rb) return ra - rb;
+            return new Date(a.onset) - new Date(b.onset);
+        });
+        root.alerts = list;
+        root.alerts_has_data = true;
+        root.alerts_error = "";
+        root.save_cache();
+    }
+
+    function alert_color(severity) {
+        if (severity === "Extreme" || severity === "Severe") return Theme.error;
+        if (severity === "Moderate") return Theme.warning;
+        if (severity === "Minor") return Theme.yellow;
+        return Theme.info;
+    }
+
     function apply_data(parsed) {
         root.current = parsed.current;
         root.hours = parsed.hours;
@@ -234,7 +386,38 @@ Singleton {
         root.sunset = parsed.sunset;
         root.moon = parsed.moon;
         root.utc_offset = parsed.utc_offset || 0;
+        root.lat = parsed.lat || root.lat;
+        root.lon = parsed.lon || root.lon;
+        if (parsed.aq_current !== undefined) root.aq_current = parsed.aq_current;
+        if (parsed.aq_hours !== undefined) root.aq_hours = parsed.aq_hours;
+        if (parsed.aq_current) root.aq_has_data = true;
+        if (parsed.alerts !== undefined) {
+            root.alerts = parsed.alerts;
+            root.alerts_has_data = true;
+        }
         root.has_data = true;
+    }
+
+    // Persists the whole shared state in one file so a restart shows data immediately.
+    function save_cache() {
+        const snapshot = {
+            current: root.current,
+            hours: root.hours,
+            days: root.days,
+            location_name: root.location_name,
+            updated: root.updated,
+            sunrise: root.sunrise,
+            sunset: root.sunset,
+            moon: root.moon,
+            utc_offset: root.utc_offset,
+            lat: root.lat,
+            lon: root.lon,
+            aq_current: root.aq_current,
+            aq_hours: root.aq_hours,
+            alerts: root.alerts,
+            settings_key: JSON.stringify(root.settings)
+        };
+        cache_file.setText(JSON.stringify(snapshot));
     }
 
     // Wall-clock time at the forecast location; read it with the getUTC* methods.
@@ -257,11 +440,26 @@ Singleton {
         return idx === -1 ? "" : iso.substr(idx + 1, 5);
     }
 
-    function parse_blob(blob, location_name) {
+    // `current` doesn't reliably carry every field on every Open-Meteo revision; the
+    // hourly entry nearest to now is a robust fallback source for all of them.
+    function current_hour_index(hourly, now_local) {
+        for (let i = 0; i < hourly.time.length; i++) {
+            if (new Date(hourly.time[i]) >= now_local) return i;
+        }
+        return 0;
+    }
+
+    function pick(cur_val, hourly_arr, idx, def) {
+        if (cur_val !== undefined && cur_val !== null) return root.parse_num(cur_val, def);
+        return hourly_arr ? root.parse_num(hourly_arr[idx], def) : def;
+    }
+
+    function parse_blob(blob, location_name, lat, lon) {
         const cur = blob.current;
         const hourly = blob.hourly;
         const daily = blob.daily;
         const now_local = new Date(cur.time);
+        const now_idx = root.current_hour_index(hourly, now_local);
 
         const current = {
             temp: root.parse_num(cur.temperature_2m, 0),
@@ -269,7 +467,16 @@ Singleton {
             code: Math.round(root.parse_num(cur.weather_code, 0)),
             is_day: cur.is_day ? 1 : 0,
             precip: root.parse_num(cur.precipitation, 0),
-            cond: root.description(cur.weather_code)
+            cond: root.description(cur.weather_code),
+            humidity: Math.round(root.pick(cur.relative_humidity_2m, hourly.relative_humidity_2m, now_idx, 0)),
+            dew_point: root.pick(cur.dew_point_2m, hourly.dew_point_2m, now_idx, 0),
+            pressure: root.pick(cur.pressure_msl, hourly.pressure_msl, now_idx, 0),
+            visibility: root.pick(cur.visibility, hourly.visibility, now_idx, 0),
+            uv_index: root.pick(cur.uv_index, hourly.uv_index, now_idx, 0),
+            cloud_cover: Math.round(root.pick(cur.cloud_cover, hourly.cloud_cover, now_idx, 0)),
+            wind_speed: root.pick(cur.wind_speed_10m, hourly.wind_speed_10m, now_idx, 0),
+            wind_dir: Math.round(root.pick(cur.wind_direction_10m, hourly.wind_direction_10m, now_idx, 0)),
+            wind_gusts: root.pick(cur.wind_gusts_10m, hourly.wind_gusts_10m, now_idx, 0)
         };
 
         // Every remaining hour across every fetched day (the Hourly popup tab scrolls the whole range).
@@ -281,11 +488,17 @@ Singleton {
                 date: Qt.formatDate(dt, "yyyy-MM-dd"),
                 hour: dt.getHours(),
                 temp: root.parse_num(hourly.temperature_2m[i], 0),
+                feels: root.parse_num(hourly.apparent_temperature ? hourly.apparent_temperature[i] : undefined, 0),
                 pop: Math.round(root.parse_num(hourly.precipitation_probability[i], 0)),
                 precip: root.parse_num(hourly.precipitation[i], 0),
                 code: Math.round(root.parse_num(hourly.weather_code[i], 0)),
                 is_day: hourly.is_day[i] ? 1 : 0,
-                cond: root.description(hourly.weather_code[i])
+                cond: root.description(hourly.weather_code[i]),
+                humidity: Math.round(root.parse_num(hourly.relative_humidity_2m ? hourly.relative_humidity_2m[i] : undefined, 0)),
+                uv_index: root.parse_num(hourly.uv_index ? hourly.uv_index[i] : undefined, 0),
+                wind_speed: root.parse_num(hourly.wind_speed_10m ? hourly.wind_speed_10m[i] : undefined, 0),
+                wind_dir: Math.round(root.parse_num(hourly.wind_direction_10m ? hourly.wind_direction_10m[i] : undefined, 0)),
+                wind_gusts: root.parse_num(hourly.wind_gusts_10m ? hourly.wind_gusts_10m[i] : undefined, 0)
             });
         }
         let next_hours = all_hours.filter(h => new Date(h.dt) >= now_local);
@@ -306,7 +519,12 @@ Singleton {
                 pop: Math.round(root.parse_num(daily.precipitation_probability_max[i], 0)),
                 precip: root.parse_num(daily.precipitation_sum[i], 0),
                 sunrise: root.fmt_time(daily.sunrise[i]),
-                sunset: root.fmt_time(daily.sunset[i])
+                sunset: root.fmt_time(daily.sunset[i]),
+                uv_max: root.parse_num(daily.uv_index_max ? daily.uv_index_max[i] : undefined, 0),
+                wind_speed_max: root.parse_num(daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : undefined, 0),
+                wind_gusts_max: root.parse_num(daily.wind_gusts_10m_max ? daily.wind_gusts_10m_max[i] : undefined, 0),
+                wind_dir: Math.round(root.parse_num(daily.wind_direction_10m_dominant ? daily.wind_direction_10m_dominant[i] : undefined, 0)),
+                sunshine_hours: root.parse_num(daily.sunshine_duration ? daily.sunshine_duration[i] : undefined, 0) / 3600
             });
         }
 
@@ -323,6 +541,8 @@ Singleton {
             sunset: today ? today.sunset : "",
             moon: { phase: phase, name: root.moon_name(phase) },
             utc_offset: blob.utc_offset_seconds || 0,
+            lat: lat,
+            lon: lon,
             settings_key: JSON.stringify(root.settings)
         };
     }
@@ -348,6 +568,55 @@ Singleton {
         if (phase < 0.6875) return "Waning Gibbous";
         if (phase < 0.8125) return "Last Quarter";
         return "Waning Crescent";
+    }
+
+    // Location-clock midnight (as a UTC instant) for a "YYYY-MM-DD" date at this forecast location.
+    function local_midnight_ms(date_str) {
+        return Date.parse(date_str + "T00:00:00Z") - root.utc_offset * 1000;
+    }
+
+    readonly property var month_names: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    // Formats a UTC instant as "H:MMam" (or 24h "HH:MM") in the forecast location's clock.
+    function fmt_location_time(date) {
+        if (!date) return null;
+        const shifted = new Date(date.getTime() + root.utc_offset * 1000);
+        const h = shifted.getUTCHours(), m = shifted.getUTCMinutes();
+        const mm = m < 10 ? "0" + m : "" + m;
+        if (root.settings.time_format === "12h") {
+            let hh = h % 12;
+            if (hh === 0) hh = 12;
+            return hh + ":" + mm + (h < 12 ? "am" : "pm");
+        }
+        return (h < 10 ? "0" + h : "" + h) + ":" + mm;
+    }
+
+    function moon_times_for_date(date_str) {
+        if (!date_str || (root.lat === 0 && root.lon === 0)) return { rise: null, set: null, always_up: false, always_down: false };
+        const t0 = root.local_midnight_ms(date_str);
+        const result = Astro.moon_times(new Date(t0), root.lat, root.lon);
+        return {
+            rise: result.rise ? root.fmt_location_time(result.rise) : null,
+            set: result.set ? root.fmt_location_time(result.set) : null,
+            always_up: !!result.alwaysUp,
+            always_down: !!result.alwaysDown
+        };
+    }
+
+    function moon_phase_for_date(date_str) {
+        const t0 = root.local_midnight_ms(date_str);
+        return root.moon_phase(new Date(t0 + 12 * 3600000));
+    }
+
+    // Closed form: phase advances at a constant rate, so the next full moon is one calculation away.
+    function next_full_moon_label(date_str) {
+        const t0 = root.local_midnight_ms(date_str);
+        const phase = root.moon_phase_for_date(date_str);
+        const frac = ((0.5 - phase) % 1 + 1) % 1;
+        const days_ahead = frac * root.lunar_cycle_days;
+        const target = new Date(t0 + days_ahead * 86400000);
+        const shifted = new Date(target.getTime() + root.utc_offset * 1000);
+        return root.month_names[shifted.getUTCMonth()] + " " + shifted.getUTCDate();
     }
 
     readonly property var moon_icon_slugs: ({
@@ -491,10 +760,83 @@ Singleton {
         if (root.settings.time_format === "12h") {
             let h = d.getHours() % 12;
             if (h === 0) h = 12;
-            const ampm = d.getHours() < 12 ? "am" : "pm";
-            return (h < 10 ? "0" + h : "" + h) + " " + ampm;
+            return h + (d.getHours() < 12 ? "am" : "pm");
         }
         const hh = d.getHours();
         return hh < 10 ? "0" + hh : "" + hh;
+    }
+
+    // --- Wind, pressure, visibility, UV and AQI: units and bands ---
+
+    readonly property var wind_dir_names: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+
+    function wind_dir_label(deg) {
+        const idx = Math.round(((deg % 360) + 360) % 360 / 45) % 8;
+        return root.wind_dir_names[idx];
+    }
+
+    function wind_unit() {
+        return root.settings.unit === "celsius" ? "km/h" : "mph";
+    }
+
+    function pressure_display(hpa) {
+        if (root.settings.unit === "celsius") return Math.round(hpa) + " hPa";
+        return (hpa * 0.0295299831).toFixed(2) + " inHg";
+    }
+
+    function visibility_display(meters) {
+        if (root.settings.unit === "celsius") return (meters / 1000).toFixed(1) + " km";
+        return (meters / 1609.344).toFixed(1) + " mi";
+    }
+
+    readonly property var uv_bands: [
+        { limit: 3, label: "Low", color_key: "green" },
+        { limit: 6, label: "Moderate", color_key: "yellow" },
+        { limit: 8, label: "High", color_key: "warning" },
+        { limit: 11, label: "Very High", color_key: "red" },
+        { limit: Infinity, label: "Extreme", color_key: "magenta" }
+    ]
+
+    function uv_band(uv) {
+        for (const band of root.uv_bands) {
+            if (uv < band.limit) return band;
+        }
+        return root.uv_bands[root.uv_bands.length - 1];
+    }
+
+    function uv_color(uv) {
+        return root.color_for_key(root.uv_band(uv).color_key);
+    }
+
+    readonly property var aqi_bands: [
+        { limit: 51, label: "Good", color_key: "green" },
+        { limit: 101, label: "Moderate", color_key: "yellow" },
+        { limit: 151, label: "Unhealthy for Sensitive Groups", color_key: "warning" },
+        { limit: 201, label: "Unhealthy", color_key: "red" },
+        { limit: 301, label: "Very Unhealthy", color_key: "magenta" },
+        { limit: Infinity, label: "Hazardous", color_key: "bright_red" }
+    ]
+
+    function aqi_band(aqi) {
+        for (const band of root.aqi_bands) {
+            if (aqi < band.limit) return band;
+        }
+        return root.aqi_bands[root.aqi_bands.length - 1];
+    }
+
+    function aqi_color(aqi) {
+        return root.color_for_key(root.aqi_band(aqi).color_key);
+    }
+
+    function color_for_key(key) {
+        switch (key) {
+        case "green": return Theme.green;
+        case "yellow": return Theme.yellow;
+        case "warning": return Theme.warning;
+        case "red": return Theme.red;
+        case "magenta": return Theme.magenta;
+        case "bright_red": return Theme.bright_red;
+        default: return Theme.fg_core;
+        }
     }
 }

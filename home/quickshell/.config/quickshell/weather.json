@@ -2,6 +2,6 @@
   "latitude": "auto",
   "longitude": "auto",
   "unit": "fahrenheit",
-  "time_format": "24h",
+  "time_format": "12h",
   "days": 7
 }
