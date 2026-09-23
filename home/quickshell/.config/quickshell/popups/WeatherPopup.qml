@@ -344,73 +344,6 @@ Popup {
                 }
             }
 
-            // --- Sub-view chips (Daily/Hourly) or a selected-time context label (others) ---
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 22
-
-                RowLayout {
-                    anchors.fill: parent
-                    spacing: 6
-                    visible: root.current_tab === 0 || root.current_tab === 1
-
-                    Repeater {
-                        model: root.current_tab === 0 ? root.daily_sub_names : root.current_tab === 1 ? root.hourly_sub_names : []
-
-                        RowLayout {
-                            id: sub_chip
-                            required property string modelData
-                            required property int index
-
-                            spacing: 6
-
-                            Text {
-                                text: sub_chip.modelData
-                                color: sub_chip.index === (root.current_tab === 0 ? root.daily_sub : root.hourly_sub) ? Theme.theme_secondary : Theme.fg_muted
-                                font.bold: sub_chip.index === (root.current_tab === 0 ? root.daily_sub : root.hourly_sub)
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 3
-
-                                MouseArea { anchors.fill: parent; onClicked: root.set_current_sub(sub_chip.index) }
-                            }
-
-                            Text {
-                                visible: sub_chip.index < (root.current_tab === 0 ? root.daily_sub_names.length : root.hourly_sub_names.length) - 1
-                                text: "·"
-                                color: Theme.fg_dim
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 3
-                            }
-                        }
-                    }
-                }
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: root.current_tab === 3
-                    readonly property var d: WeatherState.days[root.day_cursor]
-                    text: d ? d.weekday + (d.weekday !== "Today" ? " (" + d.date.substr(5) + ")" : "") : ""
-                    color: Theme.fg_muted
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 3
-                }
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: root.current_tab === 2 || root.current_tab === 4
-                    text: {
-                        const hrs = root.current_tab === 3 ? WeatherState.hours.slice(0, 12) : WeatherState.aq_hours.slice(0, 24);
-                        const r = hrs[Math.max(0, Math.min(hrs.length - 1, root.hour_cursor))];
-                        return r ? WeatherState.format_hour(new Date(r.dt)) : "";
-                    }
-                    color: Theme.fg_muted
-                    font.family: Theme.font_family
-                    font.pixelSize: Theme.popup_font_size - 3
-                }
-            }
-
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.content_height
@@ -458,6 +391,69 @@ Popup {
                     visible: root.on_alerts_tab
                     alert_cursor: root.alert_cursor
                     on_select: function (i) { root.alert_cursor = i; }
+                }
+            }
+
+            // --- Sub-view chips (Daily/Hourly) or the selected time (others), under the content ---
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 28
+
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: 4
+                    visible: root.current_tab === 0 || root.current_tab === 1
+
+                    Repeater {
+                        model: root.current_tab === 0 ? root.daily_sub_names : root.current_tab === 1 ? root.hourly_sub_names : []
+
+                        Rectangle {
+                            id: sub_chip
+                            required property string modelData
+                            required property int index
+                            readonly property bool active: sub_chip.index === (root.current_tab === 0 ? root.daily_sub : root.hourly_sub)
+
+                            implicitWidth: sub_label.implicitWidth + 20
+                            implicitHeight: 24
+                            radius: 12
+                            color: sub_chip.active ? Theme.bg_surface : "transparent"
+
+                            Text {
+                                id: sub_label
+                                anchors.centerIn: parent
+                                text: sub_chip.modelData
+                                color: sub_chip.active ? Theme.theme_secondary : Theme.fg_muted
+                                font.bold: sub_chip.active
+                                font.family: Theme.font_family
+                                font.pixelSize: Theme.popup_font_size - 3
+                            }
+
+                            MouseArea { anchors.fill: parent; onClicked: root.set_current_sub(sub_chip.index) }
+                        }
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: root.current_tab === 3
+                    readonly property var d: WeatherState.days[root.day_cursor]
+                    text: d ? d.weekday + (d.weekday !== "Today" ? " (" + d.date.substr(5) + ")" : "") : ""
+                    color: Theme.fg_muted
+                    font.family: Theme.font_family
+                    font.pixelSize: Theme.popup_font_size - 3
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: root.current_tab === 2 || root.current_tab === 4
+                    text: {
+                        const hrs = root.current_tab === 2 ? WeatherState.hours.slice(0, 12) : WeatherState.aq_hours.slice(0, 24);
+                        const r = hrs[Math.max(0, Math.min(hrs.length - 1, root.hour_cursor))];
+                        return r ? WeatherState.format_hour(new Date(r.dt)) : "";
+                    }
+                    color: Theme.fg_muted
+                    font.family: Theme.font_family
+                    font.pixelSize: Theme.popup_font_size - 3
                 }
             }
 

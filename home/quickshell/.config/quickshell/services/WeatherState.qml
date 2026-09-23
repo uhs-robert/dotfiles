@@ -129,7 +129,7 @@ Singleton {
         onLoaded: {
             try {
                 const parsed = JSON.parse(text());
-                if (parsed.settings_key !== JSON.stringify(root.settings)) return;
+                if (parsed.settings_key !== JSON.stringify(root.settings) || !parsed.current) return;
                 root.apply_data(parsed);
                 root.last_success_ms = parsed.updated || 0;
             } catch (e) {
@@ -280,6 +280,7 @@ Singleton {
 
     // Air quality is fetched separately: a failure here never marks the main forecast stale.
     function fetch_air_quality(lat, lon) {
+        const key = root.fetch_key;
         root.aq_loading = true;
         const params = {
             latitude: lat,
@@ -294,7 +295,7 @@ Singleton {
         const xhr = new XMLHttpRequest();
         xhr.timeout = root.request_timeout_ms;
         xhr.onreadystatechange = () => {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            if (xhr.readyState !== XMLHttpRequest.DONE || key !== root.fetch_key) return;
             root.aq_loading = false;
             if (xhr.status === 200) {
                 try {
@@ -306,8 +307,8 @@ Singleton {
                 root.aq_error = "air quality request failed: " + xhr.status;
             }
         };
-        xhr.onerror = () => { root.aq_loading = false; root.aq_error = "air quality network error"; };
-        xhr.ontimeout = () => { root.aq_loading = false; root.aq_error = "air quality request timed out"; };
+        xhr.onerror = () => { if (key === root.fetch_key) { root.aq_loading = false; root.aq_error = "air quality network error"; } };
+        xhr.ontimeout = () => { if (key === root.fetch_key) { root.aq_loading = false; root.aq_error = "air quality request timed out"; } };
         xhr.open("GET", "https://air-quality-api.open-meteo.com/v1/air-quality?" + query);
         xhr.send();
     }
@@ -340,10 +341,11 @@ Singleton {
     // US National Weather Service active alerts for this point. A failure or a non-US
     // location (404/empty) just means no alerts; it never marks the forecast stale.
     function fetch_alerts(lat, lon) {
+        const key = root.fetch_key;
         const xhr = new XMLHttpRequest();
         xhr.timeout = root.request_timeout_ms;
         xhr.onreadystatechange = () => {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            if (xhr.readyState !== XMLHttpRequest.DONE || key !== root.fetch_key) return;
             if (xhr.status === 200) {
                 try {
                     root.handle_alerts(JSON.parse(xhr.responseText));
@@ -356,8 +358,8 @@ Singleton {
                 root.alerts_error = "";
             }
         };
-        xhr.onerror = () => { root.alerts = []; root.alerts_has_data = true; };
-        xhr.ontimeout = () => { root.alerts = []; root.alerts_has_data = true; };
+        xhr.onerror = () => { if (key === root.fetch_key) { root.alerts = []; root.alerts_has_data = true; } };
+        xhr.ontimeout = () => { if (key === root.fetch_key) { root.alerts = []; root.alerts_has_data = true; } };
         xhr.open("GET", "https://api.weather.gov/alerts/active?point=" + lat.toFixed(4) + "," + lon.toFixed(4));
         try {
             xhr.setRequestHeader("User-Agent", "quickshell-weather (dotfiles)");
@@ -434,6 +436,7 @@ Singleton {
 
     // Persists the whole shared state in one file so a restart shows data immediately.
     function save_cache() {
+        if (!root.current) return;
         const snapshot = {
             current: root.current,
             hours: root.hours,
