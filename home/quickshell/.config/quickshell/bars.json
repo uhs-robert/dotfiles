@@ -4,6 +4,6 @@
     "compact": false,
     "left": ["start", "workspaces"],
     "center": ["clock"],
-    "right": ["tray", "volume", "battery", "system", "network", "bluetooth"]
+    "right": ["tray", "keeptabs", "weather", "volume", "battery", "system", "network", "bluetooth", "notifications"]
   }
 ]

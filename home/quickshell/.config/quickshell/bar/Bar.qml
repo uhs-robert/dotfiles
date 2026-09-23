@@ -21,7 +21,10 @@ Item {
         battery: battery_component,
         bluetooth: bluetooth_component,
         system: system_component,
-        network: network_component
+        network: network_component,
+        weather: weather_component,
+        keeptabs: keeptabs_component,
+        notifications: notifications_component
     })
 
     // Resolves a bars.json module list into loadable entries, skipping unknown names.
@@ -59,6 +62,9 @@ Item {
     Component { id: bluetooth_component; Bluetooth { compact: root.compact; screen_name: root.screen_name } }
     Component { id: system_component; System { compact: root.compact; screen_name: root.screen_name } }
     Component { id: network_component; Network { screen_name: root.screen_name } }
+    Component { id: weather_component; Placeholder { glyph: "\u{f0f31}"; label: "--\u00b0"; tooltip_text: "Weather (coming soon)" } }
+    Component { id: keeptabs_component; Placeholder { glyph: "\u{f06a9}"; label: "--"; tooltip_text: "Keeptabs (coming soon)" } }
+    Component { id: notifications_component; Placeholder { glyph: "\u{f009a}"; tooltip_text: "Notifications (coming soon)" } }
 
     Island {
         id: left_island
