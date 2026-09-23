@@ -31,10 +31,10 @@ Item {
     readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
 
     readonly property string glyph: {
-        if (root.muted) return "";
-        if (root.volume <= 0.33) return "";
-        if (root.volume <= 0.66) return "";
-        return "";
+        if (root.muted) return "";
+        if (root.volume <= 0.33) return "";
+        if (root.volume <= 0.66) return "";
+        return "";
     }
 
     readonly property string tooltip_text: {

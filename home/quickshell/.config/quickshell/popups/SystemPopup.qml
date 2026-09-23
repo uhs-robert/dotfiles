@@ -10,16 +10,16 @@ Popup {
     id: root
 
     popup_name: "system"
-    implicitWidth: 260
+    fallback_width: 260
     implicitHeight: (SysStats.has_temp ? 4 : 3) * 30 + 24
 
     readonly property var stat_rows: {
         const list = [
-            { kind: "cpu", label: "CPU", glyph: "" },
-            { kind: "memory", label: "RAM", glyph: "" }
+            { kind: "cpu", label: "CPU", glyph: "" },
+            { kind: "memory", label: "RAM", glyph: "" }
         ];
-        if (SysStats.has_temp) list.push({ kind: "temperature", label: "Temp", glyph: "" });
-        list.push({ kind: "btop", label: "Open btop", glyph: "" });
+        if (SysStats.has_temp) list.push({ kind: "temperature", label: "Temp", glyph: "" });
+        list.push({ kind: "btop", label: "Open btop", glyph: "" });
         return list;
     }
 

@@ -18,7 +18,7 @@ Item {
     readonly property bool show_mem: root.effective_stat === "memory"
     readonly property bool dim: !Power.on_ac
 
-    readonly property string glyph: root.show_temp ? "" : (root.show_mem ? "" : "")
+    readonly property string glyph: root.show_temp ? "" : (root.show_mem ? "" : "")
     readonly property bool hot: root.show_temp && SysStats.temp_c >= 80
     readonly property color temp_color: root.hot ? Theme.theme_label : Theme.theme_primary
     readonly property color value_color: root.show_temp ? root.temp_color : Theme.fg_core
