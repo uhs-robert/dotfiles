@@ -28,15 +28,16 @@ Item {
         width: layout.implicitWidth + 16
         color: root.bg_color
 
+        // Declared before the layout so module MouseAreas stack above it.
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.clicked()
+        }
+
         RowLayout {
             id: layout
             anchors.centerIn: parent
             spacing: 16
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.clicked()
         }
     }
 
