@@ -17,13 +17,14 @@ Popup {
     property var sessions: []
     property int selected: 0
     property bool stale: false
+    readonly property int max_visible_rows: 8
 
     readonly property bool is_open: Popups.open_name === "keeptabs"
     onIs_openChanged: if (is_open) {
         root.selected = 0;
         root.refresh();
     }
-    onSessionsChanged: if (selected >= sessions.length) selected = Math.max(0, sessions.length - 1);
+    onSessionsChanged: selected = Math.max(0, Math.min(selected, sessions.length - 1));
 
     function refresh() {
         if (!root.is_open) return;
@@ -85,10 +86,12 @@ Popup {
 
         Keys.onPressed: event => {
             if (event.key === Qt.Key_J) {
-                root.selected = Math.min(root.sessions.length - 1, root.selected + 1);
+                root.selected = Math.max(0, Math.min(root.sessions.length - 1, root.selected + 1));
+                session_list.positionViewAtIndex(root.selected, ListView.Contain);
                 event.accepted = true;
             } else if (event.key === Qt.Key_K) {
                 root.selected = Math.max(0, root.selected - 1);
+                session_list.positionViewAtIndex(root.selected, ListView.Contain);
                 event.accepted = true;
             } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && root.sessions[root.selected]) {
                 root.focus_session(root.sessions[root.selected].id);
@@ -111,15 +114,21 @@ Popup {
                 font.pixelSize: Theme.popup_font_size - 2
             }
 
-            Repeater {
+            ListView {
+                id: session_list
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.min(contentHeight, root.max_visible_rows * (36 + spacing))
+                clip: true
+                spacing: 4
                 model: root.sessions
+                currentIndex: root.selected
 
-                Rectangle {
+                delegate: Rectangle {
                     id: session_row
                     required property var modelData
                     required property int index
 
-                    Layout.fillWidth: true
+                    width: session_list.width
                     height: 36
                     radius: 4
                     color: session_row.index === root.selected ? Theme.bg_surface : "transparent"
