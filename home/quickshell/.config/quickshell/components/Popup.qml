@@ -14,7 +14,8 @@ PanelWindow {
     // Set while a native menu from this popup is open, so the focus grab doesn't close us.
     property bool suspend_grab: false
 
-    implicitWidth: preferred_width
+    // Never narrower than the island's bottom edge (its body, between the slants).
+    implicitWidth: Math.max(preferred_width, island_width)
     default property alias content: content_scope.data
 
     readonly property bool wanted: Popups.open_name === root.popup_name && Popups.open_screen_name !== ""
@@ -26,6 +27,7 @@ PanelWindow {
 
     // The anchor is the island's body; its parent is the Island, which knows which end caps it has.
     readonly property var island: held_anchor ? held_anchor.parent : null
+    readonly property real island_width: held_anchor ? held_anchor.width : 0
     readonly property bool island_cap_left: !!island && island.cap_left === true
     readonly property bool island_cap_right: !!island && island.cap_right === true
     // cap_right-only = a left island, flush with the screen's left edge; cap_left-only = a right island.
@@ -64,7 +66,7 @@ PanelWindow {
         }
     }
 
-    // Plays once per open or close: the accent line draws out from the screen edge (center: the middle),
+    // Plays once per open or close: the accent line draws out to the island's width from the screen edge (center: the middle),
     // then the body drops from it; closing folds back the same way.
     SequentialAnimation {
         id: open_anim
@@ -90,7 +92,7 @@ PanelWindow {
 
     Rectangle {
         id: accent_line
-        readonly property real w: root.width * root.line_progress
+        readonly property real w: root.island_width * root.line_progress
         x: root.edge_x(w)
         width: w
         height: root.line_height
