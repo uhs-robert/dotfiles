@@ -10,52 +10,8 @@ Singleton {
     property string name: "default"
     readonly property var names: Object.keys(root.styles)
 
-    readonly property var styles: ({
-        "default": {
-            font_family: Theme.font_family,
-            font_size: Theme.popup_font_size,
-            rounded: true,
-            frame_follows_island: true,
-            frame_color: Theme.bg_mantle,
-            frame_radius: 10,
-            frame_border_width: 0,
-            frame_border_color: "transparent",
-            accent_color: Theme.theme_primary,
-            accent_height: 3,
-            accent_full_width: false,
-            selection_bg: Theme.bg_surface,
-            selection_inverse: false,
-            selection_fg: Theme.bg_crust,
-            tab_active_bg: Theme.bg_surface,
-            tab_active_fg: Theme.theme_secondary,
-            tab_fg: Theme.fg_muted,
-            key_bg: Theme.bg_mantle,
-            key_fg: Theme.fg_dim,
-            key_border: Theme.ui_border,
-            section_fg: Theme.fg_muted,
-            section_rule: false,
-            footer_fg: Theme.fg_dim,
-            footer_rule: false,
-            footer_rule_color: Theme.bg_surface,
-            meter_on: Theme.theme_primary,
-            meter_off: Theme.bg_surface,
-            meter_hot: Theme.theme_label,
-            meter_radius: 1,
-            scale: 1,
-            show_title: false,
-            title_bg: Theme.theme_secondary,
-            title_fg: Theme.bg_crust,
-            show_footer: false,
-            footer_wrap: false,
-            row_cursor: "",
-            segmented_levels: false,
-            tab_keys: false,
-            chip_brackets: false,
-            chip_active_bg: Theme.bg_surface,
-            chip_active_fg: Theme.theme_secondary,
-            marker_fill: false
-        },
-        "terminal": {
+    readonly property var styles: {
+        const terminal = {
             font_family: "JetBrainsMono Nerd Font",
             font_size: Theme.popup_font_size + 2,
             rounded: false,
@@ -67,9 +23,11 @@ Singleton {
             accent_color: Theme.theme_secondary,
             accent_height: 3,
             accent_full_width: true,
-            selection_bg: Theme.theme_primary,
-            selection_inverse: true,
+            selection_bg: "transparent",
+            selection_inverse: false,
             selection_fg: Theme.bg_crust,
+            caret_color: Theme.theme_primary,
+            caret_blink: true,
             tab_active_bg: Theme.theme_secondary,
             tab_active_fg: Theme.bg_crust,
             tab_fg: Theme.fg_muted,
@@ -98,8 +56,65 @@ Singleton {
             chip_active_bg: "transparent",
             chip_active_fg: Theme.theme_primary,
             marker_fill: true
-        }
-    })
+        };
+        return {
+            "default": {
+                font_family: Theme.font_family,
+                font_size: Theme.popup_font_size,
+                rounded: true,
+                frame_follows_island: true,
+                frame_color: Theme.bg_mantle,
+                frame_radius: 10,
+                frame_border_width: 0,
+                frame_border_color: "transparent",
+                accent_color: Theme.theme_primary,
+                accent_height: 3,
+                accent_full_width: false,
+                selection_bg: Theme.bg_surface,
+                selection_inverse: false,
+                selection_fg: Theme.bg_crust,
+                caret_color: Theme.theme_primary,
+                caret_blink: false,
+                tab_active_bg: Theme.bg_surface,
+                tab_active_fg: Theme.theme_secondary,
+                tab_fg: Theme.fg_muted,
+                key_bg: Theme.bg_mantle,
+                key_fg: Theme.fg_dim,
+                key_border: Theme.ui_border,
+                section_fg: Theme.fg_muted,
+                section_rule: false,
+                footer_fg: Theme.fg_dim,
+                footer_rule: false,
+                footer_rule_color: Theme.bg_surface,
+                meter_on: Theme.theme_primary,
+                meter_off: Theme.bg_surface,
+                meter_hot: Theme.theme_label,
+                meter_radius: 1,
+                scale: 1,
+                show_title: false,
+                title_bg: Theme.theme_secondary,
+                title_fg: Theme.bg_crust,
+                show_footer: false,
+                footer_wrap: false,
+                row_cursor: "",
+                segmented_levels: false,
+                tab_keys: false,
+                chip_brackets: false,
+                chip_active_bg: Theme.bg_surface,
+                chip_active_fg: Theme.theme_secondary,
+                marker_fill: false
+            },
+            "terminal": terminal,
+            "terminal_inverted": Object.assign({}, terminal, {
+                accent_color: Theme.theme_primary,
+                tab_active_bg: Theme.theme_primary,
+                title_bg: Theme.theme_primary,
+                caret_color: Theme.theme_secondary,
+                meter_on: Theme.theme_secondary,
+                chip_active_fg: Theme.theme_secondary
+            })
+        };
+    }
 
     readonly property var active: root.styles[root.name] || root.styles["default"]
 
@@ -117,6 +132,10 @@ Singleton {
     readonly property color selection_bg: root.active.selection_bg
     readonly property bool selection_inverse: root.active.selection_inverse
     readonly property color selection_fg: root.active.selection_fg
+    readonly property color caret_color: root.active.caret_color
+    readonly property bool caret_blink: root.active.caret_blink
+    // Toggled by the open popup's blink timer; the caret is solid whenever it rests true.
+    property bool caret_phase: true
     readonly property color tab_active_bg: root.active.tab_active_bg
     readonly property color tab_active_fg: root.active.tab_active_fg
     readonly property color tab_fg: root.active.tab_fg

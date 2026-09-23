@@ -20,11 +20,11 @@ Rectangle {
 
     Text {
         id: cursor_text
-        visible: root.selected && Style.row_cursor !== ""
+        visible: root.selected && Style.row_cursor !== "" && Style.caret_phase
         x: 6
         anchors.verticalCenter: parent.verticalCenter
         text: Style.row_cursor
-        color: root.fg(Theme.theme_primary)
+        color: Style.caret_color
         font.family: Style.font_family
         font.pixelSize: Style.font_size - 1
         font.bold: true

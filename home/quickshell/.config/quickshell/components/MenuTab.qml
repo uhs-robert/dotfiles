@@ -33,7 +33,7 @@ Rectangle {
         anchors.rightMargin: 6
         anchors.verticalCenter: parent.verticalCenter
         key: root.key
-        on_selection: root.active
+        on_fill: root.active
     }
 
     Text {

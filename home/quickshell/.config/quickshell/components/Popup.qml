@@ -136,6 +136,14 @@ PanelWindow {
 
     // Plays once per open or close: the accent line draws out to the island's width from the screen edge (center: the middle),
     // then the body drops from it; closing folds back the same way.
+    Timer {
+        interval: 530
+        repeat: true
+        running: Style.caret_blink && root.visible && root.wanted && Power.on_ac
+        onTriggered: Style.caret_phase = !Style.caret_phase
+        onRunningChanged: Style.caret_phase = true
+    }
+
     SequentialAnimation {
         id: open_anim
         NumberAnimation { target: root; property: "line_progress"; to: 1; duration: 180; easing.type: Easing.OutCubic }
