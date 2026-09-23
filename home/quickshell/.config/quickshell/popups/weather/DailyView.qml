@@ -158,7 +158,7 @@ Item {
                                 radius: 2
                                 color: Theme.cyan
                                 opacity: 0.5
-                                height: (day_col.modelData.wind_speed_max / root.wind_max) * (root.bar_area_h - 20)
+                                height: (day_col.modelData.wind_speed_max / root.wind_max) * (parent.height - 36)
                             }
 
                             Rectangle {
@@ -166,13 +166,12 @@ Item {
                                 width: parent.width * 0.6
                                 height: 2
                                 color: Theme.bright_cyan
-                                y: root.bar_area_h - (day_col.modelData.wind_gusts_max / root.wind_max) * (root.bar_area_h - 20)
+                                y: parent.height - (day_col.modelData.wind_gusts_max / root.wind_max) * (parent.height - 36)
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.bottom: parent.bottom
-                                anchors.bottomMargin: -14
+                                y: Math.max(16, parent.height - (day_col.modelData.wind_gusts_max / root.wind_max) * (parent.height - 36) - 18)
                                 text: Math.round(day_col.modelData.wind_speed_max)
                                 color: Theme.cyan
                                 font.family: Theme.font_family
@@ -193,12 +192,12 @@ Item {
                                 radius: 2
                                 color: WeatherState.uv_color(day_col.modelData.uv_max)
                                 opacity: 0.7
-                                height: Math.min(1, day_col.modelData.uv_max / 12) * root.bar_area_h
+                                height: Math.min(1, day_col.modelData.uv_max / 12) * (parent.height - 18)
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                y: root.bar_area_h - Math.min(1, day_col.modelData.uv_max / 12) * root.bar_area_h - 14
+                                y: parent.height - Math.min(1, day_col.modelData.uv_max / 12) * (parent.height - 18) - 16
                                 text: day_col.modelData.uv_max.toFixed(1)
                                 color: WeatherState.uv_color(day_col.modelData.uv_max)
                                 font.family: Theme.font_family
@@ -219,12 +218,12 @@ Item {
                                 radius: 2
                                 color: Theme.yellow
                                 opacity: 0.55
-                                height: Math.min(1, day_col.modelData.sunshine_hours / 14) * root.bar_area_h
+                                height: Math.min(1, day_col.modelData.sunshine_hours / 14) * (parent.height - 18)
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                y: root.bar_area_h - Math.min(1, day_col.modelData.sunshine_hours / 14) * root.bar_area_h - 14
+                                y: parent.height - Math.min(1, day_col.modelData.sunshine_hours / 14) * (parent.height - 18) - 16
                                 text: day_col.modelData.sunshine_hours.toFixed(1) + "h"
                                 color: Theme.yellow
                                 font.family: Theme.font_family
