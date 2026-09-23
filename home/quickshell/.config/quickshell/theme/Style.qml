@@ -40,6 +40,36 @@ Singleton {
             meter_off: Theme.bg_surface,
             meter_hot: Theme.theme_label,
             meter_radius: 1
+        },
+        "terminal": {
+            font_family: "JetBrainsMono Nerd Font",
+            font_size: Theme.popup_font_size,
+            rounded: false,
+            frame_follows_island: false,
+            frame_color: Theme.bg_crust,
+            frame_radius: 0,
+            frame_border_width: 0,
+            frame_border_color: "transparent",
+            accent_color: Theme.theme_secondary,
+            accent_height: 3,
+            selection_bg: Theme.theme_primary,
+            selection_inverse: true,
+            selection_fg: Theme.bg_crust,
+            tab_active_bg: Theme.theme_secondary,
+            tab_active_fg: Theme.bg_crust,
+            tab_fg: Theme.fg_muted,
+            key_bg: "transparent",
+            key_fg: Theme.fg_muted,
+            key_border: Theme.bg_surface,
+            section_fg: Theme.fg_muted,
+            section_rule: true,
+            footer_fg: Theme.fg_muted,
+            footer_rule: true,
+            footer_rule_color: Theme.bg_surface,
+            meter_on: Theme.theme_primary,
+            meter_off: Theme.bg_surface,
+            meter_hot: Theme.theme_label,
+            meter_radius: 0
         }
     })
 
