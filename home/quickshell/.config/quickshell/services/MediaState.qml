@@ -107,7 +107,9 @@ Singleton {
 
     function seek_by(seconds) {
         if (!root.active || !root.active.canSeek || !root.active.positionSupported) return;
-        const target = Math.max(0, Math.min(root.active.length || 0, root.active.position + seconds));
+        // Without lengthSupported, Quickshell reports length as the current position.
+        const max = root.active.lengthSupported ? root.active.length : Infinity;
+        const target = Math.max(0, Math.min(max, root.active.position + seconds));
         root.active.position = target;
     }
 
