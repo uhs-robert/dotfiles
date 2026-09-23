@@ -30,6 +30,16 @@ Item {
         color: root.glyph_color
         font.family: Theme.font_family
         font.pixelSize: Theme.glyph_size
+
+        SequentialAnimation {
+            id: pulse_animation
+            running: VoxtypeState.recording
+            loops: Animation.Infinite
+            onRunningChanged: if (!running) glyph.opacity = 1
+
+            NumberAnimation { target: glyph; property: "opacity"; from: 1; to: 0.5; duration: 500; easing.type: Easing.InOutQuad }
+            NumberAnimation { target: glyph; property: "opacity"; from: 0.5; to: 1; duration: 500; easing.type: Easing.InOutQuad }
+        }
     }
 
     HoverHandler {
