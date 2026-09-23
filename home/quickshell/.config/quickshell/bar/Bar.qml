@@ -80,7 +80,7 @@ Item {
         height: root.bar_height
         id: left_island
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         bg_color: Theme.bg_core
         cap_right: true
         visible: root.left_entries.length > 0
@@ -106,7 +106,7 @@ Item {
         height: root.bar_height
         id: center_island
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         bg_color: Theme.bg_mantle
         cap_left: true
         cap_right: true
@@ -141,7 +141,7 @@ Item {
         height: root.bar_height
         id: right_island
         anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         bg_color: Theme.bg_core
         cap_left: true
         visible: root.right_entries.length > 0

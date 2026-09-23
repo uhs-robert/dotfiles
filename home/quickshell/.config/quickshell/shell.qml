@@ -21,25 +21,18 @@ ShellRoot {
                 readonly property var rule: BarConfig.rule_for(screen_scope.modelData)
                 readonly property bool has_bar: screen_scope.rule !== null && screen_scope.rule.bar !== false
 
-                PanelWindow {
+                BarReserve {
                     visible: screen_scope.has_bar
                     screen: screen_scope.modelData
-                    color: "transparent"
-                    implicitHeight: BarConfig.height_for(screen_scope.rule)
-                    exclusiveZone: screen_scope.has_bar ? implicitHeight : 0
+                    reserve_height: BarConfig.height_for(screen_scope.rule)
+                }
 
-                    anchors {
-                        top: true
-                        left: true
-                        right: true
-                    }
-
-                    Bar {
-                        id: bar
-                        anchors.fill: parent
-                        screen_name: screen_scope.modelData.name
-                        rule: screen_scope.rule
-                    }
+                BarWindow {
+                    id: bar
+                    visible: screen_scope.has_bar
+                    screen: screen_scope.modelData
+                    screen_name: screen_scope.modelData.name
+                    rule: screen_scope.rule
                 }
 
                 PopupScrim {
