@@ -88,7 +88,7 @@ Popup {
         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
             root.invoke_selected();
             event.accepted = true;
-        } else if (event.key === Qt.Key_D || event.key === Qt.Key_X) {
+        } else if ((event.key === Qt.Key_D && !(event.modifiers & Qt.ShiftModifier)) || event.key === Qt.Key_X) {
             root.dismiss_selected();
             event.accepted = true;
         } else if (event.key === Qt.Key_C && (event.modifiers & Qt.ShiftModifier)) {

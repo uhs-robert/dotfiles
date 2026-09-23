@@ -40,9 +40,11 @@ Singleton {
     function handle_notification(n) {
         n.tracked = true;
         const entry = { id: n.id, notification: n, time: Date.now(), timer: null };
-        root.history = [entry].concat(root.history);
-        root.unread += 1;
         n.closed.connect(() => root.remove_entry(entry));
+        if (!n.transient) {
+            root.history = [entry].concat(root.history);
+            root.unread += 1;
+        }
 
         if (root.dnd && n.urgency !== NotificationUrgency.Critical) return;
         root.toasts = [entry].concat(root.toasts);
@@ -53,7 +55,10 @@ Singleton {
         let ms = n.expireTimeout > 0 ? n.expireTimeout : (n.urgency === NotificationUrgency.Critical ? 0 : n.urgency === NotificationUrgency.Low ? root.timeout_low_ms : root.timeout_normal_ms);
         if (ms <= 0) return;
         const timer = timer_component.createObject(root, { interval: ms });
-        timer.triggered.connect(() => root.hide_toast(entry));
+        timer.triggered.connect(() => {
+            root.hide_toast(entry);
+            if (!root.history.includes(entry) && entry.notification) entry.notification.expire();
+        });
         entry.timer = timer;
         timer.start();
     }
@@ -69,6 +74,7 @@ Singleton {
     function remove_entry(entry) {
         root.toasts = root.toasts.filter(e => e !== entry);
         root.history = root.history.filter(e => e !== entry);
+        root.unread = Math.min(root.unread, root.history.length);
         root.stop_timer(entry);
     }
 
