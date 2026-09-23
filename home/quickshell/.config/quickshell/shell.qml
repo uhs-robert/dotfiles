@@ -57,7 +57,6 @@ ShellRoot {
     TrayPopup {}
     NetworkPopup {}
     KeeptabsPopup {}
-    WeatherPopup {}
     UpdatesPopup {}
     MediaPopup {}
     NotificationsPopup {}

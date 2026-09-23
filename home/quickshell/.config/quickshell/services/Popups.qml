@@ -13,6 +13,10 @@ Singleton {
     property color open_color: Theme.bg_mantle
     property string open_screen_name: ""
 
+    // Set by the bars: these open inside their island, which handles outside clicks itself.
+    property var panel_names: []
+    readonly property bool open_in_island: open_name !== "" && panel_names.indexOf(open_name) !== -1
+
     // screen_name -> { module_name: { item, color } }, so each bar keeps its own anchors.
     property var default_anchors: ({})
 

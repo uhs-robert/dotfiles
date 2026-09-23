@@ -1,17 +1,15 @@
-// home/quickshell/.config/quickshell/popups/WeatherPopup.qml
+// home/quickshell/.config/quickshell/popups/weather/WeatherPanel.qml
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import "../components"
-import "../theme"
-import "../services"
-import "weather"
+import "../../theme"
+import "../../services"
 
-MenuFrame {
+FocusScope {
     id: root
 
-    popup_name: "weather"
-    preferred_width: 760
+    property real preferred_width: 760
+    property bool is_open: false
     implicitHeight: content.implicitHeight + 24
 
     readonly property var base_tab_names: ["Daily", "Hourly", "Precipitation", "Sun & Moon", "Air"]
@@ -22,7 +20,7 @@ MenuFrame {
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
     readonly property var hourly_sub_names: ["Temperature", "Precipitation", "Wind", "UV", "Humidity"]
 
-    // None of this is reset on close: the popup lives for the whole qs session, only visibility toggles.
+    // None of this is reset on close: the island keeps the panel loaded after its first open.
     property int current_tab: 0
     property int daily_sub: 0
     property int hourly_sub: 0
@@ -35,7 +33,6 @@ MenuFrame {
 
     onTab_namesChanged: if (root.current_tab >= root.tab_names.length) root.current_tab = 0;
 
-    readonly property bool is_open: Popups.open_name === "weather"
     onIs_openChanged: if (is_open) { WeatherState.refresh_if_due(); root.go_now(); }
 
     function set_tab(i) {

@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import "../theme"
 import "../services"
 import "modules"
+import "../popups/weather"
 
 Item {
     id: root
@@ -12,7 +13,14 @@ Item {
     property var rule: null
     readonly property bool compact: BarConfig.compact_for(root.rule, root.screen_name)
     readonly property int bar_height: BarConfig.height_for(root.rule)
-    readonly property real center_width: center_island.body_item.width
+    readonly property real center_width: center_island.rest_body_width
+    readonly property bool expanded: left_island.expanded || center_island.expanded || right_island.expanded
+
+    // Input for the island that is open or still animating; the window adds the bar strip itself.
+    readonly property Item moving_island: [left_island, center_island, right_island].find(i => i.visible && i.morph > 0) || null
+    readonly property int mask_x: root.moving_island ? Math.floor(root.moving_island.x) : 0
+    readonly property int mask_width: root.moving_island ? Math.ceil(root.moving_island.width) + 1 : 0
+    readonly property int mask_height: root.moving_island ? Math.ceil(root.moving_island.height) + 4 : 0
     readonly property bool has_center: root.center_entries.length > 0
 
     readonly property var module_map: ({
@@ -32,6 +40,13 @@ Item {
         notifications: notifications_component,
         media: media_component
     })
+
+    // Popups that open inside their island instead of a window of their own.
+    readonly property var panel_map: ({
+        weather: weather_panel
+    })
+
+    Component { id: weather_panel; WeatherPanel {} }
 
     // Resolves a bars.json module list into loadable entries, skipping unknown names.
     function build_entries(names) {
@@ -77,8 +92,11 @@ Item {
     Component { id: media_component; Media { compact: root.compact; screen_name: root.screen_name } }
 
     Island {
-        height: root.bar_height
         id: left_island
+        rest_height: root.bar_height
+        max_width: root.width
+        screen_name: root.screen_name
+        panel_map: root.panel_map
         anchors.left: parent.left
         anchors.top: parent.top
         bg_color: Theme.bg_core
@@ -103,8 +121,11 @@ Item {
     }
 
     Island {
-        height: root.bar_height
         id: center_island
+        rest_height: root.bar_height
+        max_width: root.width
+        screen_name: root.screen_name
+        panel_map: root.panel_map
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         bg_color: Theme.bg_mantle
@@ -135,11 +156,15 @@ Item {
         anchors.leftMargin: 6
         anchors.rightMargin: 6
         active: MediaState.playing && root.has_center
+        visible: opacity > 0 && center_island.morph === 0
     }
 
     Island {
-        height: root.bar_height
         id: right_island
+        rest_height: root.bar_height
+        max_width: root.width
+        screen_name: root.screen_name
+        panel_map: root.panel_map
         anchors.right: parent.right
         anchors.top: parent.top
         bg_color: Theme.bg_core
@@ -176,6 +201,9 @@ Item {
     onLeft_entriesChanged: sync_clock_anchor()
     onCenter_entriesChanged: sync_clock_anchor()
     onRight_entriesChanged: sync_clock_anchor()
-    Component.onCompleted: sync_clock_anchor()
+    Component.onCompleted: {
+        Popups.panel_names = Object.keys(root.panel_map);
+        sync_clock_anchor();
+    }
     Component.onDestruction: Popups.unregister_screen(root.screen_name)
 }
