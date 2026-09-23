@@ -86,18 +86,24 @@ Popup {
         }
     }
 
-    // The bar's own window, mapped through the island item so display() gets window-relative
-    // coordinates. Native menus and our focus-grabbed popup both want focus, so close ours first.
+    QsMenuAnchor {
+        id: menu_anchor
+        anchor.edges: Edges.Bottom | Edges.Left
+        anchor.gravity: Edges.Bottom | Edges.Right
+        anchor.adjustment: PopupAdjustment.SlideX | PopupAdjustment.FlipX | PopupAdjustment.FlipY
+        onClosed: root.suspend_grab = false
+    }
+
+    // Anchored to the row inside this popup so it opens next to it; the popup stays open underneath.
     function open_menu(item_data, source_item) {
-        if (!item_data || !item_data.hasMenu) return;
-        const island_item = Popups.open_anchor;
-        const anchor_item = source_item || island_item;
-        if (!island_item || !anchor_item) return;
-        const win_attached = island_item.QsWindow;
-        if (!win_attached || !win_attached.window) return;
-        Popups.close();
-        const point = win_attached.mapFromItem(anchor_item, 0, anchor_item.height);
-        item_data.display(win_attached.window, Math.round(point.x), Math.round(point.y));
+        if (!item_data || !item_data.hasMenu || !source_item) return;
+        if (menu_anchor.visible) menu_anchor.close();
+        root.suspend_grab = true;
+        menu_anchor.menu = item_data.menu;
+        menu_anchor.anchor.item = source_item;
+        Qt.callLater(() => {
+            if (!menu_anchor.visible) menu_anchor.open();
+        });
     }
 
     Item {
