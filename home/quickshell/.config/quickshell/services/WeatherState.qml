@@ -157,7 +157,9 @@ Singleton {
 
     function refresh_if_due() {
         const now = Date.now();
-        if (now - root.last_success_ms >= root.refresh_interval_ms && now - root.last_attempt_ms >= root.retry_gap_ms) root.refresh(true);
+        const day_rolled = root.days.length > 0 && root.days[0].date !== root.location_date_str();
+        const due = day_rolled || now - root.last_success_ms >= root.refresh_interval_ms;
+        if (due && now - root.last_attempt_ms >= root.retry_gap_ms) root.refresh(true);
     }
 
     // A non-forced call within min_refresh_gap_ms of the last success is a no-op.
@@ -566,7 +568,7 @@ Singleton {
         }
 
         const today = days.length > 0 ? days[0] : null;
-        const phase = root.moon_phase(now_local);
+        const phase = root.moon_phase(new Date());
 
         return {
             current: current,
