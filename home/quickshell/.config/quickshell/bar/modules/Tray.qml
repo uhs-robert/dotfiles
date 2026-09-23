@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 
 Row {
     id: root
@@ -19,10 +20,10 @@ Row {
             width: 16
             height: 16
 
-            Image {
+            IconImage {
                 anchors.fill: parent
+                implicitSize: 16
                 source: icon_root.modelData.icon
-                smooth: true
             }
 
             QsMenuAnchor {

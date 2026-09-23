@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import "../../theme"
 
 Item {
@@ -105,14 +106,10 @@ Item {
                             width: root.icon_size + 4
                             height: root.icon_size + 4
 
-                            Image {
+                            IconImage {
                                 anchors.centerIn: parent
-                                width: root.icon_size
-                                height: root.icon_size
-                                sourceSize.width: root.icon_size * 2
-                                sourceSize.height: root.icon_size * 2
+                                implicitSize: root.icon_size
                                 source: root.icon_for(root.class_of(icon_item.modelData))
-                                smooth: true
                             }
 
                             MouseArea {
