@@ -9,7 +9,7 @@ Item {
     property bool on_selection: false
     signal moved(real value)
 
-    implicitHeight: 14
+    implicitHeight: Style.px(14)
 
     function set_from_x(x) {
         root.moved(Math.max(0, Math.min(1, x / track.width)));
@@ -17,6 +17,7 @@ Item {
 
     Rectangle {
         id: track
+        visible: !Style.segmented_levels
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
@@ -30,6 +31,16 @@ Item {
             radius: parent.radius
             color: root.on_selection && Style.selection_inverse ? Style.selection_fg : Theme.theme_primary
         }
+    }
+
+    Meter {
+        visible: Style.segmented_levels
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        value: root.value
+        hot_from: 0.9
+        on_selection: root.on_selection
     }
 
     MouseArea {

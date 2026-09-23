@@ -10,6 +10,10 @@ PanelWindow {
 
     property string popup_name: ""
     property real preferred_width: 260
+    // Content height; the base adds the style's title tab and footer around it.
+    property real body_height: 0
+    property string title: popup_name.toUpperCase()
+    property string footer_hint: ""
     // Set while a native menu from this popup is open; focus returns to the popup when it closes.
     property bool suspend_grab: false
 
@@ -76,7 +80,8 @@ PanelWindow {
     }
 
     // Never narrower than the island's bottom edge (its body, between the slants).
-    implicitWidth: Math.max(preferred_width, island_width)
+    implicitWidth: Math.max(Style.px(preferred_width), island_width)
+    implicitHeight: body_height + header_height + footer_height
     default property alias content: content_scope.data
 
     readonly property bool wanted: Popups.open_name === root.popup_name && Popups.open_screen_name !== ""
@@ -107,6 +112,10 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     readonly property int line_height: Style.accent_height
+    readonly property bool has_title: Style.show_title && title !== ""
+    readonly property bool has_footer: Style.show_footer && footer_hint !== ""
+    readonly property real header_height: has_title ? title_tab.height : 0
+    readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 : 0
     property real line_progress: 0
     property real drop_progress: 0
 
@@ -151,7 +160,7 @@ PanelWindow {
 
     Rectangle {
         id: accent_line
-        readonly property real w: root.island_width * root.line_progress
+        readonly property real w: (Style.accent_full_width ? root.width : root.island_width) * root.line_progress
         x: root.edge_x(w)
         width: w
         height: root.line_height
@@ -181,9 +190,42 @@ PanelWindow {
                 border.color: Style.frame_border_color
             }
 
+            Rectangle {
+                id: title_tab
+                visible: root.has_title
+                width: title_text.implicitWidth + 20
+                height: title_text.implicitHeight + 4
+                color: Style.title_bg
+
+                Text {
+                    id: title_text
+                    anchors.centerIn: parent
+                    text: root.title
+                    color: Style.title_fg
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 2
+                    font.bold: true
+                    font.letterSpacing: 2
+                }
+            }
+
+            MenuFooter {
+                id: base_footer
+                visible: root.has_footer
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.leftMargin: 12
+                anchors.rightMargin: 12
+                anchors.bottomMargin: 8
+                text: root.footer_hint
+            }
+
             FocusScope {
                 id: content_scope
                 anchors.fill: parent
+                anchors.topMargin: root.header_height
+                anchors.bottomMargin: root.footer_height
                 focus: true
 
                 Keys.onEscapePressed: Popups.close()

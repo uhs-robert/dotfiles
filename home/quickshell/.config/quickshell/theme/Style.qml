@@ -22,6 +22,7 @@ Singleton {
             frame_border_color: "transparent",
             accent_color: Theme.theme_primary,
             accent_height: 3,
+            accent_full_width: false,
             selection_bg: Theme.bg_surface,
             selection_inverse: false,
             selection_fg: Theme.bg_crust,
@@ -39,19 +40,33 @@ Singleton {
             meter_on: Theme.theme_primary,
             meter_off: Theme.bg_surface,
             meter_hot: Theme.theme_label,
-            meter_radius: 1
+            meter_radius: 1,
+            scale: 1,
+            show_title: false,
+            title_bg: Theme.theme_secondary,
+            title_fg: Theme.bg_crust,
+            show_footer: false,
+            footer_wrap: false,
+            row_cursor: "",
+            segmented_levels: false,
+            tab_keys: false,
+            chip_brackets: false,
+            chip_active_bg: Theme.bg_surface,
+            chip_active_fg: Theme.theme_secondary,
+            marker_fill: false
         },
         "terminal": {
             font_family: "JetBrainsMono Nerd Font",
-            font_size: Theme.popup_font_size,
+            font_size: Theme.popup_font_size + 2,
             rounded: false,
             frame_follows_island: false,
             frame_color: Theme.bg_crust,
             frame_radius: 0,
-            frame_border_width: 0,
-            frame_border_color: "transparent",
+            frame_border_width: 1,
+            frame_border_color: Theme.fg_muted,
             accent_color: Theme.theme_secondary,
             accent_height: 3,
+            accent_full_width: true,
             selection_bg: Theme.theme_primary,
             selection_inverse: true,
             selection_fg: Theme.bg_crust,
@@ -69,7 +84,20 @@ Singleton {
             meter_on: Theme.theme_primary,
             meter_off: Theme.bg_surface,
             meter_hot: Theme.theme_label,
-            meter_radius: 0
+            meter_radius: 0,
+            scale: 1.15,
+            show_title: true,
+            title_bg: Theme.theme_secondary,
+            title_fg: Theme.bg_crust,
+            show_footer: true,
+            footer_wrap: true,
+            row_cursor: ">",
+            segmented_levels: true,
+            tab_keys: true,
+            chip_brackets: true,
+            chip_active_bg: "transparent",
+            chip_active_fg: Theme.theme_primary,
+            marker_fill: true
         }
     })
 
@@ -85,6 +113,7 @@ Singleton {
     readonly property color frame_border_color: root.active.frame_border_color
     readonly property color accent_color: root.active.accent_color
     readonly property int accent_height: root.active.accent_height
+    readonly property bool accent_full_width: root.active.accent_full_width
     readonly property color selection_bg: root.active.selection_bg
     readonly property bool selection_inverse: root.active.selection_inverse
     readonly property color selection_fg: root.active.selection_fg
@@ -103,10 +132,28 @@ Singleton {
     readonly property color meter_off: root.active.meter_off
     readonly property color meter_hot: root.active.meter_hot
     readonly property real meter_radius: root.active.meter_radius
+    readonly property real scale: root.active.scale
+    readonly property bool show_title: root.active.show_title
+    readonly property color title_bg: root.active.title_bg
+    readonly property color title_fg: root.active.title_fg
+    readonly property bool show_footer: root.active.show_footer
+    readonly property bool footer_wrap: root.active.footer_wrap
+    readonly property string row_cursor: root.active.row_cursor
+    readonly property bool segmented_levels: root.active.segmented_levels
+    readonly property bool tab_keys: root.active.tab_keys
+    readonly property bool chip_brackets: root.active.chip_brackets
+    readonly property color chip_active_bg: root.active.chip_active_bg
+    readonly property color chip_active_fg: root.active.chip_active_fg
+    readonly property bool marker_fill: root.active.marker_fill
 
     // Corner radius for a shape that is rounded by `r` in the default look.
     function radius(r) {
         return root.rounded ? r : 0;
+    }
+
+    // A layout size that grows with the style's larger type.
+    function px(n) {
+        return root.scale === 1 ? n : Math.round(n * root.scale);
     }
 
     function set(style_name) {

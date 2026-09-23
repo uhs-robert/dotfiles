@@ -8,6 +8,7 @@ Item {
     id: root
 
     property string text: ""
+    property bool wrap: Style.footer_wrap
     readonly property int rule_gap: Style.footer_rule ? 5 : 0
 
     Layout.minimumWidth: 0
@@ -21,7 +22,7 @@ Item {
         clip: true
 
         Repeater {
-            model: Style.footer_rule ? Math.ceil(root.width / 7) : 0
+            model: Style.footer_rule ? Math.max(0, Math.ceil(root.width / 7)) : 0
 
             Rectangle {
                 width: 4
@@ -35,8 +36,10 @@ Item {
         id: hint
         y: root.rule_gap
         width: parent.width
-        elide: Text.ElideRight
-        text: root.text
+        elide: root.wrap ? Text.ElideNone : Text.ElideRight
+        wrapMode: root.wrap ? Text.WordWrap : Text.NoWrap
+        // Wrapped hints break only between groups, never inside "j/k move".
+        text: root.wrap ? root.text.split(" · ").map(g => g.replace(/ /g, "\u00a0").replace(/\//g, "/\u2060")).join("\u00a0· ") : root.text
         color: Style.footer_fg
         font.family: Style.font_family
         font.pixelSize: Style.font_size - 4
