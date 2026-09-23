@@ -17,7 +17,7 @@ Popup {
     property int current_tab: 0
 
     readonly property bool is_open: Popups.open_name === "weather"
-    onIs_openChanged: if (is_open) WeatherState.refresh(false)
+    onIs_openChanged: if (is_open) WeatherState.refresh_if_due()
 
     function set_tab(i) {
         root.current_tab = Math.max(0, Math.min(root.tab_names.length - 1, i));
@@ -559,7 +559,7 @@ Popup {
     readonly property var hourly_rows: {
         const rows = [];
         let last_date = null;
-        const today_str = Qt.formatDate(new Date(), "yyyy-MM-dd");
+        const today_str = WeatherState.location_date_str();
         for (const h of WeatherState.hours) {
             if (h.date !== last_date) {
                 const label = h.date === today_str ? "Today" : Qt.formatDate(new Date(h.date + "T00:00:00"), "dddd, MMM d");
@@ -571,28 +571,28 @@ Popup {
         return rows;
     }
 
-    function parse_hm_today(hm) {
+    function hm_minutes(hm) {
         if (!hm) return null;
         const parts = hm.split(":");
         if (parts.length !== 2) return null;
-        const now = new Date();
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0], 10), parseInt(parts[1], 10));
+        return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
     }
 
     function sun_fraction() {
-        const rise = root.parse_hm_today(WeatherState.sunrise);
-        const set = root.parse_hm_today(WeatherState.sunset);
-        if (!rise || !set || set <= rise) return null;
-        const now = new Date();
+        const rise = root.hm_minutes(WeatherState.sunrise);
+        const set = root.hm_minutes(WeatherState.sunset);
+        if (rise === null || set === null || set <= rise) return null;
+        const loc = WeatherState.location_now();
+        const now = loc.getUTCHours() * 60 + loc.getUTCMinutes();
         if (now < rise || now > set) return null;
         return (now - rise) / (set - rise);
     }
 
     function day_length() {
-        const rise = root.parse_hm_today(WeatherState.sunrise);
-        const set = root.parse_hm_today(WeatherState.sunset);
-        if (!rise || !set || set <= rise) return "—";
-        const mins = Math.round((set - rise) / 60000);
+        const rise = root.hm_minutes(WeatherState.sunrise);
+        const set = root.hm_minutes(WeatherState.sunset);
+        if (rise === null || set === null || set <= rise) return "—";
+        const mins = set - rise;
         return Math.floor(mins / 60) + "h " + (mins % 60) + "m";
     }
 }

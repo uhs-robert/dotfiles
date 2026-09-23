@@ -36,10 +36,13 @@ Singleton {
 
     property double last_success_ms: 0
     property bool warned_once: false
+    property double last_attempt_ms: 0
+    property int utc_offset: 0
 
     readonly property int refresh_interval_ms: 900000
     readonly property int request_timeout_ms: 10000
     readonly property int min_refresh_gap_ms: 60000
+    readonly property int retry_gap_ms: 120000
 
     FileView {
         id: settings_file
@@ -79,6 +82,7 @@ Singleton {
         onLoaded: {
             try {
                 const parsed = JSON.parse(text());
+                if (parsed.settings_key !== JSON.stringify(root.settings)) return;
                 root.apply_data(parsed);
                 root.last_success_ms = parsed.updated || 0;
             } catch (e) {
@@ -90,15 +94,22 @@ Singleton {
 
     Component.onCompleted: {
         ensure_cache_dir.running = true;
+        settings_file.reload();
         cache_file.reload();
-        if (Date.now() - root.last_success_ms >= root.refresh_interval_ms) root.refresh(true);
+        root.refresh_if_due();
     }
 
+    // Checks every minute so the refresh follows the data's age, not process uptime.
     Timer {
-        interval: root.refresh_interval_ms
+        interval: 60000
         running: true
         repeat: true
-        onTriggered: root.refresh(false)
+        onTriggered: root.refresh_if_due()
+    }
+
+    function refresh_if_due() {
+        const now = Date.now();
+        if (now - root.last_success_ms >= root.refresh_interval_ms && now - root.last_attempt_ms >= root.retry_gap_ms) root.refresh(true);
     }
 
     // A non-forced call within min_refresh_gap_ms of the last success is a no-op.
@@ -107,6 +118,7 @@ Singleton {
         const now = Date.now();
         if (!force && root.last_success_ms > 0 && (now - root.last_success_ms) < root.min_refresh_gap_ms) return;
         root.loading = true;
+        root.last_attempt_ms = now;
         root.start_fetch();
     }
 
@@ -214,7 +226,17 @@ Singleton {
         root.sunrise = parsed.sunrise;
         root.sunset = parsed.sunset;
         root.moon = parsed.moon;
+        root.utc_offset = parsed.utc_offset || 0;
         root.has_data = true;
+    }
+
+    // Wall-clock time at the forecast location; read it with the getUTC* methods.
+    function location_now() {
+        return new Date(Date.now() + root.utc_offset * 1000);
+    }
+
+    function location_date_str() {
+        return root.location_now().toISOString().substr(0, 10);
     }
 
     function parse_num(val, def) {
@@ -292,7 +314,9 @@ Singleton {
             updated: Date.now(),
             sunrise: today ? today.sunrise : "",
             sunset: today ? today.sunset : "",
-            moon: { phase: phase, name: root.moon_name(phase) }
+            moon: { phase: phase, name: root.moon_name(phase) },
+            utc_offset: blob.utc_offset_seconds || 0,
+            settings_key: JSON.stringify(root.settings)
         };
     }
 
