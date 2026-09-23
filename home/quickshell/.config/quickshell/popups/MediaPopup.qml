@@ -3,10 +3,11 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Services.Mpris
 import "../components"
 import "../theme"
 import "../services"
-import "notifications" as Notifications
+import "media" as Media
 
 Popup {
     id: root
@@ -17,6 +18,7 @@ Popup {
 
     readonly property var player: MediaState.active
     readonly property var players: MediaState.players
+    readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
 
     readonly property bool is_open: Popups.open_name === "media"
     onIs_openChanged: MediaState.tracking = root.is_open
@@ -45,6 +47,20 @@ Popup {
         root.player.position = Math.max(0, Math.min(length, ratio * length));
     }
 
+    function toggle_shuffle() {
+        if (!root.player || !root.player.shuffleSupported) return;
+        root.player.shuffle = !root.player.shuffle;
+    }
+
+    // Cycles None -> Playlist -> Track -> None.
+    function cycle_loop() {
+        if (!root.player || !root.player.loopSupported) return;
+        const cur = root.player.loopState;
+        if (cur === MprisLoopState.None) root.player.loopState = MprisLoopState.Playlist;
+        else if (cur === MprisLoopState.Playlist) root.player.loopState = MprisLoopState.Track;
+        else root.player.loopState = MprisLoopState.None;
+    }
+
     function handle_key(event) {
         if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
             root.step_player(-1);
@@ -63,6 +79,12 @@ Popup {
             if (event.modifiers & Qt.ShiftModifier) MediaState.next();
             else MediaState.seek_by(5);
             event.accepted = true;
+        } else if (event.key === Qt.Key_S) {
+            root.toggle_shuffle();
+            event.accepted = true;
+        } else if (event.key === Qt.Key_R) {
+            root.cycle_loop();
+            event.accepted = true;
         }
     }
 
@@ -79,192 +101,340 @@ Popup {
         Keys.onTabPressed: event => root.handle_key(event)
         Keys.onBacktabPressed: event => root.handle_key(event)
 
+        // --- Backdrop: the album art, heavily blurred and dimmed, tinting the panel ---
+        Item {
+            id: backdrop
+            anchors.fill: parent
+            clip: true
+            z: 0
+
+            Image {
+                id: backdrop_art
+                anchors.fill: parent
+                visible: false
+                source: root.has_art ? root.player.trackArtUrl : ""
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                layer.enabled: true
+            }
+
+            MultiEffect {
+                anchors.fill: parent
+                anchors.margins: -32
+                visible: root.has_art && backdrop_art.status === Image.Ready
+                source: backdrop_art
+                blurEnabled: true
+                blur: 1.0
+                blurMax: 64
+                opacity: 0.2
+            }
+        }
+
         ColumnLayout {
             id: main_column
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
             spacing: 10
+            z: 1
 
-            Item {
+            RowLayout {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 178
+                spacing: 14
 
-                RowLayout {
-                    anchors.fill: parent
-                    spacing: 14
+                Item {
+                    id: art_container
+                    Layout.preferredWidth: 168
+                    Layout.preferredHeight: 168
+                    Layout.alignment: Qt.AlignTop
 
-                    Item {
-                        id: art_container
-                        Layout.preferredWidth: 160
-                        Layout.preferredHeight: 160
-                        Layout.alignment: Qt.AlignTop
-
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: 12
-                            color: Theme.bg_surface
-                            visible: !art_image.has_art || art_image.status !== Image.Ready
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            visible: !art_image.has_art || art_image.status !== Image.Ready
-                            text: "\u{f001}"
-                            color: Theme.fg_dim
-                            font.family: Theme.font_family
-                            font.pixelSize: 48
-                        }
-
-                        Rectangle {
-                            id: art_mask
-                            anchors.fill: parent
-                            radius: 12
-                            visible: false
-                            layer.enabled: true
-                        }
-
-                        Image {
-                            id: art_image
-                            readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
-                            anchors.fill: parent
-                            visible: false
-                            source: root.player ? root.player.trackArtUrl : ""
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
-                            layer.enabled: true
-                        }
-
-                        MultiEffect {
-                            anchors.fill: parent
-                            visible: art_image.has_art && art_image.status === Image.Ready
-                            source: art_image
-                            maskEnabled: true
-                            maskSource: art_mask
-                            maskThresholdMin: 0.5
-                            maskSpreadAtMin: 1.0
-                        }
+                    Rectangle {
+                        id: art_shadow_source
+                        anchors.fill: parent
+                        radius: 12
+                        color: Theme.bg_shadow
+                        visible: false
+                        layer.enabled: true
                     }
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        spacing: 4
+                    MultiEffect {
+                        anchors.fill: parent
+                        anchors.topMargin: 8
+                        visible: art_image.has_art && art_image.status === Image.Ready
+                        source: art_shadow_source
+                        blurEnabled: true
+                        blur: 0.6
+                        blurMax: 32
+                        opacity: 0.55
+                        z: -1
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 12
+                        color: Theme.bg_surface
+                        visible: !art_image.has_art || art_image.status !== Image.Ready
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        visible: !art_image.has_art || art_image.status !== Image.Ready
+                        text: "\u{f001}"
+                        color: Theme.fg_dim
+                        font.family: Theme.font_family
+                        font.pixelSize: 48
+                    }
+
+                    Rectangle {
+                        id: art_mask
+                        anchors.fill: parent
+                        radius: 12
+                        visible: false
+                        layer.enabled: true
+                    }
+
+                    Image {
+                        id: art_image
+                        readonly property bool has_art: root.has_art
+                        anchors.fill: parent
+                        visible: false
+                        source: root.player ? root.player.trackArtUrl : ""
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        layer.enabled: true
+                    }
+
+                    MultiEffect {
+                        anchors.fill: parent
+                        visible: art_image.has_art && art_image.status === Image.Ready
+                        source: art_image
+                        maskEnabled: true
+                        maskSource: art_mask
+                        maskThresholdMin: 0.5
+                        maskSpreadAtMin: 1.0
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: 4
+
+                    // --- Player identity pill ---
+                    Rectangle {
+                        Layout.alignment: Qt.AlignLeft
+                        visible: !!root.player
+                        implicitWidth: pill_label.implicitWidth + 16
+                        implicitHeight: 20
+                        radius: 10
+                        color: Theme.bg_surface
 
                         Text {
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 0
-                            elide: Text.ElideRight
-                            text: root.player ? (root.player.trackTitle || "Unknown title") : "Nothing playing"
-                            color: Theme.fg_core
-                            font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size + 4
-                            font.bold: true
-                        }
-
-                        Text {
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 0
-                            elide: Text.ElideRight
-                            visible: root.player && root.player.trackArtist !== ""
-                            text: root.player ? root.player.trackArtist : ""
+                            id: pill_label
+                            anchors.centerIn: parent
+                            text: root.player ? (root.player.identity || "Player") : ""
                             color: Theme.fg_muted
                             font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size
+                            font.pixelSize: Theme.popup_font_size - 4
                         }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        elide: Text.ElideRight
+                        text: root.player ? (root.player.trackTitle || "Unknown title") : "Nothing playing"
+                        color: Theme.fg_core
+                        font.family: Theme.font_family
+                        font.pixelSize: Theme.popup_font_size + 5
+                        font.bold: true
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        elide: Text.ElideRight
+                        visible: root.player && root.player.trackArtist !== ""
+                        text: root.player ? root.player.trackArtist : ""
+                        color: Theme.theme_primary
+                        font.family: Theme.font_family
+                        font.pixelSize: Theme.popup_font_size
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        elide: Text.ElideRight
+                        visible: root.player && root.player.trackAlbum !== ""
+                        text: root.player ? root.player.trackAlbum : ""
+                        color: Theme.fg_dim
+                        font.family: Theme.font_family
+                        font.pixelSize: Theme.popup_font_size - 2
+                    }
+
+                    Item { Layout.fillHeight: true }
+
+                    // --- Progress bar: click or drag to seek ---
+                    Item {
+                        id: progress_item
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 16
+
+                        readonly property bool has_length: !!root.player && root.player.length > 0
+                        readonly property real ratio: progress_item.has_length
+                            ? Math.max(0, Math.min(1, root.player.position / root.player.length)) : 0
+                        readonly property bool knob_active: seek_area.containsMouse || seek_area.pressed
+
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            height: 6
+                            radius: 3
+                            color: Theme.bg_surface
+                            visible: progress_item.has_length
+                        }
+
+                        Rectangle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width * progress_item.ratio
+                            height: 6
+                            radius: 3
+                            color: Theme.theme_primary
+                            visible: progress_item.has_length
+                        }
+
+                        Rectangle {
+                            id: knob
+                            readonly property int base_size: 12
+                            width: progress_item.knob_active ? base_size + 3 : base_size
+                            height: width
+                            radius: width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: Math.max(0, Math.min(parent.width - width, parent.width * progress_item.ratio - width / 2))
+                            color: Theme.theme_primary
+                            visible: progress_item.has_length
+                            opacity: progress_item.knob_active ? 1 : 0
+                            border.width: 2
+                            border.color: Theme.bg_core
+
+                            Behavior on width { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
+                            Behavior on opacity { NumberAnimation { duration: 120 } }
+                        }
+
+                        MouseArea {
+                            id: seek_area
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            enabled: !!root.player && root.player.canSeek && root.player.positionSupported
+                            onPressed: mouse => root.seek_ratio(mouse.x / width)
+                            onPositionChanged: mouse => { if (pressed) root.seek_ratio(Math.max(0, Math.min(1, mouse.x / width))); }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 14
 
                         Text {
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 0
-                            elide: Text.ElideRight
-                            visible: root.player && root.player.trackAlbum !== ""
-                            text: root.player ? root.player.trackAlbum : ""
+                            visible: progress_item.has_length
+                            text: root.player ? root.fmt_time(root.player.position) : "0:00"
                             color: Theme.fg_dim
                             font.family: Theme.font_family
-                            font.pixelSize: Theme.popup_font_size - 2
+                            font.pixelSize: Theme.popup_font_size - 4
                         }
 
-                        Item { Layout.fillHeight: true }
+                        Item { Layout.fillWidth: true }
 
-                        // --- Progress bar: click or drag to seek ---
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 8
-
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width
-                                height: 4
-                                radius: 2
-                                color: Theme.bg_surface
-                            }
-
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: {
-                                    if (!root.player || !root.player.length) return 0;
-                                    return parent.width * Math.max(0, Math.min(1, root.player.position / root.player.length));
-                                }
-                                height: 4
-                                radius: 2
-                                color: Theme.theme_primary
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                enabled: !!root.player && root.player.canSeek && root.player.positionSupported
-                                onPressed: mouse => root.seek_ratio(mouse.x / width)
-                                onPositionChanged: mouse => { if (pressed) root.seek_ratio(Math.max(0, Math.min(1, mouse.x / width))); }
-                            }
+                        Text {
+                            text: progress_item.has_length ? root.fmt_time(root.player.length) : "Live"
+                            color: Theme.fg_dim
+                            font.family: Theme.font_family
+                            font.pixelSize: Theme.popup_font_size - 4
                         }
+                    }
+
+                    // --- Transport controls: centered on the progress bar above ---
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: 2
+                        spacing: 10
+
+                        Media.RoundButton {
+                            visible: !!root.player && root.player.shuffleSupported
+                            diameter: 32
+                            icon: "\u{f04b3}"
+                            active: !!root.player && root.player.shuffle
+                            onActivated: root.toggle_shuffle()
+                        }
+
+                        Media.RoundButton {
+                            diameter: 32
+                            icon: "\u{f048}"
+                            button_enabled: !!root.player && root.player.canGoPrevious
+                            onActivated: MediaState.previous()
+                        }
+
+                        Media.RoundButton {
+                            diameter: 44
+                            primary: true
+                            icon: root.player && root.player.isPlaying ? "\u{f04c}" : "\u{f04b}"
+                            button_enabled: !!root.player && root.player.canTogglePlaying
+                            onActivated: MediaState.toggle()
+                        }
+
+                        Media.RoundButton {
+                            diameter: 32
+                            icon: "\u{f051}"
+                            button_enabled: !!root.player && root.player.canGoNext
+                            onActivated: MediaState.next()
+                        }
+
+                        Media.RoundButton {
+                            visible: !!root.player && root.player.loopSupported
+                            diameter: 32
+                            icon: (!!root.player && root.player.loopState !== MprisLoopState.None) ? "\u{f0456}" : "\u{f0457}"
+                            active: !!root.player && root.player.loopState !== MprisLoopState.None
+                            badge: (!!root.player && root.player.loopState === MprisLoopState.Track) ? "1" : ""
+                            onActivated: root.cycle_loop()
+                        }
+                    }
+
+                    // --- Subtle cava visualizer along the bottom edge ---
+                    Item {
+                        id: cava_strip
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 18
+                        Layout.topMargin: 4
+
+                        readonly property int bar_count: 28
+                        readonly property bool active: MediaState.playing
 
                         RowLayout {
-                            Layout.fillWidth: true
+                            anchors.fill: parent
+                            spacing: 3
 
-                            Text {
-                                text: root.player ? root.fmt_time(root.player.position) : "0:00"
-                                color: Theme.fg_dim
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 4
-                            }
+                            Repeater {
+                                model: cava_strip.bar_count
 
-                            Item { Layout.fillWidth: true }
+                                Rectangle {
+                                    id: cava_bar
+                                    required property int index
+                                    readonly property int src_index: Math.floor(cava_bar.index * CavaState.bar_count / cava_strip.bar_count)
+                                    readonly property real level: CavaState.levels[cava_bar.src_index] || 0
 
-                            Text {
-                                text: root.player ? root.fmt_time(root.player.length) : "0:00"
-                                color: Theme.fg_dim
-                                font.family: Theme.font_family
-                                font.pixelSize: Theme.popup_font_size - 4
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignBottom
+                                    height: cava_strip.active ? Math.max(2, cava_bar.level * 18) : 2
+                                    radius: 1
+                                    color: Theme.theme_primary
+                                    opacity: cava_strip.active ? 0.25 : 0
+
+                                    Behavior on height { NumberAnimation { duration: 90 } }
+                                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                                }
                             }
                         }
                     }
-                }
-            }
-
-            // --- Transport controls ---
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 8
-
-                Notifications.HeaderButton {
-                    icon: "\u{f048}"
-                    enabled: !!root.player && root.player.canGoPrevious
-                    opacity: enabled ? 1 : 0.4
-                    onActivated: MediaState.previous()
-                }
-
-                Notifications.HeaderButton {
-                    icon: root.player && root.player.isPlaying ? "\u{f04c}" : "\u{f04b}"
-                    enabled: !!root.player && root.player.canTogglePlaying
-                    opacity: enabled ? 1 : 0.4
-                    onActivated: MediaState.toggle()
-                }
-
-                Notifications.HeaderButton {
-                    icon: "\u{f051}"
-                    enabled: !!root.player && root.player.canGoNext
-                    opacity: enabled ? 1 : 0.4
-                    onActivated: MediaState.next()
                 }
             }
 
@@ -273,6 +443,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.players.length > 1 ? 28 : 0
                 visible: root.players.length > 1
+                z: 1
 
                 RowLayout {
                     anchors.centerIn: parent
@@ -314,7 +485,8 @@ Popup {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
                 elide: Text.ElideRight
-                text: "Tab player · space play · h/l seek · H/L track · q close"
+                z: 1
+                text: "Tab player · space play · h/l seek · H/L track · s shuffle · r loop · q close"
                 color: Theme.fg_dim
                 font.family: Theme.font_family
                 font.pixelSize: Theme.popup_font_size - 4
