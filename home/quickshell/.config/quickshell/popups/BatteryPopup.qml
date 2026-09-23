@@ -16,7 +16,7 @@ Popup {
 
     readonly property var device: UPower.displayDevice
     readonly property bool has_battery: !!device && device.ready
-    readonly property real percent: has_battery ? device.percentage : 0
+    readonly property real percent: has_battery ? device.percentage * 100 : 0
     readonly property int state: has_battery ? device.state : UPowerDeviceState.Unknown
     readonly property real rate: has_battery ? device.changeRate : 0
 

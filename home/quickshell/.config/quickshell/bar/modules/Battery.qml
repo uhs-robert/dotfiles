@@ -13,7 +13,7 @@ Item {
 
     readonly property var device: UPower.displayDevice
     readonly property bool has_battery: !!device && device.ready && device.isLaptopBattery
-    readonly property real percent: has_battery ? device.percentage : 0
+    readonly property real percent: has_battery ? device.percentage * 100 : 0
     readonly property int state: has_battery ? device.state : UPowerDeviceState.Unknown
     readonly property bool charging: state === UPowerDeviceState.Charging || state === UPowerDeviceState.PendingCharge
     readonly property var level_glyphs: ["", "", "", "", ""]
