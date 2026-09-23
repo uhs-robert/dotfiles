@@ -15,7 +15,7 @@ Popup {
     WheelStepper {
         id: stepper
     }
-    implicitWidth: 320
+    fallback_width: 320
     implicitHeight: 24 + rows.length * 28 + (streams.length === 0 ? 22 : 0)
 
     readonly property var output_devices: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio)

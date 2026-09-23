@@ -9,7 +9,7 @@ Popup {
     id: root
 
     popup_name: "clock"
-    implicitWidth: 260
+    fallback_width: 260
     implicitHeight: 284
 
     property date today: new Date()

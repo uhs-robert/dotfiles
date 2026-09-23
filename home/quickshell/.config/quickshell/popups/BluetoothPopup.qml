@@ -10,7 +10,7 @@ Popup {
     id: root
 
     popup_name: "bluetooth"
-    implicitWidth: 260
+    fallback_width: 260
     implicitHeight: 40 + (root.devices.length > 0 ? root.devices.length * 26 : 22) + 24
 
     readonly property var adapter: QsBt.Bluetooth.defaultAdapter

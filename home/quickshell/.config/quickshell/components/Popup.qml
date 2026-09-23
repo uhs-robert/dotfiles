@@ -8,6 +8,10 @@ PopupWindow {
     id: root
 
     property string popup_name: ""
+    property real fallback_width: 260
+
+    // Flush with the island's bottom edge: the anchor is the island body, between the slants.
+    implicitWidth: Popups.open_anchor ? Popups.open_anchor.width : fallback_width
     default property alias content: content_scope.data
 
     color: "transparent"

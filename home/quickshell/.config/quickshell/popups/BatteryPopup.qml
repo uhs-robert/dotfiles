@@ -15,7 +15,7 @@ Popup {
     WheelStepper {
         id: stepper
     }
-    implicitWidth: 260
+    fallback_width: 260
     implicitHeight: 20 + 20 + (root.time_label !== "" ? 18 : 0) + (root.rate > 0 ? 18 : 0) + 10
         + 26 + (Backlight.has_kbd ? 26 : 0)
         + (root.ppd_available ? root.profiles.length * 26 : 22) + 24

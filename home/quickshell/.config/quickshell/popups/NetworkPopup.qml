@@ -11,7 +11,7 @@ Popup {
     id: root
 
     popup_name: "network"
-    implicitWidth: 300
+    fallback_width: 300
     implicitHeight: 300
 
     readonly property var wifi_device: {

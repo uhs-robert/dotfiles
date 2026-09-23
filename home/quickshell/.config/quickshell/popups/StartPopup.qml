@@ -10,7 +10,7 @@ Popup {
     id: root
 
     popup_name: "start"
-    implicitWidth: 180
+    fallback_width: 180
     implicitHeight: confirm ? 60 : 180
 
     readonly property var actions: ["Apps", "Lock", "Logout", "Reboot", "Power Off"]
