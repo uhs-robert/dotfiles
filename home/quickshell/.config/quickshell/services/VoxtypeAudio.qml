@@ -13,6 +13,8 @@ Singleton {
     property real window_secs: 3
     readonly property int frame_rate: 100
     readonly property real floor_dbfs: -60
+    // Linear peak multiplier for the line wave; read from voxtype's osd.waveform_gain.
+    property real gain: 10
     readonly property int capacity: Math.max(1, Math.round(root.window_secs * root.frame_rate))
 
     // Mutated in place so a frame never re-evaluates bindings; read through columns().
@@ -40,6 +42,26 @@ Singleton {
         root.count = Math.min(root.count + 1, root.capacity);
     }
 
+    // Linear peaks averaged into n buckets, right-aligned so a filling window reads as silence on the left.
+    function averages(n) {
+        const out = new Array(n).fill(0);
+        const size = root.ring.length;
+        if (size === 0 || root.count === 0) return out;
+        const pad = size - root.count;
+        for (let c = 0; c < n; c++) {
+            const start = Math.max(pad, Math.floor(c * size / n));
+            const end = Math.max(start + 1, Math.floor((c + 1) * size / n));
+            let sum = 0;
+            let k = 0;
+            for (let j = start; j < Math.min(end, size); j++) {
+                sum += root.ring[(root.head - size + j + size * 2) % size];
+                k++;
+            }
+            out[c] = k > 0 ? sum / k : 0;
+        }
+        return out;
+    }
+
     // The window split into n buckets, oldest first, each the loudest level in it.
     function columns(n) {
         const out = new Array(n).fill(0);
@@ -49,7 +71,8 @@ Singleton {
             const age = root.count - 1 - i;
             const value = root.ring[(root.head - 1 - age + size * 2) % size];
             const col = Math.min(n - 1, Math.floor((size - 1 - age) * n / size));
-            if (value > out[col]) out[col] = value;
+            const lvl = root.level(value);
+            if (lvl > out[col]) out[col] = lvl;
         }
         return out;
     }
@@ -61,13 +84,16 @@ Singleton {
         } catch (e) {
             return;
         }
-        if (typeof data.peak === "number") root.push(root.level(data.peak));
+        if (typeof data.peak === "number") root.push(Math.max(0, Math.min(1, data.peak)));
     }
 
     onActiveChanged: {
         root.clear();
         bridge.running = root.active;
-        if (root.active) settings.running = true;
+        if (root.active) {
+            settings.running = true;
+            gain_setting.running = true;
+        }
     }
 
     Component.onCompleted: root.clear()
@@ -97,6 +123,17 @@ Singleton {
                     root.window_secs = secs;
                     root.clear();
                 }
+            }
+        }
+    }
+
+    Process {
+        id: gain_setting
+        command: ["voxtype", "config", "get", "osd.waveform_gain"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const g = parseFloat(text);
+                if (g > 0) root.gain = g;
             }
         }
     }
