@@ -13,15 +13,25 @@ Item {
     property bool selected: false
     property real scale_min: 0
     property real scale_max: 1
-    // Largest integer scale of the 24x18 photo that still fits this column.
-    readonly property int pixel: Math.max(1, Math.min(3, Math.floor((root.width - 18) / 24)))
+
+    // Rough label/temp/pop row height, used only to budget the sprite scale; the real gap is filled below.
+    readonly property real text_row_h: Style.font_size + 6
+    readonly property int width_pixel: Math.max(1, Math.floor((root.width - 18) / 24))
+    readonly property int height_pixel: Math.max(1, Math.floor((root.height - 3 * root.text_row_h - 38) / 20))
+    // Largest integer scale of the 24x18 photo that fits both the column width and the available height.
+    readonly property int pixel: Math.max(1, Math.min(6, Math.min(root.width_pixel, root.height_pixel)))
+
+    // Space left over after the photo, dot bar and labels take their natural size, spread across the gaps between them.
+    readonly property real content_h: label_row.height + photo_box.height + dot_bar.height + temp_row.height + pop_text.height
+    readonly property real fill_spacing: Math.max(3, (root.height - root.content_h) / 4)
 
     Column {
         x: Math.round((root.width - width) / 2)
         y: Math.round((root.height - height) / 2)
-        spacing: 5
+        spacing: root.fill_spacing
 
         Row {
+            id: label_row
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 2
 
@@ -42,6 +52,7 @@ Item {
         }
 
         Item {
+            id: photo_box
             anchors.horizontalCenter: parent.horizontalCenter
             width: photo.width + 18
             height: photo.height + 18
@@ -62,6 +73,7 @@ Item {
         }
 
         DotBar {
+            id: dot_bar
             anchors.horizontalCenter: parent.horizontalCenter
             low: root.day ? root.day.min : 0
             high: root.day ? root.day.max : 0
@@ -71,6 +83,7 @@ Item {
         }
 
         Row {
+            id: temp_row
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 4
 
@@ -88,6 +101,7 @@ Item {
         }
 
         Text {
+            id: pop_text
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.day ? root.day.pop + "%" : ""
             color: Style.shade_2

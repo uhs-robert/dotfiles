@@ -23,7 +23,11 @@ Item {
     readonly property color hl: Style.text_primary
     readonly property color hl_t: Style.text_muted
 
-    implicitHeight: slots_row.childrenRect.height
+    readonly property real bar_h: 18
+    // Space left for the open bucket once the number bar is out of the way.
+    readonly property real bucket_h: Math.max(80, root.height - root.bar_h)
+    // Grows the open bucket's contents so it fills tall Daily areas instead of sitting content-sized.
+    readonly property real bucket_scale: Math.max(1, Math.min(2.2, root.bucket_h / 130))
 
     Row {
         id: slots_row
@@ -44,7 +48,7 @@ Item {
 
                 Rectangle {
                     width: parent.width
-                    height: 18
+                    height: root.bar_h
                     color: slot.open ? root.hl : "transparent"
                     border.width: slot.open ? 0 : 1
                     border.color: Style.hairline_dim
@@ -85,8 +89,9 @@ Item {
                 }
 
                 Rectangle {
+                    id: bucket_box
                     width: parent.width
-                    height: bucket.implicitHeight + 13
+                    height: slot.open ? root.bucket_h : bucket.implicitHeight + 13
                     color: slot.open ? Style.selection_bg : "transparent"
                     border.width: slot.open ? 1 : 0
                     border.color: Style.hairline
@@ -97,10 +102,10 @@ Item {
 
                         Rectangle {
                             required property var modelData
-                            x: modelData[0] * (parent.width - 1)
-                            y: modelData[1] * (parent.height - 1)
-                            width: modelData[2] ? 1 : parent.width
-                            height: modelData[3] ? parent.height : 1
+                            x: modelData[0] * ((parent ? parent.width : 0) - 1)
+                            y: modelData[1] * ((parent ? parent.height : 0) - 1)
+                            width: modelData[2] ? 1 : (parent ? parent.width : 0)
+                            height: modelData[3] ? (parent ? parent.height : 0) : 1
                             color: Style.hairline_dim
                         }
                     }
@@ -110,21 +115,28 @@ Item {
                         x: slot.open ? 7 : 5
                         y: 6
                         width: parent.width - x * 2
-                        spacing: 3
+                        height: slot.open ? bucket_box.height - 12 : bucket.implicitHeight
+                        spacing: slot.open ? 3 * root.bucket_scale : 3
 
                         RowLayout {
                             visible: slot.open
-                            spacing: 7
+                            spacing: 7 * root.bucket_scale
 
                             DayIcon {
                                 code: slot.modelData.code
+                                size: 22 * Math.min(root.bucket_scale, 1.8)
                             }
 
                             Temps {
-                                hi_size: 20
-                                lo_size: 14
+                                hi_size: 20 * root.bucket_scale
+                                lo_size: 14 * root.bucket_scale
                                 day: slot.modelData
                             }
+                        }
+
+                        Item {
+                            visible: slot.open
+                            Layout.fillHeight: true
                         }
 
                         Text {
@@ -136,7 +148,7 @@ Item {
                             text: slot.modelData.cond.toUpperCase()
                             color: root.hl
                             font.family: Style.font_family
-                            font.pixelSize: Style.font_size - 6
+                            font.pixelSize: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
                             font.bold: true
                             font.letterSpacing: 1.4
                         }
@@ -160,11 +172,12 @@ Item {
                             label: "RAIN"
                             value: slot.modelData.pop + "%"
                             value_color: Theme.info
+                            font_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 4
+                            Layout.preferredHeight: Math.round(4 * Math.min(root.bucket_scale, 1.8))
                             color: Style.meter_off
 
                             Rectangle {
@@ -188,12 +201,19 @@ Item {
                             visible: slot.open
                             label: "WIND"
                             value: Math.round(slot.modelData.wind_speed_max) + " " + WeatherState.wind_unit()
+                            font_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
                         }
 
                         Stat {
                             visible: slot.open
                             label: "UV"
                             value: slot.modelData.uv_max.toFixed(1)
+                            font_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
+                        }
+
+                        Item {
+                            visible: slot.open
+                            Layout.fillHeight: true
                         }
                     }
                 }
@@ -208,16 +228,17 @@ Item {
     component DayIcon: Item {
         id: day_icon
         property int code: 0
-        implicitWidth: 22
-        implicitHeight: 22
+        property real size: 22
+        implicitWidth: day_icon.size
+        implicitHeight: day_icon.size
 
         Image {
             id: icon_image
             anchors.fill: parent
             visible: false
             readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
-            sourceSize.width: Math.ceil(44 * dpr)
-            sourceSize.height: Math.ceil(44 * dpr)
+            sourceSize.width: Math.ceil(2 * day_icon.size * dpr)
+            sourceSize.height: Math.ceil(2 * day_icon.size * dpr)
             source: WeatherState.icon_source(day_icon.code, true)
             smooth: true
         }
@@ -233,8 +254,8 @@ Item {
     component Temps: RowLayout {
         id: temps
         property var day: null
-        property int hi_size: 13
-        property int lo_size: 13
+        property real hi_size: 13
+        property real lo_size: 13
         spacing: 4
 
         Text {
@@ -260,6 +281,7 @@ Item {
         property string label: ""
         property string value: ""
         property color value_color: Theme.fg_strong
+        property real font_size: Style.font_size - 6
         Layout.fillWidth: true
         spacing: 4
 
@@ -270,7 +292,7 @@ Item {
             text: stat.label
             color: root.hl_t
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 6
+            font.pixelSize: stat.font_size
             font.bold: true
             font.letterSpacing: 1.5
         }
@@ -279,7 +301,7 @@ Item {
             text: stat.value
             color: stat.value_color
             font.family: Style.number_font
-            font.pixelSize: Style.font_size - 5
+            font.pixelSize: stat.font_size + 1
             font.bold: true
         }
     }

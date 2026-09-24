@@ -45,7 +45,7 @@ Popup {
     property int hour_cursor: 0
     property int alert_cursor: 0
 
-    readonly property int content_height: Style.px(root.hev ? 240 : 400)
+    readonly property int content_height: Style.px(400)
     readonly property bool on_air: root.current_tab === 1 && root.hourly_sub === root.air_sub
     readonly property int air_hours: Math.min(24, WeatherState.aq_hours.length)
 

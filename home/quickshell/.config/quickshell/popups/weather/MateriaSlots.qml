@@ -19,10 +19,13 @@ Item {
     readonly property real label_w: 40
     readonly property int n: Math.max(1, root.days.length)
     readonly property real col_w: (root.width - root.label_w) / root.n
-    readonly property real band_h: 34
-    readonly property real row_h: Math.max(20, Math.min(34, (root.height - root.band_h - 8) / root.rows.length))
+    // Band and rows share out the full available height instead of centering at a fixed size.
+    readonly property real band_h: Math.max(34, Math.min(70, root.height * 0.16))
+    readonly property real row_h: Math.max(20, (root.height - root.band_h - 8) / root.rows.length)
     readonly property real table_h: root.band_h + 4 + root.row_h * root.rows.length
     readonly property real top_y: Math.max(0, (root.height - root.table_h) / 2)
+    readonly property real socket_size: Math.max(24, Math.min(56, root.band_h * 0.75))
+    readonly property real row_scale: Math.min(1.6, Math.max(1, root.row_h / 34))
     readonly property int sel: root.day_cursor - root.first_day
     readonly property var rows: [
         ["", d => d.weekday],
@@ -99,9 +102,9 @@ Item {
                 id: socket
                 x: (slot.width - width) / 2
                 y: (root.band_h - height) / 2
-                width: 24
-                height: 24
-                radius: 12
+                width: root.socket_size
+                height: root.socket_size
+                radius: width / 2
                 color: Theme.bg_crust
                 border.width: 2
                 border.color: Style.frame_border_color
@@ -117,8 +120,8 @@ Item {
 
                 MateriaOrb {
                     anchors.centerIn: parent
-                    width: 16
-                    height: 16
+                    width: root.socket_size * 0.67
+                    height: width
                     glow: false
                     color: (Style.materia.days || {})[root.orb_colors[slot.index]] || "transparent"
                 }
@@ -128,9 +131,9 @@ Item {
                 visible: slot.selected
                 anchors.right: socket.left
                 anchors.rightMargin: -3
-                y: socket.y + 5
-                width: 18
-                height: 11
+                y: socket.y + socket.height * 0.2
+                width: 18 * root.row_scale
+                height: 11 * root.row_scale
             }
 
             Repeater {
@@ -147,11 +150,11 @@ Item {
                     Image {
                         visible: cell.index === 1
                         anchors.centerIn: parent
-                        width: Math.min(26, root.row_h - 2)
+                        width: Math.min(48, root.row_h - 2)
                         height: width
                         readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
-                        sourceSize.width: Math.ceil(52 * dpr)
-                        sourceSize.height: Math.ceil(52 * dpr)
+                        sourceSize.width: Math.ceil(96 * dpr)
+                        sourceSize.height: Math.ceil(96 * dpr)
                         source: visible ? WeatherState.icon_source(slot.modelData.code, true) : ""
                         smooth: true
                     }
@@ -159,13 +162,13 @@ Item {
                     Text {
                         visible: cell.index !== 1
                         anchors.centerIn: parent
-                        anchors.verticalCenterOffset: cell.index === 4 ? -3 : 0
+                        anchors.verticalCenterOffset: cell.index === 4 ? -3 * root.row_scale : 0
                         width: Math.min(implicitWidth, cell.width - 4)
                         elide: Text.ElideRight
                         text: cell.modelData[1](slot.modelData)
                         color: cell.index === 2 || slot.selected && cell.index === 0 ? Theme.fg_strong : cell.index === 4 ? Style.text_fg : Theme.theme_primary_light
                         font.family: Style.font_family
-                        font.pixelSize: cell.index === 0 ? Style.font_size - 3 : Style.font_size - (cell.index === 4 ? 4 : 3)
+                        font.pixelSize: Math.round((cell.index === 0 ? Style.font_size - 3 : Style.font_size - (cell.index === 4 ? 4 : 3)) * root.row_scale)
                         font.weight: cell.index === 2 ? Font.ExtraBold : Font.Bold
                     }
 
@@ -173,9 +176,9 @@ Item {
                         visible: cell.index === 4
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 2
-                        width: Math.min(36, cell.width - 12)
-                        height: 4
+                        anchors.bottomMargin: 2 * root.row_scale
+                        width: Math.min(36 * root.row_scale, cell.width - 12)
+                        height: 4 * root.row_scale
                         value: slot.modelData.pop / 100
                         fill_color: Theme.info
                         shade_color: Qt.tint(Theme.info, Qt.alpha(Theme.fg_strong, 0.55))
@@ -197,11 +200,11 @@ Item {
             required property var modelData
             required property int index
             x: 0
-            y: root.top_y + root.band_h + 4 + index * root.row_h + (root.row_h - height) / 2 - (index === 4 ? 3 : 0)
+            y: root.top_y + root.band_h + 4 + index * root.row_h + (root.row_h - height) / 2 - (index === 4 ? 3 * root.row_scale : 0)
             text: modelData[0]
             color: Theme.theme_primary_light
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 5
+            font.pixelSize: Math.round((Style.font_size - 5) * root.row_scale)
             font.weight: Font.ExtraBold
             font.letterSpacing: 1
         }

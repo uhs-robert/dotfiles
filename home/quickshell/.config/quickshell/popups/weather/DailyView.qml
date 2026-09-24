@@ -198,6 +198,7 @@ Item {
 
         Loader {
             Layout.fillWidth: true
+            Layout.fillHeight: true
             active: root.hev_slots
             visible: active
             sourceComponent: WeaponSlots {
@@ -648,11 +649,6 @@ Item {
                 font.family: Style.font_family
                 font.pixelSize: Style.font_size
             }
-        }
-
-        Item {
-            visible: root.hev_slots
-            Layout.fillHeight: true
         }
     }
 }
