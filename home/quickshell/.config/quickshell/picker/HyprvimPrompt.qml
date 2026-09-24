@@ -44,11 +44,18 @@ Popup {
     property int history_index: -1
     property string draft: ""
     property string output_text: ""
+    // First visible menu row; the menu is a fixed window of slots over items.
+    property int menu_top: 0
+    // Latched per prompt once shown, so the layer surface keeps one height while typing.
+    property bool menu_reserved: false
+    property bool hint_reserved: false
 
     // Keyed "cmd|pos|prev_args"; a source runs once per key per prompt.
     property var source_cache: ({})
     property var source_queue: []
     property var shell_items: null
+    // Last source and query with every match, so a query that only grew filters those instead of the whole source.
+    readonly property var memo: ({ key: "", cur: "", matched: [] })
 
     readonly property string query_text: root.cycle_base !== null ? root.cycle_base : input.text
     readonly property var ctx: root.context_of(root.query_text)
@@ -57,15 +64,22 @@ Popup {
     readonly property bool loading: root.ctx.kind === "shell" && root.shell_items === null || !!root.arg_spec && !!root.arg_spec.source && root.source_cache[root.source_key()] === undefined
     readonly property var items: root.candidates(root.ctx, root.source_cache, root.shell_items)
     readonly property bool menu_shown: !root.is_output && !root.menu_hidden && root.items.length > 0 && (root.query_text !== "" || root.cycle_base !== null)
-    readonly property int menu_rows: root.menu_shown ? Math.min(root.items.length, Math.max(3, Math.floor(root.screen_height * 0.35 / root.row_height))) : 0
+    readonly property int menu_slots: Math.min(10, Math.max(3, Math.floor(root.screen_height * 0.35 / root.row_height)))
+    readonly property int menu_rows: root.menu_shown ? Math.min(root.items.length - root.menu_top, root.menu_slots) : 0
     readonly property bool hint_shown: !root.is_output && (root.hint !== "" || root.loading)
     readonly property real output_height: Math.min(output_view.contentHeight + 8, Math.round(root.screen_height * 0.45))
 
     body_height: root.is_output
         ? output_label.height + 8 + root.output_height + 24
-        : root.input_height + (root.hint_shown ? hint_text.height + 6 : 0) + (root.menu_shown ? root.menu_rows * root.row_height + 8 : 0) + 24
+        : root.input_height + (root.hint_reserved ? hint_text.height + 6 : 0) + (root.menu_reserved ? root.menu_slots * root.row_height + 8 : 0) + 24
 
     onCtxChanged: root.request_sources()
+    onItemsChanged: {
+        root.menu_top = 0;
+        root.reveal_selected();
+    }
+    onMenu_shownChanged: if (root.menu_shown) root.menu_reserved = true
+    onHint_shownChanged: if (root.hint_shown) root.hint_reserved = true
     onIs_openChanged: {
         if (root.is_open) Qt.callLater(root.focus_body);
         else if (root.session) root.finish(null);
@@ -150,6 +164,11 @@ Popup {
         root.source_queue = [];
         root.shell_items = null;
         root.output_text = "";
+        root.menu_top = 0;
+        root.menu_reserved = false;
+        root.hint_reserved = false;
+        root.memo.key = "";
+        root.memo.matched = [];
         if (root.is_output) {
             output_file.path = parsed.output_path || "";
             const text = output_file.text() || "";
@@ -273,14 +292,31 @@ Popup {
         return out;
     }
 
-    function rank(list, query) {
+    // Matching is monotonic: whatever matches a longer query also matched its prefix.
+    function narrowed_base(key, list, cur) {
+        const m = root.memo;
+        const base = m.key === key && cur.startsWith(m.cur) ? m.matched : list;
+        m.key = key;
+        m.cur = cur;
+        return base;
+    }
+
+    function rank(key, list, query) {
         const terms = Fuzzy.terms_of(query);
-        if (terms.length === 0) return list.slice(0, root.max_items).map(item => ({ item: item, positions: [] }));
-        const out = [];
-        for (const item of list) {
-            const m = Fuzzy.score_item(terms, item);
-            if (m) out.push({ item: item, positions: m.positions, score: m.score });
+        const base = root.narrowed_base(key, list, query);
+        if (terms.length === 0) {
+            root.memo.matched = base;
+            return base.slice(0, root.max_items).map(item => ({ item: item, positions: [] }));
         }
+        const out = [];
+        const matched = [];
+        for (const item of base) {
+            const m = Fuzzy.score_item(terms, item);
+            if (!m) continue;
+            out.push({ item: item, positions: m.positions, score: m.score });
+            matched.push(item);
+        }
+        root.memo.matched = matched;
         out.sort((a, b) => b.score - a.score || a.item.label.length - b.item.label.length);
         return out.slice(0, root.max_items);
     }
@@ -289,18 +325,22 @@ Popup {
         if (!root.session || root.is_output) return [];
         if (ctx.kind === "command") {
             const list = (root.spec.completions || []).map(c => ({ label: c.name, description: c.desc || "", keywords: c.aliases || [], insert: c.name + (c.takes_args ? " " : "") }));
-            return root.rank(list, ctx.cur);
+            return root.rank("command", list, ctx.cur);
         }
         if (ctx.kind === "shell") {
-            const list = (shell_items || []).filter(i => i.label.startsWith(ctx.cur));
+            const base = root.narrowed_base("shell|" + (shell_items !== null), shell_items || [], ctx.cur);
+            const list = base.filter(i => i.label.startsWith(ctx.cur));
+            root.memo.matched = list;
             return list.slice(0, root.max_items).map(item => ({ item: item, positions: [...Array(ctx.cur.length).keys()] }));
         }
         if (ctx.kind !== "arg") return [];
         const spec = root.arg_spec_for(ctx.cmd, ctx.pos);
         if (!spec) return [];
+        const key = root.canonical(ctx.cmd) + "|" + ctx.pos + "|" + ctx.prev;
+        const sourced = spec.source ? cache[key] : undefined;
         let list = (spec.values || []).map(v => ({ label: v[0], description: v[1] || "", insert: v[0] + " " }));
-        if (spec.source) list = list.concat(cache[root.canonical(ctx.cmd) + "|" + ctx.pos + "|" + ctx.prev] || []);
-        return root.rank(list, ctx.cur);
+        if (sourced) list = list.concat(sourced);
+        return root.rank("arg|" + key + "|" + (sourced !== undefined), list, ctx.cur);
     }
 
     function apply(index) {
@@ -324,7 +364,18 @@ Popup {
         } else {
             root.selected = ((root.selected + delta) % n + n) % n;
         }
+        root.reveal_selected();
         root.apply(root.selected);
+    }
+
+    function reveal_selected() {
+        if (root.selected < 0) return;
+        if (root.selected < root.menu_top) root.menu_top = root.selected;
+        else if (root.selected >= root.menu_top + root.menu_slots) root.menu_top = root.selected - root.menu_slots + 1;
+    }
+
+    function scroll_menu(delta) {
+        root.menu_top = Math.max(0, Math.min(root.items.length - root.menu_slots, root.menu_top + delta));
     }
 
     function recall(delta) {
@@ -408,63 +459,74 @@ Popup {
             visible: !root.is_output
             focus: !root.is_output
 
-            ListView {
+            // Fixed slots over a window of items: typing rebinds rows instead of recreating them.
+            Column {
                 id: menu
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.bottom: hint_text.visible ? hint_text.top : input_bar.top
-                anchors.bottomMargin: 6
-                height: root.menu_rows * root.row_height
+                anchors.bottom: input_bar.top
+                anchors.bottomMargin: 6 + (root.hint_reserved ? hint_text.height + 6 : 0)
                 visible: root.menu_shown
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                model: root.menu_shown ? root.items.length : 0
-                currentIndex: root.selected
-                highlightFollowsCurrentItem: false
-                onCurrentIndexChanged: if (currentIndex >= 0) positionViewAtIndex(currentIndex, ListView.Contain)
 
-                delegate: MenuRow {
-                    id: row
-                    required property int index
-                    readonly property var entry: root.items[row.index] || ({ item: { label: "", description: "" }, positions: [] })
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: event => root.scroll_menu(event.angleDelta.y < 0 ? 1 : -1)
+                }
 
-                    width: menu.width
-                    height: root.row_height - 2
-                    selected: row.index === root.selected
+                Repeater {
+                    model: root.menu_reserved ? root.menu_slots : 0
 
-                    Text {
-                        id: row_label
-                        x: 8 + row.inset
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: Math.min(implicitWidth, Math.max(Style.px(160), menu.width * 0.3))
-                        elide: Text.ElideRight
-                        textFormat: Text.StyledText
-                        text: Fuzzy.highlight(row.entry.item.label, row.entry.positions, String(row.fg(root.st.text_accent)))
-                        color: row.fg(root.st.text_fg)
-                        font.family: root.st.mono_font
-                        font.pixelSize: root.st.font_size - 1
-                    }
+                    delegate: Item {
+                        id: menu_slot
+                        required property int index
+                        width: menu.width
+                        height: root.row_height
+                        visible: menu_slot.index < root.menu_rows
 
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: 8 + row.inset + Math.max(Style.px(160), menu.width * 0.3) + 16
-                        anchors.right: parent.right
-                        anchors.rightMargin: 8
-                        anchors.verticalCenter: parent.verticalCenter
-                        elide: Text.ElideRight
-                        text: row.entry.item.description
-                        color: row.fg(root.st.text_muted)
-                        font.family: root.st.font_family
-                        font.pixelSize: root.st.font_size - 3
-                    }
+                        MenuRow {
+                            id: row
+                            readonly property int item_index: root.menu_top + menu_slot.index
+                            readonly property var entry: root.items[row.item_index] || ({ item: { label: "", description: "" }, positions: [] })
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            root.apply(row.index);
-                            root.cycle_base = null;
-                            root.selected = -1;
-                            input.forceActiveFocus();
+                            width: menu.width
+                            height: root.row_height - 2
+                            selected: row.item_index === root.selected
+
+                            Text {
+                                id: row_label
+                                x: 8 + row.inset
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Math.min(implicitWidth, Math.max(Style.px(160), menu.width * 0.3))
+                                elide: Text.ElideRight
+                                textFormat: Text.StyledText
+                                text: Fuzzy.highlight(row.entry.item.label, row.entry.positions, String(row.fg(root.st.text_accent)))
+                                color: row.fg(root.st.text_fg)
+                                font.family: root.st.mono_font
+                                font.pixelSize: root.st.font_size - 1
+                            }
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: 8 + row.inset + Math.max(Style.px(160), menu.width * 0.3) + 16
+                                anchors.right: parent.right
+                                anchors.rightMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                elide: Text.ElideRight
+                                text: row.entry.item.description
+                                color: row.fg(root.st.text_muted)
+                                font.family: root.st.font_family
+                                font.pixelSize: root.st.font_size - 3
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    root.apply(row.item_index);
+                                    root.cycle_base = null;
+                                    root.selected = -1;
+                                    input.forceActiveFocus();
+                                }
+                            }
                         }
                     }
                 }
