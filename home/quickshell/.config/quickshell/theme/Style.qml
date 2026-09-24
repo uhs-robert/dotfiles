@@ -69,6 +69,7 @@ Singleton {
             selection_bar: false,
             title_prefix: "",
             title_suffix: "",
+            title_codec: false,
             frame_glow: "transparent",
             scanlines: false,
             scanline_color: "transparent",
@@ -82,6 +83,8 @@ Singleton {
             selection_border: "transparent",
             selection_glow: "transparent",
             meter_shade: "transparent",
+            meter_climb: false,
+            meter_glow: "transparent",
             corner_scale: 1,
             bar_font_family: "JetBrainsMono Nerd Font",
             bar_font_size: Theme.font_size,
@@ -160,6 +163,7 @@ Singleton {
                 selection_bar: false,
                 title_prefix: "",
                 title_suffix: "",
+                title_codec: false,
                 frame_glow: "transparent",
                 scanlines: false,
                 scanline_color: "transparent",
@@ -173,6 +177,8 @@ Singleton {
                 selection_border: "transparent",
                 selection_glow: "transparent",
                 meter_shade: "transparent",
+                meter_climb: false,
+                meter_glow: "transparent",
                 corner_scale: 1,
                 bar_font_family: Theme.font_family,
                 bar_font_size: Theme.font_size,
@@ -332,6 +338,51 @@ Singleton {
                 bar_tip_bg: Theme.bg_mantle,
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.4)
+            }),
+            "mgs": Object.assign({}, terminal, {
+                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary, 0.45)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.6)),
+                font_family: "ProFontWindows Nerd Font",
+                font_size: Theme.popup_font_size + 3,
+                frame_border_color: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.45)),
+                accent_color: Theme.theme_primary,
+                selection_bg: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.25)),
+                selection_outline: "transparent",
+                selection_border: Theme.theme_primary,
+                caret_color: Theme.theme_primary,
+                caret_blink: false,
+                row_cursor: "▸",
+                tab_active_bg: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.25)),
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Theme.theme_primary,
+                key_fg: Theme.theme_primary,
+                key_border: Qt.alpha(Theme.theme_primary, 0.35),
+                section_fg: Theme.theme_primary,
+                section_rule: false,
+                footer_fg: Theme.theme_primary_light,
+                footer_rule: false,
+                meter_off: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.2)),
+                meter_climb: true,
+                meter_glow: Qt.alpha(Theme.theme_primary, 0.3),
+                title_bg: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.25)),
+                title_fg: Theme.fg_strong,
+                title_codec: true,
+                chip_brackets: false,
+                chip_active_bg: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.25)),
+                chip_active_fg: Theme.fg_strong,
+                toggle_on: Theme.theme_primary_light,
+                toggle_off: Theme.fg_dim,
+                scanlines: true,
+                scanline_color: Qt.alpha(Theme.theme_primary, 0.07),
+                bar_font_family: "ProFontWindows Nerd Font",
+                bar_font_size: Theme.font_size + 3,
+                bar_fg: Theme.theme_primary_light,
+                bar_border_color: Theme.theme_primary,
+                bar_workspace_idle: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.3)),
+                bar_hover_bg: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.25)),
+                bar_scanline_color: Qt.alpha(Theme.theme_primary, 0.07),
+                bar_tip_fg: Theme.theme_primary_light,
+                bar_tip_border_color: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.45))
             })
         };
     }
@@ -395,6 +446,8 @@ Singleton {
     readonly property bool selection_bar: root.active.selection_bar
     readonly property string title_prefix: root.active.title_prefix
     readonly property string title_suffix: root.active.title_suffix
+    // Draws the title as a codec header: PTT tag, boxed frequency, title.
+    readonly property bool title_codec: root.active.title_codec
     readonly property color frame_glow: root.active.frame_glow
     readonly property bool scanlines: root.active.scanlines
     readonly property color scanline_color: root.active.scanline_color
@@ -410,6 +463,10 @@ Singleton {
     readonly property color selection_border: root.active.selection_border
     readonly property color selection_glow: root.active.selection_glow
     readonly property color meter_shade: root.active.meter_shade
+    // Segments step up in height left to right, like a signal-strength meter.
+    readonly property bool meter_climb: root.active.meter_climb
+    // A halo behind lit segments.
+    readonly property color meter_glow: root.active.meter_glow
     // Multiplies every radius a rounded style draws.
     readonly property real corner_scale: root.active.corner_scale
 

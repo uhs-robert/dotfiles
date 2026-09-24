@@ -208,11 +208,11 @@ PanelWindow {
 
         readonly property int pad_x: Style.px(16)
         readonly property int pad_y: Style.px(10)
-        readonly property real header_height: title_tab.visible ? title_tab.height : 0
+        readonly property real header_height: codec_header.item ? codec_header.item.implicitHeight : title_tab.visible ? title_tab.height : 0
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
-        width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width : 0)
+        width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width : 0, codec_header.item ? codec_header.item.implicitWidth : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded ? height / 2 : Style.frame_radius
         color: Style.frame_follows_island ? Theme.bg_core : Style.frame_color
@@ -255,9 +255,20 @@ PanelWindow {
             layer.enabled: glow_layer.layered
             opacity: glow_layer.layered ? 0 : 1
 
+            // A Loader, so the header's MultiEffect is rebuilt per style.
+            Loader {
+                id: codec_header
+                active: Style.show_title && Style.title_codec
+                width: parent.width
+                sourceComponent: CodecHeader {
+                    title: root.title
+                    seed: root.showing_vox ? "voxtype" : root.kind
+                }
+            }
+
             Rectangle {
                 id: title_tab
-                visible: Style.show_title
+                visible: Style.show_title && !Style.title_codec
                 x: Style.fade_fills || Style.rounded ? frame.radius : 0
                 y: Style.fade_fills ? Style.frame_border_width : 0
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20

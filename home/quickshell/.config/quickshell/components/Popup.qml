@@ -82,7 +82,7 @@ PanelWindow {
     }
 
     // Never narrower than the island's bottom edge (its body, between the slants).
-    implicitWidth: Math.max(Style.px(preferred_width), island_width)
+    implicitWidth: Math.max(Style.px(preferred_width), island_width, codec_header.item ? codec_header.item.implicitWidth : 0)
     implicitHeight: body_height + header_height + footer_height
     default property alias content: content_scope.data
 
@@ -116,7 +116,7 @@ PanelWindow {
     readonly property int line_height: Style.accent_height
     readonly property bool has_title: Style.show_title && title !== ""
     readonly property bool has_footer: Style.show_footer && footer_hint !== ""
-    readonly property real header_height: has_title ? title_tab.height : 0
+    readonly property real header_height: !has_title ? 0 : codec_header.item ? codec_header.item.implicitHeight : title_tab.height
     readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 : 0
     property real line_progress: 0
     property real drop_progress: 0
@@ -236,9 +236,20 @@ PanelWindow {
                 layer.enabled: glow_layer.layered
                 opacity: glow_layer.layered ? 0 : 1
 
+                // A Loader, so the header's MultiEffect is rebuilt per style.
+                Loader {
+                    id: codec_header
+                    active: Style.title_codec && root.has_title
+                    width: parent.width
+                    sourceComponent: CodecHeader {
+                        title: root.title
+                        seed: root.popup_name
+                    }
+                }
+
                 Rectangle {
                     id: title_tab
-                    visible: root.has_title
+                    visible: root.has_title && !Style.title_codec
                     x: Style.fade_fills ? Style.frame_border_width : 0
                     y: Style.fade_fills ? Style.frame_border_width : 0
                     width: Style.fade_fills ? parent.width - Style.frame_border_width * 2 : title_text.implicitWidth + 20

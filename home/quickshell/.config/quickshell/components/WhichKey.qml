@@ -110,9 +110,9 @@ PanelWindow {
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
         readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : 0
-        readonly property real header_height: title_tab.height
+        readonly property real header_height: codec_header.item ? codec_header.item.implicitHeight : title_tab.height
 
-        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2)
+        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2, codec_header.item ? codec_header.item.implicitWidth : 0)
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
         color: Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
@@ -162,8 +162,20 @@ PanelWindow {
             layer.enabled: glow_layer.layered
             opacity: glow_layer.layered ? 0 : 1
 
+            // A Loader, so the header's MultiEffect is rebuilt per style.
+            Loader {
+                id: codec_header
+                active: Style.show_title && Style.title_codec
+                y: frame.top_edge
+                width: parent.width
+                sourceComponent: CodecHeader {
+                    title: root.title
+                }
+            }
+
             Rectangle {
                 id: title_tab
+                visible: !codec_header.active
                 x: frame.title_x
                 y: frame.top_edge
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
