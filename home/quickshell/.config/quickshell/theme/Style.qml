@@ -1361,8 +1361,9 @@ Singleton {
             // Final Fantasy VII materia menus: blue diagonal windows in a light rim, orbs for keys and a pointing hand.
             "ff7": (() => {
                 const rim = Qt.tint(Theme.fg_strong, Qt.alpha(Theme.theme_primary_light, 0.55));
-                const win_top = Qt.tint(Theme.ui_visual_bg, Qt.alpha(Theme.theme_primary_strong, 0.62));
-                const win_end = Qt.tint(Theme.bg_core, Qt.alpha(Theme.ui_visual_bg, 0.4));
+                const win_top = Qt.tint(Theme.ui_visual_bg, Qt.alpha(Theme.theme_primary_strong, 0.14));
+                const win_mid = Qt.tint(Theme.bg_crust, Qt.alpha(Theme.ui_visual_bg, 0.55));
+                const win_end = Qt.tint(Theme.bg_crust, Qt.alpha(Theme.ui_visual_bg, 0.14));
                 const label = Qt.tint(Theme.fg_strong, Qt.alpha(Theme.theme_primary_light, 0.15));
                 return Object.assign({}, terminal, {
                     wait_anim: "atb",
@@ -1376,7 +1377,7 @@ Singleton {
                     font_size: Theme.popup_font_size + 1,
                     frame_color: win_end,
                     frame_shade: win_top,
-                    window_gradient: [[0, win_top], [0.4, Theme.ui_visual_bg], [1, win_end]],
+                    window_gradient: [[0, win_top], [0.4, win_mid], [1, win_end]],
                     frame_radius: 6,
                     frame_border_width: 2,
                     frame_border_color: rim,
