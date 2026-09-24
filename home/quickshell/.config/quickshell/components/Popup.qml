@@ -260,7 +260,7 @@ PanelWindow {
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size - 2
                         font.bold: true
-                        font.letterSpacing: 2
+                        font.letterSpacing: Style.title_spacing
                     }
                 }
 
@@ -354,6 +354,15 @@ PanelWindow {
                 anchors.margins: Style.frame_border_width
                 color: Style.dither
                 radius: Style.frame_radius
+            }
+
+            Rectangle {
+                visible: Style.frame_base_line.a > 0
+                x: Style.frame_radius
+                y: parent.height - Style.frame_border_width - 1
+                width: parent.width - Style.frame_radius * 2
+                height: 1
+                color: Style.frame_base_line
             }
         }
     }

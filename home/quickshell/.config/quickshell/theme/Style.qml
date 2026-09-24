@@ -24,9 +24,11 @@ Singleton {
             frame_radius: 0,
             frame_border_width: 1,
             frame_border_color: Theme.fg_muted,
+            frame_base_line: "transparent",
             accent_color: Theme.theme_secondary,
             accent_height: 3,
             accent_full_width: true,
+            frame_top_rule: false,
             selection_bg: "transparent",
             selection_inverse: false,
             selection_fg: Theme.bg_crust,
@@ -41,6 +43,8 @@ Singleton {
             key_border: Theme.bg_surface,
             section_fg: Theme.fg_muted,
             section_rule: true,
+            label_caps: false,
+            label_spacing: 0,
             footer_fg: Theme.fg_muted,
             footer_rule: true,
             footer_rule_color: Theme.bg_surface,
@@ -48,6 +52,7 @@ Singleton {
             meter_off: Theme.bg_surface,
             meter_hot: Theme.theme_label,
             meter_radius: 0,
+            meter_skew: 0,
             scale: 1.15,
             show_title: true,
             title_bg: Theme.theme_secondary,
@@ -55,6 +60,7 @@ Singleton {
             show_footer: true,
             footer_wrap: true,
             row_cursor: ">",
+            row_cursor_end: "",
             segmented_levels: true,
             tab_keys: true,
             row_keys: true,
@@ -69,6 +75,7 @@ Singleton {
             selection_bar: false,
             title_prefix: "",
             title_suffix: "",
+            title_spacing: 2,
             frame_glow: "transparent",
             scanlines: false,
             scanline_color: "transparent",
@@ -85,6 +92,8 @@ Singleton {
             corner_scale: 1,
             bar_font_family: "JetBrainsMono Nerd Font",
             bar_font_size: Theme.font_size,
+            bar_caps: false,
+            bar_letter_spacing: 0,
             bar_side_bg: Theme.bg_crust,
             bar_center_bg: Theme.bg_crust,
             bar_fg: Theme.fg_core,
@@ -115,9 +124,11 @@ Singleton {
                 frame_radius: 10,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
+                frame_base_line: "transparent",
                 accent_color: Theme.theme_primary,
                 accent_height: 3,
                 accent_full_width: false,
+                frame_top_rule: false,
                 selection_bg: Theme.bg_surface,
                 selection_inverse: false,
                 selection_fg: Theme.bg_crust,
@@ -132,6 +143,8 @@ Singleton {
                 key_border: Theme.ui_border,
                 section_fg: Theme.fg_muted,
                 section_rule: false,
+                label_caps: false,
+                label_spacing: 0,
                 footer_fg: Theme.fg_dim,
                 footer_rule: false,
                 footer_rule_color: Theme.bg_surface,
@@ -139,6 +152,7 @@ Singleton {
                 meter_off: Theme.bg_surface,
                 meter_hot: Theme.theme_label,
                 meter_radius: 1,
+                meter_skew: 0,
                 scale: 1,
                 show_title: false,
                 title_bg: Theme.theme_secondary,
@@ -146,6 +160,7 @@ Singleton {
                 show_footer: false,
                 footer_wrap: false,
                 row_cursor: "",
+                row_cursor_end: "",
                 segmented_levels: false,
                 tab_keys: false,
                 row_keys: false,
@@ -160,6 +175,7 @@ Singleton {
                 selection_bar: false,
                 title_prefix: "",
                 title_suffix: "",
+                title_spacing: 2,
                 frame_glow: "transparent",
                 scanlines: false,
                 scanline_color: "transparent",
@@ -176,6 +192,8 @@ Singleton {
                 corner_scale: 1,
                 bar_font_family: Theme.font_family,
                 bar_font_size: Theme.font_size,
+                bar_caps: false,
+                bar_letter_spacing: 0,
                 bar_side_bg: Theme.bg_core,
                 bar_center_bg: Theme.bg_mantle,
                 bar_fg: Theme.fg_core,
@@ -280,6 +298,54 @@ Singleton {
                 bar_tip_border_width: 2,
                 bar_tip_border_color: Theme.fg_dim
             }),
+            "bond": Object.assign({}, terminal, {
+                // Muted text lifted toward the foreground so it holds up on the near-black glass.
+                text_muted: Qt.tint(Theme.fg_muted, Qt.alpha(Theme.fg_core, 0.3)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                frame_color: Theme.bg_crust,
+                frame_border_width: 0,
+                frame_border_color: "transparent",
+                frame_base_line: Qt.alpha(Theme.theme_label, 0.35),
+                accent_color: Theme.theme_primary,
+                accent_height: 2,
+                frame_top_rule: true,
+                selection_bg: Qt.alpha(Theme.theme_primary, 0.25),
+                selection_outline: "transparent",
+                fade_fills: true,
+                caret_color: Theme.theme_primary,
+                caret_blink: false,
+                row_cursor: "[",
+                row_cursor_end: "]",
+                tab_active_bg: Qt.alpha(Theme.theme_primary, 0.25),
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                key_bg: Theme.fg_core,
+                key_fg: Theme.bg_core,
+                key_border: Theme.fg_core,
+                section_fg: Theme.theme_primary,
+                section_rule: false,
+                label_caps: true,
+                label_spacing: 3,
+                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                footer_rule: false,
+                meter_off: Theme.bg_surface,
+                meter_skew: -0.32,
+                title_bg: "transparent",
+                title_fg: Theme.fg_strong,
+                title_spacing: 5,
+                chip_active_fg: Theme.theme_primary,
+                marker_fill: false,
+                toggle_on: Theme.theme_primary,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                bar_font_size: Theme.font_size - 1,
+                bar_caps: true,
+                bar_letter_spacing: 1.5,
+                bar_side_bg: Theme.bg_crust,
+                bar_center_bg: Theme.bg_crust,
+                bar_border_color: Theme.theme_primary,
+                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.25),
+                bar_tip_border_color: Theme.theme_primary
+            }),
             "ps2": Object.assign({}, terminal, {
                 font_family: "Montserrat",
                 font_size: Theme.popup_font_size + 1,
@@ -348,9 +414,13 @@ Singleton {
     readonly property real frame_radius: root.active.frame_radius
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
+    // A 1px rule along the bottom edge of every frame.
+    readonly property color frame_base_line: root.active.frame_base_line
     readonly property color accent_color: root.active.accent_color
     readonly property int accent_height: root.active.accent_height
     readonly property bool accent_full_width: root.active.accent_full_width
+    // Frames without a popup accent line (OSD, toasts) draw one along their top edge.
+    readonly property bool frame_top_rule: root.active.frame_top_rule
     readonly property color selection_bg: root.active.selection_bg
     readonly property bool selection_inverse: root.active.selection_inverse
     readonly property color selection_fg: root.active.selection_fg
@@ -367,6 +437,9 @@ Singleton {
     readonly property color key_border: root.active.key_border
     readonly property color section_fg: root.active.section_fg
     readonly property bool section_rule: root.active.section_rule
+    // Section headers and footer descriptions in tracked caps.
+    readonly property bool label_caps: root.active.label_caps
+    readonly property real label_spacing: root.active.label_spacing
     readonly property color footer_fg: root.active.footer_fg
     readonly property bool footer_rule: root.active.footer_rule
     readonly property color footer_rule_color: root.active.footer_rule_color
@@ -374,6 +447,8 @@ Singleton {
     readonly property color meter_off: root.active.meter_off
     readonly property color meter_hot: root.active.meter_hot
     readonly property real meter_radius: root.active.meter_radius
+    // Horizontal shear of each meter segment; negative leans the tops right.
+    readonly property real meter_skew: root.active.meter_skew
     readonly property real scale: root.active.scale
     readonly property bool show_title: root.active.show_title
     readonly property color title_bg: root.active.title_bg
@@ -381,6 +456,8 @@ Singleton {
     readonly property bool show_footer: root.active.show_footer
     readonly property bool footer_wrap: root.active.footer_wrap
     readonly property string row_cursor: root.active.row_cursor
+    // Closes the cursor at the selected row's right end, before its key badge.
+    readonly property string row_cursor_end: root.active.row_cursor_end
     readonly property bool segmented_levels: root.active.segmented_levels
     readonly property bool tab_keys: root.active.tab_keys
     readonly property bool row_keys: root.active.row_keys
@@ -395,6 +472,7 @@ Singleton {
     readonly property bool selection_bar: root.active.selection_bar
     readonly property string title_prefix: root.active.title_prefix
     readonly property string title_suffix: root.active.title_suffix
+    readonly property real title_spacing: root.active.title_spacing
     readonly property color frame_glow: root.active.frame_glow
     readonly property bool scanlines: root.active.scanlines
     readonly property color scanline_color: root.active.scanline_color
@@ -423,6 +501,9 @@ Singleton {
     readonly property var bar: root.style_bar ? root.active : root.plain_bar
     readonly property string bar_font_family: root.bar.bar_font_family
     readonly property int bar_font_size: root.bar.bar_font_size
+    // Text labels only; glyphs are unaffected.
+    readonly property int bar_capitalization: root.bar.bar_caps ? Font.AllUppercase : Font.MixedCase
+    readonly property real bar_letter_spacing: root.bar.bar_letter_spacing
     readonly property color bar_side_bg: root.bar.bar_side_bg
     readonly property color bar_center_bg: root.bar.bar_center_bg
     readonly property color bar_fg: root.bar.bar_fg

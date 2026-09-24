@@ -173,7 +173,7 @@ Popup {
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 6 + brightness_row.inset
-                    anchors.rightMargin: 6
+                    anchors.rightMargin: 6 + brightness_row.key_space
                     spacing: 8
 
                     Text {
@@ -210,7 +210,7 @@ Popup {
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 6 + kbd_row.inset
-                    anchors.rightMargin: 6
+                    anchors.rightMargin: 6 + kbd_row.key_space
                     spacing: 8
 
                     Text {

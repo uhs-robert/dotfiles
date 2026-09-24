@@ -142,7 +142,7 @@ Popup {
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 8 + update_row.inset
-                            anchors.rightMargin: 8
+                            anchors.rightMargin: 8 + update_row.key_space
                             spacing: 8
 
                             Text {

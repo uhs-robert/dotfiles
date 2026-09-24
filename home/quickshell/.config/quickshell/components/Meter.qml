@@ -49,6 +49,9 @@ Item {
                 width: root.segment_width
                 height: root.implicitHeight
                 radius: Style.meter_radius
+                transform: Matrix4x4 {
+                    matrix: Qt.matrix4x4(1, Style.meter_skew, 0, -Style.meter_skew * segment.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                }
                 color: segment.lit
                     ? (segment.is_hot ? Style.meter_hot : root.on_selection && Style.selection_inverse ? Style.selection_fg : root.on_color)
                     : root.on_selection && Style.selection_inverse ? Qt.alpha(Style.selection_fg, 0.25) : Style.meter_off

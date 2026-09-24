@@ -46,6 +46,8 @@ Row {
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color
         font.pixelSize: Style.bar_font_size
+        font.capitalization: Style.bar_capitalization
+        font.letterSpacing: Style.bar_letter_spacing
     }
 
     Text {
@@ -56,6 +58,8 @@ Row {
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color
         font.pixelSize: Style.bar_font_size
+        font.capitalization: Style.bar_capitalization
+        font.letterSpacing: Style.bar_letter_spacing
     }
 
     Text {
@@ -66,5 +70,7 @@ Row {
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color
         font.pixelSize: Style.bar_font_size
+        font.capitalization: Style.bar_capitalization
+        font.letterSpacing: Style.bar_letter_spacing
     }
 }

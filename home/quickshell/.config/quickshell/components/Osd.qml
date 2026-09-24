@@ -208,7 +208,8 @@ PanelWindow {
 
         readonly property int pad_x: Style.px(16)
         readonly property int pad_y: Style.px(10)
-        readonly property real header_height: title_tab.visible ? title_tab.height : 0
+        readonly property real top_rule: Style.frame_top_rule ? Style.accent_height : 0
+        readonly property real header_height: title_tab.visible ? title_tab.height + frame.top_rule : 0
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
@@ -259,7 +260,7 @@ PanelWindow {
                 id: title_tab
                 visible: Style.show_title
                 x: Style.fade_fills || Style.rounded ? frame.radius : 0
-                y: Style.fade_fills ? Style.frame_border_width : 0
+                y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.fade_fills ? "transparent" : Style.title_bg
@@ -279,7 +280,7 @@ PanelWindow {
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 2
                     font.bold: true
-                    font.letterSpacing: 2
+                    font.letterSpacing: Style.title_spacing
                 }
             }
 
@@ -401,6 +402,23 @@ PanelWindow {
             color: Style.dither
             radius: frame.radius
             top_radius: frame.radius
+        }
+
+        Rectangle {
+            visible: Style.frame_top_rule
+            x: frame.radius
+            width: frame.width - frame.radius * 2
+            height: frame.top_rule
+            color: Style.accent_color
+        }
+
+        Rectangle {
+            visible: Style.frame_base_line.a > 0
+            x: frame.radius
+            y: frame.height - Style.frame_border_width - 1
+            width: frame.width - frame.radius * 2
+            height: 1
+            color: Style.frame_base_line
         }
     }
 }
