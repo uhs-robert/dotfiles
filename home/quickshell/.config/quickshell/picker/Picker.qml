@@ -14,6 +14,8 @@ Popup {
     popup_name: "picker"
     size_class: "large"
     dock_bottom: root.held_anchor === null
+    fit_island: !root.dock_bottom
+    anim_scale: 0.3
     preferred_width: 320
     title: root.provider ? root.provider.title.toUpperCase() : "PICKER"
     footer_hint: "Enter open · Esc normal · q close"
@@ -36,16 +38,39 @@ Popup {
     readonly property var results: root.rank(root.provider ? root.provider.items : [], root.query)
     readonly property var selected_item: root.results.length > 0 ? root.results[Math.min(root.selected, root.results.length - 1)].item : null
 
-    onResultsChanged: root.selected = 0
+    onResultsChanged: {
+        root.sync_slots();
+        root.selected = 0;
+        grid.positionViewAtBeginning();
+    }
     onSelectedChanged: grid.positionViewAtIndex(root.selected, GridView.Contain)
     onJump_first: root.selected = 0
     onJump_last: root.selected = Math.max(0, root.results.length - 1)
 
+    // Reset once hidden so an open finds the empty-query results already laid out.
+    onVisibleChanged: if (!visible) root.reset()
     onIs_openChanged: if (is_open) {
+        root.reset();
+        root.set_insert(true);
+    }
+    Component.onCompleted: root.sync_slots()
+
+    function reset() {
         query_input.text = "";
         root.selected = 0;
         grid.positionViewAtBeginning();
-        root.set_insert(true);
+    }
+
+    // One row per result, grown or shrunk at the tail, so delegates outlive a new ranking and just rebind.
+    function sync_slots() {
+        const n = root.results.length;
+        if (slots.count > n) {
+            slots.remove(n, slots.count - n);
+        } else if (slots.count < n) {
+            const add = [];
+            for (let i = slots.count; i < n; i++) add.push({ slot: i });
+            slots.append(add);
+        }
     }
 
     function rank(items, query) {
@@ -105,7 +130,9 @@ Popup {
         if (root.results.length > 0) root.selected = root.wrap_index(root.selected, delta, 0, root.results.length);
     }
 
-    function icon_source(icon) {
+    function icon_source(item) {
+        if (item.icon_path !== undefined) return item.icon_path;
+        const icon = item.icon;
         if (!icon) return Quickshell.iconPath("application-x-executable", true);
         if (icon.startsWith("/")) return "file://" + icon;
         return Quickshell.iconPath(icon, "application-x-executable");
@@ -147,6 +174,10 @@ Popup {
             return;
         }
         event.accepted = true;
+    }
+
+    ListModel {
+        id: slots
     }
 
     FocusScope {
@@ -203,6 +234,8 @@ Popup {
                 Text {
                     visible: query_input.text === ""
                     anchors.verticalCenter: parent.verticalCenter
+                    width: query_input.width
+                    elide: Text.ElideRight
                     text: root.provider ? root.provider.placeholder : ""
                     color: root.st.text_muted
                     font: query_input.font
@@ -214,7 +247,7 @@ Popup {
                 anchors.right: parent.right
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                text: (root.insert ? "INSERT" : "NORMAL") + "  " + root.results.length + "/" + (root.provider ? root.provider.items.length : 0)
+                text: (root.insert ? "INSERT" : "NORMAL") + (query_bar.width < Style.px(260) ? "" : "  " + root.results.length + "/" + (root.provider ? root.provider.items.length : 0))
                 color: root.insert ? root.st.text_accent : root.st.text_primary
                 font.family: root.st.font_family
                 font.pixelSize: root.st.font_size - 4
@@ -243,12 +276,13 @@ Popup {
                 boundsBehavior: Flickable.StopAtBounds
                 cellWidth: Math.floor(width / root.columns)
                 cellHeight: root.cell_height
-                model: root.results
+                model: slots
+                reuseItems: true
 
                 delegate: MenuRow {
                     id: row
                     required property int index
-                    required property var modelData
+                    readonly property var result: root.results[row.index] || ({ item: {}, positions: [] })
 
                     width: grid.cellWidth - 4
                     height: grid.cellHeight - 2
@@ -260,7 +294,8 @@ Popup {
                         x: 8 + row.inset
                         anchors.verticalCenter: parent.verticalCenter
                         implicitSize: Style.px(20)
-                        source: root.icon_source(row.modelData.item.icon)
+                        asynchronous: true
+                        source: root.icon_source(row.result.item)
                     }
 
                     Text {
@@ -271,7 +306,7 @@ Popup {
                         width: Math.min(implicitWidth, row.width - x - 8 - (row_desc.visible ? Style.px(40) : 0))
                         elide: Text.ElideRight
                         textFormat: Text.StyledText
-                        text: Fuzzy.highlight(row.modelData.item.label, row.modelData.positions, String(row.fg(root.st.text_accent)))
+                        text: Fuzzy.highlight(row.result.item.label || "", row.result.positions, String(row.fg(root.st.text_accent)))
                         color: row.fg(root.st.text_fg)
                         font.family: root.st.font_family
                         font.pixelSize: root.st.font_size - 1
@@ -279,14 +314,14 @@ Popup {
 
                     Text {
                         id: row_desc
-                        visible: root.columns === 1 && text !== ""
+                        visible: root.columns === 1 && text !== "" && row.width - row_label.x - row_label.implicitWidth > Style.px(90)
                         anchors.left: row_label.right
                         anchors.leftMargin: 10
                         anchors.right: parent.right
                         anchors.rightMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
                         elide: Text.ElideRight
-                        text: row.modelData.item.description || ""
+                        text: row.result.item.description || ""
                         color: row.fg(root.st.text_muted)
                         font.family: root.st.font_family
                         font.pixelSize: root.st.font_size - 4

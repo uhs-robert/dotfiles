@@ -19,7 +19,7 @@ Scope {
     // Drawn beside the list with `entry` set to the selected item.
     property Component preview: null
 
-    // Called on every open; rebuild `items` here rather than polling.
+    // Called on every open, so keep it cheap; an item's `icon_path` skips the picker's icon lookup.
     function refresh() {}
 
     function activate(item) {}

@@ -26,7 +26,7 @@ PanelWindow {
     readonly property var st: root.size_class === "small" ? Style.small : Style
     // A hover shelf: follows Tooltip instead of Popups, never takes focus or input, and plays faster.
     property bool passive: false
-    readonly property real anim_scale: root.passive ? 0.6 : 1
+    property real anim_scale: root.passive ? 0.6 : 1
     // Set while a native menu from this popup is open; focus returns to the popup when it closes.
     property bool suspend_grab: false
 
