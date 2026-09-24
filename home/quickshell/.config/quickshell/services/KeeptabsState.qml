@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../theme"
 
 // One keeptabs-waybar stream shared by every bar; it animates and idles on battery by itself.
 Singleton {
@@ -13,17 +14,33 @@ Singleton {
     property string tooltip: ""
     readonly property bool available: runs.length > 0
     readonly property string done_glyph: String.fromCodePoint(0xF1719)
+    readonly property string wait_glyph: String.fromCodePoint(0xF169F)
     property int done_count: 0
     property int running_count: 0
     // False until the first line after (re)start, so a done state already present never celebrates.
     property bool primed: false
     property int last_seq: -1
+    property int waiting_count: 0
+    property int last_wait_seq: -1
 
     // A session went from running to done since the previous line.
     signal finished()
+    // A session started waiting for input since the previous line.
+    signal waiting_started()
 
     function count(state) {
         return root.tooltip.split("\n").filter(l => l.indexOf(state + "\t") === 0).length;
+    }
+
+    // Falls back to the waiting glyph group's badge when the tooltip has no WAITING lines.
+    function waiting_in(runs) {
+        const listed = root.count("WAITING");
+        if (listed > 0) return listed;
+        const i = runs.findIndex(r => r.text.indexOf(root.wait_glyph) !== -1);
+        if (i === -1) return 0;
+        const own = /(\d+)/.exec(runs[i].text.replace(root.wait_glyph, ""));
+        const next = i + 1 < runs.length ? /^\s*(\d+)\s*$/.exec(runs[i + 1].text) : null;
+        return own ? parseInt(own[1]) : next ? parseInt(next[1]) : 1;
     }
 
     // keeptabs' class is a string, or [class, "finished"] for 3s after a finish.
@@ -70,9 +87,23 @@ Singleton {
             onRead: line => {
                 try {
                     const data = JSON.parse(line);
-                    root.runs = root.parse(data.text || "");
+                    const runs = root.parse(data.text || "");
                     root.state_class = root.class_of(data);
                     root.tooltip = root.decode(data.tooltip || "");
+                    let waiting = root.waiting_in(runs);
+                    if (root.debug_wait) {
+                        root.inject_wait(runs);
+                        waiting = Math.max(waiting, 1);
+                    }
+                    root.runs = runs;
+                    let wait_rose;
+                    if (typeof data.waiting_seq === "number") {
+                        wait_rose = root.primed && data.waiting_seq > root.last_wait_seq;
+                        root.last_wait_seq = data.waiting_seq;
+                    } else {
+                        wait_rose = root.primed && waiting > root.waiting_count;
+                    }
+                    root.waiting_count = waiting;
                     const done = root.count("DONE");
                     const was_running = root.running_count;
                     let rose;
@@ -86,6 +117,7 @@ Singleton {
                     root.running_count = root.count("RUNNING");
                     root.primed = true;
                     if (rose) root.finished();
+                    if (wait_rose) root.waiting_started();
                 } catch (e) {
                     console.warn("keeptabs: " + e);
                 }
@@ -94,6 +126,33 @@ Singleton {
         onExited: {
             root.primed = false;
             restart_timer.start();
+        }
+    }
+
+    // TEMP: simulates a session entering or leaving waiting; remove before the PR.
+    property bool debug_wait: false
+
+    function inject_wait(runs) {
+        if (!runs.some(r => r.text.indexOf(root.wait_glyph) !== -1))
+            runs.unshift({ text: root.wait_glyph, color: Theme.error, rise: 0, debug: true });
+    }
+
+    IpcHandler {
+        target: "keeptabs_debug"
+
+        function wait(): void {
+            root.debug_wait = true;
+            const runs = root.runs.slice();
+            root.inject_wait(runs);
+            root.runs = runs;
+            root.waiting_count += 1;
+            root.waiting_started();
+        }
+
+        function unwait(): void {
+            root.debug_wait = false;
+            root.runs = root.runs.filter(r => !r.debug);
+            root.waiting_count = root.waiting_in(root.runs);
         }
     }
 

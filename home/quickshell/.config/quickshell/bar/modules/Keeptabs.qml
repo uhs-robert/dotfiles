@@ -28,6 +28,27 @@ Item {
 
     // The done glyph's centre and colour; delegates are rebuilt on every stream line, so they report it here.
     property var done_anchor: null
+    property var wait_anchor: null
+    readonly property bool wait_hides_glyph: wait_loader.item ? wait_loader.item.hides_glyph : false
+
+    function play_wait(nudge) {
+        if (!root.groups.some(g => g.glyph === KeeptabsState.wait_glyph)) return;
+        wait_loader.nudge = nudge;
+        wait_loader.active = false;
+        wait_loader.active = true;
+    }
+
+    // Nudges replay only on AC; the timer never runs while nothing waits.
+    function sync_nudge() {
+        if (KeeptabsState.waiting_count > 0 && Power.on_ac) {
+            if (!nudge_timer.running) nudge_timer.start();
+        } else {
+            nudge_timer.stop();
+        }
+        if (KeeptabsState.waiting_count === 0) wait_loader.active = false;
+    }
+
+    Component.onCompleted: root.sync_nudge()
 
     Connections {
         target: KeeptabsState
@@ -36,6 +57,27 @@ Item {
             pulse_loader.active = false;
             pulse_loader.active = true;
         }
+        function onWaiting_started() {
+            root.play_wait(false);
+            if (nudge_timer.running) nudge_timer.restart();
+        }
+        function onWaiting_countChanged() {
+            root.sync_nudge();
+        }
+    }
+
+    Connections {
+        target: Power
+        function onOn_acChanged() {
+            root.sync_nudge();
+        }
+    }
+
+    Timer {
+        id: nudge_timer
+        interval: 10000
+        repeat: true
+        onTriggered: if (!wait_loader.active) root.play_wait(true)
     }
 
     Rectangle {
@@ -74,6 +116,7 @@ Item {
                 required property var modelData
 
                 readonly property bool is_done: modelData.glyph === KeeptabsState.done_glyph
+                readonly property bool is_wait: modelData.glyph === KeeptabsState.wait_glyph
                 implicitWidth: glyph_text.implicitWidth + (count_text.visible ? count_text.implicitWidth * 0.6 : 0)
                 implicitHeight: glyph_text.implicitHeight
 
@@ -82,6 +125,14 @@ Item {
                     restoreMode: Binding.RestoreNone
                     target: root
                     property: "done_anchor"
+                    value: ({ x: row.x + group.x + glyph_text.x + glyph_text.width / 2, y: row.y + group.y + glyph_text.y + glyph_text.height / 2, color: glyph_text.color })
+                }
+
+                Binding {
+                    when: group.is_wait
+                    restoreMode: Binding.RestoreNone
+                    target: root
+                    property: "wait_anchor"
                     value: ({ x: row.x + group.x + glyph_text.x + glyph_text.width / 2, y: row.y + group.y + glyph_text.y + glyph_text.height / 2, color: glyph_text.color })
                 }
 
@@ -95,7 +146,7 @@ Item {
                     style: Style.bar_text_style
                     styleColor: Style.bar_glow_color
                     font.pixelSize: Theme.glyph_size
-                    opacity: group.is_done && pulse_loader.active ? 0 : 1
+                    opacity: (group.is_done && pulse_loader.active) || (group.is_wait && root.wait_hides_glyph) ? 0 : 1
                 }
 
                 Text {
@@ -124,6 +175,20 @@ Item {
             glyph: KeeptabsState.done_glyph
             color: root.done_anchor ? root.done_anchor.color : Theme.theme_primary
             onFinished: pulse_loader.active = false
+        }
+    }
+
+    Loader {
+        id: wait_loader
+        property bool nudge: false
+        active: false
+        x: root.wait_anchor ? root.wait_anchor.x : 0
+        y: root.wait_anchor ? root.wait_anchor.y : 0
+        sourceComponent: WaitPulse {
+            glyph: KeeptabsState.wait_glyph
+            color: root.wait_anchor ? root.wait_anchor.color : Theme.theme_primary
+            nudge: wait_loader.nudge
+            onFinished: wait_loader.active = false
         }
     }
 
