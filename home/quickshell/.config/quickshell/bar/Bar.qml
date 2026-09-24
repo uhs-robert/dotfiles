@@ -91,6 +91,7 @@ Item {
         inset_gap: Style.bar_inset_gap
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
+        visor: Style.style_bar && Style.frame_visor
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -126,6 +127,7 @@ Item {
         inset_gap: Style.bar_inset_gap
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
+        visor: Style.style_bar && Style.frame_visor
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -171,6 +173,7 @@ Item {
         inset_gap: Style.bar_inset_gap
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
+        visor: Style.style_bar && Style.frame_visor
         cap_left: true
         visible: root.right_entries.length > 0
 

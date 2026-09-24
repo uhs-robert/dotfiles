@@ -198,8 +198,9 @@ PanelWindow {
 
     TextMetrics {
         id: percent_metrics
-        font.family: Style.font_family
+        font.family: Style.number_font
         font.pixelSize: Style.font_size
+        font.bold: Style.number_font !== Style.font_family
         text: "100%"
     }
 
@@ -227,10 +228,14 @@ PanelWindow {
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
-        radius: Style.rounded ? height / 2 : Style.frame_radius
-        color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
-        border.width: Style.frame_border_width
+        radius: Style.rounded && !Style.frame_visor ? height / 2 : Style.frame_radius
+        color: Style.frame_chamfer > 0 || Style.frame_visor ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
+        border.width: Style.frame_visor ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
+
+        VisorGlass {
+            anchors.fill: parent
+        }
 
         Shape {
             id: frame_glow
@@ -356,8 +361,9 @@ PanelWindow {
                     horizontalAlignment: Text.AlignRight
                     text: root.showing_vox ? root.elapsed : root.percent + "%"
                     color: root.showing_vox && !root.vox_recording ? Theme.warning : !root.showing_vox && root.muted ? Style.text_muted : Theme.fg_core
-                    font.family: Style.font_family
+                    font.family: Style.number_font
                     font.pixelSize: Style.font_size
+                    font.bold: Style.number_font !== Style.font_family
                 }
             }
         }

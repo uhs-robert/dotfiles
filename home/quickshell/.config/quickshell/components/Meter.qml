@@ -72,6 +72,8 @@ Item {
                     width: root.segment_width
                     height: root.implicitHeight
                     radius: Style.meter_radius
+                    border.width: Style.meter_outline.a > 0 ? 1 : 0
+                    border.color: segment.lit && segment.is_hot ? Style.meter_hot : Style.meter_outline
                     antialiasing: Style.meter_slant > 0
                     transform: Matrix4x4 {
                         matrix: Qt.matrix4x4(1, -Style.meter_slant, 0, Style.meter_slant * segment.height, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)

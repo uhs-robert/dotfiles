@@ -18,6 +18,7 @@ Singleton {
             text_dim: Theme.fg_dim,
             font_family: "JetBrainsMono Nerd Font",
             font_size: Theme.popup_font_size + 2,
+            number_font: "",
             rounded: false,
             frame_follows_island: false,
             frame_color: Theme.bg_crust,
@@ -26,10 +27,12 @@ Singleton {
             frame_border_color: Theme.fg_muted,
             frame_base_line: "transparent",
             frame_chamfer: 0,
+            frame_visor: false,
             frame_brackets: "transparent",
             frame_inset_gap: 0,
             frame_inset_width: 0,
             frame_inset_color: "transparent",
+            frame_pad: 0,
             frame_drop: 0,
             accent_color: Theme.theme_secondary,
             accent_height: 3,
@@ -59,6 +62,7 @@ Singleton {
             meter_off: Theme.bg_surface,
             meter_hot: Theme.theme_label,
             meter_radius: 0,
+            meter_outline: "transparent",
             scale: 1.15,
             popup_min_width: 0,
             show_title: true,
@@ -85,6 +89,7 @@ Singleton {
             title_spacing: 2,
             title_glow: "transparent",
             title_readout: "",
+            title_readout_fg: "transparent",
             frame_glow: "transparent",
             scanlines: false,
             scanline_color: "transparent",
@@ -135,6 +140,7 @@ Singleton {
                 text_dim: Theme.fg_dim,
                 font_family: Theme.font_family,
                 font_size: Theme.popup_font_size,
+                number_font: "",
                 rounded: true,
                 frame_follows_island: true,
                 frame_color: Theme.bg_mantle,
@@ -143,10 +149,12 @@ Singleton {
                 frame_border_color: "transparent",
                 frame_base_line: "transparent",
                 frame_chamfer: 0,
+                frame_visor: false,
                 frame_brackets: "transparent",
                 frame_inset_gap: 0,
                 frame_inset_width: 0,
                 frame_inset_color: "transparent",
+                frame_pad: 0,
                 frame_drop: 0,
                 accent_color: Theme.theme_primary,
                 accent_height: 3,
@@ -176,6 +184,7 @@ Singleton {
                 meter_off: Theme.bg_surface,
                 meter_hot: Theme.theme_label,
                 meter_radius: 1,
+                meter_outline: "transparent",
                 scale: 1,
                 popup_min_width: 0,
                 show_title: false,
@@ -202,6 +211,7 @@ Singleton {
                 title_spacing: 2,
                 title_glow: "transparent",
                 title_readout: "",
+                title_readout_fg: "transparent",
                 frame_glow: "transparent",
                 scanlines: false,
                 scanline_color: "transparent",
@@ -553,6 +563,66 @@ Singleton {
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.6)
             }),
+            "metroid": Object.assign({}, terminal, {
+                // Greys lifted toward primary_light so they read on the visor glass.
+                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
+                font_family: "Share Tech Mono",
+                font_size: Theme.popup_font_size + 2,
+                number_font: "Orbitron",
+                rounded: true,
+                frame_visor: true,
+                frame_pad: 6,
+                frame_color: Theme.bg_crust,
+                frame_radius: 14,
+                frame_border_width: 1,
+                frame_border_color: Qt.alpha(Theme.theme_primary, 0.45),
+                accent_color: Theme.theme_primary,
+                accent_height: 0,
+                selection_bg: Qt.alpha(Theme.theme_primary, 0.2),
+                selection_outline: "transparent",
+                selection_bar: true,
+                fade_fills: true,
+                caret_color: Theme.theme_secondary,
+                caret_blink: false,
+                row_cursor: "",
+                tab_active_bg: Qt.alpha(Theme.theme_primary, 0.15),
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
+                key_fg: Theme.theme_secondary,
+                key_border: Qt.alpha(Theme.theme_secondary, 0.45),
+                section_fg: Theme.theme_primary,
+                section_rule: false,
+                section_fade: Qt.alpha(Theme.theme_primary, 0.5),
+                label_caps: true,
+                label_spacing: 2.5,
+                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
+                footer_rule: false,
+                meter_off: Qt.alpha(Theme.theme_primary, 0.06),
+                meter_radius: 1,
+                meter_outline: Qt.alpha(Theme.theme_primary, 0.55),
+                title_bg: "transparent",
+                title_fg: Theme.theme_primary,
+                title_spacing: 3,
+                title_readout: "COMBAT VISOR",
+                title_readout_fg: Theme.theme_primary,
+                chip_brackets: false,
+                chip_active_bg: Theme.theme_secondary,
+                chip_active_fg: Theme.bg_crust,
+                toggle_brackets: false,
+                toggle_on: Theme.theme_primary,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
+                bar_font_family: "Share Tech Mono",
+                bar_font_size: Theme.font_size + 1,
+                bar_side_bg: Qt.alpha(Theme.bg_crust, 0.95),
+                bar_center_bg: Qt.alpha(Theme.bg_crust, 0.95),
+                bar_fg: Theme.theme_primary_light,
+                bar_border_color: Qt.alpha(Theme.theme_primary, 0.5),
+                bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.18),
+                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.18),
+                bar_tip_fg: Theme.theme_primary_light,
+                bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.45)
+            }),
             "ps2": Object.assign({}, terminal, {
                 font_family: "Exo 2",
                 font_size: Theme.popup_font_size + 1,
@@ -613,6 +683,8 @@ Singleton {
 
     readonly property string font_family: root.active.font_family
     readonly property int font_size: root.active.font_size
+    // Big readouts (weather temperature, OSD percentage); empty uses font_family.
+    readonly property string number_font: root.active.number_font !== "" ? root.active.number_font : root.font_family
     readonly property color text_muted: root.active.text_muted
     readonly property color text_dim: root.active.text_dim
     readonly property bool rounded: root.active.rounded
@@ -625,12 +697,14 @@ Singleton {
     readonly property color frame_base_line: root.active.frame_base_line
     // Bottom corners cut at 45 degrees by this many px.
     readonly property real frame_chamfer: root.active.frame_chamfer
+    // Frames drawn as visor glass (VisorGlass) instead of a plain rectangle.
+    readonly property bool frame_visor: root.active.frame_visor
     readonly property color frame_brackets: root.active.frame_brackets
     // An inner ring frame_inset_gap inside the border; content keeps inset_pad clear of the frame edge.
     readonly property int frame_inset_gap: root.active.frame_inset_gap
     readonly property int frame_inset_width: root.active.frame_inset_width
     readonly property color frame_inset_color: root.active.frame_inset_color
-    readonly property int inset_pad: root.frame_inset_width > 0 ? root.frame_border_width + root.frame_inset_gap + root.frame_inset_width : 0
+    readonly property int inset_pad: root.frame_inset_width > 0 ? root.frame_border_width + root.frame_inset_gap + root.frame_inset_width : root.active.frame_pad
     // A hard shadow this many px below floating frames.
     readonly property int frame_drop: root.active.frame_drop
     readonly property color accent_color: root.active.accent_color
@@ -666,6 +740,8 @@ Singleton {
     readonly property color meter_off: root.active.meter_off
     readonly property color meter_hot: root.active.meter_hot
     readonly property real meter_radius: root.active.meter_radius
+    // Outlines every meter segment; lit hot segments take meter_hot instead.
+    readonly property color meter_outline: root.active.meter_outline
     readonly property real scale: root.active.scale
     // Floor for every popup's width, for wide fonts that overrun the small popups.
     readonly property real popup_min_width: root.active.popup_min_width
@@ -695,6 +771,8 @@ Singleton {
     readonly property color title_glow: root.active.title_glow
     // A static system readout drawn at the right end of the title row.
     readonly property string title_readout: root.active.title_readout
+    // Transparent draws the readout in text_muted.
+    readonly property color title_readout_fg: root.active.title_readout_fg
     readonly property color frame_glow: root.active.frame_glow
     readonly property bool scanlines: root.active.scanlines
     readonly property color scanline_color: root.active.scanline_color

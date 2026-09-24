@@ -126,9 +126,13 @@ PanelWindow {
         width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
-        color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
-        border.width: Style.frame_border_width
+        color: Style.frame_chamfer > 0 || Style.frame_visor ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
+        border.width: Style.frame_visor ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
+
+        VisorGlass {
+            anchors.fill: parent
+        }
 
         Shape {
             id: frame_glow
@@ -220,7 +224,7 @@ PanelWindow {
                 anchors.rightMargin: frame.title_x + 10
                 y: title_tab.y + (title_tab.height - height) / 2
                 text: Style.title_readout
-                color: Style.text_muted
+                color: Style.title_readout_fg.a > 0 ? Style.title_readout_fg : Style.text_muted
                 font.family: Style.font_family
                 font.pixelSize: Style.font_size - 5
                 font.letterSpacing: 1
