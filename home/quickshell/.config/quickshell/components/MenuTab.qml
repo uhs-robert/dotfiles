@@ -28,8 +28,9 @@ Rectangle {
     implicitWidth: root.is_chip ? label_text.implicitWidth + 20 : 0
     implicitHeight: Style.px(24)
     radius: root.is_chip && root.st.pill_chips ? height / 2 : Style.radius(root.base_radius)
-    border.width: root.is_chip && root.st.pill_chips ? 1 : 0
-    border.color: root.active ? root.st.chip_active_bg : root.st.chip_border
+    readonly property bool outlined: root.st.tab_outline.a > 0
+    border.width: root.is_chip && (root.st.pill_chips || root.outlined) ? 1 : !root.is_chip && root.outlined ? 1 : 0
+    border.color: root.is_chip ? (root.active ? root.st.chip_active_bg : root.st.chip_border) : root.active && root.st.selection_border.a > 0 ? root.st.selection_border : root.st.tab_outline
     readonly property color fill: !root.active ? (root.is_chip ? root.st.chip_bg : root.st.tab_bg) : root.is_chip ? root.st.chip_active_bg : root.st.tab_active_bg
     readonly property real cut: root.is_chip ? root.st.key_cut : root.st.tab_cut
     color: root.cut > 0 ? "transparent" : root.fill
@@ -67,8 +68,8 @@ Rectangle {
         font.bold: root.active
         font.family: root.st.label_font_family
         font.pixelSize: root.font_size
-        font.capitalization: root.st.tab_caps ? Font.AllUppercase : Font.MixedCase
-        font.letterSpacing: root.st.tab_caps ? root.st.label_spacing : 0
+        font.capitalization: root.st.tab_caps || root.st.caps_tracking > 0 ? Font.AllUppercase : Font.MixedCase
+        font.letterSpacing: root.st.caps_tracking > 0 ? root.st.caps_tracking * (root.is_chip ? 0.3 : 1) : root.st.tab_caps ? root.st.label_spacing : 0
     }
 
     Text {
@@ -104,7 +105,7 @@ Rectangle {
         visible: root.active && !root.is_chip && root.st.tab_underline.a > 0
         anchors.bottom: parent.bottom
         width: parent.width
-        height: root.st.hairline.a > 0 ? 1 : 2
+        height: root.st.hairline.a > 0 && !root.outlined ? 1 : 2
         color: root.st.tab_underline
     }
 

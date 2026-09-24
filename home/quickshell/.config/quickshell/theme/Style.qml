@@ -200,7 +200,10 @@ Singleton {
             title_index: [],
             title_weight: 0,
             title_trail: "transparent",
-            bar_ticks: "transparent"
+            bar_ticks: "transparent",
+            title_strip: "transparent",
+            caps_tracking: 0,
+            tab_outline: "transparent"
         };
         return {
             "default": {
@@ -390,7 +393,10 @@ Singleton {
                 title_index: [],
                 title_weight: 0,
                 title_trail: "transparent",
-                bar_ticks: "transparent"
+                bar_ticks: "transparent",
+                title_strip: "transparent",
+                caps_tracking: 0,
+                tab_outline: "transparent"
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1164,7 +1170,85 @@ Singleton {
                 bar_workspace_ring: Qt.alpha(Theme.theme_primary_light, 0.24),
                 bar_pill_square: true,
                 bar_hover_bg: Qt.alpha(Theme.theme_primary_light, 0.24)
-            })
+            }),
+            // Half-Life's VGUI windows and HEV HUD: translucent panels on a primary hairline, Exo 2 text, Chakra Petch readouts.
+            "halflife": (() => {
+                const hl = Theme.theme_primary;
+                const hl_t = Qt.alpha(hl, 0.72);
+                const hl_l = Qt.alpha(hl, 0.55);
+                const hl_d = Qt.alpha(hl, 0.3);
+                const hl_f = Qt.alpha(hl, 0.13);
+                return Object.assign({}, terminal, {
+                    wait_anim: "hev_alert",
+                    done_anim: "hev_pickup",
+                    weather_header: "hev",
+                    osd_layout: "hud",
+                    text_muted: hl_t,
+                    text_dim: Qt.alpha(hl, 0.85),
+                    text_fg: hl,
+                    text_primary: hl,
+                    font_family: "Exo 2",
+                    font_size: Theme.popup_font_size + 1,
+                    number_font: "Chakra Petch",
+                    mono_font: "Chakra Petch",
+                    frame_color: Qt.alpha(Theme.bg_core, 0.84),
+                    frame_border_color: hl_l,
+                    accent_color: hl,
+                    accent_height: 1,
+                    hairline: hl_l,
+                    hairline_dim: hl_d,
+                    selection_bg: hl_f,
+                    selection_outline: "transparent",
+                    selection_border: hl_l,
+                    caret_color: hl,
+                    caret_blink: false,
+                    row_cursor: "",
+                    tab_active_bg: hl_f,
+                    tab_active_fg: Theme.fg_strong,
+                    tab_fg: hl_t,
+                    tab_underline: hl,
+                    tab_outline: hl_d,
+                    key_fg: Theme.theme_secondary,
+                    key_border: Qt.alpha(Theme.theme_secondary, 0.45),
+                    section_fg: hl,
+                    section_rule: false,
+                    section_fade: hl_d,
+                    label_spacing: 1,
+                    caps_tracking: 3,
+                    footer_fg: hl_t,
+                    footer_rule_solid: true,
+                    footer_rule_color: hl_d,
+                    meter_on: hl,
+                    meter_off: hl_f,
+                    title_bg: "transparent",
+                    title_fg: hl,
+                    title_spacing: 3.8,
+                    title_strip: hl_f,
+                    chip_brackets: false,
+                    chip_active_bg: hl,
+                    chip_active_fg: Theme.bg_crust,
+                    chip_pick: hl,
+                    chip_border: hl_l,
+                    toggle_brackets: false,
+                    toggle_on: hl,
+                    toggle_off: hl_t,
+                    marker_fill: false,
+                    bar_font_family: "Chakra Petch",
+                    bar_font_size: Theme.font_size + 1,
+                    bar_letter_spacing: 0.8,
+                    bar_side_bg: Qt.alpha(Theme.bg_core, 0.82),
+                    bar_center_bg: Qt.alpha(Theme.bg_core, 0.82),
+                    bar_fg: hl,
+                    bar_clock_fg: hl,
+                    bar_border_color: hl_l,
+                    bar_workspace_focused: Theme.theme_secondary,
+                    bar_workspace_active: hl,
+                    bar_workspace_idle: hl_f,
+                    bar_workspace_ring: hl_d,
+                    bar_pill_square: true,
+                    bar_hover_bg: hl_d
+                });
+            })()
         };
     }
 
@@ -1405,14 +1489,20 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers" or "scan", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan" or "hev", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
-    // The keeptabs done celebration: hearts, pixel (stepped) or lcd (stepped, then blinks).
+    // The keeptabs done celebration: hearts, pixel (stepped), lcd (stepped, then blinks) or hev_pickup.
     readonly property string done_anim: root.active.done_anim || "hearts"
-    // The keeptabs waiting cue: bubble, cursor, pressanykey, advance, hand, alert, rumble, transmission, scan, comms, ping or orders.
+    // The keeptabs waiting cue: bubble, cursor, pressanykey, advance, hand, alert, rumble, transmission, scan, comms, ping, orders or hev_alert.
     readonly property string wait_anim: root.active.wait_anim || "bubble"
+    // A full-width title strip in this color with a hairline under it and a close box at the right.
+    readonly property color title_strip: root.active.title_strip
+    // Sections, tabs, chips and header buttons in caps tracked this far; footers keep label_caps.
+    readonly property real caps_tracking: root.active.caps_tracking
+    // A 1px outline around every tab and header button; the active tab takes selection_border.
+    readonly property color tab_outline: root.active.tab_outline
 
     property bool cava_line: true
     readonly property var bar: root.active

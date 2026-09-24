@@ -211,6 +211,23 @@ Rectangle {
         top_radius: root.radius
     }
 
+    // Styles with a title strip head the toast like a window: the app line sits on the strip.
+    Rectangle {
+        visible: Style.title_strip.a > 0
+        x: root.border.width
+        y: root.border.width
+        width: root.width - root.border.width * 2
+        height: layout.y + header_row.height + 4 - y
+        color: Style.title_strip
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: 1
+            color: Style.hairline.a > 0 ? Style.hairline : Style.frame_border_color
+        }
+    }
+
     RowLayout {
         id: layout
         anchors.left: parent.left
@@ -235,8 +252,10 @@ Rectangle {
             spacing: 2
 
             RowLayout {
+                id: header_row
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
+                Layout.bottomMargin: Style.title_strip.a > 0 ? 6 : 0
                 spacing: 6
 
                 Text {
