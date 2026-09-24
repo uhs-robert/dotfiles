@@ -19,8 +19,9 @@ Popup {
     dock_bottom: true
     anim_scale: 0.3
     title: String(root.spec.title || "Prompt").toUpperCase()
-    key_help: ""
-    footer_hint: root.is_output ? "j/k scroll · Ctrl+d/u half page · gg/G top/bottom · Enter/Esc/q close" : "Enter run · Tab/Shift+Tab complete · Up/Down history · Esc " + (root.menu_shown ? "hide menu" : "cancel")
+    footer_hint: root.is_output ? "j/k scroll · Ctrl+d/u half page · gg/G top/bottom · Enter/Esc/q close" : "Enter run · Esc normal · q close"
+    footer_override: !root.is_output && root.insert ? "Enter run · Tab complete · Esc normal" : ""
+    key_help: root.is_output ? "" : ["Enter run", "Tab/Shift+Tab complete", "Up/Down history", "Ctrl+p/n history", "Ctrl+u clear to start", "Ctrl+w delete word", "Esc normal mode", "h/l char", "w/b/e word", "0/^/$ start/first/end", "x/X delete char", "D/C delete/change to end", "dd/cc clear line", "d/c+motion delete/change", "r replace char", "u undo", "i/a insert/append", "I/A insert at start/end", "j/k menu, or history on an empty line", "gg/G first/last completion", "Enter accept completion or run", "q/Esc cancel"].join(" · ")
 
     readonly property int max_output: 100000
     readonly property int max_items: 200
@@ -44,6 +45,10 @@ Popup {
     property int history_index: -1
     property string draft: ""
     property string output_text: ""
+    property bool insert: true
+    // A typed operator or prefix waiting for its second key: d, c, r or g.
+    property string pending_key: ""
+    property var undo_stack: []
     // First visible menu row; the menu is a fixed window of slots over items.
     property int menu_top: 0
     // Latched per prompt once shown, so the layer surface keeps one height while typing.
@@ -169,6 +174,9 @@ Popup {
         root.hint_reserved = false;
         root.memo.key = "";
         root.memo.matched = [];
+        root.insert = true;
+        root.pending_key = "";
+        root.undo_stack = [];
         if (root.is_output) {
             output_file.path = parsed.output_path || "";
             const text = output_file.text() || "";
@@ -176,6 +184,7 @@ Popup {
             output_view.contentY = 0;
         }
         root.set_text(parsed.text || "");
+        root.snapshot();
         const mon = Hyprland.focusedMonitor;
         const screen = (mon && Quickshell.screens.find(s => s.name === mon.name)) || Quickshell.screens[0];
         Popups.open(root.popup_name, null, Theme.bg_mantle, screen ? screen.name : "");
@@ -205,14 +214,138 @@ Popup {
     function focus_body() {
         if (!root.is_open) return;
         if (root.is_output) output_scope.forceActiveFocus();
-        else input.forceActiveFocus();
+        else if (root.insert) input.forceActiveFocus();
+        else input_scope.forceActiveFocus();
     }
 
     function set_text(text) {
         root.applying = true;
         input.text = text;
-        input.cursorPosition = text.length;
+        input.cursorPosition = root.insert ? text.length : root.normal_max();
         root.applying = false;
+    }
+
+    function normal_max() {
+        return Math.max(0, input.text.length - 1);
+    }
+
+    function snapshot() {
+        root.undo_stack = root.undo_stack.slice(-49).concat([{ text: input.text, pos: input.cursorPosition }]);
+    }
+
+    function undo() {
+        const s = root.undo_stack[root.undo_stack.length - 1];
+        if (!s) return;
+        root.undo_stack = root.undo_stack.slice(0, -1);
+        input.text = s.text;
+        input.cursorPosition = Math.min(s.pos, root.normal_max());
+    }
+
+    // An insert session is one undo step, like vim; `record` is false when an edit already snapshotted.
+    function enter_insert(pos, record) {
+        if (record) root.snapshot();
+        root.pending_key = "";
+        root.insert = true;
+        input.cursorPosition = Math.max(0, Math.min(pos, input.text.length));
+        input.forceActiveFocus();
+    }
+
+    function enter_normal() {
+        const top = root.undo_stack[root.undo_stack.length - 1];
+        if (top && top.text === input.text) root.undo_stack = root.undo_stack.slice(0, -1);
+        const pos = input.cursorPosition;
+        root.insert = false;
+        root.pending_key = "";
+        input.focus = false;
+        input_scope.forceActiveFocus();
+        input.cursorPosition = Math.min(Math.max(0, pos - 1), root.normal_max());
+    }
+
+    // Vim word classes: blank, keyword characters, other punctuation.
+    function char_class(c) {
+        return /\s/.test(c) ? 0 : /\w/.test(c) ? 1 : 2;
+    }
+
+    function word_forward(t, p) {
+        const n = t.length;
+        const c = p < n ? root.char_class(t[p]) : 0;
+        if (c !== 0) while (p < n && root.char_class(t[p]) === c) p++;
+        while (p < n && root.char_class(t[p]) === 0) p++;
+        return p;
+    }
+
+    function word_end(t, p) {
+        const n = t.length;
+        p++;
+        while (p < n && root.char_class(t[p]) === 0) p++;
+        if (p >= n) return Math.max(0, n - 1);
+        const c = root.char_class(t[p]);
+        while (p + 1 < n && root.char_class(t[p + 1]) === c) p++;
+        return p;
+    }
+
+    function word_back(t, p) {
+        if (p <= 0) return 0;
+        p--;
+        while (p > 0 && root.char_class(t[p]) === 0) p--;
+        const c = root.char_class(t[p]);
+        while (p > 0 && root.char_class(t[p - 1]) === c) p--;
+        return p;
+    }
+
+    // Where a motion lands from p, and whether an operator over it includes the landing character.
+    function motion(ch, t, p) {
+        const n = t.length;
+        if (ch === "h") return { to: Math.max(0, p - 1), incl: false };
+        if (ch === "l") return { to: Math.min(n, p + 1), incl: false };
+        if (ch === "w") return { to: root.word_forward(t, p), incl: false };
+        if (ch === "b") return { to: root.word_back(t, p), incl: false };
+        if (ch === "e") return { to: root.word_end(t, p), incl: true };
+        if (ch === "0") return { to: 0, incl: false };
+        if (ch === "^") return { to: Math.max(0, t.search(/\S/)), incl: false };
+        if (ch === "$") return { to: Math.max(0, n - 1), incl: true };
+        return null;
+    }
+
+    function remove(from, to) {
+        const t = input.text;
+        if (from >= to || from >= t.length) return;
+        root.snapshot();
+        input.text = t.slice(0, from) + t.slice(to);
+        input.cursorPosition = from;
+    }
+
+    function operate(op, ch) {
+        const t = input.text;
+        const p = input.cursorPosition;
+        let from = p;
+        let to = t.length;
+        if (ch !== op) {
+            // cw on a word changes to its end, as in vim.
+            const m = op === "c" && ch === "w" && p < t.length && root.char_class(t[p]) !== 0 ? { to: root.word_end(t, p), incl: true } : root.motion(ch, t, p);
+            if (!m) return;
+            from = Math.min(p, m.to);
+            to = Math.min(t.length, Math.max(p, m.to) + (m.incl ? 1 : 0));
+        } else {
+            from = 0;
+        }
+        if (op === "c") {
+            root.snapshot();
+            input.text = t.slice(0, from) + t.slice(to);
+            root.enter_insert(from, false);
+        } else {
+            root.remove(from, to);
+            input.cursorPosition = Math.min(from, root.normal_max());
+        }
+    }
+
+    function replace_char(ch) {
+        const t = input.text;
+        const p = input.cursorPosition;
+        if (p >= t.length) return;
+        root.snapshot();
+        input.text = t.slice(0, p) + ch + t.slice(p + 1);
+        input.cursorPosition = p;
     }
 
     // What the cursor is completing: a command name, a command's Nth argument, or a shell command after `!`.
@@ -368,6 +501,22 @@ Popup {
         root.apply(root.selected);
     }
 
+    function select_item(i) {
+        const n = root.items.length;
+        if (n === 0) return;
+        if (root.cycle_base === null) root.cycle_base = input.text;
+        root.menu_hidden = false;
+        root.selected = Math.max(0, Math.min(n - 1, i));
+        root.reveal_selected();
+        root.apply(root.selected);
+    }
+
+    // j/k walk history on an empty line and keep walking while the line came from history; otherwise the menu.
+    function walk(delta) {
+        if (input.text === "" || root.history_index !== -1) root.recall(delta);
+        else root.cycle(delta);
+    }
+
     function reveal_selected() {
         if (root.selected < 0) return;
         if (root.selected < root.menu_top) root.menu_top = root.selected;
@@ -413,13 +562,7 @@ Popup {
         if (k === Qt.Key_Return || k === Qt.Key_Enter) {
             root.finish(input.text);
         } else if (k === Qt.Key_Escape) {
-            if (root.menu_shown) {
-                root.menu_hidden = true;
-                root.cycle_base = null;
-                root.selected = -1;
-            } else {
-                root.finish(null);
-            }
+            root.enter_normal();
         } else if (k === Qt.Key_Tab) {
             root.cycle(1);
         } else if (k === Qt.Key_Backtab) {
@@ -433,6 +576,77 @@ Popup {
             input.cursorPosition = 0;
         } else if (ctrl && k === Qt.Key_W) {
             root.delete_word();
+        } else {
+            return;
+        }
+        event.accepted = true;
+    }
+
+    function handle_normal_key(event) {
+        const ctrl = event.modifiers & Qt.ControlModifier;
+        const k = event.key;
+        const t = event.text;
+        const p = input.cursorPosition;
+        if (k === Qt.Key_Shift || k === Qt.Key_Control || k === Qt.Key_Alt || k === Qt.Key_Meta) return;
+        if (k === Qt.Key_Return || k === Qt.Key_Enter) {
+            if (root.cycle_base !== null && root.selected >= 0) {
+                root.cycle_base = null;
+                root.selected = -1;
+                input.cursorPosition = root.normal_max();
+            } else {
+                root.finish(input.text);
+            }
+        } else if (k === Qt.Key_Escape) {
+            if (root.pending_key !== "") root.pending_key = "";
+            else root.finish(null);
+        } else if (k === Qt.Key_Up || (ctrl && k === Qt.Key_P)) {
+            root.recall(-1);
+        } else if (k === Qt.Key_Down || (ctrl && k === Qt.Key_N)) {
+            root.recall(1);
+        } else if (k === Qt.Key_Tab) {
+            root.cycle(1);
+        } else if (k === Qt.Key_Backtab) {
+            root.cycle(-1);
+        } else if (ctrl || (event.modifiers & Qt.AltModifier)) {
+            return;
+        } else if (root.pending_key !== "") {
+            const op = root.pending_key;
+            root.pending_key = "";
+            if (op === "r" && t.length === 1 && t >= " ") root.replace_char(t);
+            else if (op === "g" && t === "g") root.select_item(0);
+            else if (op === "d" || op === "c") root.operate(op, t);
+        } else if (k === Qt.Key_Left || k === Qt.Key_Right || "hlwbe0^$".indexOf(t) >= 0 && t !== "") {
+            const m = root.motion(k === Qt.Key_Left ? "h" : k === Qt.Key_Right ? "l" : t, input.text, p);
+            input.cursorPosition = Math.min(m.to, root.normal_max());
+        } else if (t === "x") {
+            root.remove(p, p + 1);
+            input.cursorPosition = Math.min(p, root.normal_max());
+        } else if (t === "X") {
+            if (p > 0) root.remove(p - 1, p);
+        } else if (t === "D") {
+            root.operate("d", "$");
+        } else if (t === "C") {
+            root.operate("c", "$");
+        } else if (t === "d" || t === "c" || t === "r" || t === "g") {
+            root.pending_key = t;
+        } else if (t === "G") {
+            root.select_item(root.items.length - 1);
+        } else if (t === "i") {
+            root.enter_insert(p, true);
+        } else if (t === "a") {
+            root.enter_insert(p + 1, true);
+        } else if (t === "I") {
+            root.enter_insert(Math.max(0, input.text.search(/\S/)), true);
+        } else if (t === "A") {
+            root.enter_insert(input.text.length, true);
+        } else if (t === "j") {
+            root.walk(1);
+        } else if (t === "k") {
+            root.walk(-1);
+        } else if (t === "u") {
+            root.undo();
+        } else if (t === "q") {
+            root.finish(null);
         } else {
             return;
         }
@@ -458,6 +672,9 @@ Popup {
             anchors.fill: parent
             visible: !root.is_output
             focus: !root.is_output
+
+            // NORMAL keys; the text input has focus only in INSERT.
+            Keys.onPressed: event => root.handle_normal_key(event)
 
             // Fixed slots over a window of items: typing rebinds rows instead of recreating them.
             Column {
@@ -554,7 +771,7 @@ Popup {
                 height: root.input_height
                 radius: Style.radius(4)
                 color: Theme.bg_surface
-                border.width: 1
+                border.width: root.insert ? 1 : 0
                 border.color: root.st.caret_color
 
                 Text {
@@ -573,7 +790,7 @@ Popup {
                     id: input
                     anchors.left: label_text.right
                     anchors.leftMargin: label_text.text === "" ? 0 : 4
-                    anchors.right: count_text.left
+                    anchors.right: mode_text.left
                     anchors.rightMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
                     focus: true
@@ -590,6 +807,7 @@ Popup {
                         root.menu_hidden = false;
                         root.history_index = -1;
                     }
+                    onActiveFocusChanged: if (activeFocus && !root.insert) root.enter_insert(input.cursorPosition, true)
                     // A static caret: the default one blinks for as long as the bar is open.
                     cursorDelegate: Rectangle {
                         width: 2
@@ -599,15 +817,38 @@ Popup {
 
                     // Runs before TextInput's own handling, so Tab, Ctrl+U and Ctrl+W never reach it.
                     Keys.onPressed: event => root.handle_input_key(event)
+
+                    FontMetrics {
+                        id: cell_metrics
+                        font: input.font
+                    }
+
+                    Rectangle {
+                        id: block_cursor
+                        readonly property string ch: input.text.charAt(input.cursorPosition)
+                        visible: !root.insert && root.is_open
+                        x: input.cursorRectangle.x
+                        y: input.cursorRectangle.y
+                        width: Math.max(2, cell_metrics.advanceWidth(block_cursor.ch || " "))
+                        height: input.cursorRectangle.height
+                        color: root.st.caret_color
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: block_cursor.ch
+                            color: Theme.bg_surface
+                            font: input.font
+                        }
+                    }
                 }
 
                 Text {
-                    id: count_text
+                    id: mode_text
                     anchors.right: parent.right
                     anchors.rightMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    text: root.menu_shown ? (root.selected >= 0 ? root.selected + 1 + "/" : "") + root.items.length : ""
-                    color: root.st.text_primary
+                    text: (root.insert ? "INSERT" : "NORMAL") + (root.menu_shown ? "  " + (root.selected >= 0 ? root.selected + 1 + "/" : "") + root.items.length : "")
+                    color: root.insert ? root.st.text_accent : root.st.text_primary
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 4
                     font.bold: true
@@ -615,8 +856,9 @@ Popup {
 
                 MouseArea {
                     anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
+                    acceptedButtons: root.insert ? Qt.NoButton : Qt.LeftButton
                     cursorShape: Qt.IBeamCursor
+                    onClicked: root.enter_insert(input.cursorPosition, true)
                 }
             }
         }
