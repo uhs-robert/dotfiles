@@ -23,7 +23,6 @@ Item {
     readonly property bool hides_glyph: root.mode === "rumble" || root.mode === "transmission"
     // Drawn beneath the glyph row so the glyph and its count badge stay on top.
     readonly property bool under: ["pressanykey", "rumble", "transmission", "scan", "comms", "ping", "orders"].indexOf(root.mode) !== -1
-    readonly property bool text_entry: !root.nudge && ["pressanykey", "scan", "comms", "orders"].indexOf(root.mode) !== -1
     readonly property real strength: root.nudge ? 0.6 : 1
     readonly property real half: root.glyph_size / 2
     readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600] })
@@ -38,14 +37,8 @@ Item {
     readonly property real glyph_half: root.slot ? root.slot.glyph_half : root.half
     readonly property real room_left: root.slot ? root.slot.left : root.half + 5
     readonly property real room_right: root.slot ? root.slot.right : root.half + 5
-    readonly property real base_right: root.room_right - (root.slot ? root.slot.open : 0)
     readonly property real content_right: root.slot ? root.slot.content_right : root.glyph_half
     readonly property real badge_bottom: root.slot && root.slot.badge ? root.slot.badge_bottom : -root.room_up
-
-    // Text cues ask the module to open room for their label, and give it back before they end.
-    property real label_width: 0
-    readonly property real want_right: root.text_entry && root.elapsed < root.duration - 260 ? root.label_width + 6 : 0
-    readonly property real label_fade: 1 - root.phase(root.duration - 260, 200)
 
     function phase(start, length) {
         return Math.max(0, Math.min(1, (root.elapsed - start) / length));
@@ -77,17 +70,6 @@ Item {
         to: root.duration
         duration: root.duration
         onFinished: root.finished()
-    }
-
-    // The room opened right of the glyph and its badge; children use window-relative y (0 is the top edge).
-    component Side: Item {
-        x: root.content_right + 4
-        y: -root.room_up
-        width: Math.max(0, root.room_right - root.content_right - 5)
-        height: root.room_up + root.room_down
-        clip: true
-        visible: !root.nudge
-        opacity: root.label_fade
     }
 
     Loader {
@@ -169,13 +151,7 @@ Item {
             readonly property int frame: root.step(50)
             readonly property bool lit: frame >= 8 || [1, 0, 1, 1, 0, 1, 0, 1][frame] === 1
             readonly property real x0: -Math.min(root.room_left - 1, root.glyph_half + 2)
-            readonly property real x1: Math.min(root.room_right - 1, root.nudge ? root.glyph_half + 2 : root.content_right + 6 + label.width)
-
-            Binding {
-                target: root
-                property: "label_width"
-                value: label.implicitWidth
-            }
+            readonly property real x1: Math.min(root.room_right - 1, root.nudge ? root.glyph_half + 2 : root.content_right + 5)
 
             Rectangle {
                 x: pak.x0
@@ -186,21 +162,6 @@ Item {
                 color: root.color
                 visible: !root.nudge || pak.lit
                 opacity: root.nudge ? 0.3 * (1 - root.phase(0, 500)) : 0.35 * (1 - root.phase(0, 350))
-            }
-
-            Side {
-                Text {
-                    id: label
-                    y: root.room_up - height / 2
-                    text: "PRESS ANY KEY"
-                    color: root.color
-                    font.family: "VT323"
-                    font.pixelSize: 13
-                    style: Style.bar_text_style
-                    styleColor: Style.bar_glow_color
-                    visible: pak.lit
-                    opacity: root.tail
-                }
             }
         }
     }
@@ -346,7 +307,7 @@ Item {
     component Frame: CornerBrackets {
         property real grow: 0
         readonly property real x0: -Math.min(root.room_left - 1, root.glyph_half + 2 + grow)
-        readonly property real x1: Math.min(root.base_right - 1, root.content_right + 2 + grow)
+        readonly property real x1: Math.min(root.room_right - 1, root.content_right + 2 + grow)
         readonly property real y0: -Math.min(root.room_up - 1, root.half + 2 + grow)
         readonly property real y1: Math.min(root.room_down - 1, root.half + 2 + grow)
         x: x0
@@ -364,28 +325,10 @@ Item {
         Item {
             opacity: root.tail * root.strength * (root.elapsed < 350 ? 1 : 0.55 + 0.45 * Math.cos((root.elapsed - 350) / 300 * 2 * Math.PI))
 
-            Binding {
-                target: root
-                property: "label_width"
-                value: scan_label.implicitWidth
-            }
-
             Frame {
-                id: scan_frame
                 grow: (root.nudge ? 2 : 5) * (1 - root.out_quad(root.phase(0, 350)))
                 color: root.color
                 arm: 4
-            }
-
-            Side {
-                Text {
-                    id: scan_label
-                    y: root.room_up + scan_frame.y1 - height + 1
-                    text: "SCAN"
-                    color: root.color
-                    font.family: Style.mono_font
-                    font.pixelSize: 8
-                }
             }
         }
     }
@@ -396,34 +339,16 @@ Item {
         Item {
             opacity: root.tail * root.strength
 
-            Binding {
-                target: root
-                property: "label_width"
-                value: comms_label.implicitWidth
-            }
-
             Frame {
-                id: comms_frame
                 color: Theme.theme_label
                 arm: 5
                 visible: root.step(120) % 2 === 0
-            }
-
-            Side {
-                Text {
-                    id: comms_label
-                    y: root.room_up + comms_frame.y1 - height + 1
-                    text: "COMMS"
-                    color: Theme.theme_label
-                    font.family: Style.mono_font
-                    font.pixelSize: 8
-                }
             }
         }
     }
 
     // Rings grow from inside the glyph out to the nearer slot edge, and to the window's edges.
-    readonly property real ping_rx: Math.max(4, Math.min(root.room_left, root.base_right) - 1)
+    readonly property real ping_rx: Math.max(4, Math.min(root.room_left, root.room_right) - 1)
     readonly property real ping_ry: Math.max(4, root.room - 1)
 
     component Ring: ShapePath {
@@ -469,46 +394,31 @@ Item {
             readonly property int frame: root.step(140)
             readonly property bool lit: frame % 2 === 0 && frame < (root.nudge ? 2 : 6)
             readonly property color amber: Theme.bright_yellow
-
-            Binding {
-                target: root
-                property: "label_width"
-                value: orders_label.implicitWidth
-            }
+            readonly property real x0: -Math.min(root.room_left - 1, root.glyph_half + 3)
+            readonly property real x1: Math.min(root.room_right - 1, root.glyph_half + 3)
+            readonly property real box_height: Math.min(root.glyph_size + 4, 2 * root.room - 2)
 
             Rectangle {
-                readonly property real x1: Math.min(root.base_right - 1, root.glyph_half + 3)
                 visible: orders.lit
-                x: -Math.min(root.room_left - 1, root.glyph_half + 3)
+                x: orders.x0
                 y: -height / 2
-                width: x1 - x
-                height: Math.min(root.glyph_size + 4, 2 * root.room - 2)
+                width: orders.x1 - orders.x0
+                height: orders.box_height
                 radius: 3
                 color: Qt.alpha(orders.amber, 0.35 * root.strength)
                 border.color: orders.amber
                 border.width: 1
             }
 
-            Side {
-                Text {
-                    id: orders_label
-                    y: root.room_up - height + 2
-                    text: "AWAITING ORDERS"
-                    color: orders.amber
-                    font.family: Style.mono_font
-                    font.pixelSize: 8
-                    opacity: root.tail
-                }
-
-                Hazard {
-                    visible: orders.lit
-                    y: root.room_up + 4
-                    width: orders_label.width
-                    height: 4
-                    stripe: Style.hazard.a > 0 ? Style.hazard : orders.amber
-                    tile: 6
-                    line: 2
-                }
+            Hazard {
+                visible: orders.lit
+                x: orders.x0
+                y: orders.box_height / 2 + 2
+                width: orders.x1 - orders.x0
+                height: 4
+                stripe: Style.hazard.a > 0 ? Style.hazard : orders.amber
+                tile: 6
+                line: 2
             }
         }
     }

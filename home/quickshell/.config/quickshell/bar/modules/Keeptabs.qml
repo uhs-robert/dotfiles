@@ -32,11 +32,6 @@ Item {
     readonly property bool wait_hides_glyph: wait_loader.item ? wait_loader.item.hides_glyph : false
     // Half the island's module spacing, which is also its edge padding.
     readonly property real edge_room: 8
-    // Extra room a text cue opens right of the waiting group, only during its entrance.
-    property real wait_open: wait_loader.item ? wait_loader.item.want_right : 0
-    Behavior on wait_open {
-        NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
-    }
 
     function play_wait(nudge) {
         if (!root.groups.some(g => g.glyph === KeeptabsState.wait_glyph)) return;
@@ -151,9 +146,8 @@ Item {
 
                 readonly property bool is_done: modelData.glyph === KeeptabsState.done_glyph
                 readonly property bool is_wait: modelData.glyph === KeeptabsState.wait_glyph
-                readonly property real open: group.is_wait ? root.wait_open : 0
                 readonly property real content_width: glyph_text.implicitWidth + (count_text.visible ? count_text.implicitWidth * 0.6 : 0)
-                implicitWidth: group.content_width + group.open
+                implicitWidth: group.content_width
                 implicitHeight: glyph_text.implicitHeight
 
                 // Its slot reaches half the row spacing past each side, or the island's spacing at the module's ends.
@@ -168,7 +162,6 @@ Item {
                         color: glyph_text.color,
                         left: cx + pad_left,
                         right: group.implicitWidth - cx + pad_right,
-                        open: group.open,
                         glyph_half: glyph_text.width / 2,
                         content_right: group.content_width - cx,
                         badge: count_text.visible,
