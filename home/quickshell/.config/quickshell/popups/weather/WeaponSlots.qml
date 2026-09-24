@@ -26,8 +26,18 @@ Item {
     readonly property real bar_h: 18
     // Space left for the open bucket once the number bar is out of the way.
     readonly property real bucket_h: Math.max(80, root.height - root.bar_h)
+    readonly property real open_inner_w: Math.floor(root.unit * root.open_weight) - 14
     // Grows the open bucket's contents so it fills tall Daily areas instead of sitting content-sized.
     readonly property real bucket_scale: Math.max(1, Math.min(2.2, root.bucket_h / 130))
+    readonly property real temps_scale: Math.max(1, Math.min(root.bucket_scale, (root.open_inner_w - 2) / Math.max(1, probe_temps.implicitWidth)))
+
+    Temps {
+        id: probe_temps
+        visible: false
+        hi_size: 20
+        lo_size: 14
+        day: root.days.length > 0 ? root.days[0] : null
+    }
 
     Row {
         id: slots_row
@@ -118,20 +128,17 @@ Item {
                         height: slot.open ? bucket_box.height - 12 : bucket.implicitHeight
                         spacing: slot.open ? 3 * root.bucket_scale : 3
 
-                        RowLayout {
+                        DayIcon {
                             visible: slot.open
-                            spacing: 7 * root.bucket_scale
+                            code: slot.modelData.code
+                            size: Math.min(22 * root.bucket_scale, root.open_inner_w * 0.45)
+                        }
 
-                            DayIcon {
-                                code: slot.modelData.code
-                                size: 22 * Math.min(root.bucket_scale, 1.8)
-                            }
-
-                            Temps {
-                                hi_size: 20 * root.bucket_scale
-                                lo_size: 14 * root.bucket_scale
-                                day: slot.modelData
-                            }
+                        Temps {
+                            visible: slot.open
+                            hi_size: 20 * root.temps_scale
+                            lo_size: 14 * root.temps_scale
+                            day: slot.modelData
                         }
 
                         Item {
