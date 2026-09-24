@@ -55,10 +55,10 @@ Rectangle {
         }
 
         Rectangle {
-            visible: root.key_hint !== ""
             id: key_cap
+            visible: root.key_hint !== ""
             readonly property bool orb: Style.materia.key !== undefined
-            implicitWidth: Math.max(16, key_label.implicitWidth + 8)
+            implicitWidth: key_cap.orb ? Math.max(16, key_label.implicitWidth + 8) : key_label.implicitWidth + 8
             implicitHeight: 16
             radius: Style.key_round ? height / 2 : Style.radius(3)
             color: key_cap.orb ? "transparent" : root.active ? Theme.bg_core : Style.key_bg

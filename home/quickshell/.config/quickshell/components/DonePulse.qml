@@ -29,15 +29,16 @@ Item {
     readonly property real ring_max: Math.max(8, 2 * Math.min(root.side, root.room) - 2)
     readonly property real ring_min: Math.min(root.glyph_size * 0.9, root.ring_max * 0.7)
 
-    // fanfare: the glyph hops, gold stars twinkle round it and the count flashes gold (count_color).
+    // fanfare: the glyph hops, gold stars twinkle round it and the count flashes gold.
     readonly property bool fanfare: root.mode === "fanfare"
-    readonly property color count_color: root.fanfare && root.elapsed >= 300 && root.elapsed < root.duration - 100 ? Theme.theme_secondary : "transparent"
     readonly property bool pixel: root.mode === "pixel"
     readonly property bool lcd: root.mode === "lcd"
     // A health pickup: the glyph and count flash bright and a + rises into the pickup history.
     readonly property bool hev: root.mode === "hev_pickup"
-    // Drawn over the glyph row so its bright count covers the module's own.
-    readonly property bool over: root.hev
+    // The count redrawn over the module's badge in this color; transparent leaves the module's own showing.
+    readonly property color count_color: root.hev ? (root.hev_flash ? Theme.fg_strong : root.color) : root.fanfare && root.elapsed >= 300 && root.elapsed < root.duration - 100 ? Theme.theme_secondary : "transparent"
+    // Drawn beneath the glyph row, except by modes that redraw the count badge.
+    readonly property bool under: !root.hev && !root.fanfare
     readonly property bool levelup: root.mode === "levelup"
     // lcd reuses the pixel stepping/snapping machinery, just on a coarser refresh.
     readonly property bool stepped: root.pixel || root.lcd || root.levelup
@@ -242,11 +243,11 @@ Item {
     }
 
     Text {
-        visible: root.hev && !!root.slot && root.slot.badge
+        visible: root.count_color.a > 0 && !!root.slot && root.slot.badge
         x: root.slot ? root.slot.badge_x : 0
         y: root.slot ? root.slot.badge_y : 0
         text: root.slot ? root.slot.count : ""
-        color: root.hev_flash ? Theme.fg_strong : root.color
+        color: root.count_color
         opacity: root.hev_fade
         font.family: root.font_family
         font.pixelSize: Style.bar_font_size - 3

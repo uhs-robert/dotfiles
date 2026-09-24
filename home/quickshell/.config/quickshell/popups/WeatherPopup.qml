@@ -26,6 +26,8 @@ Popup {
     readonly property bool threat: Style.weather_header === "scan"
     readonly property bool hev: Style.weather_header === "hev"
     readonly property bool dex: Style.weather_header === "pokedex"
+    // Headers that carry their own alert (HEV banner, Pokédex alert, FF7 status panel) replace the shared banner.
+    readonly property bool own_alert: root.hev || root.dex || Style.weather_header === "status"
 
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine", "Sun & Moon"]
     readonly property int sun_moon_sub: 4
@@ -358,9 +360,9 @@ Popup {
                 }
             }
 
-            // --- Active-alert banner; the status header carries its own ---
+            // --- Active-alert banner ---
             Rectangle {
-                readonly property bool shown: root.has_alerts && !root.hev && !root.dex && Style.weather_header !== "status"
+                readonly property bool shown: root.has_alerts && !root.own_alert
                 Layout.fillWidth: true
                 Layout.preferredHeight: shown ? 28 : 0
                 visible: shown

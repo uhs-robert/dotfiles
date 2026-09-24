@@ -47,6 +47,8 @@ Item {
     readonly property bool hev_slots: Style.weather_header === "hev" && root.sub === 0
     // FF7: the days as linked materia slots.
     readonly property bool materia_slots: Style.weather_header === "status" && root.sub === 0
+    // Views that draw the whole window themselves instead of the day row.
+    readonly property bool row_replaced: root.wttr_table || root.hev_slots || root.materia_slots
 
     onFloor_shownChanged: {
         if (!floor_loader.item) return;
@@ -219,7 +221,7 @@ Item {
 
         RowLayout {
             id: day_row
-            visible: !root.wttr_table && !root.hev_slots && !root.materia_slots
+            visible: !root.row_replaced
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 4
