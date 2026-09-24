@@ -82,6 +82,7 @@ Singleton {
             meter_shade: "transparent",
             corner_scale: 1,
             bar_font_family: "JetBrainsMono Nerd Font",
+            bar_font_size: Theme.font_size,
             bar_side_bg: Theme.bg_crust,
             bar_center_bg: Theme.bg_crust,
             bar_fg: Theme.fg_core,
@@ -170,6 +171,7 @@ Singleton {
                 meter_shade: "transparent",
                 corner_scale: 1,
                 bar_font_family: Theme.font_family,
+                bar_font_size: Theme.font_size,
                 bar_side_bg: Theme.bg_core,
                 bar_center_bg: Theme.bg_mantle,
                 bar_fg: Theme.fg_core,
@@ -227,7 +229,7 @@ Singleton {
             }),
             "ps1": Object.assign({}, terminal, {
                 font_family: "Terminess Nerd Font",
-                font_size: Theme.popup_font_size + 4,
+                font_size: Theme.popup_font_size + 6,
                 frame_color: Theme.bg_crust,
                 frame_shade: Theme.bg_mantle,
                 frame_radius: 10,
@@ -258,6 +260,7 @@ Singleton {
                 dither: Qt.alpha(Theme.bg_shadow, 0.22),
                 text_shadow: Theme.bg_shadow,
                 bar_font_family: "Terminess Nerd Font",
+                bar_font_size: Theme.font_size + 4,
                 bar_side_bg: Theme.bg_core,
                 bar_center_bg: Theme.bg_mantle,
                 bar_border_color: Theme.fg_dim,
@@ -308,6 +311,7 @@ Singleton {
                 toggle_off: Theme.fg_dim,
                 marker_fill: false,
                 bar_font_family: "Montserrat",
+                bar_font_size: Theme.font_size,
                 bar_side_bg: Theme.bg_mantle,
                 bar_center_bg: Theme.bg_mantle,
                 bar_fg: Theme.theme_primary_light,
@@ -406,6 +410,7 @@ Singleton {
     })
     readonly property var bar: root.style_bar ? root.active : root.plain_bar
     readonly property string bar_font_family: root.bar.bar_font_family
+    readonly property int bar_font_size: root.bar.bar_font_size
     readonly property color bar_side_bg: root.bar.bar_side_bg
     readonly property color bar_center_bg: root.bar.bar_center_bg
     readonly property color bar_fg: root.bar.bar_fg
