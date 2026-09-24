@@ -70,8 +70,7 @@ Item {
                     readonly property bool is_hot: root.hot || index >= Math.round(root.hot_from * root.segment_count)
 
                     width: root.segment_width
-                    height: Style.meter_climb ? Math.max(2, Math.round(root.implicitHeight * (0.4 + 0.2 * Math.floor(index * 4 / root.segment_count)))) : root.implicitHeight
-                    y: root.implicitHeight - height
+                    height: root.implicitHeight
                     radius: Style.meter_radius
                     antialiasing: Style.meter_slant > 0
                     transform: Matrix4x4 {
@@ -80,15 +79,6 @@ Item {
                     color: segment.lit
                         ? (segment.is_hot ? Style.meter_hot : root.on_selection && Style.selection_inverse ? Style.selection_fg : root.on_color)
                         : root.on_selection && Style.selection_inverse ? Qt.alpha(Style.selection_fg, 0.25) : Style.meter_off
-
-                    Rectangle {
-                        visible: segment.lit && Style.meter_glow.a > 0
-                        z: -1
-                        anchors.fill: parent
-                        anchors.margins: -1
-                        radius: parent.radius + 1
-                        color: segment.is_hot ? Qt.alpha(Style.meter_hot, Style.meter_glow.a) : Style.meter_glow
-                    }
 
                     // Lit segments shade down from meter_shade at the top.
                     Rectangle {

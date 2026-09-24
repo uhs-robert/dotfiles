@@ -224,8 +224,6 @@ Popup {
                             visible: cell.marked
                             anchors.fill: parent
                             color: Style.title_bg
-                            border.width: Style.selection_border.a > 0 ? 1 : 0
-                            border.color: Style.selection_border
                         }
                     }
                 }

@@ -82,7 +82,7 @@ PanelWindow {
     }
 
     // Never narrower than the island's bottom edge (its body, between the slants).
-    implicitWidth: Math.max(Style.px(preferred_width), island_width, codec_header.item ? codec_header.item.implicitWidth : 0)
+    implicitWidth: Math.max(Style.px(preferred_width), island_width)
     implicitHeight: body_height + header_height + footer_height + Style.frame_drop
     default property alias content: content_scope.data
 
@@ -118,7 +118,7 @@ PanelWindow {
     readonly property bool has_footer: Style.show_footer && footer_hint !== ""
     // Room kept clear of the corner brackets around the title.
     readonly property real bracket_pad: Style.frame_brackets.a > 0 ? 4 : 0
-    readonly property real header_height: !has_title ? 0 : codec_header.item ? codec_header.item.implicitHeight : title_tab.height + bracket_pad + Style.inset_pad
+    readonly property real header_height: has_title ? title_tab.height + bracket_pad + Style.inset_pad : 0
     readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 + Style.inset_pad : 0
     property real line_progress: 0
     property real drop_progress: 0
@@ -257,20 +257,10 @@ PanelWindow {
                 layer.enabled: glow_layer.layered
                 opacity: glow_layer.layered ? 0 : 1
 
-                // A Loader, so the header's MultiEffect is rebuilt per style.
-                Loader {
-                    id: codec_header
-                    active: Style.title_codec && root.has_title
-                    width: parent.width
-                    sourceComponent: CodecHeader {
-                        title: root.title
-                        seed: root.popup_name
-                    }
-                }
 
                 Rectangle {
                     id: title_tab
-                    visible: root.has_title && !Style.title_codec
+                    visible: root.has_title
                     x: (Style.fade_fills ? Style.frame_border_width : root.bracket_pad * 1.5) + Style.inset_pad
                     y: (Style.fade_fills ? Style.frame_border_width : root.bracket_pad) + Style.inset_pad
                     width: Style.fade_fills ? parent.width - Style.frame_border_width * 2 : title_text.implicitWidth + 20
