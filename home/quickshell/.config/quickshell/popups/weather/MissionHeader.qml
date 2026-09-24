@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../../theme"
 import "../../services"
 
-// The GoldenEye briefing line over the objective lists, with the forecast location as the facility.
+// The GoldenEye briefing line over the Daily columns and alert objectives, with the forecast location as the facility.
 ColumnLayout {
     id: root
 

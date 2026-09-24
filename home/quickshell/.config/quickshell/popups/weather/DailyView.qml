@@ -7,7 +7,7 @@ import "../../theme"
 import "../../services"
 
 // One column per day in a window of up to five that the popup scrolls with day_cursor.
-// sub 0: temp band + precip chance, or the objective list under the "watch" header. 1: wind. 2: UV. 3: sunshine.
+// sub 0: temp band + precip chance. 1: wind. 2: UV. 3: sunshine.
 Item {
     id: root
 
@@ -22,9 +22,8 @@ Item {
     // Temperature ranges as 1px altitude ladders with rungs.
     readonly property bool ladder: Style.weather_header === "scope"
     readonly property bool thin_range: Style.range_line || root.ladder
-    // Temp & Precip as a lettered GoldenEye objective list under a mission line.
-    readonly property bool objectives: Style.weather_header === "watch" && root.sub === 0
-    readonly property real objective_row_h: Math.ceil(label_metrics.height + small_metrics.height + 8)
+    // GoldenEye: a mission line over the columns, each lettered as an objective.
+    readonly property bool mission: Style.weather_header === "watch"
 
     FontMetrics {
         id: label_metrics
@@ -41,8 +40,8 @@ Item {
     // Columns that fit without clipping their widest label, capped at five.
     readonly property int fit_days: {
         const f = label_metrics.font;
-        if (root.objectives) return Math.max(1, Math.min(16, Math.floor((root.height - label_metrics.height * 5) / (root.objective_row_h + 2))));
-        const col = root.stat_columns ? 56 : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%")) + 8;
+        const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
+        const col = root.stat_columns ? 56 : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
         return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
     }
     readonly property var window_days: WeatherState.days.slice(root.first_day, root.first_day + root.fit_days)
@@ -89,40 +88,18 @@ Item {
 
         Loader {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            active: root.objectives
+            active: root.mission
             visible: active
-
-            sourceComponent: ColumnLayout {
-                spacing: 6
-
-                MissionHeader {
-                    Layout.fillWidth: true
-                }
-
-                DayObjectives {
-                    Layout.fillWidth: true
-                    days: root.window_days
-                    first_day: root.first_day
-                    day_cursor: root.day_cursor
-                    row_h: root.objective_row_h
-                    on_select: function (i) { root.on_select(i); }
-                }
-
-                Item {
-                    Layout.fillHeight: true
-                }
-            }
+            sourceComponent: MissionHeader {}
         }
 
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: !root.objectives
             spacing: 4
 
             Repeater {
-                model: root.objectives ? [] : root.window_days
+                model: root.window_days
 
                 Item {
                     id: day_col
@@ -138,12 +115,19 @@ Item {
                         anchors.fill: parent
                         anchors.margins: -2
                         radius: Style.radius(4)
-                        color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 ? Style.selection_bg : Theme.bg_surface
+                        color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 || root.mission ? Style.selection_bg : Theme.bg_surface
                         border.width: Style.range_line ? 1 : 0
                         border.color: Style.hairline_dim
                         visible: day_col.day_index === root.day_cursor && !root.stat_columns
 
                         LockBrackets {}
+
+                        Rectangle {
+                            visible: root.mission
+                            width: parent.width
+                            height: 2
+                            color: Style.caret_color
+                        }
                     }
 
                     Loader {
@@ -369,10 +353,23 @@ Item {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
-                            text: day_col.modelData.weekday
+                            text: root.mission ? String.fromCharCode(97 + day_col.day_index) + ") " + Qt.formatDate(new Date(day_col.modelData.date + "T00:00:00"), "ddd").toUpperCase() : day_col.modelData.weekday
                             color: day_col.day_index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core
                             font.family: Style.font_family
                             font.pixelSize: Style.font_size - 2
+                        }
+
+                        Text {
+                            visible: root.mission
+                            opacity: day_col.day_index === 0 ? 1 : 0
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                            text: "IN PROGRESS"
+                            color: Style.accent_color
+                            font.family: Style.font_family
+                            font.pixelSize: Style.font_size - 5
+                            font.letterSpacing: 1
                         }
                     }
                 }
