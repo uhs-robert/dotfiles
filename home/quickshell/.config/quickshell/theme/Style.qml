@@ -30,7 +30,6 @@ Singleton {
             frame_radius: 0,
             frame_border_width: 1,
             frame_border_color: Theme.fg_muted,
-            frame_base_line: "transparent",
             frame_chamfer: 0,
             frame_visor: false,
             frame_brackets: "transparent",
@@ -84,7 +83,6 @@ Singleton {
             show_footer: true,
             footer_wrap: true,
             row_cursor: ">",
-            row_cursor_end: "",
             segmented_levels: true,
             tab_keys: true,
             row_keys: true,
@@ -174,7 +172,6 @@ Singleton {
                 frame_radius: 10,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
-                frame_base_line: "transparent",
                 frame_chamfer: 0,
                 frame_visor: false,
                 frame_brackets: "transparent",
@@ -228,7 +225,6 @@ Singleton {
                 show_footer: false,
                 footer_wrap: false,
                 row_cursor: "",
-                row_cursor_end: "",
                 segmented_levels: false,
                 tab_keys: false,
                 row_keys: false,
@@ -505,54 +501,6 @@ Singleton {
                 bar_text_raised: true,
                 bar_tip_border_width: 2,
                 bar_tip_border_color: Theme.fg_dim
-            }),
-            "bond": Object.assign({}, terminal, {
-                // Muted text lifted toward the foreground so it holds up on the near-black glass.
-                text_muted: Qt.tint(Theme.fg_muted, Qt.alpha(Theme.fg_core, 0.3)),
-                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
-                frame_color: Theme.bg_crust,
-                frame_border_width: 0,
-                frame_border_color: "transparent",
-                frame_base_line: Qt.alpha(Theme.theme_label, 0.35),
-                accent_color: Theme.theme_primary,
-                accent_height: 2,
-                frame_top_rule: true,
-                selection_bg: Qt.alpha(Theme.theme_primary, 0.25),
-                selection_outline: "transparent",
-                fade_fills: true,
-                caret_color: Theme.theme_primary,
-                caret_blink: false,
-                row_cursor: "[",
-                row_cursor_end: "]",
-                tab_active_bg: Qt.alpha(Theme.theme_primary, 0.25),
-                tab_active_fg: Theme.fg_strong,
-                tab_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
-                key_bg: Theme.fg_core,
-                key_fg: Theme.bg_core,
-                key_border: Theme.fg_core,
-                section_fg: Theme.theme_primary,
-                section_rule: false,
-                label_caps: true,
-                label_spacing: 3,
-                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
-                footer_rule: false,
-                meter_off: Theme.bg_surface,
-                meter_slant: 0.32,
-                title_bg: "transparent",
-                title_fg: Theme.fg_strong,
-                title_spacing: 5,
-                chip_active_fg: Theme.theme_primary,
-                marker_fill: false,
-                toggle_on: Theme.theme_primary,
-                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
-                bar_font_size: Theme.font_size - 1,
-                bar_caps: true,
-                bar_letter_spacing: 1.5,
-                bar_side_bg: Theme.bg_crust,
-                bar_center_bg: Theme.bg_crust,
-                bar_border_color: Theme.theme_primary,
-                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.25),
-                bar_tip_border_color: Theme.theme_primary
             }),
             // Perfect Dark panels; `small` turns the small popups into the Q-branch watch LCD.
             "goldeneye": Object.assign({}, terminal, {
@@ -895,7 +843,6 @@ Singleton {
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
     // A 1px rule along the bottom edge of every frame.
-    readonly property color frame_base_line: root.active.frame_base_line
     // Bottom corners cut at 45 degrees by this many px.
     readonly property real frame_chamfer: root.active.frame_chamfer
     // Frames drawn as visor glass (VisorGlass) instead of a plain rectangle.
@@ -963,7 +910,6 @@ Singleton {
     readonly property bool footer_wrap: root.active.footer_wrap
     readonly property string row_cursor: root.active.row_cursor
     // Closes the cursor at the selected row's right end, before its key badge.
-    readonly property string row_cursor_end: root.active.row_cursor_end
     readonly property bool segmented_levels: root.active.segmented_levels
     readonly property bool tab_keys: root.active.tab_keys
     readonly property bool row_keys: root.active.row_keys

@@ -347,14 +347,5 @@ PanelWindow {
             radius: frame.radius
             top_radius: frame.radius
         }
-
-        Rectangle {
-            visible: Style.frame_base_line.a > 0
-            x: frame.radius
-            y: frame.height - Style.frame_border_width - 1
-            width: frame.width - frame.radius * 2
-            height: 1
-            color: Style.frame_base_line
-        }
     }
 }

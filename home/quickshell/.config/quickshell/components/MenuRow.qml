@@ -14,7 +14,7 @@ Rectangle {
     // The row's shortcut, drawn as a badge at the right by styles that show row keys.
     property string key: ""
     readonly property bool show_key: root.st.row_keys && root.key !== ""
-    readonly property real key_space: (root.show_key ? key_badge.width + 6 : 0) + (root.st.row_cursor_end !== "" ? cursor_end_text.implicitWidth + 4 : 0)
+    readonly property real key_space: (root.show_key ? key_badge.width + 6 : 0)
 
     radius: Style.radius(root.base_radius)
     color: root.selected && !root.st.fade_fills && root.st.slant <= 0 ? root.st.selection_bg : "transparent"
@@ -76,18 +76,6 @@ Rectangle {
         font.bold: true
     }
 
-    Text {
-        id: cursor_end_text
-        visible: root.selected && root.st.row_cursor_end !== "" && Style.caret_phase
-        anchors.right: parent.right
-        anchors.rightMargin: 6 + (root.show_key ? key_badge.width + 6 : 0)
-        anchors.verticalCenter: parent.verticalCenter
-        text: root.st.row_cursor_end
-        color: root.st.caret_color
-        font.family: root.st.font_family
-        font.pixelSize: root.st.font_size - 1
-        font.bold: true
-    }
 
     KeyBadge {
         id: key_badge

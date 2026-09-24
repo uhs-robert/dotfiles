@@ -458,15 +458,6 @@ PanelWindow {
                 color: root.st.dither
                 radius: root.st.frame_radius
             }
-
-            Rectangle {
-                visible: root.st.frame_base_line.a > 0
-                x: root.st.frame_radius
-                y: parent.height - root.st.frame_border_width - 1
-                width: parent.width - root.st.frame_radius * 2
-                height: 1
-                color: root.st.frame_base_line
-            }
         }
     }
 
