@@ -14,9 +14,9 @@ Popup {
     footer_hint: root.confirm ? "y/Enter confirm · n/Esc back" : "j/k move · Enter run · q close"
     body_height: content.implicitHeight + 24
 
-    readonly property var actions: ["Apps", "Lock", "Logout", "Reboot", "Power Off"]
-    readonly property var glyphs: ["󰣇", "󰌾", "󰍃", "󰜉", "󰐥"]
-    readonly property var glyph_colors: [Theme.green, Theme.fg_core, Theme.info, Theme.warning, Theme.theme_label]
+    readonly property var actions: ["Apps", "Style", "Lock", "Logout", "Reboot", "Power Off"]
+    readonly property var glyphs: ["󰣇", "󰏘", "󰌾", "󰍃", "󰜉", "󰐥"]
+    readonly property var glyph_colors: [Theme.green, Theme.theme_secondary, Theme.fg_core, Theme.info, Theme.warning, Theme.theme_label]
 
     property int selected: 0
     property bool confirm: false
@@ -30,19 +30,20 @@ Popup {
     function choose(index) {
         selected = index;
         if (index === 0) run(0);
+        else if (index === 1) Popups.open("style", Popups.open_anchor, Popups.open_color, Popups.open_screen_name);
         else confirm = true;
     }
 
     function run(index) {
         if (index === 0) {
             Quickshell.execDetached(["hyprctl", "dispatch", "LayerRules.exec_without_animation('rofi -show drun -theme ~/.config/rofi/themes/oasis-start.rasi')"]);
-        } else if (index === 1) {
-            Quickshell.execDetached(["sh", "-c", "~/.config/hypr/scripts/hyprlock-screenshot.lua"]);
         } else if (index === 2) {
-            Quickshell.execDetached(["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch \"hl.dsp.exit()\""]);
+            Quickshell.execDetached(["sh", "-c", "~/.config/hypr/scripts/hyprlock-screenshot.lua"]);
         } else if (index === 3) {
-            Quickshell.execDetached(["systemctl", "reboot"]);
+            Quickshell.execDetached(["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch \"hl.dsp.exit()\""]);
         } else if (index === 4) {
+            Quickshell.execDetached(["systemctl", "reboot"]);
+        } else if (index === 5) {
             Quickshell.execDetached(["systemctl", "poweroff"]);
         }
         Popups.close();

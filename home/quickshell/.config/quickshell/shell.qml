@@ -57,6 +57,7 @@ ShellRoot {
 
     ClockPopup {}
     StartPopup {}
+    StylePopup {}
     VolumePopup {}
     BatteryPopup {}
     BluetoothPopup {}
