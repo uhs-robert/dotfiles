@@ -54,6 +54,7 @@ Singleton {
             segmented_levels: true,
             tab_keys: true,
             row_keys: true,
+            boxed_cards: true,
             chip_brackets: true,
             chip_active_bg: "transparent",
             chip_active_fg: Theme.theme_primary,
@@ -103,6 +104,7 @@ Singleton {
                 segmented_levels: false,
                 tab_keys: false,
                 row_keys: false,
+                boxed_cards: false,
                 chip_brackets: false,
                 chip_active_bg: Theme.bg_surface,
                 chip_active_fg: Theme.theme_secondary,
@@ -158,6 +160,7 @@ Singleton {
     readonly property bool segmented_levels: root.active.segmented_levels
     readonly property bool tab_keys: root.active.tab_keys
     readonly property bool row_keys: root.active.row_keys
+    readonly property bool boxed_cards: root.active.boxed_cards
     readonly property bool chip_brackets: root.active.chip_brackets
     readonly property color chip_active_bg: root.active.chip_active_bg
     readonly property color chip_active_fg: root.active.chip_active_fg
