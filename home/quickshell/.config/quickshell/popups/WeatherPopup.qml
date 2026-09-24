@@ -200,11 +200,16 @@ Popup {
                 Layout.fillWidth: true
                 active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: Style.weather_header === "spec" ? spec_header : ring_header
+                sourceComponent: Style.weather_header === "spec" ? spec_header : Style.weather_header === "scope" ? scope_header : ring_header
 
                 Component {
                     id: spec_header
                     WeatherSpec {}
+                }
+
+                Component {
+                    id: scope_header
+                    ScopeHeader {}
                 }
 
                 Component {

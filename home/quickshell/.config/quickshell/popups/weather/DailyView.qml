@@ -19,6 +19,9 @@ Item {
 
     readonly property var sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
     readonly property bool stat_columns: Style.weather_header === "spec" && root.sub === 0
+    // Temperature ranges as 1px altitude ladders with rungs.
+    readonly property bool ladder: Style.weather_header === "scope"
+    readonly property bool thin_range: Style.range_line || root.ladder
 
     FontMetrics {
         id: label_metrics
@@ -146,10 +149,10 @@ Item {
                             Rectangle {
                                 id: inner_band
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                width: Style.range_line ? 1 : parent.width * 0.3
+                                width: root.thin_range ? 1 : parent.width * 0.3
                                 radius: Style.radius(2)
-                                color: !Style.range_line ? Style.chart_fill : day_col.day_index === root.day_cursor ? Style.text_accent : Style.text_strong
-                                border.width: Style.chart_outline.a > 0 ? 1 : 0
+                                color: root.ladder ? (day_col.day_index === root.day_cursor ? Style.selection_brackets : Style.text_primary) : !Style.range_line ? Style.chart_fill : day_col.day_index === root.day_cursor ? Style.text_accent : Style.text_strong
+                                border.width: Style.chart_outline.a > 0 && !root.ladder ? 1 : 0
                                 border.color: Style.chart_outline
                                 y: root.inner_top_y(day_col.modelData)
                                 height: Math.max(4, root.inner_bottom_y(day_col.modelData) - root.inner_top_y(day_col.modelData))
@@ -161,22 +164,39 @@ Item {
                                 RangeCaps {
                                     visible: Style.range_line
                                 }
+
+                                Repeater {
+                                    id: rungs
+                                    readonly property int steps: Math.max(1, Math.round(inner_band.height / 6))
+                                    model: root.ladder ? rungs.steps + 1 : 0
+
+                                    Rectangle {
+                                        required property int index
+                                        readonly property bool major: index === 0 || index === rungs.steps
+                                        width: major ? 11 : 5
+                                        height: 1
+                                        x: (1 - width) / 2
+                                        y: Math.min(inner_band.height - 1, index * inner_band.height / rungs.steps)
+                                        color: inner_band.color
+                                        opacity: major ? 1 : 0.5
+                                    }
+                                }
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                y: inner_band.y - implicitHeight - (Style.range_line ? 5 : 1)
+                                y: inner_band.y - implicitHeight - (root.thin_range ? 5 : 1)
                                 text: Math.round(day_col.modelData.max) + "°"
-                                color: Style.range_line ? Style.text_strong : Theme.yellow
+                                color: root.thin_range ? Style.text_strong : Theme.yellow
                                 font.family: Style.font_family
                                 font.pixelSize: Style.font_size - 3
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                y: inner_band.y + inner_band.height + (Style.range_line ? 5 : 1)
+                                y: inner_band.y + inner_band.height + (root.thin_range ? 5 : 1)
                                 text: Math.round(day_col.modelData.min) + "°"
-                                color: Style.range_line ? Style.text_muted : Theme.yellow
+                                color: root.thin_range ? Style.text_muted : Theme.yellow
                                 font.family: Style.font_family
                                 font.pixelSize: Style.font_size - 3
                             }

@@ -894,6 +894,7 @@ Singleton {
                     scanline_color: Qt.alpha(vec, 0.05),
                     chart_fill: Qt.alpha(vec, 0.09),
                     chart_outline: vec,
+                    weather_header: "scope",
                     bar_font_family: "B612 Mono",
                     bar_font_size: Theme.font_size - 1,
                     bar_side_bg: Theme.bg_crust,
@@ -1382,7 +1383,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring" or "spec", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec" or "scope", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
