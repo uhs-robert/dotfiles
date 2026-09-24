@@ -9,6 +9,7 @@ Item {
 
     property string text: ""
     property bool wrap: Style.footer_wrap
+    property bool centered: false
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: Style.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
     readonly property var key_glyphs: ({ Enter: String.fromCodePoint(0xF0311), Esc: String.fromCodePoint(0xF12B7), Tab: String.fromCodePoint(0xF0312), space: String.fromCodePoint(0xF1050), Backspace: String.fromCodePoint(0xF030D) })
@@ -45,8 +46,9 @@ Item {
 
     Flow {
         id: hint
+        x: root.centered ? Math.max(0, (root.width - childrenRect.width) / 2) : 0
         y: root.rule_gap
-        width: root.wrap ? parent.width : 100000
+        width: root.wrap && !root.centered ? parent.width : 100000
 
         Repeater {
             model: root.groups

@@ -233,6 +233,7 @@ PanelWindow {
                 MenuFooter {
                     visible: root.has_footer
                     Layout.fillWidth: true
+                    centered: true
                     text: root.footer_hint
                 }
             }
