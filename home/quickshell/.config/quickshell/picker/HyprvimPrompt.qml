@@ -125,15 +125,16 @@ Popup {
         onTriggered: root.warn_text = ""
     }
 
+    // blockLoading does not block once a file has loaded, so a new path would read the previous file.
     FileView {
         id: spec_file
-        blockLoading: true
+        blockAllReads: true
         printErrors: false
     }
 
     FileView {
         id: output_file
-        blockLoading: true
+        blockAllReads: true
         printErrors: false
     }
 
@@ -786,7 +787,7 @@ Popup {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: menu.usage_width > 0 && !!row.entry.item.usage
                                 elide: Text.ElideRight
-                                text: menu.usage_wide ? row.entry.item.usage : "…"
+                                text: menu.usage_wide ? row.entry.item.usage || "" : "…"
                                 color: row.fg(root.st.text_muted)
                                 opacity: 0.7
                                 font.family: root.st.mono_font
