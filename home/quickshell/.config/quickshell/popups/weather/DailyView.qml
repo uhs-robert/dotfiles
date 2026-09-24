@@ -24,6 +24,15 @@ Item {
     readonly property bool thin_range: Style.range_line || root.ladder
     // GoldenEye: a mission line over the columns, each lettered as an objective.
     readonly property bool mission: Style.weather_header === "watch"
+    // PS1: Temp & Precip as memory card save blocks.
+    readonly property bool save_blocks: Style.weather_header === "memcard" && root.sub === 0
+    readonly property bool custom_column: root.stat_columns || root.save_blocks
+
+    function day_label(day, i) {
+        const ddd = Qt.formatDate(new Date(day.date + "T00:00:00"), "ddd").toUpperCase();
+        if (root.mission) return String.fromCharCode(97 + i) + ") " + ddd;
+        return day.weekday;
+    }
 
     FontMetrics {
         id: label_metrics
@@ -41,7 +50,9 @@ Item {
     readonly property int fit_days: {
         const f = label_metrics.font;
         const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
-        const col = root.stat_columns ? 56 : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
+        const col = root.stat_columns ? 56
+            : root.save_blocks ? small_metrics.advanceWidth("100°/88°") + 6
+            : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
         return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
     }
     readonly property var window_days: WeatherState.days.slice(root.first_day, root.first_day + root.fit_days)
@@ -118,7 +129,7 @@ Item {
                         color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 || root.mission ? Style.selection_bg : Theme.bg_surface
                         border.width: Style.range_line ? 1 : 0
                         border.color: Style.hairline_dim
-                        visible: day_col.day_index === root.day_cursor && !root.stat_columns
+                        visible: day_col.day_index === root.day_cursor && !root.custom_column
 
                         LockBrackets {}
 
@@ -142,13 +153,22 @@ Item {
                         }
                     }
 
+                    Loader {
+                        active: root.save_blocks
+                        anchors.fill: parent
+                        sourceComponent: SaveBlock {
+                            day: day_col.modelData
+                            selected: day_col.day_index === root.day_cursor
+                        }
+                    }
+
                     MouseArea {
                         anchors.fill: parent
                         onClicked: root.on_select(day_col.day_index)
                     }
 
                     ColumnLayout {
-                        visible: !root.stat_columns
+                        visible: !root.custom_column
                         anchors.fill: parent
                         anchors.margins: 2
                         spacing: 2
@@ -353,7 +373,7 @@ Item {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
-                            text: root.mission ? String.fromCharCode(97 + day_col.day_index) + ") " + Qt.formatDate(new Date(day_col.modelData.date + "T00:00:00"), "ddd").toUpperCase() : day_col.modelData.weekday
+                            text: root.day_label(day_col.modelData, day_col.day_index)
                             color: day_col.day_index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core
                             font.family: Style.font_family
                             font.pixelSize: Style.font_size - 2

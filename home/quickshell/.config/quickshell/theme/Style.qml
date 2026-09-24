@@ -543,6 +543,7 @@ Singleton {
             }),
             "ps1": Object.assign({}, terminal, {
                 done_anim: "pixel",
+                weather_header: "memcard",
                 // Muted text brightened; the shaded, dithered frame swallows the theme greys.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.6)),
@@ -1384,7 +1385,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope" or "watch", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch" or "memcard", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
