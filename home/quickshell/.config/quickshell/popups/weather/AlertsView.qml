@@ -101,10 +101,30 @@ Item {
                     ColumnLayout {
                         spacing: 0
                         Layout.fillWidth: true
+                        RowLayout {
+                            visible: root.encounter
+                            Layout.fillWidth: true
+                            spacing: 4
+                            Text {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                                text: alert_row.modelData.event.toUpperCase()
+                                color: alert_row.fg(alert_row.index === root.alert_cursor ? Theme.theme_secondary : Theme.fg_core)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 2
+                            }
+                            Text {
+                                text: "attacks!"
+                                color: alert_row.fg(alert_row.index === root.alert_cursor ? Theme.theme_secondary : Theme.fg_core)
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 2
+                            }
+                        }
                         Text {
+                            visible: !root.encounter
                             Layout.fillWidth: true
                             elide: Text.ElideRight
-                            text: root.objectives ? "OBJECTIVE: AVOID " + alert_row.modelData.event.toUpperCase() : root.encounter ? alert_row.modelData.event.toUpperCase() + " attacks!" : alert_row.modelData.event
+                            text: root.objectives ? "OBJECTIVE: AVOID " + alert_row.modelData.event.toUpperCase() : alert_row.modelData.event
                             color: alert_row.fg(root.objectives ? Theme.theme_label : alert_row.index === root.alert_cursor ? Theme.theme_secondary : Theme.fg_core)
                             font.family: Style.font_family
                             font.pixelSize: Style.font_size - 2

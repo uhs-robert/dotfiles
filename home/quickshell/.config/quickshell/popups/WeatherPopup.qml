@@ -348,7 +348,7 @@ Popup {
                     }
 
                     Text {
-                        visible: root.mission
+                        visible: root.mission && main_column.width >= 340
                         text: "MISSION CRITICAL"
                         color: Theme.theme_label
                         font.family: Style.title_font_family
@@ -360,7 +360,7 @@ Popup {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         text: WeatherState.alerts.length === 0 ? ""
-                            : root.mission ? "AVOID " + WeatherState.alerts[0].event.toUpperCase() + (WeatherState.alerts.length > 1 ? "  +" + (WeatherState.alerts.length - 1) : "")
+                            : root.mission ? (WeatherState.alerts.length > 1 ? "+" + (WeatherState.alerts.length - 1) + "  " : "") + "AVOID " + WeatherState.alerts[0].event.toUpperCase()
                             : WeatherState.alerts[0].event + " · until " + root.fmt_alert_time(WeatherState.alerts[0].ends) + (WeatherState.alerts.length > 1 ? "  +" + (WeatherState.alerts.length - 1) + " more" : "")
                         color: root.mission ? Theme.theme_label : WeatherState.alerts.length > 0 ? WeatherState.alert_color(WeatherState.alerts[0].severity) : Theme.fg_core
                         font.family: Style.font_family

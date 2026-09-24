@@ -33,7 +33,11 @@ Item {
     readonly property bool mode7: Style.weather_header === "mode7"
     readonly property bool floor_shown: root.mode7 && root.visible && Popups.open_name === "weather"
 
-    onFloor_shownChanged: if (root.floor_shown && floor_loader.item) floor_loader.item.run()
+    onFloor_shownChanged: {
+        if (!floor_loader.item) return;
+        if (root.floor_shown) floor_loader.item.run();
+        else floor_loader.item.stop();
+    }
 
     function day_label(day, i) {
         const ddd = Qt.formatDate(new Date(day.date + "T00:00:00"), "ddd").toUpperCase();
@@ -106,10 +110,10 @@ Item {
     Loader {
         id: floor_loader
         active: root.mode7
-        x: day_row.x - 4
+        x: day_row.x
         y: day_row.y + day_row.height * 0.42
-        width: day_row.width + 8
-        height: day_row.height * 0.58 + 4
+        width: day_row.width
+        height: day_row.height * 0.58
         sourceComponent: Mode7Floor {}
         onLoaded: if (root.floor_shown) floor_loader.item.run()
     }
@@ -166,7 +170,7 @@ Item {
                     Loader {
                         active: root.dq
                         anchors.fill: parent
-                        anchors.margins: -2
+                        anchors.margins: 0
                         sourceComponent: DqWindow {}
                     }
 

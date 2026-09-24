@@ -19,6 +19,10 @@ Canvas {
         scroll.restart();
     }
 
+    function stop() {
+        scroll.stop();
+    }
+
     NumberAnimation {
         id: scroll
         target: root
