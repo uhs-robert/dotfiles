@@ -1,12 +1,13 @@
 // home/quickshell/.config/quickshell/popups/weather/MateriaSlots.qml
 pragma ComponentBehavior: Bound
 import QtQuick
+import Quickshell
 import "../../components"
 import "../../theme"
 import "../../services"
 import "Materia.js" as Materia
 
-// The Daily window as a weapon's materia slots: one socket per day, linked in pairs, with HI, LO and RAIN rows below.
+// The Daily window as a weapon's materia slots: one socket per day, linked in pairs, with icon, HI, LO and RAIN rows below.
 Item {
     id: root
 
@@ -19,16 +20,19 @@ Item {
     readonly property int n: Math.max(1, root.days.length)
     readonly property real col_w: (root.width - root.label_w) / root.n
     readonly property real band_h: 34
-    readonly property real row_h: Math.max(20, Math.min(34, (root.height - root.band_h - 8) / 4))
-    readonly property real table_h: root.band_h + 4 + root.row_h * 4
+    readonly property real row_h: Math.max(20, Math.min(34, (root.height - root.band_h - 8) / root.rows.length))
+    readonly property real table_h: root.band_h + 4 + root.row_h * root.rows.length
     readonly property real top_y: Math.max(0, (root.height - root.table_h) / 2)
     readonly property int sel: root.day_cursor - root.first_day
     readonly property var rows: [
         ["", d => d.weekday],
+        ["", d => ""],
         ["HI", d => Math.round(d.max) + "°"],
         ["LO", d => Math.round(d.min) + "°"],
         ["RAIN", d => d.pop + "%"]
     ]
+
+    readonly property var orb_colors: Materia.day_colors(root.days.map(d => d.date))
 
     function col_x(i) {
         return root.label_w + i * root.col_w;
@@ -116,7 +120,7 @@ Item {
                     width: 16
                     height: 16
                     glow: false
-                    color: Materia.color(Style.materia, WeatherState.weather_color_keys, slot.modelData.code)
+                    color: (Style.materia.days || {})[root.orb_colors[slot.index]] || "transparent"
                 }
             }
 
@@ -140,20 +144,33 @@ Item {
                     width: slot.width
                     height: root.row_h
 
-                    Text {
+                    Image {
+                        visible: cell.index === 1
                         anchors.centerIn: parent
-                        anchors.verticalCenterOffset: cell.index === 3 ? -3 : 0
+                        width: Math.min(26, root.row_h - 2)
+                        height: width
+                        readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
+                        sourceSize.width: Math.ceil(52 * dpr)
+                        sourceSize.height: Math.ceil(52 * dpr)
+                        source: visible ? WeatherState.icon_source(slot.modelData.code, true) : ""
+                        smooth: true
+                    }
+
+                    Text {
+                        visible: cell.index !== 1
+                        anchors.centerIn: parent
+                        anchors.verticalCenterOffset: cell.index === 4 ? -3 : 0
                         width: Math.min(implicitWidth, cell.width - 4)
                         elide: Text.ElideRight
                         text: cell.modelData[1](slot.modelData)
-                        color: cell.index === 1 || slot.selected && cell.index === 0 ? Theme.fg_strong : cell.index === 3 ? Style.text_fg : Theme.theme_primary_light
+                        color: cell.index === 2 || slot.selected && cell.index === 0 ? Theme.fg_strong : cell.index === 4 ? Style.text_fg : Theme.theme_primary_light
                         font.family: Style.font_family
-                        font.pixelSize: cell.index === 0 ? Style.font_size - 3 : Style.font_size - (cell.index === 3 ? 4 : 3)
-                        font.weight: cell.index === 1 ? Font.ExtraBold : Font.Bold
+                        font.pixelSize: cell.index === 0 ? Style.font_size - 3 : Style.font_size - (cell.index === 4 ? 4 : 3)
+                        font.weight: cell.index === 2 ? Font.ExtraBold : Font.Bold
                     }
 
                     AtbBar {
-                        visible: cell.index === 3
+                        visible: cell.index === 4
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 2
@@ -180,7 +197,7 @@ Item {
             required property var modelData
             required property int index
             x: 0
-            y: root.top_y + root.band_h + 4 + index * root.row_h + (root.row_h - height) / 2 - (index === 3 ? 3 : 0)
+            y: root.top_y + root.band_h + 4 + index * root.row_h + (root.row_h - height) / 2 - (index === 4 ? 3 : 0)
             text: modelData[0]
             color: Theme.theme_primary_light
             font.family: Style.font_family

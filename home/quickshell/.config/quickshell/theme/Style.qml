@@ -1409,7 +1409,14 @@ Singleton {
                         rain: Theme.info,
                         storm: Theme.theme_label,
                         snow: Theme.fg_strong,
-                        fog: Theme.fg_dim
+                        fog: Theme.fg_dim,
+                        days: {
+                            red: Theme.theme_label,
+                            green: Theme.ok,
+                            purple: Theme.magenta,
+                            blue: Theme.info,
+                            yellow: Theme.theme_secondary
+                        }
                     },
                     section_fg: Theme.theme_primary_light,
                     section_rule: false,
@@ -1724,7 +1731,7 @@ Singleton {
     readonly property bool device_shell: root.active.device_shell
     // Diagonal [position, color] stops filling window frames inside their border (WindowGradient); empty keeps frame_color.
     readonly property var window_gradient: root.active.window_gradient
-    // Orb colors (MateriaOrb) by role (key, section, workspace, alert) and weather kind; a role left out draws no orb.
+    // Orb colors (MateriaOrb) by role (key, section, workspace, alert), weather kind and daily slot color; a role left out draws no orb.
     readonly property var materia: root.active.materia
     // A pointing hand (HandCursor) on the selected row, active tab, picked chip and selected day.
     readonly property bool hand_cursor: root.active.hand_cursor
