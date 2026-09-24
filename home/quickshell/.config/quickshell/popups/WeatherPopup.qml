@@ -12,16 +12,17 @@ Popup {
 
     popup_name: "weather"
     size_class: "large"
-    preferred_width: 760
+    preferred_width: 440
     body_height: content.implicitHeight + 24
 
-    readonly property var base_tab_names: ["Daily", "Hourly", "Precip", "Sun & Moon", "Air"]
+    readonly property var base_tab_names: ["Daily", "Hourly", "Sun & Moon"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
     tabs: root.has_alerts ? root.base_tab_names.concat(["Alerts"]) : root.base_tab_names
-    readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 5
+    readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 3
 
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
-    readonly property var hourly_sub_names: ["Temperature", "Precip", "Wind", "UV", "Humidity"]
+    readonly property var hourly_sub_names: ["Temp", "Precip", "Wind", "UV", "Humid", "Air"]
+    readonly property int air_sub: 5
     sub_views: root.current_tab === 0 ? root.daily_sub_names : root.current_tab === 1 ? root.hourly_sub_names : []
     jumps_enabled: true
 
@@ -33,6 +34,73 @@ Popup {
     property int alert_cursor: 0
 
     readonly property int content_height: Style.px(400)
+    readonly property bool on_air: root.current_tab === 1 && root.hourly_sub === root.air_sub
+    readonly property int air_hours: Math.min(24, WeatherState.aq_hours.length)
+
+    FontMetrics {
+        id: tab_metrics
+        font.family: Style.font_family
+        font.pixelSize: Style.font_size - 2
+        font.bold: true
+        font.capitalization: Style.tab_caps ? Font.AllUppercase : Font.MixedCase
+        font.letterSpacing: Style.tab_caps ? Style.label_spacing : 0
+    }
+
+    FontMetrics {
+        id: chip_metrics
+        font.family: Style.font_family
+        font.pixelSize: Style.font_size - 3
+        font.bold: true
+        font.capitalization: Style.tab_caps ? Font.AllUppercase : Font.MixedCase
+        font.letterSpacing: Style.tab_caps ? Style.label_spacing : 0
+    }
+
+    FontMetrics {
+        id: key_metrics
+        font.family: Style.font_family
+        font.pixelSize: Style.font_size - 5
+        font.bold: true
+    }
+
+    // Mirrors MenuTab/KeyBadge sizing so rows can be split before the tabs exist.
+    readonly property real tab_key_space: Style.tab_keys ? Math.max(key_metrics.height + 2, key_metrics.advanceWidth("9") + 8) * (1 + Style.slant) + 6 : 0
+    // Reading .font re-runs the measurement when the style changes the metrics' font.
+    readonly property var tab_needs: {
+        const f = tab_metrics.font;
+        return root.tabs.map(t => tab_metrics.advanceWidth(t) + 12 + root.tab_key_space);
+    }
+
+    function chip_needs(names) {
+        const f = chip_metrics.font;
+        return names.map(n => chip_metrics.advanceWidth(Style.chip_brackets ? "[" + n + "]" : n) + 20);
+    }
+
+    // Fewest balanced rows of consecutive indices whose widths fit `avail`.
+    function split_rows(needs, avail, spacing) {
+        const n = needs.length;
+        for (let r = 1; r <= n; r++) {
+            const per = Math.ceil(n / r);
+            const rows = [];
+            let fits = true;
+            for (let i = 0; i < n; i += per) {
+                const idx = [];
+                let w = -spacing;
+                for (let j = i; j < Math.min(n, i + per); j++) {
+                    idx.push(j);
+                    w += needs[j] + spacing;
+                }
+                if (w > avail) fits = false;
+                rows.push(idx);
+            }
+            if (fits || per === 1) return rows;
+        }
+        return [];
+    }
+
+    readonly property var tab_rows: root.split_rows(root.tab_needs, main_column.width, 4)
+    readonly property var chip_rows: root.split_rows(root.chip_needs(root.sub_views), main_column.width, 4)
+    // Both chip sets reserve the same height so switching Daily/Hourly never resizes the popup.
+    readonly property int chip_row_count: Math.max(root.split_rows(root.chip_needs(root.daily_sub_names), main_column.width, 4).length, root.split_rows(root.chip_needs(root.hourly_sub_names), main_column.width, 4).length)
 
     onCurrent_subChanged: {
         if (root.current_tab === 0) root.daily_sub = root.current_sub;
@@ -76,10 +144,9 @@ Popup {
     }
 
     function move_time(dir, jump) {
-        if (root.current_tab === 0 || root.current_tab === 3) root.move_day_cursor(dir, jump);
+        if (root.current_tab === 0 || root.current_tab === 2) root.move_day_cursor(dir, jump);
+        else if (root.on_air) root.move_hour_cursor(dir, jump, root.air_hours, false);
         else if (root.current_tab === 1) root.move_hour_cursor(dir, jump, WeatherState.hours.length, true);
-        else if (root.current_tab === 2) root.move_hour_cursor(dir, jump, Math.min(12, WeatherState.hours.length), false);
-        else if (root.current_tab === 4) root.move_hour_cursor(dir, jump, Math.min(24, WeatherState.aq_hours.length), false);
         else if (root.on_alerts_tab) root.move_alert_cursor(dir, jump);
     }
 
@@ -91,15 +158,13 @@ Popup {
     }
 
     function go_end() {
-        if (root.current_tab === 0 || root.current_tab === 3) {
+        if (root.current_tab === 0 || root.current_tab === 2) {
             root.day_cursor = Math.max(0, WeatherState.days.length - 1);
+        } else if (root.on_air) {
+            root.hour_cursor = Math.max(0, root.air_hours - 1);
         } else if (root.current_tab === 1) {
             root.hour_cursor = Math.max(0, WeatherState.hours.length - 1);
             if (hourly_view) hourly_view.scroll_to_cursor();
-        } else if (root.current_tab === 2) {
-            root.hour_cursor = Math.max(0, Math.min(11, WeatherState.hours.length - 1));
-        } else if (root.current_tab === 4) {
-            root.hour_cursor = Math.max(0, Math.min(23, WeatherState.aq_hours.length - 1));
         } else if (root.on_alerts_tab) {
             root.alert_cursor = Math.max(0, WeatherState.alerts.length - 1);
         }
@@ -115,6 +180,7 @@ Popup {
         if (idx === -1) idx = 0;
         root.hour_cursor = idx;
         root.set_tab(1);
+        if (root.on_air) root.current_sub = 0;
         if (hourly_view) hourly_view.scroll_to_cursor();
     }
 
@@ -198,6 +264,8 @@ Popup {
                     }
 
                     Text {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
                         text: WeatherState.has_data ? WeatherState.current.cond : WeatherState.loading ? "Loading…" : "Unavailable: " + WeatherState.error
                         color: WeatherState.has_data || WeatherState.loading ? Theme.fg_core : Theme.warning
                         font.family: Style.font_family
@@ -206,6 +274,8 @@ Popup {
 
                     Text {
                         visible: WeatherState.has_data
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
                         text: "Feels like " + (WeatherState.has_data ? root.fmt_temp(WeatherState.current.feels) : "")
                         color: Style.text_muted
                         font.family: Style.font_family
@@ -226,6 +296,11 @@ Popup {
                 Text {
                     visible: WeatherState.stale
                     Layout.alignment: Qt.AlignTop
+                    Layout.maximumWidth: main_column.width / 3
+                    horizontalAlignment: Text.AlignRight
+                    wrapMode: Text.Wrap
+                    maximumLineCount: 3
+                    elide: Text.ElideRight
                     text: "Stale data" + (WeatherState.error ? ": " + WeatherState.error : "")
                     color: Theme.warning
                     font.family: Style.font_family
@@ -275,25 +350,37 @@ Popup {
                 }
             }
 
-            // --- Tab row ---
-            RowLayout {
+            // --- Tab rows: each tab asks for its label's width, wrapping only when a row cannot hold them ---
+            ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 4
 
                 Repeater {
-                    model: root.tabs
+                    model: root.tab_rows
 
-                    MenuTab {
-                        id: tab_chip
-                        required property string modelData
-                        required property int index
+                    RowLayout {
+                        id: tab_row
+                        required property var modelData
 
                         Layout.fillWidth: true
-                        implicitHeight: Style.px(26)
-                        label: tab_chip.modelData
-                        active: tab_chip.index === root.current_tab
-                        key: tab_chip.index < 9 ? String(tab_chip.index + 1) : ""
-                        onClicked: root.set_tab(tab_chip.index)
+                        spacing: 4
+
+                        Repeater {
+                            model: tab_row.modelData
+
+                            MenuTab {
+                                id: tab_chip
+                                required property int modelData
+
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: root.tab_needs[tab_chip.modelData] || 0
+                                implicitHeight: Style.px(26)
+                                label: root.tabs[tab_chip.modelData] || ""
+                                active: tab_chip.modelData === root.current_tab
+                                key: tab_chip.modelData < 9 ? String(tab_chip.modelData + 1) : ""
+                                onClicked: root.set_tab(tab_chip.modelData)
+                            }
+                        }
                     }
                 }
             }
@@ -313,30 +400,23 @@ Popup {
                 HourlyView {
                     id: hourly_view
                     anchors.fill: parent
-                    visible: root.current_tab === 1
+                    visible: root.current_tab === 1 && !root.on_air
                     hour_cursor: root.hour_cursor
                     sub: root.hourly_sub
                     on_select: function (i) { root.hour_cursor = i; }
                 }
 
-                PrecipView {
+                AirView {
                     anchors.fill: parent
-                    visible: root.current_tab === 2
+                    visible: root.on_air
                     hour_cursor: root.hour_cursor
                     on_select: function (i) { root.hour_cursor = i; }
                 }
 
                 SunMoonView {
                     anchors.fill: parent
-                    visible: root.current_tab === 3
+                    visible: root.current_tab === 2
                     day_cursor: root.day_cursor
-                }
-
-                AirView {
-                    anchors.fill: parent
-                    visible: root.current_tab === 4
-                    hour_cursor: root.hour_cursor
-                    on_select: function (i) { root.hour_cursor = i; }
                 }
 
                 AlertsView {
@@ -348,51 +428,49 @@ Popup {
                 }
             }
 
-            // --- Sub-view chips (Daily/Hourly) or the selected time (others), under the content ---
+            // --- Sub-view chips (Daily/Hourly) or the selected day (Sun & Moon), under the content ---
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 28
+                Layout.preferredHeight: Math.max(28, root.chip_row_count * Style.px(24) + (root.chip_row_count - 1) * 4)
 
-                RowLayout {
+                ColumnLayout {
                     anchors.centerIn: parent
                     spacing: 4
                     visible: root.current_tab === 0 || root.current_tab === 1
 
                     Repeater {
-                        model: root.sub_views
+                        model: root.chip_rows
 
-                        MenuTab {
-                            id: sub_chip
-                            required property string modelData
-                            required property int index
+                        RowLayout {
+                            id: chip_row
+                            required property var modelData
 
-                            base_radius: 12
-                            label: sub_chip.modelData
-                            active: sub_chip.index === root.current_sub
-                            font_size: Style.font_size - 3
-                            onClicked: root.current_sub = sub_chip.index
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: 4
+
+                            Repeater {
+                                model: chip_row.modelData
+
+                                MenuTab {
+                                    id: sub_chip
+                                    required property int modelData
+
+                                    base_radius: 12
+                                    label: root.sub_views[sub_chip.modelData] || ""
+                                    active: sub_chip.modelData === root.current_sub
+                                    font_size: Style.font_size - 3
+                                    onClicked: root.current_sub = sub_chip.modelData
+                                }
+                            }
                         }
                     }
                 }
 
                 Text {
                     anchors.centerIn: parent
-                    visible: root.current_tab === 3
+                    visible: root.current_tab === 2
                     readonly property var d: WeatherState.days[root.day_cursor]
                     text: d ? d.weekday + (d.weekday !== "Today" ? " (" + d.date.substr(5) + ")" : "") : ""
-                    color: Style.text_muted
-                    font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 3
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    visible: root.current_tab === 2 || root.current_tab === 4
-                    text: {
-                        const hrs = root.current_tab === 2 ? WeatherState.hours.slice(0, 12) : WeatherState.aq_hours.slice(0, 24);
-                        const r = hrs[Math.max(0, Math.min(hrs.length - 1, root.hour_cursor))];
-                        return r ? WeatherState.format_hour(new Date(r.dt)) : "";
-                    }
                     color: Style.text_muted
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 3
@@ -408,7 +486,8 @@ Popup {
 
             MenuFooter {
                 Layout.fillWidth: true
-                text: "[ ] tabs · 1-5 select · Tab view · h/l move · H/L jump · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
+                wrap: true
+                text: "[ ] tabs · 1-" + root.tabs.length + " select · Tab view · h/l move · H/L jump · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
             }
         }
     }

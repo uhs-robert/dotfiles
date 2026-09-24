@@ -13,7 +13,7 @@ Popup {
 
     popup_name: "notifications"
     size_class: "large"
-    preferred_width: 640
+    preferred_width: 420
     body_height: content.implicitHeight + 24
 
     readonly property int content_height: Style.px(460)
@@ -201,11 +201,16 @@ Popup {
 
             // --- Header ---
             RowLayout {
+                id: header_row
+                // The buttons sit side by side only when the title and counts still fit beside them.
+                readonly property bool buttons_inline: header_row.width >= (bell.visible ? bell.implicitWidth + 14 : 0) + Math.max(title_text.visible ? title_text.implicitWidth : 0, count_text.implicitWidth) + 14 + dnd_button.implicitWidth + 8 + clear_button.implicitWidth
+
                 Layout.fillWidth: true
                 spacing: 14
 
                 // The style's title tab already names the popup.
                 Text {
+                    id: bell
                     visible: !Style.show_title
                     text: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
                     color: NotificationState.dnd ? Style.text_dim : Theme.theme_primary
@@ -219,6 +224,7 @@ Popup {
                     spacing: 0
 
                     Text {
+                        id: title_text
                         visible: !Style.show_title
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -231,6 +237,7 @@ Popup {
                     }
 
                     Text {
+                        id: count_text
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                         elide: Text.ElideRight
@@ -241,21 +248,30 @@ Popup {
                     }
                 }
 
-                HeaderButton {
+                GridLayout {
                     Layout.alignment: Qt.AlignVCenter
-                    icon: "\u{f009b}"
-                    label: "Do not disturb"
-                    key_hint: Style.row_keys ? "t" : "D"
-                    active: NotificationState.dnd
-                    onActivated: NotificationState.toggle_dnd()
-                }
+                    columns: header_row.buttons_inline ? 2 : 1
+                    columnSpacing: 8
+                    rowSpacing: 4
 
-                HeaderButton {
-                    Layout.alignment: Qt.AlignVCenter
-                    icon: "\u{f0a7a}"
-                    label: "Clear all"
-                    key_hint: "C"
-                    onActivated: NotificationState.clear_all()
+                    HeaderButton {
+                        id: dnd_button
+                        Layout.fillWidth: true
+                        icon: "\u{f009b}"
+                        label: "DND"
+                        key_hint: Style.row_keys ? "t" : "D"
+                        active: NotificationState.dnd
+                        onActivated: NotificationState.toggle_dnd()
+                    }
+
+                    HeaderButton {
+                        id: clear_button
+                        Layout.fillWidth: true
+                        icon: "\u{f0a7a}"
+                        label: "Clear all"
+                        key_hint: "C"
+                        onActivated: NotificationState.clear_all()
+                    }
                 }
             }
 
@@ -410,7 +426,8 @@ Popup {
 
             MenuFooter {
                 Layout.fillWidth: true
-                text: "[ ] tabs · 1-3 select · Tab order · j/k move · gg/G first/last · h/l action · H/L body/last · Enter open · d/x dismiss · C clear all · t toggle"
+                wrap: true
+                text: "[ ] tabs · 1-3 select · Tab order · j/k move · gg/G first/last · h/l action · H/L body/last · Enter open · d/x dismiss · C clear all · t dnd"
             }
         }
     }

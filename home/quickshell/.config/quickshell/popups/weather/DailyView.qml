@@ -245,14 +245,16 @@ Item {
                         }
 
                         Item {
+                            id: icon_box
+                            readonly property real size: Math.max(16, Math.min(root.icon_size, day_col.width - 4))
                             Layout.alignment: Qt.AlignHCenter
-                            width: root.icon_size
-                            height: root.icon_size
+                            Layout.preferredWidth: icon_box.size
+                            Layout.preferredHeight: icon_box.size
 
                             Image {
                                 anchors.centerIn: parent
-                                width: root.icon_size
-                                height: root.icon_size
+                                width: icon_box.size
+                                height: icon_box.size
                                 readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
                                 sourceSize.width: Math.ceil(root.icon_size * 2 * dpr)
                                 sourceSize.height: Math.ceil(root.icon_size * 2 * dpr)
@@ -264,6 +266,7 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
                             text: day_col.modelData.weekday
                             color: day_col.index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core
                             font.family: Style.font_family
@@ -278,6 +281,8 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: 4
             horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+            maximumLineCount: 2
             elide: Text.ElideRight
             readonly property var selected: WeatherState.days[root.day_cursor]
             text: selected ? selected.cond + " · " + selected.precip.toFixed(2) + (WeatherState.settings.unit === "celsius" ? " mm" : " in") + " · " + (selected.sunrise || "—") + "–" + (selected.sunset || "—") : ""

@@ -144,11 +144,11 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             Layout.topMargin: 4
-            spacing: 14
+            spacing: 12
 
             Image {
-                Layout.preferredWidth: 110
-                Layout.preferredHeight: 110
+                Layout.preferredWidth: 96
+                Layout.preferredHeight: 96
                 source: WeatherState.moon_icon_source(root.moon_phase)
                 sourceSize.width: 220
                 sourceSize.height: 220
@@ -159,6 +159,8 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
                     text: WeatherState.moon_name(root.moon_phase)
                     color: Theme.fg_core
                     font.family: Style.font_family
@@ -167,13 +169,27 @@ Item {
                 }
 
                 Text {
-                    text: "Moonrise " + (root.moon_times.rise || "—") + (root.moon_times.set ? "  ·  Moonset " + root.moon_times.set : "")
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: "Moonrise " + (root.moon_times.rise || "—")
                     color: Style.text_muted
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 2
                 }
 
                 Text {
+                    visible: !!root.moon_times.set
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: "Moonset " + (root.moon_times.set || "")
+                    color: Style.text_muted
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 2
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
                     text: "Full moon " + root.next_full
                     color: Style.text_dim
                     font.family: Style.font_family
