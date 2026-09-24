@@ -139,10 +139,10 @@ Popup {
         root.fetch_details();
     }
 
-    readonly property string details_script: "nmcli -t -m multiline -f IN-USE,SSID,BSSID,BAND,CHAN,FREQ,SIGNAL,SECURITY device wifi list ifname \"$1\" --rescan no; "
-        + "echo @@DEV; nmcli -t -f GENERAL.HWADDR,GENERAL.CON-UUID,CAPABILITIES.SPEED,IP4,IP6 device show \"$1\"; "
+    readonly property string details_script: "nmcli -t -e no -m multiline -f IN-USE,SSID,BSSID,BAND,CHAN,FREQ,SIGNAL,SECURITY device wifi list ifname \"$1\" --rescan no; "
+        + "echo @@DEV; nmcli -t -e no -f GENERAL.HWADDR,GENERAL.CON-UUID,CAPABILITIES.SPEED,IP4,IP6 device show \"$1\"; "
         + "echo @@SAVED; u=$(nmcli -t -f UUID,TYPE connection show | sed -n 's/:802-11-wireless$//p'); "
-        + "[ -z \"$u\" ] || nmcli -t -f connection.uuid,connection.id,connection.timestamp,connection.autoconnect,connection.metered,ipv4.dns,802-11-wireless.ssid connection show $u"
+        + "[ -z \"$u\" ] || nmcli -t -e no -f connection.uuid,connection.id,connection.timestamp,connection.autoconnect,connection.metered,ipv4.dns,802-11-wireless.ssid connection show $u"
 
     // Errors go to stdout so one collector sees them; reapply runs only for the active profile and keeps the link up.
     readonly property string modify_script: "u=$1; r=$2; shift 2; "
@@ -174,7 +174,7 @@ Popup {
             const i = line.indexOf(":");
             if (i < 0) continue;
             const key = line.slice(0, i).replace(/\[\d+\]$/, "");
-            const value = line.slice(i + 1).trim();
+            const value = line.slice(i + 1);
             if (section === "aps") {
                 if (key === "IN-USE") aps.push({ in_use: value === "*" });
                 else if (aps.length > 0) aps[aps.length - 1][key] = value;
@@ -193,7 +193,7 @@ Popup {
             }
         }
 
-        const ssid = root.details_ssid.trim();
+        const ssid = root.details_ssid;
         const matches = aps.filter(a => a.SSID === ssid).sort((a, b) => Number(b.SIGNAL) - Number(a.SIGNAL));
         const ap = matches.find(a => a.in_use) || matches[0] || null;
         const profiles = saved.filter(c => c["802-11-wireless.ssid"] === ssid).sort((a, b) => Number(b["connection.timestamp"]) - Number(a["connection.timestamp"]));
