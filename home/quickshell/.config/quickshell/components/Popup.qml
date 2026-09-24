@@ -133,6 +133,8 @@ PanelWindow {
             root.open_search();
         } else if (root.search_enabled && root.search_query !== "" && event.key === Qt.Key_N) {
             root.step_search(back ? -1 : 1);
+        } else if (event.key === Qt.Key_Backspace && Popups.back_name !== "") {
+            Popups.back();
         } else if (event.key === Qt.Key_Q) {
             Popups.close();
         } else if (tabs.length > 0 && event.key === Qt.Key_BracketLeft) {

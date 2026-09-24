@@ -25,7 +25,7 @@ Singleton {
     }
 
     // With an anchor it drops from that island like a popup; without one it docks at the bottom of the focused monitor.
-    function open(name, anchor_item, color, screen_name) {
+    function open(name, anchor_item, color, screen_name, back_to) {
         const p = root.providers[name];
         if (!p) {
             console.warn("Pickers: unknown provider " + name);
@@ -36,11 +36,11 @@ Singleton {
         root.provider_name = name;
         p.refresh();
         if (anchor_item) {
-            Popups.open("picker", anchor_item, color, screen_name);
+            Popups.open("picker", anchor_item, color, screen_name, back_to);
         } else {
             const mon = Hyprland.focusedMonitor;
             const screen = (mon && Quickshell.screens.find(s => s.name === mon.name)) || Quickshell.screens[0];
-            Popups.open("picker", null, color, screen ? screen.name : "");
+            Popups.open("picker", null, color, screen ? screen.name : "", back_to);
         }
         return true;
     }

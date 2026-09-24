@@ -156,6 +156,8 @@ Popup {
             query_input.text = "";
         } else if (root.insert || ctrl || (event.modifiers & Qt.AltModifier)) {
             return;
+        } else if (k === Qt.Key_Backspace && Popups.back_name !== "") {
+            Popups.back();
         } else if (k === Qt.Key_J) {
             root.move_row(1);
         } else if (k === Qt.Key_K) {
@@ -235,6 +237,11 @@ Popup {
                 Keys.onPressed: event => {
                     const ctrl = event.modifiers & Qt.ControlModifier;
                     const k = event.key;
+                    if (k === Qt.Key_Backspace && query_input.text === "" && Popups.back_name !== "") {
+                        Popups.back();
+                        event.accepted = true;
+                        return;
+                    }
                     const nav = k === Qt.Key_Up || k === Qt.Key_Down || k === Qt.Key_Tab || k === Qt.Key_Backtab
                         || k === Qt.Key_Return || k === Qt.Key_Enter
                         || (ctrl && (k === Qt.Key_J || k === Qt.Key_K || k === Qt.Key_N || k === Qt.Key_P || k === Qt.Key_U));
