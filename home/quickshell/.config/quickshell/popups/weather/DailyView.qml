@@ -33,7 +33,9 @@ Item {
     readonly property int tower_labels_h: Math.round(Style.font_size * 3.4)
     // Metroid: scan brackets lock onto the selected day.
     readonly property bool scan: Style.weather_header === "scan"
-    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns
+    // Game Boy: days as a Game Boy Camera photo strip on the week's hi/lo dot scale.
+    readonly property bool camera: Style.weather_header === "pokedex" && root.sub === 0
+    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns || root.camera
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
     // SNES: columns standing on a Mode 7 floor.
@@ -111,6 +113,9 @@ Item {
         const r = root.week_temp_range;
         return root.headroom + (r.max - day.min) / (r.max - r.min) * root.band_range_h;
     }
+
+    readonly property real week_low: WeatherState.days.length > 0 ? Math.min(...WeatherState.days.map(d => d.min)) : 0
+    readonly property real week_high: WeatherState.days.length > 0 ? Math.max(...WeatherState.days.map(d => d.max)) : 1
 
     readonly property real wind_max: {
         const days = WeatherState.days;
@@ -274,6 +279,18 @@ Item {
                             scale_min: root.week_temp_range.min
                             scale_max: root.week_temp_range.max
                             labels_h: root.tower_labels_h
+                        }
+                    }
+
+                    Loader {
+                        active: root.camera
+                        anchors.fill: parent
+                        sourceComponent: CameraPhoto {
+                            day: day_col.modelData
+                            day_index: day_col.day_index
+                            selected: day_col.day_index === root.day_cursor
+                            scale_min: root.week_low
+                            scale_max: root.week_high
                         }
                     }
 
@@ -538,6 +555,26 @@ Item {
                         }
                     }
                 }
+            }
+        }
+
+        RowLayout {
+            visible: root.camera && root.window_days.length > 0
+            Layout.fillWidth: true
+
+            Text {
+                Layout.fillWidth: true
+                text: "HI LO °" + WeatherState.unit_symbol() + " · RAIN %"
+                color: Style.shade_2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 5
+            }
+
+            Text {
+                text: Math.round(root.week_low) + "–" + Math.round(root.week_high) + "°" + WeatherState.unit_symbol()
+                color: Style.shade_2
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 5
             }
         }
 
