@@ -301,25 +301,25 @@ PanelWindow {
 
                 Item {
                     Layout.alignment: Qt.AlignVCenter
-                    Layout.preferredWidth: root.vox_recording ? Style.px(260) : Style.px(180)
-                    Layout.preferredHeight: root.vox_recording ? Style.px(44) : meter.implicitHeight
+                    Layout.preferredWidth: root.showing_vox ? Style.px(260) : Style.px(180)
+                    Layout.preferredHeight: root.showing_vox ? Style.px(44) : meter.implicitHeight
 
                     Meter {
                         id: meter
-                        visible: !root.vox_recording
+                        visible: !root.showing_vox
                         width: parent.width
                         anchors.verticalCenter: parent.verticalCenter
                         value: root.showing_vox ? 0 : root.level
-                        busy: root.showing_vox && !root.vox_recording && root.visible
                         hot_from: root.showing_vox ? 1 : 0.9
                         opacity: !root.showing_vox && root.muted ? 0.35 : 1
                     }
 
                     Waveform {
                         id: waveform
-                        visible: root.vox_recording
+                        visible: root.showing_vox
                         anchors.fill: parent
-                        running: root.vox_recording && root.visible && VoxtypeState.recording
+                        frozen: !root.vox_recording
+                        running: root.showing_vox && root.visible
                     }
                 }
 

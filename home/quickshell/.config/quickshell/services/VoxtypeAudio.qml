@@ -87,8 +87,9 @@ Singleton {
         if (typeof data.peak === "number") root.push(Math.max(0, Math.min(1, data.peak)));
     }
 
+    // The last recording stays in the ring so the transcribing view can show it frozen.
     onActiveChanged: {
-        root.clear();
+        if (root.active) root.clear();
         bridge.running = root.active;
         if (root.active) {
             settings.running = true;

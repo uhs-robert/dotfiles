@@ -11,6 +11,8 @@ Item {
     // Polls VoxtypeAudio only while true.
     property bool running: false
     property bool line: true
+    // Holds the last recording while voxtype transcribes: yellow, gently wobbling, over a breathing glow.
+    property bool frozen: false
     property int bar_count: 30
     // Bars from this level up take the hot color.
     property real hot_from: 0.9
@@ -80,7 +82,8 @@ Item {
         return out;
     }
     readonly property bool hot_now: root.envelope.length > 0 && root.envelope[root.envelope.length - 1] >= root.hot_from
-    readonly property color line_color: root.hot_now ? Style.meter_hot : Style.meter_on
+    readonly property color line_color: root.frozen ? Theme.warning : root.hot_now ? Style.meter_hot : Style.meter_on
+    readonly property real breath: 0.5 + 0.5 * Math.sin(root.phase * 1.6)
     readonly property real amp: root.height * 0.45
     readonly property var top_points: {
         const n = root.envelope.length;
@@ -100,6 +103,14 @@ Item {
             pts.push(Qt.point(t * root.width, root.height / 2 + (root.envelope[i] - Math.sin(root.phase * 2 + t * Math.PI * 3) * 0.04) * root.amp));
         }
         return pts;
+    }
+
+    Rectangle {
+        visible: root.line && root.frozen
+        anchors.fill: parent
+        anchors.margins: -(2 + root.breath * 5)
+        radius: Style.radius(12)
+        color: Qt.alpha(Theme.warning, 0.06 + root.breath * 0.08)
     }
 
     Shape {
