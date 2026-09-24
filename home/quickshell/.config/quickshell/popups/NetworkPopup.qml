@@ -190,6 +190,7 @@ Popup {
             if (root.password_mode) return;
 
             if (root.forget_confirm) {
+                if (root.is_help_key(event) || event.key === Qt.Key_Q) return;
                 if (event.key === Qt.Key_Y) {
                     if (root.forget_target) root.forget_target.forget();
                     root.forget_confirm = false;

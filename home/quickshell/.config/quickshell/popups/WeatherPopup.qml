@@ -15,6 +15,7 @@ Popup {
     preferred_width: 440
     fit_island: true
     body_height: content.implicitHeight + 24
+    key_help: "[ ] tabs · 1-" + root.tabs.length + " select · Tab view · h/l move · H/L jump · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
 
     readonly property var base_tab_names: ["Daily", "Hourly"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
@@ -392,7 +393,7 @@ Popup {
             MenuFooter {
                 Layout.fillWidth: true
                 wrap: true
-                text: "[ ] tabs · 1-" + root.tabs.length + " select · Tab view · h/l move · H/L jump · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
+                text: root.help_hint
             }
         }
     }

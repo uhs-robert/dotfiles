@@ -16,6 +16,7 @@ Popup {
     preferred_width: 420
     fit_island: true
     body_height: content.implicitHeight + 24
+    key_help: "[ ] tabs · 1-3 select · Tab order · j/k move · gg/G first/last · h/l action · H/L body/last · Enter open · d/x dismiss · C clear all · t dnd"
 
     readonly property int content_height: Style.px(460)
     tabs: ["All", "Apps", "Critical"]
@@ -403,7 +404,7 @@ Popup {
             MenuFooter {
                 Layout.fillWidth: true
                 wrap: true
-                text: "[ ] tabs · 1-3 select · Tab order · j/k move · gg/G first/last · h/l action · H/L body/last · Enter open · d/x dismiss · C clear all · t dnd"
+                text: root.help_hint
             }
         }
     }

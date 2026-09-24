@@ -12,6 +12,7 @@ Popup {
     popup_name: "updates"
     preferred_width: 520
     body_height: content.implicitHeight + 24
+    key_help: "Tab views · j/k move · gg/G ends · r refresh · u upgrade · q close"
 
     readonly property int content_height: Style.px(320)
     sub_views: ["Official (" + UpdatesState.official.length + ")", "AUR (" + UpdatesState.aur.length + ")"]
@@ -206,7 +207,7 @@ Popup {
 
             MenuFooter {
                 Layout.fillWidth: true
-                text: "Tab views · j/k move · gg/G ends · r refresh · u upgrade · q close"
+                text: root.help_hint
             }
         }
     }
