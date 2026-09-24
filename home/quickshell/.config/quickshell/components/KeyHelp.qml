@@ -24,7 +24,7 @@ Item {
             e.push({ key: root.tab_count > 1 ? "1-" + Math.min(9, root.tab_count) : "1", desc: "select" });
         }
         if (root.has_views) e.push({ key: "Tab", desc: "views" });
-        e.push({ key: "?", desc: "help" }, { key: "Esc", desc: "back" }, { key: "q", desc: "close" });
+        e.push({ key: "?", desc: "help" }, { key: "Esc/Backspace", desc: "back" }, { key: "q", desc: "close" });
         return e.filter(g => root.own_keys.indexOf(g.key) < 0);
     }
 
@@ -46,7 +46,7 @@ Item {
     onVisibleChanged: if (visible) flick.contentY = 0
 
     Keys.onPressed: event => {
-        if (event.key === Qt.Key_Question || event.text === "?" || event.key === Qt.Key_Escape) {
+        if (event.key === Qt.Key_Question || event.text === "?" || event.key === Qt.Key_Escape || event.key === Qt.Key_Backspace) {
             root.back();
         } else if (event.key === Qt.Key_Q) {
             Popups.close();
