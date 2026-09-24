@@ -127,7 +127,7 @@ PanelWindow {
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
-        border.width: Style.frame_visor ? 0 : Style.frame_border_width
+        border.width: Style.frame_visor || Style.frame_chamfer > 0 ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
 
         VisorGlass {
@@ -208,9 +208,9 @@ PanelWindow {
                     y: (parent.height - height) / 2
                     text: Style.title_prefix + root.title + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
                     color: Style.show_title ? Style.title_fg : Style.accent_color
-                    font.family: Style.font_family
+                    font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
-                    font.bold: true
+                    font.bold: Style.title_font_family === Style.font_family
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
                     style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
                     styleColor: Style.title_glow
@@ -223,7 +223,7 @@ PanelWindow {
                 anchors.right: parent.right
                 anchors.rightMargin: frame.title_x + 10
                 y: title_tab.y + (title_tab.height - height) / 2
-                text: Style.title_readout
+                text: Style.title_readout.replace("{code}", root.title.slice(0, 3))
                 color: Style.title_readout_fg.a > 0 ? Style.title_readout_fg : Style.text_muted
                 font.family: Style.font_family
                 font.pixelSize: Style.font_size - 5

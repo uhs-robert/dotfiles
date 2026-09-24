@@ -94,16 +94,16 @@ Popup {
                         Text {
                             Layout.fillWidth: true
                             text: root.label(row.modelData)
-                            color: row.fg(Theme.fg_core)
-                            font.family: Style.font_family
-                            font.pixelSize: Style.font_size
+                            color: row.fg(root.st.text_fg)
+                            font.family: root.st.font_family
+                            font.pixelSize: root.st.font_size
                         }
 
                         Text {
                             text: row.modelData === Style.saved_name ? "active" : ""
                             color: row.fg(Theme.ok)
-                            font.family: Style.font_family
-                            font.pixelSize: Style.font_size - 3
+                            font.family: root.st.font_family
+                            font.pixelSize: root.st.font_size - 3
                         }
                     }
 

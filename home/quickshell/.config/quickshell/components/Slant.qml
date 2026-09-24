@@ -6,7 +6,7 @@ import "../theme"
 Rectangle {
     id: root
 
-    property real slant: Style.slant
+    property real slant: Style.for_item(root).slant
     readonly property real shift: root.slant * root.height
 
     width: parent ? parent.width - root.shift : 0

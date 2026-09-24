@@ -155,6 +155,15 @@ Rectangle {
     }
 
     Rectangle {
+        visible: Style.card_edge.a > 0 && !(root.selected && Style.selection_bar)
+        x: 1
+        y: 1
+        width: 2
+        height: root.height - 2
+        color: Style.card_edge
+    }
+
+    Rectangle {
         visible: root.selected && Style.selection_bar && !Style.frame_visor
         x: 1
         y: 1
@@ -258,8 +267,8 @@ Rectangle {
                 elide: Text.ElideRight
                 text: root.notification ? root.notification.summary : ""
                 color: Theme.fg_core
-                font.bold: true
-                font.family: Style.font_family
+                font.bold: Style.title_font_family === Style.font_family
+                font.family: Style.title_font_family
                 font.pixelSize: Style.font_size + (Style.boxed_cards ? 0 : 1)
                 style: root.text_style
                 styleColor: root.glow_color
@@ -299,9 +308,9 @@ Rectangle {
                         implicitWidth: Math.min(action_label.implicitWidth + 16, layout.width)
                         implicitHeight: 22
                         radius: Style.radius(11)
-                        color: action_chip.focused ? Theme.theme_secondary : Style.boxed_cards ? "transparent" : Theme.bg_surface
+                        color: action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : Theme.bg_surface
                         border.width: Style.boxed_cards || action_chip.focused ? 1 : 0
-                        border.color: action_chip.focused ? Theme.theme_secondary : Style.key_border
+                        border.color: action_chip.focused ? Style.chip_pick : Style.chip_border.a > 0 ? Style.chip_border : Style.key_border
 
                         Text {
                             id: action_label
