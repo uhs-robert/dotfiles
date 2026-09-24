@@ -781,6 +781,7 @@ Singleton {
                 }
             }),
             "ps2": Object.assign({}, terminal, {
+                weather_header: "towers",
                 done_anim: "pixel",
                 font_family: "Exo 2",
                 font_size: Theme.popup_font_size + 1,
@@ -1390,7 +1391,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr" or "weatherstar", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar" or "towers", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout

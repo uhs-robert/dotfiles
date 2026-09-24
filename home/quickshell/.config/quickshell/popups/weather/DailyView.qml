@@ -28,7 +28,10 @@ Item {
     readonly property bool save_blocks: Style.weather_header === "memcard"
     // CRT: WeatherStar 4000 "Extended Forecast" panels.
     readonly property bool ws_panels: Style.weather_header === "weatherstar" && root.sub === 0
-    readonly property bool custom_column: root.stat_columns || root.ws_panels
+    // PS2: days as translucent towers on a dark floor.
+    readonly property bool tower_columns: Style.weather_header === "towers" && root.sub === 0
+    readonly property int tower_labels_h: Math.round(Style.font_size * 3.4)
+    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
     // SNES: columns standing on a Mode 7 floor.
@@ -126,6 +129,17 @@ Item {
         height: day_row.height * 0.58
         sourceComponent: Mode7Floor {}
         onLoaded: if (root.floor_shown) floor_loader.item.run()
+    }
+
+    Loader {
+        active: root.tower_columns && root.window_days.length > 0
+        x: day_row.x - 2
+        y: day_row.y + day_row.height - root.tower_labels_h - 40
+        width: day_row.width + 4
+        height: root.tower_labels_h + 40
+        sourceComponent: TowerFloor {
+            haze_h: 40
+        }
     }
 
     ColumnLayout {
@@ -238,6 +252,18 @@ Item {
                             selected: day_col.day_index === root.day_cursor
                             scale_min: root.week_temp_range.min
                             scale_max: root.week_temp_range.max
+                        }
+                    }
+
+                    Loader {
+                        active: root.tower_columns
+                        anchors.fill: parent
+                        sourceComponent: TowerColumn {
+                            day: day_col.modelData
+                            selected: day_col.day_index === root.day_cursor
+                            scale_min: root.week_temp_range.min
+                            scale_max: root.week_temp_range.max
+                            labels_h: root.tower_labels_h
                         }
                     }
 
