@@ -55,9 +55,12 @@ Item {
             }
         }
 
-        RowLayout {
+        GridLayout {
+            id: readings
             Layout.fillWidth: true
-            spacing: 8
+            columns: Math.max(1, Math.min(3, Math.floor(readings.width / (Style.font_size * 6))))
+            columnSpacing: 8
+            rowSpacing: 4
 
             Repeater {
                 model: [

@@ -46,7 +46,8 @@ Item {
 
     function scroll_to_cursor() {
         const cursor_x = root.hour_cursor * root.hour_col_w;
-        const margin = root.hour_col_w * 2;
+        // Narrow views get a smaller lead so the two margins never overlap.
+        const margin = Math.max(0, Math.min(root.hour_col_w * 2, (flick.width - root.hour_col_w) / 2));
         if (cursor_x < flick.contentX + margin) {
             flick.contentX = Math.max(0, cursor_x - margin);
         } else if (cursor_x + root.hour_col_w > flick.contentX + flick.width - margin) {

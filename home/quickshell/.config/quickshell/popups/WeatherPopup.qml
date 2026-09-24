@@ -13,14 +13,16 @@ Popup {
     popup_name: "weather"
     size_class: "large"
     preferred_width: 440
+    fit_island: true
     body_height: content.implicitHeight + 24
 
-    readonly property var base_tab_names: ["Daily", "Hourly", "Sun & Moon"]
+    readonly property var base_tab_names: ["Daily", "Hourly"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
     tabs: root.has_alerts ? root.base_tab_names.concat(["Alerts"]) : root.base_tab_names
-    readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 3
+    readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 2
 
-    readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
+    readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine", "Sun & Moon"]
+    readonly property int sun_moon_sub: 4
     readonly property var hourly_sub_names: ["Temp", "Precip", "Wind", "UV", "Humid", "Air"]
     readonly property int air_sub: 5
     sub_views: root.current_tab === 0 ? root.daily_sub_names : root.current_tab === 1 ? root.hourly_sub_names : []
@@ -30,6 +32,8 @@ Popup {
     property int daily_sub: 0
     property int hourly_sub: 0
     property int day_cursor: 0
+    // First day of the Daily window; Daily and Sun & Moon share it with day_cursor.
+    property int day_first: 0
     property int hour_cursor: 0
     property int alert_cursor: 0
 
@@ -37,70 +41,24 @@ Popup {
     readonly property bool on_air: root.current_tab === 1 && root.hourly_sub === root.air_sub
     readonly property int air_hours: Math.min(24, WeatherState.aq_hours.length)
 
-    FontMetrics {
-        id: tab_metrics
-        font.family: Style.font_family
-        font.pixelSize: Style.font_size - 2
-        font.bold: true
-        font.capitalization: Style.tab_caps ? Font.AllUppercase : Font.MixedCase
-        font.letterSpacing: Style.tab_caps ? Style.label_spacing : 0
+    readonly property bool on_sun_moon: root.current_tab === 0 && root.daily_sub === root.sun_moon_sub
+    readonly property int day_span: Math.max(1, daily_view.fit_days)
+
+    function sync_day_window() {
+        const n = root.day_span;
+        let first = root.day_first;
+        if (root.day_cursor < first) first = root.day_cursor;
+        else if (root.day_cursor >= first + n) first = root.day_cursor - n + 1;
+        root.day_first = Math.max(0, Math.min(first, WeatherState.days.length - n));
     }
 
-    FontMetrics {
-        id: chip_metrics
-        font.family: Style.font_family
-        font.pixelSize: Style.font_size - 3
-        font.bold: true
-        font.capitalization: Style.tab_caps ? Font.AllUppercase : Font.MixedCase
-        font.letterSpacing: Style.tab_caps ? Style.label_spacing : 0
-    }
+    onDay_cursorChanged: root.sync_day_window()
+    onDay_spanChanged: root.sync_day_window()
 
-    FontMetrics {
-        id: key_metrics
-        font.family: Style.font_family
-        font.pixelSize: Style.font_size - 5
-        font.bold: true
+    Connections {
+        target: WeatherState
+        function onDaysChanged() { root.sync_day_window(); }
     }
-
-    // Mirrors MenuTab/KeyBadge sizing so rows can be split before the tabs exist.
-    readonly property real tab_key_space: Style.tab_keys ? Math.max(key_metrics.height + 2, key_metrics.advanceWidth("9") + 8) * (1 + Style.slant) + 6 : 0
-    // Reading .font re-runs the measurement when the style changes the metrics' font.
-    readonly property var tab_needs: {
-        const f = tab_metrics.font;
-        return root.tabs.map(t => tab_metrics.advanceWidth(t) + 12 + root.tab_key_space);
-    }
-
-    function chip_needs(names) {
-        const f = chip_metrics.font;
-        return names.map(n => chip_metrics.advanceWidth(Style.chip_brackets ? "[" + n + "]" : n) + 20);
-    }
-
-    // Fewest balanced rows of consecutive indices whose widths fit `avail`.
-    function split_rows(needs, avail, spacing) {
-        const n = needs.length;
-        for (let r = 1; r <= n; r++) {
-            const per = Math.ceil(n / r);
-            const rows = [];
-            let fits = true;
-            for (let i = 0; i < n; i += per) {
-                const idx = [];
-                let w = -spacing;
-                for (let j = i; j < Math.min(n, i + per); j++) {
-                    idx.push(j);
-                    w += needs[j] + spacing;
-                }
-                if (w > avail) fits = false;
-                rows.push(idx);
-            }
-            if (fits || per === 1) return rows;
-        }
-        return [];
-    }
-
-    readonly property var tab_rows: root.split_rows(root.tab_needs, main_column.width, 4)
-    readonly property var chip_rows: root.split_rows(root.chip_needs(root.sub_views), main_column.width, 4)
-    // Both chip sets reserve the same height so switching Daily/Hourly never resizes the popup.
-    readonly property int chip_row_count: Math.max(root.split_rows(root.chip_needs(root.daily_sub_names), main_column.width, 4).length, root.split_rows(root.chip_needs(root.hourly_sub_names), main_column.width, 4).length)
 
     onCurrent_subChanged: {
         if (root.current_tab === 0) root.daily_sub = root.current_sub;
@@ -144,7 +102,7 @@ Popup {
     }
 
     function move_time(dir, jump) {
-        if (root.current_tab === 0 || root.current_tab === 2) root.move_day_cursor(dir, jump);
+        if (root.current_tab === 0) root.move_day_cursor(dir, jump);
         else if (root.on_air) root.move_hour_cursor(dir, jump, root.air_hours, false);
         else if (root.current_tab === 1) root.move_hour_cursor(dir, jump, WeatherState.hours.length, true);
         else if (root.on_alerts_tab) root.move_alert_cursor(dir, jump);
@@ -158,7 +116,7 @@ Popup {
     }
 
     function go_end() {
-        if (root.current_tab === 0 || root.current_tab === 2) {
+        if (root.current_tab === 0) {
             root.day_cursor = Math.max(0, WeatherState.days.length - 1);
         } else if (root.on_air) {
             root.hour_cursor = Math.max(0, root.air_hours - 1);
@@ -241,8 +199,8 @@ Popup {
                 spacing: 14
 
                 Image {
-                    Layout.preferredWidth: 72
-                    Layout.preferredHeight: 72
+                    Layout.preferredWidth: Math.min(72, Math.max(40, main_column.width / 5))
+                    Layout.preferredHeight: Layout.preferredWidth
                     readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
                     source: WeatherState.has_data ? WeatherState.icon_source(WeatherState.current.code, WeatherState.current.is_day) : ""
                     visible: WeatherState.has_data
@@ -350,39 +308,12 @@ Popup {
                 }
             }
 
-            // --- Tab rows: each tab asks for its label's width, wrapping only when a row cannot hold them ---
-            ColumnLayout {
+            TabRows {
                 Layout.fillWidth: true
-                spacing: 4
-
-                Repeater {
-                    model: root.tab_rows
-
-                    RowLayout {
-                        id: tab_row
-                        required property var modelData
-
-                        Layout.fillWidth: true
-                        spacing: 4
-
-                        Repeater {
-                            model: tab_row.modelData
-
-                            MenuTab {
-                                id: tab_chip
-                                required property int modelData
-
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: root.tab_needs[tab_chip.modelData] || 0
-                                implicitHeight: Style.px(26)
-                                label: root.tabs[tab_chip.modelData] || ""
-                                active: tab_chip.modelData === root.current_tab
-                                key: tab_chip.modelData < 9 ? String(tab_chip.modelData + 1) : ""
-                                onClicked: root.set_tab(tab_chip.modelData)
-                            }
-                        }
-                    }
-                }
+                labels: root.tabs
+                current: root.current_tab
+                tab_height: Style.px(26)
+                onPicked: i => root.set_tab(i)
             }
 
             Item {
@@ -390,9 +321,11 @@ Popup {
                 Layout.preferredHeight: root.content_height
 
                 DailyView {
+                    id: daily_view
                     anchors.fill: parent
-                    visible: root.current_tab === 0
+                    visible: root.current_tab === 0 && !root.on_sun_moon
                     day_cursor: root.day_cursor
+                    first_day: root.day_first
                     sub: root.daily_sub
                     on_select: function (i) { root.day_cursor = i; }
                 }
@@ -415,8 +348,11 @@ Popup {
 
                 SunMoonView {
                     anchors.fill: parent
-                    visible: root.current_tab === 2
+                    visible: root.on_sun_moon
                     day_cursor: root.day_cursor
+                    first_day: root.day_first
+                    day_span: root.day_span
+                    on_select: function (i) { root.day_cursor = i; }
                 }
 
                 AlertsView {
@@ -428,52 +364,21 @@ Popup {
                 }
             }
 
-            // --- Sub-view chips (Daily/Hourly) or the selected day (Sun & Moon), under the content ---
+            // --- Sub-view chips (Daily/Hourly), under the content; the slot keeps its height on Alerts ---
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.max(28, root.chip_row_count * Style.px(24) + (root.chip_row_count - 1) * 4)
+                Layout.preferredHeight: sub_tabs.Layout.preferredHeight
 
-                ColumnLayout {
-                    anchors.centerIn: parent
-                    spacing: 4
+                TabRows {
+                    id: sub_tabs
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     visible: root.current_tab === 0 || root.current_tab === 1
-
-                    Repeater {
-                        model: root.chip_rows
-
-                        RowLayout {
-                            id: chip_row
-                            required property var modelData
-
-                            Layout.alignment: Qt.AlignHCenter
-                            spacing: 4
-
-                            Repeater {
-                                model: chip_row.modelData
-
-                                MenuTab {
-                                    id: sub_chip
-                                    required property int modelData
-
-                                    base_radius: 12
-                                    label: root.sub_views[sub_chip.modelData] || ""
-                                    active: sub_chip.modelData === root.current_sub
-                                    font_size: Style.font_size - 3
-                                    onClicked: root.current_sub = sub_chip.modelData
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    visible: root.current_tab === 2
-                    readonly property var d: WeatherState.days[root.day_cursor]
-                    text: d ? d.weekday + (d.weekday !== "Today" ? " (" + d.date.substr(5) + ")" : "") : ""
-                    color: Style.text_muted
-                    font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 3
+                    chips: true
+                    labels: root.sub_views
+                    current: root.current_sub
+                    reserve_labels: [root.daily_sub_names, root.hourly_sub_names]
+                    onPicked: i => root.current_sub = i
                 }
             }
 
