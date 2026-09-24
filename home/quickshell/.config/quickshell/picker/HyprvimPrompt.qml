@@ -76,6 +76,8 @@ Popup {
     readonly property bool menu_shown: !root.is_output && !root.menu_hidden && root.items.length > 0 && (root.query_text !== "" || root.cycle_base !== null)
     readonly property int menu_slots: Math.min(10, Math.max(3, Math.floor(root.screen_height * 0.35 / root.row_height)))
     readonly property int menu_rows: root.menu_shown ? Math.min(root.items.length - root.menu_top, root.menu_slots) : 0
+    // The usage column sits between name and description; a narrow bar collapses it to a dim ellipsis.
+    readonly property bool usage_column: root.ctx.kind === "command" && root.items.some(e => !!e.item.usage)
     readonly property bool hint_shown: !root.is_output && (root.hint !== "" || root.loading || root.warn_text !== "")
     readonly property real output_height: Math.min(output_view.contentHeight + 8, Math.round(root.screen_height * 0.45))
 
@@ -404,19 +406,13 @@ Popup {
         return (root.spec.completions || []).find(c => c.name === cmd || (c.aliases || []).indexOf(cmd) >= 0) || null;
     }
 
-    // First required argument the line leaves empty, or 0. Only arg-only commands carry a "<ARG>" usage in
-    // their description; ones that also run bare (dim, float, help) do not. Hints say "optional" otherwise.
+    // First required argument the line leaves empty, or 0. A spec without min_args never holds Enter.
     function missing_pos(c) {
         if (c.kind !== "command" && c.kind !== "arg") return 0;
-        const cmd = c.kind === "command" ? c.cur : c.cmd;
-        const entry = root.entry_for(cmd);
-        if (!entry || !entry.takes_args || !/<[^\[]/.test(entry.desc || "")) return 0;
+        const entry = root.entry_for(c.kind === "command" ? c.cur : c.cmd);
+        const need = entry && entry.min_args > 0 ? entry.min_args : 0;
         const filled = c.kind === "command" ? 0 : c.cur !== "" ? c.pos : c.pos - 1;
-        const positions = (root.spec.args || {})[root.canonical(cmd)] || [{ hint: "" }];
-        for (let i = filled; i < positions.length; i++) {
-            if (!/optional/i.test(positions[i].hint || "")) return i + 1;
-        }
-        return 0;
+        return filled < need ? filled + 1 : 0;
     }
 
     function settle() {
@@ -442,8 +438,9 @@ Popup {
         if (!/\s$/.test(line)) root.set_text(line + " ");
         root.settle();
         const cmd = c.kind === "command" ? c.cur : c.cmd;
+        const entry = root.entry_for(cmd);
         const spec = root.arg_spec_for(cmd, need);
-        root.warn_text = ":" + cmd + " arg " + need + " needs: " + (spec && spec.hint ? spec.hint : "a value");
+        root.warn_text = entry && entry.usage ? ":" + cmd + " needs: " + entry.usage : ":" + cmd + " arg " + need + " needs: " + (spec && spec.hint ? spec.hint : "a value");
         warn_timer.restart();
     }
 
@@ -519,7 +516,7 @@ Popup {
     function candidates(ctx, cache, shell_items) {
         if (!root.session || root.is_output) return [];
         if (ctx.kind === "command") {
-            const list = (root.spec.completions || []).map(c => ({ label: c.name, description: c.desc || "", keywords: c.aliases || [], insert: c.name + (c.takes_args ? " " : "") }));
+            const list = (root.spec.completions || []).map(c => ({ label: c.name, usage: c.usage || "", description: c.desc || "", keywords: c.aliases || [], insert: c.name + (c.takes_args ? " " : "") }));
             return root.rank("command", list, ctx.cur);
         }
         if (ctx.kind === "shell") {
@@ -742,6 +739,10 @@ Popup {
                 anchors.bottomMargin: 6 + (root.hint_reserved ? hint_text.height + 6 : 0)
                 visible: root.menu_shown
 
+                readonly property real label_width: Math.max(Style.px(160), menu.width * 0.3)
+                readonly property bool usage_wide: menu.width >= Style.px(720)
+                readonly property real usage_width: !root.usage_column ? 0 : menu.usage_wide ? Math.max(Style.px(150), menu.width * 0.2) : Style.px(14)
+
                 WheelHandler {
                     acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                     onWheel: event => root.scroll_menu(event.angleDelta.y < 0 ? 1 : -1)
@@ -770,7 +771,7 @@ Popup {
                                 id: row_label
                                 x: 8 + row.inset
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: Math.min(implicitWidth, Math.max(Style.px(160), menu.width * 0.3))
+                                width: Math.min(implicitWidth, menu.label_width)
                                 elide: Text.ElideRight
                                 textFormat: Text.StyledText
                                 text: Fuzzy.highlight(row.entry.item.label, row.entry.positions, String(row.fg(root.st.text_accent)))
@@ -780,8 +781,21 @@ Popup {
                             }
 
                             Text {
+                                x: 8 + row.inset + menu.label_width + 16
+                                width: menu.usage_width
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: menu.usage_width > 0 && !!row.entry.item.usage
+                                elide: Text.ElideRight
+                                text: menu.usage_wide ? row.entry.item.usage : "…"
+                                color: row.fg(root.st.text_muted)
+                                opacity: 0.7
+                                font.family: root.st.mono_font
+                                font.pixelSize: root.st.font_size - 3
+                            }
+
+                            Text {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 8 + row.inset + Math.max(Style.px(160), menu.width * 0.3) + 16
+                                anchors.leftMargin: 8 + row.inset + menu.label_width + 16 + (menu.usage_width > 0 ? menu.usage_width + 12 : 0)
                                 anchors.right: parent.right
                                 anchors.rightMargin: 8
                                 anchors.verticalCenter: parent.verticalCenter
