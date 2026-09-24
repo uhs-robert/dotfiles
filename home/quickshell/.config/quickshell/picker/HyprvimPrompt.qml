@@ -54,6 +54,8 @@ Popup {
     // Latched per prompt once shown: menu slots are built once, and the hint line keeps its place.
     property bool menu_reserved: false
     property bool hint_reserved: false
+    // Set when Enter is held back for a missing argument; cleared by the next edit.
+    property string warn_text: ""
 
     // Keyed "cmd|pos|prev_args"; a source runs once per key per prompt.
     property var source_cache: ({})
@@ -65,13 +67,16 @@ Popup {
     readonly property string query_text: root.cycle_base !== null ? root.cycle_base : input.text
     readonly property var ctx: root.context_of(root.query_text)
     readonly property var arg_spec: root.ctx.kind === "arg" ? root.arg_spec_for(root.ctx.cmd, root.ctx.pos) : null
-    readonly property string hint: root.arg_spec && root.arg_spec.hint ? root.arg_spec.hint : ""
+    // While Tab previews a command, the hint already speaks for its first argument.
+    readonly property var hint_ctx: root.cycle_base !== null && root.ctx.kind === "command" ? root.context_of(input.text) : root.ctx
+    readonly property var hint_spec: root.hint_ctx.kind === "arg" ? root.arg_spec_for(root.hint_ctx.cmd, root.hint_ctx.pos) : null
+    readonly property string hint: root.hint_spec && root.hint_spec.hint ? root.hint_spec.hint : ""
     readonly property bool loading: root.ctx.kind === "shell" && root.shell_items === null || !!root.arg_spec && !!root.arg_spec.source && root.source_cache[root.source_key()] === undefined
     readonly property var items: root.candidates(root.ctx, root.source_cache, root.shell_items)
     readonly property bool menu_shown: !root.is_output && !root.menu_hidden && root.items.length > 0 && (root.query_text !== "" || root.cycle_base !== null)
     readonly property int menu_slots: Math.min(10, Math.max(3, Math.floor(root.screen_height * 0.35 / root.row_height)))
     readonly property int menu_rows: root.menu_shown ? Math.min(root.items.length - root.menu_top, root.menu_slots) : 0
-    readonly property bool hint_shown: !root.is_output && (root.hint !== "" || root.loading)
+    readonly property bool hint_shown: !root.is_output && (root.hint !== "" || root.loading || root.warn_text !== "")
     readonly property real output_height: Math.min(output_view.contentHeight + 8, Math.round(root.screen_height * 0.45))
 
     readonly property real menu_height: root.menu_slots * root.row_height + 8
@@ -110,6 +115,12 @@ Popup {
         function close(): void {
             if (root.session) root.finish(null);
         }
+    }
+
+    Timer {
+        id: warn_timer
+        interval: 2000
+        onTriggered: root.warn_text = ""
     }
 
     FileView {
@@ -175,6 +186,7 @@ Popup {
         root.menu_top = 0;
         root.menu_reserved = false;
         root.hint_reserved = false;
+        root.warn_text = "";
         root.memo.key = "";
         root.memo.matched = [];
         root.insert = true;
@@ -388,6 +400,53 @@ Popup {
         return positions && pos >= 1 && pos <= positions.length ? positions[pos - 1] : null;
     }
 
+    function entry_for(cmd) {
+        return (root.spec.completions || []).find(c => c.name === cmd || (c.aliases || []).indexOf(cmd) >= 0) || null;
+    }
+
+    // First required argument the line leaves empty, or 0. Only arg-only commands carry a "<ARG>" usage in
+    // their description; ones that also run bare (dim, float, help) do not. Hints say "optional" otherwise.
+    function missing_pos(c) {
+        if (c.kind !== "command" && c.kind !== "arg") return 0;
+        const cmd = c.kind === "command" ? c.cur : c.cmd;
+        const entry = root.entry_for(cmd);
+        if (!entry || !entry.takes_args || !/<[^\[]/.test(entry.desc || "")) return 0;
+        const filled = c.kind === "command" ? 0 : c.cur !== "" ? c.pos : c.pos - 1;
+        const positions = (root.spec.args || {})[root.canonical(cmd)] || [{ hint: "" }];
+        for (let i = filled; i < positions.length; i++) {
+            if (!/optional/i.test(positions[i].hint || "")) return i + 1;
+        }
+        return 0;
+    }
+
+    function settle() {
+        root.cycle_base = null;
+        root.selected = -1;
+        root.menu_hidden = false;
+        if (!root.insert) input.cursorPosition = root.normal_max();
+    }
+
+    // Enter runs the line unless its command still needs an argument; then it steps toward that argument.
+    function press_enter() {
+        const line = input.text;
+        const c = root.context_of(line);
+        const need = root.missing_pos(c);
+        if (root.cycle_base !== null && root.selected >= 0 && (!root.insert || need > 0 || root.ctx.kind === "arg")) {
+            root.settle();
+            return;
+        }
+        if (need === 0) {
+            root.finish(line);
+            return;
+        }
+        if (!/\s$/.test(line)) root.set_text(line + " ");
+        root.settle();
+        const cmd = c.kind === "command" ? c.cur : c.cmd;
+        const spec = root.arg_spec_for(cmd, need);
+        root.warn_text = ":" + cmd + " arg " + need + " needs: " + (spec && spec.hint ? spec.hint : "a value");
+        warn_timer.restart();
+    }
+
     function source_key() {
         return root.ctx.kind === "arg" ? root.canonical(root.ctx.cmd) + "|" + root.ctx.pos + "|" + root.ctx.prev : "";
     }
@@ -563,7 +622,7 @@ Popup {
         const ctrl = event.modifiers & Qt.ControlModifier;
         const k = event.key;
         if (k === Qt.Key_Return || k === Qt.Key_Enter) {
-            root.finish(input.text);
+            root.press_enter();
         } else if (k === Qt.Key_Escape) {
             root.enter_normal();
         } else if (k === Qt.Key_Tab) {
@@ -592,13 +651,7 @@ Popup {
         const p = input.cursorPosition;
         if (k === Qt.Key_Shift || k === Qt.Key_Control || k === Qt.Key_Alt || k === Qt.Key_Meta) return;
         if (k === Qt.Key_Return || k === Qt.Key_Enter) {
-            if (root.cycle_base !== null && root.selected >= 0) {
-                root.cycle_base = null;
-                root.selected = -1;
-                input.cursorPosition = root.normal_max();
-            } else {
-                root.finish(input.text);
-            }
+            root.press_enter();
         } else if (k === Qt.Key_Escape) {
             if (root.pending_key !== "") root.pending_key = "";
             else root.finish(null);
@@ -743,8 +796,7 @@ Popup {
                                 anchors.fill: parent
                                 onClicked: {
                                     root.apply(row.item_index);
-                                    root.cycle_base = null;
-                                    root.selected = -1;
+                                    root.settle();
                                     input.forceActiveFocus();
                                 }
                             }
@@ -761,8 +813,8 @@ Popup {
                 anchors.bottomMargin: 6
                 visible: root.hint_shown
                 elide: Text.ElideRight
-                text: root.loading && root.hint === "" ? "loading..." : ":" + (root.ctx.cmd || "") + " arg " + (root.ctx.pos || "") + ": " + root.hint + (root.loading ? "  (loading...)" : "")
-                color: root.st.text_muted
+                text: root.warn_text !== "" ? root.warn_text : root.loading && root.hint === "" ? "loading..." : ":" + (root.hint_ctx.cmd || "") + " arg " + (root.hint_ctx.pos || "") + ": " + root.hint + (root.loading ? "  (loading...)" : "")
+                color: root.warn_text !== "" ? Theme.warning : root.st.text_muted
                 font.family: root.st.font_family
                 font.pixelSize: root.st.font_size - 3
             }
@@ -810,6 +862,7 @@ Popup {
                         root.selected = -1;
                         root.menu_hidden = false;
                         root.history_index = -1;
+                        root.warn_text = "";
                     }
                     onActiveFocusChanged: if (activeFocus && !root.insert) root.enter_insert(input.cursorPosition, true)
                     // A static caret: the default one blinks for as long as the bar is open.
