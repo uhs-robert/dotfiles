@@ -1196,6 +1196,7 @@ Singleton {
                 const hl = Theme.theme_primary;
                 const hl_t = Qt.alpha(hl, 0.72);
                 const hl_l = Qt.alpha(hl, 0.55);
+                const hl_hair = Qt.alpha(hl, 0.75);
                 const hl_d = Qt.alpha(hl, 0.3);
                 const hl_f = Qt.alpha(hl, 0.13);
                 return Object.assign({}, terminal, {
@@ -1208,14 +1209,14 @@ Singleton {
                     text_fg: hl,
                     text_primary: hl,
                     font_family: "Exo 2",
-                    font_size: Theme.popup_font_size + 1,
+                    font_size: Theme.popup_font_size + 2,
                     number_font: "Chakra Petch",
                     mono_font: "Chakra Petch",
-                    frame_color: Qt.alpha(Theme.bg_core, 0.93),
+                    frame_color: Qt.alpha(Theme.bg_core, 0.97),
                     frame_border_color: hl_l,
                     accent_color: hl,
                     accent_height: 1,
-                    hairline: hl_l,
+                    hairline: hl_hair,
                     hairline_dim: hl_d,
                     selection_bg: hl_f,
                     selection_outline: "transparent",
@@ -1256,8 +1257,8 @@ Singleton {
                     bar_font_family: "Chakra Petch",
                     bar_font_size: Theme.font_size + 1,
                     bar_letter_spacing: 0.8,
-                    bar_side_bg: Qt.alpha(Theme.bg_core, 0.92),
-                    bar_center_bg: Qt.alpha(Theme.bg_core, 0.92),
+                    bar_side_bg: Qt.alpha(Theme.bg_core, 0.94),
+                    bar_center_bg: Qt.alpha(Theme.bg_core, 0.94),
                     bar_fg: hl,
                     bar_clock_fg: hl,
                     bar_border_color: hl_l,
@@ -1266,7 +1267,10 @@ Singleton {
                     bar_workspace_idle: hl_f,
                     bar_workspace_ring: hl_d,
                     bar_pill_square: true,
-                    bar_hover_bg: hl_d
+                    bar_hover_bg: hl_d,
+                    small: {
+                        frame_color: Qt.alpha(Theme.bg_core, 0.96)
+                    }
                 });
             })(),
             // A backlit Game Boy screen in four shades of the primary; `small` popups sit in the handheld's shell.
