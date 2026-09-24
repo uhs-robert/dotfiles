@@ -51,7 +51,7 @@ Popup {
     property var undo_stack: []
     // First visible menu row; the menu is a fixed window of slots over items.
     property int menu_top: 0
-    // Latched per prompt once shown, so the layer surface keeps one height while typing.
+    // Latched per prompt once shown: menu slots are built once, and the hint line keeps its place.
     property bool menu_reserved: false
     property bool hint_reserved: false
 
@@ -74,9 +74,12 @@ Popup {
     readonly property bool hint_shown: !root.is_output && (root.hint !== "" || root.loading)
     readonly property real output_height: Math.min(output_view.contentHeight + 8, Math.round(root.screen_height * 0.45))
 
+    readonly property real menu_height: root.menu_slots * root.row_height + 8
+    // The surface holds the tallest input layout from open; the panel grows inside it as the menu appears.
+    reserve_height: root.is_output ? 0 : root.input_height + hint_text.height + 6 + root.menu_height + 24
     body_height: root.is_output
         ? output_label.height + 8 + root.output_height + 24
-        : root.input_height + (root.hint_reserved ? hint_text.height + 6 : 0) + (root.menu_reserved ? root.menu_slots * root.row_height + 8 : 0) + 24
+        : root.input_height + (root.hint_reserved ? hint_text.height + 6 : 0) + (root.menu_shown ? root.menu_height : 0) + 24
 
     onCtxChanged: root.request_sources()
     onItemsChanged: {
@@ -666,6 +669,7 @@ Popup {
         id: body
         anchors.fill: parent
         anchors.margins: 12
+        clip: true
 
         FocusScope {
             id: input_scope
