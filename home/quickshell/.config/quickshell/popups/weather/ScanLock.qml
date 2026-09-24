@@ -17,6 +17,7 @@ CornerBrackets {
     inset: 0
 
     onShownChanged: if (root.shown) lock.restart(); else lock.stop();
+    Component.onCompleted: if (root.shown) lock.restart()
 
     ParallelAnimation {
         id: lock

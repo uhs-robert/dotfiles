@@ -39,7 +39,13 @@ Item {
     function cell(list, i) {
         const text = list.map(r => r[0]).join("").slice(0, root.k);
         const p = root.pad(text);
-        const body = i === root.sel ? [[text, String(root.inverse)]] : list;
+        let left = root.k;
+        const clipped = list.map(r => {
+            const t = r[0].slice(0, Math.max(0, left));
+            left -= t.length;
+            return [t, r[1]];
+        });
+        const body = i === root.sel ? [[text, String(root.inverse)]] : clipped;
         return [[p[0], ""]].concat(body, [[p[1], ""]]);
     }
 
