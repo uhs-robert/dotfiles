@@ -84,6 +84,13 @@ Item {
             selected: root.selected
         }
 
+        PixelBox {
+            visible: Style.card_layout === "pixel"
+            anchors.fill: parent
+            fill: Style.shade_0
+            rings: [root.selected ? Style.shade_3 : Style.shade_2, Style.shade_0, Style.shade_3]
+        }
+
         Loader {
             active: root.channels
             anchors.fill: parent
@@ -152,7 +159,7 @@ Item {
         }
 
         Text {
-            visible: Style.boxed_cards && root.selected && Style.row_cursor !== "" && Style.caret_phase
+            visible: Style.boxed_cards && root.selected && Style.row_cursor !== "" && Style.caret_phase && Style.card_layout !== "pixel"
             x: 4
             y: layout.y + 1
             text: Style.row_cursor
