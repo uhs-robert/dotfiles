@@ -627,6 +627,7 @@ Singleton {
                 meter_slant: 0.36,
                 chart_slant: 0.21,
                 chart_fill: Theme.theme_secondary,
+                weather_header: "watch",
                 title_bg: "transparent",
                 title_fg: Theme.fg_strong,
                 title_spacing: 4,
@@ -1383,7 +1384,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec" or "scope", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope" or "watch", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
