@@ -86,7 +86,7 @@ Item {
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
         shade_color: Style.style_bar ? Style.frame_shade : "transparent"
-        dither_color: Style.style_bar ? Style.dither : "transparent"
+        dither_color: Style.style_bar ? Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2)) : "transparent"
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -117,7 +117,7 @@ Item {
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
         shade_color: Style.style_bar ? Style.frame_shade : "transparent"
-        dither_color: Style.style_bar ? Style.dither : "transparent"
+        dither_color: Style.style_bar ? Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2)) : "transparent"
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -157,7 +157,7 @@ Item {
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
         shade_color: Style.style_bar ? Style.frame_shade : "transparent"
-        dither_color: Style.style_bar ? Style.dither : "transparent"
+        dither_color: Style.style_bar ? Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2)) : "transparent"
         cap_left: true
         visible: root.right_entries.length > 0
 
