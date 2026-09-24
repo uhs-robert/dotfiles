@@ -31,6 +31,8 @@ Item {
     // PS2: days as translucent towers on a dark floor.
     readonly property bool tower_columns: Style.weather_header === "towers" && root.sub === 0
     readonly property int tower_labels_h: Math.round(Style.font_size * 3.4)
+    // Metroid: scan brackets lock onto the selected day.
+    readonly property bool scan: Style.weather_header === "scan"
     readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
@@ -234,6 +236,14 @@ Item {
                         visible: day_col.day_index === root.day_cursor && !root.custom_column && !root.dq
 
                         LockBrackets {}
+
+                        Loader {
+                            active: root.scan
+                            anchors.fill: parent
+                            sourceComponent: ScanLock {
+                                shown: day_col.day_index === root.day_cursor && root.visible && Popups.open_name === "weather"
+                            }
+                        }
 
                         Rectangle {
                             visible: root.mission

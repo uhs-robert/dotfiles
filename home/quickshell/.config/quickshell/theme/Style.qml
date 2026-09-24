@@ -720,6 +720,7 @@ Singleton {
                 }
             }),
             "metroid": Object.assign({}, terminal, {
+                weather_header: "scan",
                 // Greys lifted toward primary_light so they read on the visor glass.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
@@ -1391,7 +1392,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar" or "towers", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers" or "scan", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
