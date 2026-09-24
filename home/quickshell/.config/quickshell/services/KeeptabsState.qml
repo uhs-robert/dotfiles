@@ -140,7 +140,7 @@ Singleton {
     IpcHandler {
         target: "keeptabs_debug"
 
-        function wait(): void {
+        function wait_on(): void {
             root.debug_wait = true;
             const runs = root.runs.slice();
             root.inject_wait(runs);
@@ -149,7 +149,7 @@ Singleton {
             root.waiting_started();
         }
 
-        function unwait(): void {
+        function wait_off(): void {
             root.debug_wait = false;
             root.runs = root.runs.filter(r => !r.debug);
             root.waiting_count = root.waiting_in(root.runs);
