@@ -60,7 +60,7 @@ PanelWindow {
     margins.left: root.gap
     margins.right: root.gap
     implicitWidth: frame.width
-    implicitHeight: frame.height
+    implicitHeight: frame.height + Style.frame_drop
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -101,6 +101,15 @@ PanelWindow {
         font.pixelSize: Style.font_size - 5
         font.bold: true
         text: root.longest_key
+    }
+
+    Rectangle {
+        visible: Style.frame_drop > 0
+        y: Style.frame_drop
+        width: frame.width
+        height: frame.height
+        radius: frame.radius
+        color: Theme.bg_shadow
     }
 
     Rectangle {
@@ -151,6 +160,12 @@ PanelWindow {
 
         CornerBrackets {
             anchors.fill: parent
+        }
+
+        FrameInset {
+            top_radius: frame.radius
+            bottom_radius: frame.radius
+            top_offset: frame.top_edge - Style.frame_border_width
         }
 
         Rectangle {

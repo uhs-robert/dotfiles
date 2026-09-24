@@ -116,6 +116,13 @@ Rectangle {
         arm: 6
     }
 
+    FrameInset {
+        visible: Style.boxed_cards && Style.frame_inset_width > 0
+        edge: root.border.width
+        top_radius: root.radius
+        bottom_radius: root.radius
+    }
+
     Rectangle {
         visible: !Style.boxed_cards
         anchors.left: parent.left

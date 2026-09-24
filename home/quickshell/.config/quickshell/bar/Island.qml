@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
-import "../theme"
 
 Item {
     id: root
@@ -15,6 +14,7 @@ Item {
     property color border_color: "transparent"
     property color scanline_color: "transparent"
     property color shade_color: "transparent"
+    property bool shade_vertical: false
     property color dither_color: "transparent"
     readonly property bool shaded: root.shade_color.a > 0
     default property alias content: layout.children
@@ -27,7 +27,7 @@ Item {
     height: 30
     width: body.width + (cap_left ? cap_width : 0) + (cap_right ? cap_width : 0)
 
-    // The popup style's diagonal shade and dither, behind the modules and clipped to the slants.
+    // The popup style's shade and dither, behind the modules and clipped to the slants.
     Shape {
         visible: root.shaded
         anchors.fill: parent
@@ -37,9 +37,9 @@ Item {
             strokeWidth: -1
             // The left island mirrors the shade so its light edge faces the screen centre like the right one.
             fillGradient: LinearGradient {
-                x1: root.cap_right && !root.cap_left && !Style.shade_vertical ? root.width : 0
+                x1: root.shade_vertical ? 0 : root.cap_right && !root.cap_left ? root.width : 0
                 y1: 0
-                x2: Style.shade_vertical ? 0 : root.cap_right && !root.cap_left ? 0 : root.width
+                x2: root.shade_vertical ? 0 : root.cap_right && !root.cap_left ? 0 : root.width
                 y2: root.height
                 GradientStop { position: 0; color: root.shade_color }
                 GradientStop { position: 1; color: root.bg_color }

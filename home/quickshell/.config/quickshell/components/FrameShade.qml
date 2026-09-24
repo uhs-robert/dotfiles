@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Shapes
 import "../theme"
 
-// The style's frame shade, from frame_shade at the top left into frame_color; it also paints chamfered frames.
+// The style's frame shade into frame_color, diagonal or vertical; it also paints chamfered frames.
 Item {
     id: root
 

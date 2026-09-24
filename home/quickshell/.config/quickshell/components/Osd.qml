@@ -203,6 +203,17 @@ PanelWindow {
         text: "100%"
     }
 
+    // Fits in the slide room under the frame, so the window keeps its size.
+    Rectangle {
+        visible: Style.frame_drop > 0
+        y: frame.y + Style.frame_drop
+        width: frame.width
+        height: frame.height
+        radius: frame.radius
+        color: Theme.bg_shadow
+        opacity: frame.opacity
+    }
+
     Rectangle {
         id: frame
 
@@ -210,7 +221,7 @@ PanelWindow {
         readonly property int pad_y: Style.px(10)
         readonly property real top_rule: Style.frame_top_rule ? Style.accent_height : 0
         readonly property real bracket_pad: Style.frame_brackets.a > 0 ? 4 : 0
-        readonly property real header_height: title_tab.visible ? title_tab.height + frame.top_rule + frame.bracket_pad : 0
+        readonly property real header_height: title_tab.visible ? title_tab.height + frame.top_rule + frame.bracket_pad + Style.inset_pad : 0
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
@@ -255,6 +266,11 @@ PanelWindow {
             anchors.fill: parent
         }
 
+        FrameInset {
+            top_radius: frame.radius
+            bottom_radius: frame.radius
+        }
+
         Item {
             id: glow_layer
             readonly property bool layered: Style.glow || Style.text_shadow.a > 0
@@ -265,8 +281,8 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 visible: Style.show_title
-                x: Style.fade_fills || Style.rounded ? frame.radius : frame.bracket_pad * 1.5
-                y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + frame.bracket_pad
+                x: (Style.fade_fills || Style.rounded ? frame.radius : frame.bracket_pad * 1.5) + Style.inset_pad
+                y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + frame.bracket_pad + Style.inset_pad
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.fade_fills ? "transparent" : Style.title_bg
