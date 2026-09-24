@@ -14,16 +14,44 @@ Item {
     property real scale_min: 0
     property real scale_max: 1
 
+    // Silkscreen sits on an 8px grid, so step up by whole grid units while the widest label and temp pair still fit.
+    readonly property int text_size: {
+        for (const size of [32, 24]) {
+            if (Math.max(root.label_w(size), root.temp_w(size)) <= root.width - 2 && root.height >= 6 * size + 110) return size;
+        }
+        return Style.font_size;
+    }
+    // The high reads one grid step larger when a single stacked temperature has the width for it.
+    readonly property int hi_size: root.text_size < 32 && root.temp_w(root.text_size + 8) <= root.width - 2 ? root.text_size + 8 : root.text_size
     // Rough label/temp/pop row height, used only to budget the sprite scale; the real gap is filled below.
-    readonly property real text_row_h: Style.font_size + 6
+    readonly property real text_row_h: root.text_size + 6
     readonly property int width_pixel: Math.max(1, Math.floor((root.width - 18) / 24))
-    readonly property int height_pixel: Math.max(1, Math.floor((root.height - 3 * root.text_row_h - 38) / 20))
+    readonly property int height_pixel: Math.max(1, Math.floor((root.height - 4 * root.text_row_h - 46) / 20))
     // Largest integer scale of the 24x18 photo that fits both the column width and the available height.
     readonly property int pixel: Math.max(1, Math.min(6, Math.min(root.width_pixel, root.height_pixel)))
 
     // Space left over after the photo, dot bar and labels take their natural size, spread across the gaps between them.
     readonly property real content_h: label_row.height + photo_box.height + dot_bar.height + temp_row.height + pop_text.height
     readonly property real fill_spacing: Math.max(3, (root.height - root.content_h) / 4)
+
+    function label_w(size: int): real {
+        return arrow_metrics.advanceWidth + 2 + (size === 32 ? label_32.advanceWidth : label_24.advanceWidth);
+    }
+
+    function temp_w(size: int): real {
+        return (size === 32 ? temp_32.advanceWidth : size === 24 ? temp_24.advanceWidth : 0) + Math.max(3, Math.round(size / 4)) + 2;
+    }
+
+    TextMetrics { id: arrow_metrics; font.family: Style.font_family; font.pixelSize: Style.font_size; text: "▶" }
+    TextMetrics { id: label_24; font.family: Style.font_family; font.pixelSize: 24; text: "TODAY" }
+    TextMetrics { id: label_32; font.family: Style.font_family; font.pixelSize: 32; text: "TODAY" }
+    // The week's extremes share one scale across columns, so every photo picks the same size.
+    readonly property string widest_temp: {
+        const a = String(Math.round(root.scale_min)), b = String(Math.round(root.scale_max));
+        return a.length > b.length ? a : b;
+    }
+    TextMetrics { id: temp_24; font.family: Style.font_family; font.pixelSize: 24; text: root.widest_temp }
+    TextMetrics { id: temp_32; font.family: Style.font_family; font.pixelSize: 32; text: root.widest_temp }
 
     Column {
         x: Math.round((root.width - width) / 2)
@@ -37,6 +65,7 @@ Item {
 
             Text {
                 visible: root.selected
+                anchors.verticalCenter: parent.verticalCenter
                 text: "▶"
                 color: Style.shade_3
                 font.family: Style.font_family
@@ -47,7 +76,7 @@ Item {
                 text: root.day ? (root.day_index === 0 ? "TODAY" : root.day.weekday.toUpperCase()) : ""
                 color: root.selected ? Style.shade_3 : Style.shade_2
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size
+                font.pixelSize: root.text_size
             }
         }
 
@@ -82,21 +111,23 @@ Item {
             dot: root.pixel * 2
         }
 
-        Row {
+        Column {
             id: temp_row
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 4
+            spacing: 2
 
             PixelTemp {
+                anchors.horizontalCenter: parent.horizontalCenter
                 value: root.day ? root.day.max : 0
                 color: Style.shade_3
-                font_size: Style.font_size
+                font_size: root.hi_size
             }
 
             PixelTemp {
+                anchors.horizontalCenter: parent.horizontalCenter
                 value: root.day ? root.day.min : 0
                 color: Style.shade_2
-                font_size: Style.font_size
+                font_size: root.text_size
             }
         }
 
@@ -106,7 +137,7 @@ Item {
             text: root.day ? root.day.pop + "%" : ""
             color: Style.shade_2
             font.family: Style.font_family
-            font.pixelSize: Style.font_size
+            font.pixelSize: root.text_size
         }
     }
 }
