@@ -137,6 +137,8 @@ PanelWindow {
             root.step_search(back ? -1 : 1);
         } else if (event.key === Qt.Key_Backspace && Popups.back_name !== "") {
             Popups.back();
+        } else if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_H || event.key === Qt.Key_L)) {
+            Popups.walk(event.key === Qt.Key_L ? 1 : -1);
         } else if (event.key === Qt.Key_Q) {
             Popups.close();
         } else if (tabs.length > 0 && event.key === Qt.Key_BracketLeft) {
