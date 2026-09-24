@@ -20,12 +20,12 @@ Item {
     signal finished()
 
     // These redraw the glyph themselves, so the module hides the real one while they play.
-    readonly property bool hides_glyph: root.mode === "rumble" || root.mode === "transmission"
+    readonly property bool hides_glyph: root.mode === "rumble" || root.mode === "transmission" || root.mode === "hev_alert"
     // Drawn beneath the glyph row so the glyph and its count badge stay on top.
-    readonly property bool under: ["pressanykey", "rumble", "transmission", "scan", "comms", "ping", "orders"].indexOf(root.mode) !== -1
+    readonly property bool under: ["pressanykey", "rumble", "transmission", "scan", "comms", "ping", "orders", "hev_alert"].indexOf(root.mode) !== -1
     readonly property real strength: root.nudge ? 0.6 : 1
     readonly property real half: root.glyph_size / 2
-    readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600] })
+    readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600], hev_alert: [900, 600] })
     readonly property int duration: (root.durations[root.mode] || root.durations.bubble)[root.nudge ? 1 : 0]
     property real elapsed
     readonly property real tail: 1 - root.phase(root.duration - 150, 150)
@@ -73,7 +73,7 @@ Item {
     }
 
     Loader {
-        sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c })[root.mode] || bubble_c
+        sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c, hev_alert: hev_alert_c })[root.mode] || bubble_c
     }
 
     Component {
@@ -383,6 +383,77 @@ Item {
 
             Ring { delay: 0 }
             Ring { delay: 350; live: !root.nudge }
+        }
+    }
+
+    // HEV suit alert: a warning triangle blinks at the glyph's shoulder and the island hairline under its slot turns red.
+    Component {
+        id: hev_alert_c
+
+        Item {
+            id: hev
+            readonly property int frame: root.step(150)
+            readonly property int blinks: root.nudge ? 2 : 3
+            readonly property bool done: hev.frame >= hev.blinks * 2
+            readonly property bool lit: !hev.done && hev.frame % 2 === 0
+            readonly property real tri_x: Math.max(-root.room_left + 1, -root.glyph_half - 4)
+            readonly property real tri_y: Math.max(-root.room_up + 1, -root.half - 3)
+
+            Text {
+                x: -width / 2
+                y: -height / 2
+                text: root.glyph
+                color: root.color
+                opacity: hev.lit || hev.done ? 1 : 0.35
+                font.family: root.font_family
+                font.pixelSize: root.glyph_size
+                style: Style.bar_text_style
+                styleColor: Style.bar_glow_color
+            }
+
+            Shape {
+                visible: hev.lit
+                x: Math.round(hev.tri_x)
+                y: Math.round(hev.tri_y)
+                width: 10
+                height: 9
+                opacity: root.strength
+                preferredRendererType: Shape.CurveRenderer
+
+                ShapePath {
+                    fillColor: Theme.theme_label
+                    strokeColor: Theme.bg_shadow
+                    strokeWidth: 1
+                    joinStyle: ShapePath.MiterJoin
+                    PathPolyline { path: [Qt.point(5, 0), Qt.point(10, 9), Qt.point(0, 9), Qt.point(5, 0)] }
+                }
+
+                Rectangle {
+                    x: 4.5
+                    y: 3
+                    width: 1
+                    height: 3
+                    color: Theme.bg_crust
+                }
+
+                Rectangle {
+                    x: 4.5
+                    y: 7
+                    width: 1
+                    height: 1
+                    color: Theme.bg_crust
+                }
+            }
+
+            Rectangle {
+                visible: hev.lit
+                x: -root.room_left
+                y: Math.round(root.room_down) - 1
+                width: root.room_left + root.room_right
+                height: 1
+                color: Theme.theme_label
+                opacity: root.strength
+            }
         }
     }
 
