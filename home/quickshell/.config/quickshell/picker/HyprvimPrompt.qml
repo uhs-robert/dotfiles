@@ -106,7 +106,9 @@ Popup {
         id: source_proc
         property string key: ""
         stdout: StdioCollector {
+            // a stale result can still arrive right after finish() stops the process
             onStreamFinished: {
+                if (!root.session) return;
                 const next = Object.assign({}, root.source_cache);
                 next[source_proc.key] = root.parse_source(text);
                 root.source_cache = next;
@@ -118,7 +120,10 @@ Popup {
     Process {
         id: shell_proc
         stdout: StdioCollector {
-            onStreamFinished: root.shell_items = text.split("\n").filter(l => l !== "").map(l => ({ label: l, description: "", insert: l + " " }))
+            onStreamFinished: {
+                if (!root.session) return;
+                root.shell_items = text.split("\n").filter(l => l !== "").map(l => ({ label: l, description: "", insert: l + " " }));
+            }
         }
     }
 
@@ -162,6 +167,9 @@ Popup {
     function finish(result) {
         if (!root.session) return;
         root.session = false;
+        root.source_queue = [];
+        if (source_proc.running) source_proc.running = false;
+        if (shell_proc.running) shell_proc.running = false;
         root.pending = [result, root.spec.result_path || "", root.spec.callback];
         if (root.is_open) Popups.close();
         if (!root.visible) root.flush();
