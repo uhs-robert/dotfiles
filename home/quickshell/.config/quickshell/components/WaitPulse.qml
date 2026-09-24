@@ -25,7 +25,7 @@ Item {
     readonly property bool under: ["pressanykey", "rumble", "transmission", "scan", "comms", "ping", "orders", "hev_alert"].indexOf(root.mode) !== -1
     readonly property real strength: root.nudge ? 0.6 : 1
     readonly property real half: root.glyph_size / 2
-    readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600], hev_alert: [900, 600] })
+    readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600], hev_alert: [900, 600], exclaim: [1000, 600] })
     readonly property int duration: (root.durations[root.mode] || root.durations.bubble)[root.nudge ? 1 : 0]
     property real elapsed
     readonly property real tail: 1 - root.phase(root.duration - 150, 150)
@@ -73,7 +73,7 @@ Item {
     }
 
     Loader {
-        sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c, hev_alert: hev_alert_c })[root.mode] || bubble_c
+        sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c, hev_alert: hev_alert_c, exclaim: exclaim_c })[root.mode] || bubble_c
     }
 
     Component {
@@ -490,6 +490,44 @@ Item {
                 stripe: Style.hazard.a > 0 ? Style.hazard : orders.amber
                 tile: 6
                 line: 2
+            }
+        }
+    }
+
+    // A trainer's "!" balloon over the glyph's shoulder: half size, then full, held, then gone.
+    Component {
+        id: exclaim_c
+
+        Item {
+            id: exclaim
+            readonly property color light: Style.shade_3.a > 0 ? Style.shade_3 : Theme.fg_strong
+            readonly property color dark: Style.shade_0.a > 0 ? Style.shade_0 : Theme.bg_crust
+            readonly property bool half: root.elapsed < 120
+            readonly property int box_w: 15
+            readonly property int box_h: 17
+            visible: root.elapsed >= 60 && root.elapsed < root.duration - 100
+            x: Math.round(Math.max(-root.room_left + 1, Math.min(root.room_right - 1 - box_w, 0)))
+            y: Math.round(Math.max(-root.room_up + 1, -root.half - box_h + 6))
+            width: box_w
+            height: box_h
+            transformOrigin: Item.BottomLeft
+            scale: exclaim.half ? 0.5 : 1
+            opacity: root.nudge ? 0.85 : 1
+
+            PixelBox {
+                anchors.fill: parent
+                fill: exclaim.light
+                rings: [exclaim.light, exclaim.dark]
+                ring_width: 1
+            }
+
+            Text {
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: 1
+                text: "!"
+                color: exclaim.dark
+                font.family: "Press Start 2P"
+                font.pixelSize: 8
             }
         }
     }

@@ -19,7 +19,7 @@ Rectangle {
     radius: root.st.key_round ? height / 2 : Style.radius(3)
     readonly property bool cut: root.st.key_cut > 0
     color: root.cut ? "transparent" : root.st.key_bg
-    border.width: root.cut ? 0 : 1
+    border.width: root.cut ? 0 : root.st.pixel_border.a > 0 ? 2 : 1
     border.color: root.tinted ? root.st.tab_active_fg : root.st.key_border
 
     CutBox {

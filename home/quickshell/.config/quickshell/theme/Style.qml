@@ -203,7 +203,13 @@ Singleton {
             bar_ticks: "transparent",
             title_strip: "transparent",
             caps_tracking: 0,
-            tab_outline: "transparent"
+            tab_outline: "transparent",
+            shade_0: "transparent",
+            shade_1: "transparent",
+            shade_2: "transparent",
+            shade_3: "transparent",
+            pixel_border: "transparent",
+            device_shell: false
         };
         return {
             "default": {
@@ -396,7 +402,13 @@ Singleton {
                 bar_ticks: "transparent",
                 title_strip: "transparent",
                 caps_tracking: 0,
-                tab_outline: "transparent"
+                tab_outline: "transparent",
+                shade_0: "transparent",
+                shade_1: "transparent",
+                shade_2: "transparent",
+                shade_3: "transparent",
+                pixel_border: "transparent",
+                device_shell: false
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1248,6 +1260,95 @@ Singleton {
                     bar_pill_square: true,
                     bar_hover_bg: hl_d
                 });
+            })(),
+            // A backlit Game Boy screen in four shades of the primary; `small` popups sit in the handheld's shell.
+            "gameboy": (() => {
+                const g0 = Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.08));
+                const g1 = Qt.tint(Theme.bg_core, Qt.alpha(Theme.theme_primary_strong, 0.34));
+                const g2 = Theme.theme_primary;
+                const g3 = Theme.theme_primary_light;
+                return Object.assign({}, terminal, {
+                    wait_anim: "exclaim",
+                    done_anim: "levelup",
+                    weather_header: "pokedex",
+                    card_layout: "pixel",
+                    shade_0: g0,
+                    shade_1: g1,
+                    shade_2: g2,
+                    shade_3: g3,
+                    pixel_border: g2,
+                    text_muted: g2,
+                    text_dim: g2,
+                    text_fg: g3,
+                    text_strong: g3,
+                    text_primary: g3,
+                    text_accent: g3,
+                    // Silkscreen and Press Start 2P sit on an 8px grid; 16 is Silkscreen's 2x size.
+                    font_family: "Silkscreen",
+                    font_size: 16,
+                    title_font_family: "Press Start 2P",
+                    number_font: "Press Start 2P",
+                    mono_font: "Press Start 2P",
+                    frame_color: g1,
+                    frame_border_width: 0,
+                    frame_border_color: g2,
+                    frame_pad: 6,
+                    accent_color: g2,
+                    accent_height: 0,
+                    selection_bg: g3,
+                    selection_inverse: true,
+                    selection_fg: g0,
+                    selection_outline: "transparent",
+                    caret_color: g0,
+                    row_cursor: "\u25b6",
+                    tab_active_bg: g3,
+                    tab_active_fg: g0,
+                    tab_fg: g2,
+                    key_fg: g3,
+                    key_border: g2,
+                    section_fg: g2,
+                    section_rule: false,
+                    section_fade: g2,
+                    footer_fg: g2,
+                    footer_key_fg: g3,
+                    footer_rule_color: g2,
+                    meter_on: g3,
+                    meter_off: g0,
+                    meter_hot: Theme.theme_label,
+                    meter_height: 8,
+                    chart_fill: g3,
+                    title_bg: "transparent",
+                    title_fg: g3,
+                    title_spacing: 0,
+                    chip_brackets: false,
+                    chip_active_bg: g3,
+                    chip_active_fg: g0,
+                    chip_pick: g3,
+                    chip_border: g2,
+                    toggle_on: g3,
+                    toggle_off: g2,
+                    marker_fill: false,
+                    bar_font_family: "Silkscreen",
+                    bar_font_size: 16,
+                    bar_side_bg: g1,
+                    bar_center_bg: g1,
+                    bar_fg: g3,
+                    bar_clock_fg: g3,
+                    bar_border_width: 2,
+                    bar_border_color: g0,
+                    bar_inset_gap: 0,
+                    bar_inset_width: 2,
+                    bar_inset_color: g2,
+                    bar_workspace_focused: g3,
+                    bar_workspace_active: g2,
+                    bar_workspace_idle: g0,
+                    bar_workspace_ring: g2,
+                    bar_pill_square: true,
+                    bar_hover_bg: Qt.alpha(g3, 0.25),
+                    small: {
+                        device_shell: true
+                    }
+                });
             })()
         };
     }
@@ -1489,13 +1590,13 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan" or "hev", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev" or "pokedex", cards "rule", "channel" or "pixel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
-    // The keeptabs done celebration: hearts, pixel (stepped), lcd (stepped, then blinks) or hev_pickup.
+    // The keeptabs done celebration: hearts, pixel (stepped), lcd (stepped, then blinks), hev_pickup or levelup (inverted flash, pixel sparkles).
     readonly property string done_anim: root.active.done_anim || "hearts"
-    // The keeptabs waiting cue: bubble, cursor, pressanykey, advance, hand, alert, rumble, transmission, scan, comms, ping, orders or hev_alert.
+    // The keeptabs waiting cue: bubble, cursor, pressanykey, advance, hand, alert, rumble, transmission, scan, comms, ping, orders, hev_alert or exclaim.
     readonly property string wait_anim: root.active.wait_anim || "bubble"
     // A full-width title strip in this color with a hairline under it and a close box at the right.
     readonly property color title_strip: root.active.title_strip
@@ -1503,6 +1604,15 @@ Singleton {
     readonly property real caps_tracking: root.active.caps_tracking
     // A 1px outline around every tab and header button; the active tab takes selection_border.
     readonly property color tab_outline: root.active.tab_outline
+    // A four-shade screen palette, darkest first, for pixel-art parts (sprites, photos, dot bars).
+    readonly property color shade_0: root.active.shade_0
+    readonly property color shade_1: root.active.shade_1
+    readonly property color shade_2: root.active.shade_2
+    readonly property color shade_3: root.active.shade_3
+    // Frames get a 2px pixel double border with this middle ring (PixelFrame); keys and meters get 2px pixel rings.
+    readonly property color pixel_border: root.active.pixel_border
+    // Small popups sit inside a handheld's shell (DeviceShell); hover shelves never do.
+    readonly property bool device_shell: root.active.device_shell
 
     property bool cava_line: true
     readonly property var bar: root.active

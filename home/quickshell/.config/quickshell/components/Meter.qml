@@ -51,6 +51,16 @@ Item {
         }
     }
 
+    PixelBox {
+        visible: root.st.pixel_border.a > 0 && !root.st.tick_ruler
+        x: -4
+        y: -4
+        width: root.width + 8
+        height: root.implicitHeight + 8
+        fill: root.st.meter_off
+        rings: [root.st.pixel_border, root.st.meter_off]
+    }
+
     Loader {
         width: root.width
         height: root.implicitHeight

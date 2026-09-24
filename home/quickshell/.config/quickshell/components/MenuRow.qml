@@ -107,7 +107,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         text: root.st.row_cursor
         color: root.st.caret_color
-        font.family: root.st.font_family
+        font.family: root.st.mono_font
         font.pixelSize: root.st.font_size - 1
         font.bold: true
     }
