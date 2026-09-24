@@ -28,7 +28,7 @@ Item {
     readonly property real segment_width: Math.max(2, (width - root.lean - gap * (segment_count - 1)) / segment_count)
 
     implicitWidth: segment_count * 3 + gap * (segment_count - 1)
-    implicitHeight: Style.px(10)
+    implicitHeight: root.st.meter_height > 0 ? root.st.meter_height : Style.px(10)
 
     NumberAnimation on busy_pos {
         running: root.busy
@@ -82,7 +82,7 @@ Item {
                     }
                     color: segment.lit
                         ? (segment.is_hot ? root.st.meter_hot : root.on_selection && root.st.selection_inverse ? root.st.selection_fg : root.on_color)
-                        : root.on_selection && root.st.selection_inverse ? Qt.alpha(root.st.selection_fg, 0.25) : root.st.meter_off
+                        : root.on_selection && root.st.selection_inverse ? Qt.alpha(root.st.selection_fg, 0.25) : root.st.meter_major.a > 0 && index % 5 === 4 ? root.st.meter_major : root.st.meter_off
 
                     // Lit segments shade down from meter_shade at the top.
                     Rectangle {

@@ -15,6 +15,8 @@ PanelWindow {
     // Content height; the base adds the style's title tab and footer around it.
     property real body_height: 0
     property string title: popup_name.toUpperCase()
+    // A live value after the style's title readout, e.g. unread counts.
+    property string title_value: ""
     property string footer_hint: ""
     // The full key list behind `?`; while set, the footer shows only help_hint.
     property string key_help: footer_hint
@@ -158,8 +160,10 @@ PanelWindow {
     readonly property real bracket_pad: root.st.frame_brackets.a > 0 ? 4 : 0
     readonly property bool lcd: root.st.lcd_top.a > 0
     readonly property real title_gap: root.st.title_rule.a > 0 ? 6 : 0
+    readonly property bool banded: root.st.title_band.a > 0
+    readonly property real band_height: Math.max(26, title_tab.height + 4)
     readonly property real engraving_height: root.st.frame_engraving !== "" ? engraving.implicitHeight + 4 : 0
-    readonly property real header_height: (has_title ? title_tab.height + bracket_pad + root.st.inset_pad + title_gap : 0) + root.st.lcd_margin * 2
+    readonly property real header_height: (has_title ? (root.banded ? root.band_height + 8 : title_tab.height + bracket_pad + title_gap) + root.st.inset_pad : 0) + root.st.lcd_margin * 2
     readonly property real footer_height: (has_footer ? base_footer.implicitHeight + 10 + root.st.inset_pad : 0) + root.st.lcd_margin * 2 + engraving_height
     property real line_progress: 0
     property real drop_progress: 0
@@ -302,10 +306,10 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: root.st.frame_chamfer > 0 || root.st.frame_visor ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
+                color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.frame_cut > 0 ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
                 bottomLeftRadius: root.st.frame_radius
                 bottomRightRadius: root.st.frame_radius
-                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 ? 0 : root.st.frame_border_width
+                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.frame_cut > 0 ? 0 : root.st.frame_border_width
                 border.color: root.st.frame_border_color
             }
 
@@ -340,6 +344,10 @@ PanelWindow {
                 anchors.margins: root.st.frame_border_width
                 bottom_radius: Math.max(0, root.st.frame_radius - root.st.frame_border_width)
                 chamfer: root.st.frame_chamfer
+            }
+
+            ChamferFrame {
+                anchors.fill: parent
             }
 
             CornerBrackets {
@@ -403,9 +411,24 @@ PanelWindow {
                 opacity: glow_layer.layered ? 0 : 1
 
 
+                Loader {
+                    active: root.has_title && root.banded
+                    x: root.st.inset_pad + root.st.frame_border_width
+                    y: x
+                    width: parent.width - x * 2
+                    height: root.band_height
+                    sourceComponent: TabHeader {
+                        readonly property var ids: root.st.title_ids[root.popup_name] || []
+                        title: root.title
+                        panel_id: ids[0] || ""
+                        readout: ids[1] || ""
+                        readout_value: root.title_value
+                    }
+                }
+
                 Rectangle {
                     id: title_tab
-                    visible: root.has_title
+                    visible: root.has_title && !root.banded
                     x: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad * 1.5) + root.st.inset_pad + root.st.lcd_margin * 2
                     y: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad) + root.st.inset_pad + root.st.lcd_margin * 2
                     width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_text.implicitWidth + 20, parent.width - title_tab.x * 2)
