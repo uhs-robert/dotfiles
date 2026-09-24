@@ -21,11 +21,12 @@ Rectangle {
     readonly property real key_space: root.show_key ? key_badge.width + 6 : 0
     readonly property bool bracketed: root.active && !root.is_chip && root.st.tab_brackets.a > 0
     readonly property real bracket_space: root.bracketed ? open_bracket.implicitWidth * 2 + 4 : 0
+    readonly property real hand_space: root.active && root.st.hand_cursor ? 20 : 0
 
     signal clicked()
 
     // Filling tabs share their row evenly, so they must not ask for the label's width.
-    implicitWidth: root.is_chip ? label_text.implicitWidth + 20 : 0
+    implicitWidth: root.is_chip ? label_text.implicitWidth + 20 + root.hand_space : 0
     implicitHeight: Style.px(24)
     radius: root.is_chip && root.st.pill_chips ? height / 2 : Style.radius(root.base_radius)
     readonly property bool outlined: root.st.tab_outline.a > 0
@@ -59,8 +60,8 @@ Rectangle {
     Text {
         id: label_text
         anchors.centerIn: parent
-        anchors.horizontalCenterOffset: root.key_space / 2
-        width: Math.min(implicitWidth, parent.width - 8 - root.key_space - root.bracket_space)
+        anchors.horizontalCenterOffset: (root.key_space + root.hand_space) / 2
+        width: Math.min(implicitWidth, parent.width - 8 - root.key_space - root.bracket_space - root.hand_space)
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         text: root.st.chip_brackets && root.is_chip ? (root.active ? "[" + root.label + "]" : " " + root.label + " ") : root.label
@@ -70,6 +71,15 @@ Rectangle {
         font.pixelSize: root.font_size
         font.capitalization: root.st.tab_caps || root.st.caps_tracking > 0 ? Font.AllUppercase : Font.MixedCase
         font.letterSpacing: root.st.caps_tracking > 0 ? root.st.caps_tracking * (root.is_chip ? 0.3 : 1) : root.st.tab_caps ? root.st.label_spacing : 0
+    }
+
+    HandCursor {
+        visible: root.hand_space > 0
+        anchors.right: root.show_key ? key_badge.left : label_text.left
+        anchors.rightMargin: 4
+        anchors.verticalCenter: parent.verticalCenter
+        width: 16
+        height: 10
     }
 
     Text {

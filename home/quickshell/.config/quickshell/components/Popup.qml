@@ -432,6 +432,8 @@ PanelWindow {
             CustomFrame {
                 anchors.fill: parent
                 device: root.device
+                top_radius: 0
+                bottom_radius: root.frame_radius
             }
 
             Loader {

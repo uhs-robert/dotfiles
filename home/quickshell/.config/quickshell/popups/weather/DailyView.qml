@@ -45,6 +45,8 @@ Item {
     readonly property bool wttr_table: Style.weather_header === "wttr" && root.sub === 0
     // Half-Life: HL1 weapon-slot buckets, the selected day open wider.
     readonly property bool hev_slots: Style.weather_header === "hev" && root.sub === 0
+    // FF7: the days as linked materia slots.
+    readonly property bool materia_slots: Style.weather_header === "status" && root.sub === 0
 
     onFloor_shownChanged: {
         if (!floor_loader.item) return;
@@ -85,9 +87,11 @@ Item {
         if (root.hev_slots) return Math.max(1, Math.min(5, 1 + Math.floor((root.width - 100) / 52)));
         const col = root.stat_columns ? 56
             : Style.weather_header === "wttr" ? table_metrics.advanceWidth("─") * 8 - 4
+            : Style.weather_header === "status" ? Math.max(table_metrics.advanceWidth("Today"), table_metrics.advanceWidth("100%"), 44) + 6
             : root.dq ? Math.max(label_metrics.advanceWidth("100%"), label_metrics.advanceWidth("WED") + dq_w) + 16
             : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
-        return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
+        const room = Style.weather_header === "status" ? root.width - 40 : root.width + 4;
+        return Math.max(1, Math.min(5, Math.floor(room / (col + 4))));
     }
     readonly property var window_days: WeatherState.days.slice(root.first_day, root.first_day + root.fit_days)
 
@@ -200,9 +204,22 @@ Item {
             }
         }
 
+        Loader {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            active: root.materia_slots
+            visible: active
+            sourceComponent: MateriaSlots {
+                days: root.window_days
+                first_day: root.first_day
+                day_cursor: root.day_cursor
+                on_select: root.on_select
+            }
+        }
+
         RowLayout {
             id: day_row
-            visible: !root.wttr_table && !root.hev_slots
+            visible: !root.wttr_table && !root.hev_slots && !root.materia_slots
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 4

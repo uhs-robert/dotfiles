@@ -209,7 +209,11 @@ Singleton {
             shade_2: "transparent",
             shade_3: "transparent",
             pixel_border: "transparent",
-            device_shell: false
+            device_shell: false,
+            window_gradient: [],
+            materia: ({}),
+            hand_cursor: false,
+            meter_solid: false
         };
         return {
             "default": {
@@ -408,7 +412,11 @@ Singleton {
                 shade_2: "transparent",
                 shade_3: "transparent",
                 pixel_border: "transparent",
-                device_shell: false
+                device_shell: false,
+                window_gradient: [],
+                materia: ({}),
+                hand_cursor: false,
+                meter_solid: false
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1349,6 +1357,106 @@ Singleton {
                         device_shell: true
                     }
                 });
+            })(),
+            // Final Fantasy VII materia menus: blue diagonal windows in a light rim, orbs for keys and a pointing hand.
+            "ff7": (() => {
+                const rim = Qt.tint(Theme.fg_strong, Qt.alpha(Theme.theme_primary_light, 0.55));
+                const win_top = Qt.tint(Theme.ui_visual_bg, Qt.alpha(Theme.theme_primary_strong, 0.62));
+                const win_end = Qt.tint(Theme.bg_core, Qt.alpha(Theme.ui_visual_bg, 0.4));
+                const label = Qt.tint(Theme.fg_strong, Qt.alpha(Theme.theme_primary_light, 0.15));
+                return Object.assign({}, terminal, {
+                    wait_anim: "atb",
+                    done_anim: "fanfare",
+                    weather_header: "status",
+                    text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.5)),
+                    text_dim: Theme.theme_primary_light,
+                    text_fg: label,
+                    text_primary: Theme.theme_primary_light,
+                    font_family: "Nunito",
+                    font_size: Theme.popup_font_size + 1,
+                    frame_color: win_end,
+                    frame_shade: win_top,
+                    window_gradient: [[0, win_top], [0.4, Theme.ui_visual_bg], [1, win_end]],
+                    frame_radius: 6,
+                    frame_border_width: 2,
+                    frame_border_color: rim,
+                    frame_inset_width: 1,
+                    frame_inset_color: Theme.fg_muted,
+                    frame_drop: 4,
+                    accent_color: rim,
+                    accent_height: 2,
+                    selection_bg: "transparent",
+                    selection_outline: "transparent",
+                    caret_color: Theme.fg_strong,
+                    caret_blink: false,
+                    row_cursor: "",
+                    hand_cursor: true,
+                    tab_active_bg: "transparent",
+                    tab_active_fg: Theme.fg_strong,
+                    tab_fg: Theme.theme_primary_light,
+                    key_bg: "transparent",
+                    key_fg: Theme.bg_crust,
+                    key_border: "transparent",
+                    key_round: true,
+                    materia: {
+                        key: Theme.theme_secondary,
+                        section: Theme.ok,
+                        workspace: Theme.ok,
+                        alert: Theme.theme_label,
+                        clear: Theme.theme_secondary,
+                        cloud: Theme.theme_primary_light,
+                        rain: Theme.info,
+                        storm: Theme.theme_label,
+                        snow: Theme.fg_strong,
+                        fog: Theme.fg_dim
+                    },
+                    section_fg: Theme.theme_primary_light,
+                    section_rule: false,
+                    section_fade: Qt.alpha(rim, 0.3),
+                    label_caps: true,
+                    label_spacing: 1.2,
+                    footer_fg: Theme.theme_primary_light,
+                    footer_key_fg: Theme.theme_secondary,
+                    footer_rule_color: Qt.alpha(rim, 0.2),
+                    meter_on: Theme.theme_primary_strong,
+                    meter_shade: Theme.theme_primary_light,
+                    meter_off: Theme.bg_crust,
+                    meter_hot: Theme.theme_label,
+                    meter_outline: Theme.fg_muted,
+                    meter_radius: 1,
+                    meter_height: 7,
+                    meter_solid: true,
+                    title_bg: "transparent",
+                    title_fg: Theme.theme_primary_light,
+                    title_spacing: 0.5,
+                    chip_brackets: false,
+                    chip_active_bg: "transparent",
+                    chip_active_fg: Theme.fg_strong,
+                    chip_pick: Qt.alpha(Theme.fg_strong, 0.2),
+                    chip_border: Qt.alpha(rim, 0.45),
+                    toggle_brackets: false,
+                    toggle_on: Theme.ok,
+                    toggle_off: Theme.theme_primary_light,
+                    text_shadow: Qt.alpha(Theme.bg_crust, 0.85),
+                    bar_font_family: "Nunito",
+                    bar_font_size: Theme.font_size + 1,
+                    bar_side_bg: win_end,
+                    bar_center_bg: win_end,
+                    bar_fg: Theme.fg_strong,
+                    bar_clock_fg: Theme.fg_strong,
+                    bar_border_width: 2,
+                    bar_border_color: rim,
+                    bar_inset_gap: 2,
+                    bar_inset_width: 1,
+                    bar_inset_color: Theme.fg_muted,
+                    bar_workspace_focused: Theme.ok,
+                    bar_workspace_active: Theme.theme_secondary,
+                    bar_workspace_idle: Theme.bg_crust,
+                    bar_workspace_ring: Theme.fg_muted,
+                    bar_hover_bg: Qt.alpha(Theme.fg_strong, 0.12),
+                    bar_glow_color: Theme.bg_crust,
+                    bar_text_raised: true
+                });
             })()
         };
     }
@@ -1590,13 +1698,13 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev" or "pokedex", cards "rule", "channel" or "pixel".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel" or "pixel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
-    // The keeptabs done celebration: hearts, pixel (stepped), lcd (stepped, then blinks), hev_pickup or levelup (inverted flash, pixel sparkles).
+    // The keeptabs done celebration: hearts, pixel (stepped), lcd (stepped, then blinks), hev_pickup, levelup (inverted flash, pixel sparkles) or fanfare.
     readonly property string done_anim: root.active.done_anim || "hearts"
-    // The keeptabs waiting cue: bubble, cursor, pressanykey, advance, hand, alert, rumble, transmission, scan, comms, ping, orders, hev_alert or exclaim.
+    // The keeptabs waiting cue: bubble, cursor, pressanykey, advance, hand, alert, rumble, transmission, scan, comms, ping, orders, hev_alert, exclaim or atb.
     readonly property string wait_anim: root.active.wait_anim || "bubble"
     // A full-width title strip in this color with a hairline under it and a close box at the right.
     readonly property color title_strip: root.active.title_strip
@@ -1613,6 +1721,14 @@ Singleton {
     readonly property color pixel_border: root.active.pixel_border
     // Small popups sit inside a handheld's shell (DeviceShell); hover shelves never do.
     readonly property bool device_shell: root.active.device_shell
+    // Diagonal [position, color] stops filling window frames inside their border (WindowGradient); empty keeps frame_color.
+    readonly property var window_gradient: root.active.window_gradient
+    // Orb colors (MateriaOrb) by role (key, section, workspace, alert) and weather kind; a role left out draws no orb.
+    readonly property var materia: root.active.materia
+    // A pointing hand (HandCursor) on the selected row, active tab, picked chip and selected day.
+    readonly property bool hand_cursor: root.active.hand_cursor
+    // Meters as one continuous gauge (AtbBar) instead of segments.
+    readonly property bool meter_solid: root.active.meter_solid
 
     property bool cava_line: true
     readonly property var bar: root.active

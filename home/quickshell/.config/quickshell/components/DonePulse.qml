@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/components/DonePulse.qml
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Shapes
 import "../theme"
 
 // A one-shot celebration centred on this item's origin: the glyph pops with a ring and hearts float up; `nudge` is a quieter pass.
@@ -11,7 +12,7 @@ Item {
     property color color: Theme.theme_primary
     property string font_family: Style.bar_font_family
     property int glyph_size: Theme.glyph_size
-    // hearts, pixel (stepped, integer motion), lcd (pixel-styled, then the glyph blinks twice at the end), hev_pickup or levelup (inverted flash, then pixel sparkles).
+    // hearts, pixel (stepped, integer motion), lcd (pixel-styled, then the glyph blinks twice at the end), hev_pickup, levelup (inverted flash, then pixel sparkles) or fanfare.
     property string mode: Style.done_anim
     // How far the hearts climb; defaults to the window's top edge.
     property real rise: 12
@@ -28,6 +29,9 @@ Item {
     readonly property real ring_max: Math.max(8, 2 * Math.min(root.side, root.room) - 2)
     readonly property real ring_min: Math.min(root.glyph_size * 0.9, root.ring_max * 0.7)
 
+    // fanfare: the glyph hops, gold stars twinkle round it and the count flashes gold (count_color).
+    readonly property bool fanfare: root.mode === "fanfare"
+    readonly property color count_color: root.fanfare && root.elapsed >= 300 && root.elapsed < root.duration - 100 ? Theme.theme_secondary : "transparent"
     readonly property bool pixel: root.mode === "pixel"
     readonly property bool lcd: root.mode === "lcd"
     // A health pickup: the glyph and count flash bright and a + rises into the pickup history.
@@ -87,7 +91,7 @@ Item {
 
     Rectangle {
         readonly property real p: root.phase(0, 600)
-        visible: !root.hev && !root.levelup && p > 0 && p < 1
+        visible: !root.hev && !root.levelup && !root.fanfare && p > 0 && p < 1
         width: root.stepped ? 2 * Math.round((root.ring_min + (root.ring_max - root.ring_min) * p) / 2) : root.ring_min + (root.ring_max - root.ring_min) * root.out_quad(p)
         height: width
         x: -width / 2
@@ -100,7 +104,7 @@ Item {
     }
 
     Repeater {
-        model: root.hev || root.levelup ? [] : root.nudge ? [{ dx: 0, delay: 100 }] : [{ dx: -3, delay: 120 }, { dx: 3, delay: 260 }, { dx: 0, delay: 400 }]
+        model: root.hev || root.levelup || root.fanfare ? [] : root.nudge ? [{ dx: 0, delay: 100 }] : [{ dx: -3, delay: 120 }, { dx: 3, delay: 260 }, { dx: 0, delay: 400 }]
 
         Item {
             id: heart
@@ -189,9 +193,43 @@ Item {
         }
     }
 
+    Repeater {
+        // Kept off the top right, where the count badge sits.
+        model: !root.fanfare ? [] : root.nudge ? [{ x: -0.4, y: -1, size: 8, delay: 80 }, { x: 0.8, y: 1, size: 6, delay: 260 }]
+            : [{ x: -0.4, y: -1, size: 9, delay: 120 }, { x: -1, y: 0.3, size: 6, delay: 300 }, { x: 0.8, y: 1, size: 6, delay: 600 }]
+
+        Shape {
+            id: star
+            required property var modelData
+            readonly property real s: star.modelData.size
+            readonly property real p: root.phase(star.modelData.delay, 120)
+            readonly property real cx: Math.max(-(root.slot ? root.slot.left : root.side) + star.s / 2 + 0.5, Math.min((root.slot ? root.slot.right : root.side) - star.s / 2 - 0.5, star.modelData.x * (root.glyph_half + 1)))
+            readonly property real cy: Math.max(-root.room + star.s / 2, Math.min(root.room - star.s / 2, star.modelData.y * (root.glyph_size / 2 + 1)))
+            visible: p > 0
+            x: cx - star.s / 2
+            y: cy - star.s / 2
+            width: star.s
+            height: star.s
+            opacity: p * (root.elapsed > 600 + star.modelData.delay ? 0.45 : 1) * (1 - root.phase(root.duration - 150, 150))
+            preferredRendererType: Shape.CurveRenderer
+
+            ShapePath {
+                strokeWidth: 1
+                strokeColor: Qt.alpha(Theme.theme_secondary, 0.4)
+                fillColor: Theme.theme_secondary
+                PathPolyline {
+                    path: {
+                        const s = star.s;
+                        return [Qt.point(s * 0.5, 0), Qt.point(s * 0.62, s * 0.38), Qt.point(s, s * 0.5), Qt.point(s * 0.62, s * 0.62), Qt.point(s * 0.5, s), Qt.point(s * 0.38, s * 0.62), Qt.point(0, s * 0.5), Qt.point(s * 0.38, s * 0.38), Qt.point(s * 0.5, 0)];
+                    }
+                }
+            }
+        }
+    }
+
     Text {
         x: -width / 2
-        y: -height / 2
+        y: -height / 2 - (root.fanfare ? (root.nudge ? 2 : 3) * Math.sin(Math.PI * root.phase(80, 360)) : 0)
         text: root.glyph
         color: root.hev_flash ? Theme.fg_strong : root.inverted ? root.dark : root.color
         opacity: root.hev_fade
@@ -199,7 +237,7 @@ Item {
         font.pixelSize: root.glyph_size
         style: root.hev_flash ? Text.Outline : Style.bar_text_style
         styleColor: root.hev_flash ? Qt.alpha(Theme.ok, 0.7) : Style.bar_glow_color
-        scale: root.hev ? 1 : root.pop_scale
+        scale: root.hev || root.fanfare ? 1 : root.pop_scale
         visible: !root.lcd || root.elapsed < root.blink_start || root.blink_step % 2 === 1
     }
 

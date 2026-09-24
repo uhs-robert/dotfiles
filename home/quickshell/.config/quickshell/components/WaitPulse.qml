@@ -20,12 +20,12 @@ Item {
     signal finished()
 
     // These redraw the glyph themselves, so the module hides the real one while they play.
-    readonly property bool hides_glyph: root.mode === "rumble" || root.mode === "transmission" || root.mode === "hev_alert"
+    readonly property bool hides_glyph: root.mode === "rumble" || root.mode === "transmission" || root.mode === "hev_alert" || root.mode === "atb"
     // Drawn beneath the glyph row so the glyph and its count badge stay on top.
     readonly property bool under: ["pressanykey", "rumble", "transmission", "scan", "comms", "ping", "orders", "hev_alert"].indexOf(root.mode) !== -1
     readonly property real strength: root.nudge ? 0.6 : 1
     readonly property real half: root.glyph_size / 2
-    readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600], hev_alert: [900, 600], exclaim: [1000, 600] })
+    readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600], hev_alert: [900, 600], exclaim: [1000, 600], atb: [1600, 1000] })
     readonly property int duration: (root.durations[root.mode] || root.durations.bubble)[root.nudge ? 1 : 0]
     property real elapsed
     readonly property real tail: 1 - root.phase(root.duration - 150, 150)
@@ -73,7 +73,7 @@ Item {
     }
 
     Loader {
-        sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c, hev_alert: hev_alert_c, exclaim: exclaim_c })[root.mode] || bubble_c
+        sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c, hev_alert: hev_alert_c, exclaim: exclaim_c, atb: atb_c })[root.mode] || bubble_c
     }
 
     Component {
@@ -453,6 +453,68 @@ Item {
                 height: 1
                 color: Theme.theme_label
                 opacity: root.strength
+            }
+        }
+    }
+
+    // An ATB gauge fills under the glyph; full, it turns gold, the glyph goes white and the hand points at it.
+    Component {
+        id: atb_c
+
+        Item {
+            id: atb
+            readonly property int fill_ms: root.nudge ? 500 : 900
+            readonly property bool ready: root.elapsed >= atb.fill_ms
+            readonly property real x0: -Math.min(root.room_left - 2, root.glyph_half + 1)
+            readonly property real x1: Math.min(root.room_right - 2, root.glyph_half + 1)
+            readonly property real bar_y: Math.min(root.room_down - 5, root.half + 2)
+            readonly property real hand_w: Math.max(6, Math.min(12, root.room_left - root.glyph_half + 5))
+
+            Text {
+                x: -width / 2
+                y: -height / 2
+                text: root.glyph
+                color: atb.ready ? Theme.fg_strong : root.color
+                font.family: root.font_family
+                font.pixelSize: root.glyph_size
+                style: Style.bar_text_style
+                styleColor: Style.bar_glow_color
+            }
+
+            Rectangle {
+                x: atb.x0 - 1
+                y: atb.bar_y - 1
+                width: atb.x1 - atb.x0 + 2
+                height: 5
+                color: Theme.fg_muted
+                opacity: root.tail
+
+                Rectangle {
+                    x: 1
+                    y: 1
+                    width: parent.width - 2
+                    height: 3
+                    color: Theme.bg_crust
+
+                    Rectangle {
+                        width: parent.width * Math.min(1, 0.15 + 0.85 * root.phase(0, atb.fill_ms))
+                        height: parent.height
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0; color: atb.ready ? Theme.theme_secondary_strong : Theme.theme_primary_strong }
+                            GradientStop { position: 1; color: atb.ready ? Theme.theme_secondary : Theme.theme_primary_light }
+                        }
+                    }
+                }
+            }
+
+            HandCursor {
+                visible: root.elapsed >= atb.fill_ms + 100
+                x: Math.max(-root.room_left + 1, -root.glyph_half + 2 - width)
+                y: -height / 2
+                width: atb.hand_w
+                height: Math.round(atb.hand_w * 14 / 22)
+                opacity: root.tail * root.strength
             }
         }
     }

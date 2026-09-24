@@ -56,19 +56,27 @@ Rectangle {
 
         Rectangle {
             visible: root.key_hint !== ""
-            implicitWidth: key_label.implicitWidth + 8
+            id: key_cap
+            readonly property bool orb: Style.materia.key !== undefined
+            implicitWidth: Math.max(16, key_label.implicitWidth + 8)
             implicitHeight: 16
             radius: Style.key_round ? height / 2 : Style.radius(3)
-            color: root.active ? Theme.bg_core : Style.key_bg
-            border.width: 1
+            color: key_cap.orb ? "transparent" : root.active ? Theme.bg_core : Style.key_bg
+            border.width: key_cap.orb ? 0 : 1
             border.color: root.active ? Theme.ui_border : Style.key_border
+
+            MateriaOrb {
+                visible: key_cap.orb
+                anchors.fill: parent
+                color: key_cap.orb ? Style.materia.key : "transparent"
+            }
 
             Text {
                 id: key_label
                 anchors.centerIn: parent
                 text: root.key_hint
-                color: root.active ? Theme.theme_primary : Style.key_fg
-                font.bold: Style.mono_font === Style.font_family
+                color: root.active && !key_cap.orb ? Theme.theme_primary : Style.key_fg
+                font.bold: key_cap.orb || Style.mono_font === Style.font_family
                 font.family: Style.mono_font
                 font.pixelSize: Style.font_size - 5
             }
