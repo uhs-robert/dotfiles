@@ -75,7 +75,7 @@ Item {
 
     // Columns that fit without clipping their widest label, capped at five.
     readonly property int fit_days: {
-        const f = label_metrics.font;
+        const f = [label_metrics.font, table_metrics.font];
         const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
         const dq_w = root.dq ? 2 * (small_metrics.advanceWidth(Style.row_cursor) + 3) : 0;
         const col = root.stat_columns ? 56

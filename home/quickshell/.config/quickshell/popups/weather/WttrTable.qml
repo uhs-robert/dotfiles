@@ -16,11 +16,14 @@ Item {
     property var on_select: function (i) {}
 
     readonly property int text_px: Style.font_size - 4
-    readonly property real cw: Math.max(1, metrics.advanceWidth("─"))
+    // Reading metrics.font makes the advance rebind once the family and size land.
+    readonly property real glyph_w: metrics.font.pixelSize > 0 ? Math.max(1, metrics.advanceWidth("─")) : 1
     readonly property real lh: Math.max(1, Math.floor(metrics.height))
     readonly property int n: Math.max(1, root.days.length)
     // Cell width in characters, between the column rules.
-    readonly property int k: Math.max(3, Math.floor((Math.floor(root.width / root.cw) - 1) / root.n) - 1)
+    readonly property int k: Math.max(3, Math.floor((Math.floor(root.width / root.glyph_w) - 1) / root.n) - 1)
+    readonly property int line_chars: (root.k + 1) * root.n + 1
+    readonly property real cw: Math.max(root.glyph_w, root.width / root.line_chars)
     readonly property int bar_rows: Math.max(4, Math.floor(root.height / root.lh) - 10)
     readonly property var arrows: ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"]
     readonly property int bar_w: root.k >= 7 ? 3 : 1
@@ -115,16 +118,19 @@ Item {
 
     Column {
         Repeater {
-            model: root.lines
+            model: root.lines.length
 
             Text {
-                required property string modelData
+                required property int index
                 height: root.lh
                 textFormat: Text.StyledText
-                text: modelData
+                text: root.lines[index] ?? ""
                 color: Style.text_fg
                 font.family: Style.font_family
                 font.pixelSize: root.text_px
+                transform: Scale {
+                    xScale: root.cw / root.glyph_w
+                }
             }
         }
     }
