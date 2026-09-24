@@ -296,11 +296,11 @@ Singleton {
             "nes": Object.assign({}, terminal, {
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.6)),
-                // Press Start 2P draws on an 8px grid and runs 1em wide; 12 is 1.5x, with a slightly wider frame.
+                // Press Start 2P draws on an 8px grid and runs 1em wide; 14 sits between its 1.5x and 2x sizes, with a wider frame.
                 font_family: "Press Start 2P",
-                font_size: 12,
-                scale: 1.15,
-                popup_min_width: 270,
+                font_size: 14,
+                scale: 1.2,
+                popup_min_width: 295,
                 frame_color: Theme.bg_crust,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
@@ -335,7 +335,7 @@ Singleton {
                 toggle_on: Theme.theme_primary,
                 toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
                 bar_font_family: "Press Start 2P",
-                bar_font_size: 12,
+                bar_font_size: 14,
                 bar_side_bg: Theme.bg_crust,
                 bar_center_bg: Theme.bg_crust,
                 bar_fg: Theme.fg_strong,
