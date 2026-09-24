@@ -5,7 +5,7 @@ import "../../components"
 import "../../theme"
 import "../../services"
 
-// The PS1 memory card screen: a card title strip over the current conditions as the selected save's info panel.
+// The PS1 memory card screen: a location strip over the current conditions as the selected save's info panel.
 ColumnLayout {
     id: root
 
@@ -15,6 +15,7 @@ ColumnLayout {
     spacing: 6
 
     Rectangle {
+        visible: WeatherState.location_name !== ""
         Layout.fillWidth: true
         Layout.preferredHeight: strip_text.implicitHeight + 6
         radius: 4
@@ -34,7 +35,7 @@ ColumnLayout {
             anchors.rightMargin: 8
             anchors.verticalCenter: parent.verticalCenter
             elide: Text.ElideRight
-            text: "MEMORY CARD 1" + (WeatherState.location_name !== "" ? " · " + WeatherState.location_name.toUpperCase() : "")
+            text: WeatherState.location_name.toUpperCase()
             color: Style.title_fg
             font.family: Style.font_family
             font.pixelSize: Style.font_size - 4

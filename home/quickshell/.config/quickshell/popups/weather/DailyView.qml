@@ -24,9 +24,9 @@ Item {
     readonly property bool thin_range: Style.range_line || root.ladder
     // GoldenEye: a mission line over the columns, each lettered as an objective.
     readonly property bool mission: Style.weather_header === "watch"
-    // PS1: Temp & Precip as memory card save blocks.
-    readonly property bool save_blocks: Style.weather_header === "memcard" && root.sub === 0
-    readonly property bool custom_column: root.stat_columns || root.save_blocks
+    // PS1: each column headed by its memory card save block in place of the icon.
+    readonly property bool save_blocks: Style.weather_header === "memcard"
+    readonly property bool custom_column: root.stat_columns
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
     // SNES: columns standing on a Mode 7 floor.
@@ -64,7 +64,6 @@ Item {
         const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
         const dq_w = root.dq ? 2 * (small_metrics.advanceWidth(Style.row_cursor) + 3) : 0;
         const col = root.stat_columns ? 56
-            : root.save_blocks ? small_metrics.advanceWidth("100°/88°") + 6
             : root.dq ? Math.max(label_metrics.advanceWidth("100%"), label_metrics.advanceWidth("WED") + dq_w) + 16
             : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
         return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
@@ -205,15 +204,6 @@ Item {
                         }
                     }
 
-                    Loader {
-                        active: root.save_blocks
-                        anchors.fill: parent
-                        sourceComponent: SaveBlock {
-                            day: day_col.modelData
-                            selected: day_col.day_index === root.day_cursor
-                        }
-                    }
-
                     MouseArea {
                         anchors.fill: parent
                         onClicked: root.on_select(day_col.day_index)
@@ -224,6 +214,14 @@ Item {
                         anchors.fill: parent
                         anchors.margins: root.dq ? 8 : 2
                         spacing: 2
+
+                        SaveBlock {
+                            visible: root.save_blocks
+                            Layout.alignment: Qt.AlignHCenter
+                            block_size: Math.max(24, Math.min(48, day_col.width - 8))
+                            day: day_col.modelData
+                            selected: day_col.day_index === root.day_cursor
+                        }
 
                         Item {
                             Layout.fillWidth: true
@@ -404,6 +402,7 @@ Item {
 
                         Item {
                             id: icon_box
+                            visible: !root.save_blocks
                             readonly property real size: Math.max(16, Math.min(root.icon_size, day_col.width - 4))
                             Layout.alignment: Qt.AlignHCenter
                             Layout.preferredWidth: icon_box.size
