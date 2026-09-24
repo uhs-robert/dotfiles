@@ -52,9 +52,9 @@ Item {
     }
 
     Dither {
-        x: body.x
-        width: body.width
-        height: root.height
+        anchors.fill: parent
+        slant_left: root.cap_left ? root.cap_width : 0
+        slant_right: root.cap_right ? root.cap_width : 0
         color: root.dither_color
     }
 
