@@ -289,39 +289,46 @@ PanelWindow {
             }
 
             // Phosphor bloom: a blurred copy in the glow color under a lightly tinted sharp copy.
-            MultiEffect {
-                visible: Style.glow
+            // Loaders rebuild the effects per style; MultiEffects left hidden across a style switch stopped drawing.
+            Loader {
                 anchors.fill: glow_layer
-                source: glow_layer
-                autoPaddingEnabled: false
-                blurEnabled: true
-                blur: 0.5
-                blurMax: 12
-                brightness: 0.2
-                colorization: 1
-                colorizationColor: Style.glow_color
+                active: Style.glow
+                sourceComponent: Item {
+                    MultiEffect {
+                        anchors.fill: parent
+                        source: glow_layer
+                        autoPaddingEnabled: false
+                        blurEnabled: true
+                        blur: 0.5
+                        blurMax: 12
+                        brightness: 0.2
+                        colorization: 1
+                        colorizationColor: Style.glow_color
+                    }
+
+                    MultiEffect {
+                        anchors.fill: parent
+                        source: glow_layer
+                        autoPaddingEnabled: false
+                        colorization: Style.glow_tint
+                        colorizationColor: Theme.theme_primary_light
+                    }
+                }
             }
 
-            MultiEffect {
-                visible: Style.glow
+            Loader {
                 anchors.fill: glow_layer
-                source: glow_layer
-                autoPaddingEnabled: false
-                colorization: Style.glow_tint
-                colorizationColor: Theme.theme_primary_light
-            }
-
-            MultiEffect {
-                visible: !Style.glow && Style.text_shadow.a > 0
-                anchors.fill: glow_layer
-                source: glow_layer
-                autoPaddingEnabled: false
-                shadowEnabled: true
-                shadowBlur: 0
-                shadowOpacity: 1
-                shadowColor: Style.text_shadow
-                shadowHorizontalOffset: 2
-                shadowVerticalOffset: 2
+                active: !Style.glow && Style.text_shadow.a > 0
+                sourceComponent: MultiEffect {
+                    source: glow_layer
+                    autoPaddingEnabled: false
+                    shadowEnabled: true
+                    shadowBlur: 0
+                    shadowOpacity: 1
+                    shadowColor: Style.text_shadow
+                    shadowHorizontalOffset: 2
+                    shadowVerticalOffset: 2
+                }
             }
 
             // Static scanlines; nothing animates them.
