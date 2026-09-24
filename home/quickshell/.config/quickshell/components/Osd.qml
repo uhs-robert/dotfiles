@@ -106,6 +106,7 @@ PanelWindow {
                 root.vox_started_ms = Date.now();
                 root.now_ms = root.vox_started_ms;
             }
+            if (!VoxtypeState.recording && root.vox_phase === "recording") root.now_ms = Date.now();
             root.vox_phase = VoxtypeState.recording ? "recording" : "transcribing";
             root.hold_screen();
         }
@@ -327,8 +328,8 @@ PanelWindow {
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight
-                    text: root.showing_vox ? (root.vox_recording ? root.elapsed : "") : root.percent + "%"
-                    color: !root.showing_vox && root.muted ? Style.text_muted : Theme.fg_core
+                    text: root.showing_vox ? root.elapsed : root.percent + "%"
+                    color: root.showing_vox && !root.vox_recording ? Theme.warning : !root.showing_vox && root.muted ? Style.text_muted : Theme.fg_core
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size
                 }
