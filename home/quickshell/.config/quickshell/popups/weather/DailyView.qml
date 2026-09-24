@@ -91,6 +91,8 @@ Item {
             : Style.weather_header === "wttr" ? table_metrics.advanceWidth("─") * 8 - 4
             : Style.weather_header === "status" ? Math.max(table_metrics.advanceWidth("Today"), table_metrics.advanceWidth("100%"), 44) + 6
             : root.dq ? Math.max(label_metrics.advanceWidth("100%"), label_metrics.advanceWidth("WED") + dq_w) + 16
+            // Room for a 3x-scale 24x18 photo (72x54) plus its frame.
+            : root.camera ? 24 * 3 + 18 + 8
             : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
         const room = Style.weather_header === "status" ? root.width - 40 : root.width + 4;
         return Math.max(1, Math.min(5, Math.floor(room / (col + 4))));
