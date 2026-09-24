@@ -964,14 +964,8 @@ Singleton {
     // Multiplies every radius a rounded style draws.
     readonly property real corner_scale: root.active.corner_scale
 
-    // Saved with the style; off keeps the bar on the default look.
-    property bool style_bar: false
     property bool cava_line: true
-    readonly property var plain_bar: Object.assign({}, root.styles["default"], {
-        bar_border_width: 0,
-        bar_border_color: "transparent"
-    })
-    readonly property var bar: root.style_bar ? root.active : root.plain_bar
+    readonly property var bar: root.active
     readonly property string bar_font_family: root.bar.bar_font_family
     readonly property int bar_font_size: root.bar.bar_font_size
     // Text labels only; glyphs are unaffected.
@@ -1031,18 +1025,13 @@ Singleton {
         return true;
     }
 
-    function set_bar(on) {
-        root.style_bar = on;
-        root.save();
-    }
-
     function set_cava_line(on) {
         root.cava_line = on;
         root.save();
     }
 
     function save() {
-        state_file.setText(JSON.stringify({ style: root.saved_name, style_bar: root.style_bar, cava_line: root.cava_line }));
+        state_file.setText(JSON.stringify({ style: root.saved_name, cava_line: root.cava_line }));
     }
 
     function preview(style_name) {
@@ -1073,7 +1062,6 @@ Singleton {
             try {
                 const data = JSON.parse(text());
                 const saved = data.style;
-                root.style_bar = data.style_bar === true;
                 root.cava_line = data.cava_line !== false;
                 if (typeof saved === "string" && saved in root.styles) {
                     root.name = saved;
