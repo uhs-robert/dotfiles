@@ -73,6 +73,8 @@ Item {
                     color: Style.footer_fg
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 4
+                    font.capitalization: Style.label_caps ? Font.AllUppercase : Font.MixedCase
+                    font.letterSpacing: Style.label_spacing
                 }
             }
         }

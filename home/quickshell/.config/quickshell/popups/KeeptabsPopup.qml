@@ -207,7 +207,7 @@ Popup {
                         ColumnLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 6 + session_row.inset
-                            anchors.rightMargin: 6
+                            anchors.rightMargin: 6 + session_row.key_space
                             anchors.topMargin: 3
                             anchors.bottomMargin: 3
                             spacing: 2

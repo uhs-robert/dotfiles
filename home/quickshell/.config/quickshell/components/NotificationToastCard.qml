@@ -119,6 +119,15 @@ Rectangle {
         color: root.accent
     }
 
+    Rectangle {
+        visible: Style.frame_top_rule
+        x: root.border.width
+        y: root.border.width
+        width: root.width - root.border.width * 2
+        height: Style.accent_height
+        color: root.accent
+    }
+
     DashedOutline {
         visible: root.selected && Style.boxed_cards && Style.selection_outline.a > 0
         anchors.fill: parent
