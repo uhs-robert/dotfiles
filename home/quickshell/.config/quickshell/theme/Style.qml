@@ -60,6 +60,7 @@ Singleton {
             meter_hot: Theme.theme_label,
             meter_radius: 0,
             scale: 1.15,
+            popup_min_width: 0,
             show_title: true,
             title_bg: Theme.theme_secondary,
             title_fg: Theme.bg_crust,
@@ -176,6 +177,7 @@ Singleton {
                 meter_hot: Theme.theme_label,
                 meter_radius: 1,
                 scale: 1,
+                popup_min_width: 0,
                 show_title: false,
                 title_bg: Theme.theme_secondary,
                 title_fg: Theme.bg_crust,
@@ -251,6 +253,9 @@ Singleton {
             "crt": Object.assign({}, terminal, {
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.6)),
+                // VT323 is tall and narrow; 24 matches the old cap height with room to spare across.
+                font_family: "VT323",
+                font_size: Theme.popup_font_size + 9,
                 frame_border_color: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.35)),
                 frame_glow: Theme.ui_visual_bg,
                 accent_color: Theme.theme_primary,
@@ -278,6 +283,8 @@ Singleton {
                 glow: true,
                 glow_color: Theme.theme_primary,
                 glow_tint: 0.25,
+                bar_font_family: "VT323",
+                bar_font_size: Theme.font_size + 5,
                 bar_fg: Theme.theme_primary_light,
                 bar_border_color: Qt.alpha(Theme.theme_primary, 0.5),
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.4),
@@ -289,9 +296,11 @@ Singleton {
             "nes": Object.assign({}, terminal, {
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.6)),
-                // A 16px pixel grid; Press Start 2P is not installed.
-                font_family: "ProggyClean Nerd Font",
-                font_size: Theme.popup_font_size + 9,
+                // Press Start 2P draws on an 8px grid and runs 1em wide, so 16 is its 2x size with a wider frame.
+                font_family: "Press Start 2P",
+                font_size: 16,
+                scale: 1.3,
+                popup_min_width: 320,
                 frame_color: Theme.bg_crust,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
@@ -325,8 +334,8 @@ Singleton {
                 chip_active_fg: Theme.bg_crust,
                 toggle_on: Theme.theme_primary,
                 toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
-                bar_font_family: "ProggyClean Nerd Font",
-                bar_font_size: Theme.font_size + 7,
+                bar_font_family: "Press Start 2P",
+                bar_font_size: 16,
                 bar_side_bg: Theme.bg_crust,
                 bar_center_bg: Theme.bg_crust,
                 bar_fg: Theme.fg_strong,
@@ -343,8 +352,9 @@ Singleton {
                 // Greys lifted toward primary_light so they read on the shaded window.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
-                font_family: "ProFontWindows Nerd Font",
-                font_size: Theme.popup_font_size + 7,
+                // Silkscreen sits on an 8px grid; 16 is its 2x size.
+                font_family: "Silkscreen",
+                font_size: 16,
                 frame_color: Theme.bg_crust,
                 frame_shade: Theme.bg_mantle,
                 shade_vertical: true,
@@ -381,8 +391,8 @@ Singleton {
                 toggle_on: Theme.theme_secondary,
                 toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
                 text_shadow: Theme.bg_shadow,
-                bar_font_family: "ProFontWindows Nerd Font",
-                bar_font_size: Theme.font_size + 5,
+                bar_font_family: "Silkscreen",
+                bar_font_size: 16,
                 bar_side_bg: Theme.bg_core,
                 bar_center_bg: Theme.bg_core,
                 bar_border_width: 2,
@@ -544,7 +554,7 @@ Singleton {
                 bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.6)
             }),
             "ps2": Object.assign({}, terminal, {
-                font_family: "Montserrat",
+                font_family: "Exo 2",
                 font_size: Theme.popup_font_size + 1,
                 rounded: true,
                 corner_scale: 2.5,
@@ -582,7 +592,7 @@ Singleton {
                 toggle_on: Theme.theme_primary,
                 toggle_off: Theme.fg_dim,
                 marker_fill: false,
-                bar_font_family: "Montserrat",
+                bar_font_family: "Exo 2",
                 bar_font_size: Theme.font_size,
                 bar_side_bg: Theme.bg_mantle,
                 bar_center_bg: Theme.bg_mantle,
@@ -657,6 +667,8 @@ Singleton {
     readonly property color meter_hot: root.active.meter_hot
     readonly property real meter_radius: root.active.meter_radius
     readonly property real scale: root.active.scale
+    // Floor for every popup's width, for wide fonts that overrun the small popups.
+    readonly property real popup_min_width: root.active.popup_min_width
     readonly property bool show_title: root.active.show_title
     readonly property color title_bg: root.active.title_bg
     readonly property color title_fg: root.active.title_fg

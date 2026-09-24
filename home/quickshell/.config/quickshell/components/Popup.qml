@@ -82,7 +82,7 @@ PanelWindow {
     }
 
     // Never narrower than the island's bottom edge (its body, between the slants).
-    implicitWidth: Math.max(Style.px(preferred_width), island_width)
+    implicitWidth: Math.max(Style.px(preferred_width), island_width, Style.popup_min_width)
     implicitHeight: body_height + header_height + footer_height + Style.frame_drop
     default property alias content: content_scope.data
 
