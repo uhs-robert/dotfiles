@@ -116,6 +116,9 @@ Singleton {
             bar_workspace_active: Theme.theme_primary,
             bar_workspace_idle: Theme.bg_surface,
             bar_workspace_ring: "transparent",
+            bar_inset_gap: 0,
+            bar_inset_width: 0,
+            bar_inset_color: "transparent",
             bar_hover_bg: Theme.bg_surface,
             bar_glow_color: "transparent",
             bar_text_raised: false,
@@ -229,6 +232,12 @@ Singleton {
                 bar_workspace_active: Theme.theme_primary,
                 bar_workspace_idle: Theme.bg_surface,
                 bar_workspace_ring: "transparent",
+                bar_inset_gap: 0,
+                bar_inset_width: 0,
+                bar_inset_color: "transparent",
+            bar_inset_gap: 0,
+            bar_inset_width: 0,
+            bar_inset_color: "transparent",
                 bar_hover_bg: Theme.bg_surface,
                 bar_glow_color: "transparent",
                 bar_text_raised: false,
@@ -276,6 +285,59 @@ Singleton {
                 bar_scanline_color: Qt.alpha(Theme.theme_primary, 0.07),
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.35))
+            }),
+            "nes": Object.assign({}, terminal, {
+                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.6)),
+                // A 16px pixel grid; Press Start 2P is not installed.
+                font_family: "ProggyClean Nerd Font",
+                font_size: Theme.popup_font_size + 9,
+                frame_color: Theme.bg_crust,
+                frame_border_width: 0,
+                frame_border_color: "transparent",
+                frame_inset_gap: 4,
+                frame_inset_width: 3,
+                frame_inset_color: Theme.fg_strong,
+                accent_color: Theme.theme_primary,
+                accent_height: 4,
+                selection_bg: "transparent",
+                selection_outline: "transparent",
+                caret_color: Theme.theme_primary,
+                row_cursor: "\u25b6",
+                tab_active_bg: Theme.theme_primary,
+                tab_active_fg: Theme.bg_crust,
+                tab_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                key_bg: "transparent",
+                key_fg: Theme.theme_secondary,
+                key_border: "transparent",
+                section_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                section_rule: false,
+                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                footer_rule: false,
+                meter_on: Theme.theme_primary,
+                meter_off: Theme.bg_surface,
+                meter_hot: Theme.theme_label,
+                meter_radius: 0,
+                title_bg: "transparent",
+                title_fg: Theme.theme_primary,
+                chip_brackets: false,
+                chip_active_bg: Theme.theme_primary,
+                chip_active_fg: Theme.bg_crust,
+                toggle_on: Theme.theme_primary,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                bar_font_family: "ProggyClean Nerd Font",
+                bar_font_size: Theme.font_size + 7,
+                bar_side_bg: Theme.bg_crust,
+                bar_center_bg: Theme.bg_crust,
+                bar_fg: Theme.fg_strong,
+                bar_border_width: 0,
+                bar_border_color: "transparent",
+                bar_inset_gap: 2,
+                bar_inset_width: 2,
+                bar_inset_color: Theme.fg_strong,
+                bar_tip_fg: Theme.fg_strong,
+                bar_tip_border_width: 2,
+                bar_tip_border_color: Theme.fg_strong
             }),
             "ps1": Object.assign({}, terminal, {
                 // Muted text brightened; the shaded, dithered frame swallows the theme greys.
@@ -671,6 +733,10 @@ Singleton {
     readonly property color bar_workspace_active: root.bar.bar_workspace_active
     readonly property color bar_workspace_idle: root.bar.bar_workspace_idle
     readonly property color bar_workspace_ring: root.bar.bar_workspace_ring
+    // An inner line along each island's slants and bottom edge.
+    readonly property int bar_inset_gap: root.bar.bar_inset_gap
+    readonly property int bar_inset_width: root.bar.bar_inset_width
+    readonly property color bar_inset_color: root.bar.bar_inset_color
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color

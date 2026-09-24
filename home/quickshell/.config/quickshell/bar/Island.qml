@@ -16,6 +16,10 @@ Item {
     property color shade_color: "transparent"
     property bool shade_vertical: false
     property color dither_color: "transparent"
+    // An inner line following the slants and bottom edge, inset_gap in from them.
+    property real inset_gap: 0
+    property real inset_width: 0
+    property color inset_color: "transparent"
     readonly property bool shaded: root.shade_color.a > 0
     default property alias content: layout.children
 
@@ -162,6 +166,34 @@ Item {
                     if (root.cap_left) pts.push(Qt.point(c + i, h - i));
                     if (root.cap_right) pts.push(Qt.point(w - c - i, h - i));
                     pts.push(root.cap_right ? Qt.point(w - i, 0) : Qt.point(w, h - i));
+                    return pts;
+                }
+            }
+        }
+    }
+
+    Shape {
+        visible: root.inset_width > 0 && root.inset_color.a > 0
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeWidth: root.inset_width
+            strokeColor: root.inset_color
+            fillColor: "transparent"
+            capStyle: ShapePath.FlatCap
+            joinStyle: ShapePath.MiterJoin
+
+            PathPolyline {
+                path: {
+                    const w = root.width, h = root.height, off = root.inset_gap + root.inset_width / 2;
+                    const slope = root.cap_width / h;
+                    const shift = off * Math.sqrt(1 + slope * slope);
+                    const pts = [];
+                    if (root.cap_left) pts.push(Qt.point(shift, 0), Qt.point(shift + (h - off) * slope, h - off));
+                    else pts.push(Qt.point(0, h - off));
+                    if (root.cap_right) pts.push(Qt.point(w - shift - (h - off) * slope, h - off), Qt.point(w - shift, 0));
+                    else pts.push(Qt.point(w, h - off));
                     return pts;
                 }
             }

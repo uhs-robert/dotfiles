@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import "../components"
 import "../theme"
 import "../services"
 
@@ -80,8 +81,8 @@ PanelWindow {
             readonly property bool filled: !Style.show_title || Style.title_bg.a > 0
 
             y: -height * (1 - root.tab_progress)
-            width: label.implicitWidth + 20
-            height: label.implicitHeight + (Style.show_title ? 4 : 2)
+            width: label.implicitWidth + 20 + Style.inset_pad * 2
+            height: label.implicitHeight + (Style.show_title ? 4 : 2) + Style.inset_pad * 2
             bottomLeftRadius: Style.radius(6)
             bottomRightRadius: Style.radius(6)
             color: tab.filled ? root.shown_color : Style.frame_color
@@ -112,6 +113,11 @@ PanelWindow {
                     height: 1
                     color: Qt.alpha(root.shown_color, 0.08)
                 }
+            }
+
+            FrameInset {
+                edge: tab.border.width
+                bottom_radius: tab.bottomLeftRadius
             }
         }
     }

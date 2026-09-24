@@ -119,9 +119,11 @@ PanelWindow {
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
         readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : Style.frame_brackets.a > 0 ? 6 : 0
-        readonly property real header_height: title_tab.height
+        // The inner ring's room below the accent line, which already covers the border.
+        readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
+        readonly property real header_height: title_tab.height + frame.ring_pad
 
-        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
+        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
         color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
@@ -184,8 +186,8 @@ PanelWindow {
 
             Rectangle {
                 id: title_tab
-                x: frame.title_x
-                y: frame.top_edge
+                x: frame.title_x + Style.inset_pad
+                y: frame.top_edge + frame.ring_pad
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.show_title && !Style.fade_fills ? Style.title_bg : "transparent"

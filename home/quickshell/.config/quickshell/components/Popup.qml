@@ -119,7 +119,7 @@ PanelWindow {
     // Room kept clear of the corner brackets around the title.
     readonly property real bracket_pad: Style.frame_brackets.a > 0 ? 4 : 0
     readonly property real header_height: has_title ? title_tab.height + bracket_pad + Style.inset_pad : 0
-    readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 : 0
+    readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 + Style.inset_pad : 0
     property real line_progress: 0
     property real drop_progress: 0
 
@@ -307,7 +307,7 @@ PanelWindow {
                     anchors.bottom: parent.bottom
                     anchors.leftMargin: 12
                     anchors.rightMargin: 12
-                    anchors.bottomMargin: 8
+                    anchors.bottomMargin: 8 + Style.inset_pad
                     text: root.footer_hint
                 }
 

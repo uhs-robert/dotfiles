@@ -225,7 +225,7 @@ PanelWindow {
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
-        width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width : 0)
+        width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
