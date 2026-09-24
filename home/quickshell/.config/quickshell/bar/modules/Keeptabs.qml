@@ -204,7 +204,7 @@ Item {
                     x: glyph_text.implicitWidth - implicitWidth * 0.4
                     y: -3
                     text: group.modelData.count
-                    color: group.modelData.color || Theme.theme_primary
+                    color: group.is_done && pulse_loader.item && pulse_loader.item.count_color.a > 0 ? pulse_loader.item.count_color : group.modelData.color || Theme.theme_primary
                     font.family: Style.bar_font_family
                     style: Style.bar_text_style
                     styleColor: Style.bar_glow_color
