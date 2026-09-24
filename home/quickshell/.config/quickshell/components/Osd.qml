@@ -301,8 +301,8 @@ PanelWindow {
 
                 Item {
                     Layout.alignment: Qt.AlignVCenter
-                    Layout.preferredWidth: Style.px(180)
-                    Layout.preferredHeight: root.vox_recording ? waveform.implicitHeight : meter.implicitHeight
+                    Layout.preferredWidth: root.vox_recording ? Style.px(260) : Style.px(180)
+                    Layout.preferredHeight: root.vox_recording ? Style.px(44) : meter.implicitHeight
 
                     Meter {
                         id: meter
