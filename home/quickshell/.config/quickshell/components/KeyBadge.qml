@@ -10,14 +10,21 @@ Rectangle {
     property bool on_fill: false
     readonly property bool tinted: root.on_fill && Style.key_bg.a === 0
 
-    implicitWidth: Math.max(implicitHeight, key_text.implicitWidth + 8)
+    implicitWidth: Math.max(implicitHeight, key_text.implicitWidth + 8) + Style.slant * implicitHeight
     implicitHeight: key_text.implicitHeight + 2
     width: implicitWidth
     height: implicitHeight
     radius: Style.radius(3)
-    color: Style.key_bg
-    border.width: 1
+    color: Style.slant > 0 ? "transparent" : Style.key_bg
+    border.width: Style.slant > 0 ? 0 : 1
     border.color: root.tinted ? Style.tab_active_fg : Style.key_border
+
+    Slant {
+        visible: Style.slant > 0
+        color: Style.key_bg
+        border.width: 1
+        border.color: root.border.color
+    }
 
     Text {
         id: key_text

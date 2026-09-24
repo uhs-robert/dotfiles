@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
+import "../theme"
 
 Item {
     id: root
@@ -36,9 +37,9 @@ Item {
             strokeWidth: -1
             // The left island mirrors the shade so its light edge faces the screen centre like the right one.
             fillGradient: LinearGradient {
-                x1: root.cap_right && !root.cap_left ? root.width : 0
+                x1: root.cap_right && !root.cap_left && !Style.shade_vertical ? root.width : 0
                 y1: 0
-                x2: root.cap_right && !root.cap_left ? 0 : root.width
+                x2: Style.shade_vertical ? 0 : root.cap_right && !root.cap_left ? 0 : root.width
                 y2: root.height
                 GradientStop { position: 0; color: root.shade_color }
                 GradientStop { position: 1; color: root.bg_color }

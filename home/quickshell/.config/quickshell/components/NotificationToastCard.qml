@@ -109,6 +109,13 @@ Rectangle {
         bottom_radius: top_radius
     }
 
+    CornerBrackets {
+        visible: Style.boxed_cards && Style.frame_brackets.a > 0
+        anchors.fill: parent
+        inset: 3
+        arm: 6
+    }
+
     Rectangle {
         visible: !Style.boxed_cards
         anchors.left: parent.left

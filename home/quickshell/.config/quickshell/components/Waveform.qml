@@ -173,7 +173,7 @@ Item {
                 radius: Math.min(Style.meter_radius, bar.width / 2)
                 color: !bar.lit ? Style.meter_off : bar.is_hot ? Style.meter_hot : Style.meter_on
                 transform: Matrix4x4 {
-                    matrix: Qt.matrix4x4(1, Style.meter_skew, 0, -Style.meter_skew * bar.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                    matrix: Qt.matrix4x4(1, -Style.meter_slant, 0, Style.meter_slant * bar.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
                 }
 
                 Rectangle {

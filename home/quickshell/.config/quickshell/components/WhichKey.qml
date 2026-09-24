@@ -109,13 +109,13 @@ PanelWindow {
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
-        readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : 0
+        readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : Style.frame_brackets.a > 0 ? 6 : 0
         readonly property real header_height: title_tab.height
 
-        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2)
+        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
-        color: Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
+        color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
         border.width: Style.frame_border_width
         border.color: Style.frame_border_color
 
@@ -146,6 +146,11 @@ PanelWindow {
             anchors.margins: Style.frame_border_width
             top_radius: Math.max(0, frame.radius - Style.frame_border_width)
             bottom_radius: top_radius
+            chamfer: Style.frame_chamfer
+        }
+
+        CornerBrackets {
+            anchors.fill: parent
         }
 
         Rectangle {
@@ -185,7 +190,22 @@ PanelWindow {
                     font.pixelSize: Style.font_size - 2
                     font.bold: true
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
+                    style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
+                    styleColor: Style.title_glow
                 }
+            }
+
+            Text {
+                id: readout
+                visible: Style.show_title && Style.title_readout !== ""
+                anchors.right: parent.right
+                anchors.rightMargin: frame.title_x + 10
+                y: title_tab.y + (title_tab.height - height) / 2
+                text: Style.title_readout
+                color: Style.text_muted
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 5
+                font.letterSpacing: 1
             }
 
             ColumnLayout {

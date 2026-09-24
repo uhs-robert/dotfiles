@@ -24,7 +24,13 @@ Rectangle {
     implicitWidth: root.is_chip ? label_text.implicitWidth + 20 : 0
     implicitHeight: Style.px(24)
     radius: Style.radius(root.base_radius)
-    color: !root.active ? "transparent" : root.is_chip ? Style.chip_active_bg : Style.tab_active_bg
+    readonly property color fill: !root.active ? "transparent" : root.is_chip ? Style.chip_active_bg : Style.tab_active_bg
+    color: Style.slant > 0 ? "transparent" : root.fill
+
+    Slant {
+        visible: Style.slant > 0 && root.active
+        color: root.fill
+    }
 
     KeyBadge {
         id: key_badge
