@@ -32,6 +32,8 @@ Item {
     // SNES: columns standing on a Mode 7 floor.
     readonly property bool mode7: Style.weather_header === "mode7"
     readonly property bool floor_shown: root.mode7 && root.visible && Popups.open_name === "weather"
+    // Terminal: `curl wttr.in`, the window as one box-drawn table.
+    readonly property bool wttr_table: Style.weather_header === "wttr" && root.sub === 0
 
     onFloor_shownChanged: {
         if (!floor_loader.item) return;
@@ -53,6 +55,12 @@ Item {
     }
 
     FontMetrics {
+        id: table_metrics
+        font.family: Style.font_family
+        font.pixelSize: Style.font_size - 4
+    }
+
+    FontMetrics {
         id: small_metrics
         font.family: Style.font_family
         font.pixelSize: Style.font_size - 5
@@ -64,6 +72,7 @@ Item {
         const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
         const dq_w = root.dq ? 2 * (small_metrics.advanceWidth(Style.row_cursor) + 3) : 0;
         const col = root.stat_columns ? 56
+            : Style.weather_header === "wttr" ? table_metrics.advanceWidth("─") * 8 - 4
             : root.dq ? Math.max(label_metrics.advanceWidth("100%"), label_metrics.advanceWidth("WED") + dq_w) + 16
             : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
         return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
@@ -128,8 +137,24 @@ Item {
             sourceComponent: MissionHeader {}
         }
 
+        Loader {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            active: root.wttr_table
+            visible: active
+            sourceComponent: WttrTable {
+                days: root.window_days
+                first_day: root.first_day
+                day_cursor: root.day_cursor
+                scale_min: root.week_temp_range.min
+                scale_max: root.week_temp_range.max
+                on_select: root.on_select
+            }
+        }
+
         RowLayout {
             id: day_row
+            visible: !root.wttr_table
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 4
