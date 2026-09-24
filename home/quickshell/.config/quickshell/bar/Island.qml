@@ -121,19 +121,12 @@ Item {
             anchors.bottomMargin: root.border_width
             height: 5
             active: Style.bar_ticks.a > 0
-            sourceComponent: Item {
-                Repeater {
-                    model: Math.floor(parent.width / 12) + 1
-
-                    Rectangle {
-                        required property int index
-                        x: index * 12
-                        width: 1
-                        height: index % 5 === 0 ? 5 : 3
-                        anchors.bottom: parent.bottom
-                        color: Style.bar_ticks
-                    }
-                }
+            sourceComponent: TickScale {
+                from_end: true
+                step: 12
+                major_length: 5
+                minor_length: 3
+                major_color: Style.bar_ticks
             }
         }
 

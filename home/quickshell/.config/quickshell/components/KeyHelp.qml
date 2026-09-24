@@ -31,11 +31,10 @@ Item {
     }
 
     readonly property real key_column: {
-        const shear = root.st.slant;
         const h = key_metrics.height + 2;
         let w = 0;
         for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)));
-        return Math.min(list.width * 0.45, Math.max(h, w + 8) + shear * h);
+        return Math.min(list.width * 0.45, Math.max(h, w + 8));
     }
     readonly property real step: desc_metrics.height * 2
     readonly property real max_y: Math.max(0, flick.contentHeight - flick.height)

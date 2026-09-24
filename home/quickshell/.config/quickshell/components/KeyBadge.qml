@@ -12,22 +12,15 @@ Rectangle {
     property bool on_fill: false
     readonly property bool tinted: root.on_fill && root.st.key_bg.a === 0
 
-    implicitWidth: Math.max(implicitHeight, key_text.implicitWidth + 8) + root.st.slant * implicitHeight
+    implicitWidth: Math.max(implicitHeight, key_text.implicitWidth + 8)
     implicitHeight: key_text.implicitHeight + 2
     width: implicitWidth
     height: implicitHeight
     radius: root.st.key_round ? height / 2 : Style.radius(3)
     readonly property bool cut: root.st.key_cut > 0
-    color: root.st.slant > 0 || root.cut ? "transparent" : root.st.key_bg
-    border.width: root.st.slant > 0 || root.cut ? 0 : 1
+    color: root.cut ? "transparent" : root.st.key_bg
+    border.width: root.cut ? 0 : 1
     border.color: root.tinted ? root.st.tab_active_fg : root.st.key_border
-
-    Slant {
-        visible: root.st.slant > 0
-        color: root.st.key_bg
-        border.width: 1
-        border.color: root.border.color
-    }
 
     CutBox {
         visible: root.cut

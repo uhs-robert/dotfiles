@@ -1,13 +1,12 @@
 // home/quickshell/.config/quickshell/components/CornerBrackets.qml
 pragma ComponentBehavior: Bound
 import QtQuick
-import "../theme"
 
-// The style's corner brackets at the top left and top right, inset from the frame edge.
+// L-shaped brackets at the top corners, or all four, inset from the item's edge.
 Item {
     id: root
 
-    property color color: Style.for_item(root).frame_brackets
+    property color color: "transparent"
     property int inset: 4
     property int arm: 10
     property real thickness: 1

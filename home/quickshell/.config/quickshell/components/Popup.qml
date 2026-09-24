@@ -203,14 +203,12 @@ PanelWindow {
     readonly property int line_height: root.st.accent_height
     readonly property bool has_title: root.st.show_title && title !== ""
     readonly property bool has_footer: root.st.show_footer && footer_hint !== ""
-    // Room kept clear of the corner brackets around the title.
-    readonly property real bracket_pad: root.st.frame_brackets.a > 0 ? 4 : 0
     readonly property bool lcd: root.st.lcd_top.a > 0
     readonly property real title_gap: root.st.title_rule.a > 0 ? 6 : 0
     readonly property bool banded: root.st.title_band.a > 0
     readonly property real band_height: Math.max(26, title_tab.height + 4)
     readonly property real engraving_height: root.st.frame_engraving !== "" ? engraving.implicitHeight + 4 : 0
-    readonly property real header_height: (has_title ? (root.banded ? root.band_height + 8 : title_tab.height + bracket_pad + title_gap) + root.st.inset_pad : 0) + root.st.lcd_margin * 2
+    readonly property real header_height: (has_title ? (root.banded ? root.band_height + 8 : title_tab.height + title_gap) + root.st.inset_pad : 0) + root.st.lcd_margin * 2
     readonly property real footer_height: (has_footer ? base_footer.implicitHeight + 10 + root.st.inset_pad : 0) + root.st.lcd_margin * 2 + engraving_height
     property real line_progress: 0
     property real drop_progress: 0
@@ -356,10 +354,10 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.frame_octagon > 0 || root.st.frame_cut > 0 ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
+                color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.custom_frame ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
                 bottomLeftRadius: root.st.frame_radius
                 bottomRightRadius: root.st.frame_radius
-                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.frame_octagon > 0 || root.st.frame_cut > 0 ? 0 : root.st.frame_border_width
+                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.custom_frame ? 0 : root.st.frame_border_width
                 border.color: root.st.frame_border_color
             }
 
@@ -396,28 +394,12 @@ PanelWindow {
                 chamfer: root.st.frame_chamfer
             }
 
-            Loader {
-                anchors.fill: parent
-                active: root.st.frame_octagon > 0
-                sourceComponent: OctagonFrame {}
-            }
-
-            ChamferFrame {
-                anchors.fill: parent
-            }
-
-            CornerBrackets {
+            CustomFrame {
                 anchors.fill: parent
             }
 
             FrameInset {
                 bottom_radius: root.st.frame_radius
-            }
-
-            Loader {
-                anchors.fill: parent
-                active: root.st.frame_ticks !== ""
-                sourceComponent: FrameTicks {}
             }
 
             // The watch face: a shaded panel with static scan rows, and the engraving on the bezel below it.
@@ -499,8 +481,8 @@ PanelWindow {
                 Rectangle {
                     id: title_tab
                     visible: root.has_title && !root.banded
-                    x: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad * 1.5) + root.st.inset_pad + root.st.lcd_margin * 2
-                    y: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad) + root.st.inset_pad + root.st.lcd_margin * 2
+                    x: (root.st.fade_fills ? root.st.frame_border_width : 0) + root.st.inset_pad + root.st.lcd_margin * 2
+                    y: (root.st.fade_fills ? root.st.frame_border_width : 0) + root.st.inset_pad + root.st.lcd_margin * 2
                     readonly property real reticle_space: root.st.title_reticle.a > 0 ? title_text.implicitHeight + 4 : 0
                     readonly property real lead_space: title_tab.reticle_space + title_index.space
                     width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_text.implicitWidth + 20 + title_tab.lead_space, parent.width - title_tab.x * 2)
@@ -544,8 +526,6 @@ PanelWindow {
                         font.pixelSize: root.st.font_size - 2
                         font.weight: root.st.title_weight > 0 ? root.st.title_weight : root.st.title_font_family === root.st.font_family ? Font.Bold : Font.Normal
                         font.letterSpacing: root.st.title_spacing
-                        style: root.st.title_glow.a > 0 ? Text.Outline : Text.Normal
-                        styleColor: root.st.title_glow
                     }
                 }
 
@@ -554,7 +534,7 @@ PanelWindow {
                     // Dropped on narrow popups rather than drawn over the title.
                     visible: root.has_title && root.st.title_readout !== "" && title_tab.x + (root.st.fade_fills ? 10 + title_tab.lead_space + title_text.implicitWidth : title_tab.width) + 12 <= parent.width - anchors.rightMargin - implicitWidth
                     anchors.right: parent.right
-                    anchors.rightMargin: (root.lcd ? root.st.lcd_margin * 2 : 12) + root.bracket_pad + root.st.inset_pad
+                    anchors.rightMargin: (root.lcd ? root.st.lcd_margin * 2 : 12) + root.st.inset_pad
                     y: title_tab.y + (title_tab.height - height) / 2
                     text: root.st.title_readout.replace("{code}", root.title.slice(0, 3))
                     color: root.st.title_readout_fg.a > 0 ? root.st.title_readout_fg : root.st.text_muted
@@ -564,23 +544,10 @@ PanelWindow {
                 }
 
                 Rectangle {
-                    visible: root.has_title && root.st.title_line.a > 0 && width > 8
-                    x: title_tab.x + title_tab.width
-                    y: title_tab.y + Math.round(title_tab.height / 2)
-                    width: (title_readout.visible ? title_readout.x - 8 : parent.width - title_readout.anchors.rightMargin) - x
-                    height: 1
-                    gradient: Gradient {
-                        orientation: Gradient.Horizontal
-                        GradientStop { position: 0; color: root.st.title_line }
-                        GradientStop { position: 1; color: Qt.alpha(root.st.title_line, 0) }
-                    }
-                }
-
-                Rectangle {
                     visible: root.has_title && root.st.title_trail.a > 0 && width > 8
-                    x: title_tab.x + 10 + title_tab.lead_space + title_text.implicitWidth + 12
+                    x: title_tab.x + (root.st.fade_fills ? 10 + title_tab.lead_space + title_text.implicitWidth + 12 : title_tab.width)
                     y: title_tab.y + Math.round(title_tab.height / 2)
-                    width: (title_readout.visible ? title_readout.x - 12 : parent.width - title_tab.x - 12) - x
+                    width: (title_readout.visible ? title_readout.x - 12 : parent.width - title_readout.anchors.rightMargin) - x
                     height: 1
                     gradient: Gradient {
                         orientation: Gradient.Horizontal

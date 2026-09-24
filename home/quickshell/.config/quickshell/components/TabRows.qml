@@ -40,7 +40,7 @@ ColumnLayout {
     }
 
     // Mirrors MenuTab and KeyBadge sizing so rows can be split before the tabs exist.
-    readonly property real key_space: root.st.tab_keys && !root.chips ? Math.max(key_metrics.height + 2, key_metrics.advanceWidth("9") + 8) + root.st.slant * (key_metrics.height + 2) + 6 : 0
+    readonly property real key_space: root.st.tab_keys && !root.chips ? Math.max(key_metrics.height + 2, key_metrics.advanceWidth("9") + 8) + 6 : 0
 
     readonly property real bracket_space: root.st.tab_brackets.a > 0 && !root.chips ? label_metrics.advanceWidth("[]") + 4 : 0
 

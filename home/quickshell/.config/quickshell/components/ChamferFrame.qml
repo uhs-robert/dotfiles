@@ -17,7 +17,6 @@ Item {
     readonly property bool notched: root.st.frame_notch > 0 && root.width > 180
     readonly property real notch: root.notched ? root.st.frame_notch : 0
 
-    visible: root.cut > 0
 
     function outline(i) {
         const x0 = root.gap + i, y0 = root.gap + i, x1 = root.width - root.gap - i, y1 = root.height - root.gap - i;
@@ -62,18 +61,11 @@ Item {
         }
     }
 
-    Repeater {
-        model: root.st.frame_marks.a > 0 ? [[0, 0, 0], [0, 0, 1], [1, 0, 0], [1, 0, 1], [0, 1, 0], [0, 1, 1], [1, 1, 0], [1, 1, 1]] : []
-
-        Rectangle {
-            required property var modelData
-            readonly property bool upright: modelData[2] === 1
-
-            x: modelData[0] === 1 ? root.width - width : 0
-            y: modelData[1] === 1 ? root.height - height : 0
-            width: upright ? 1 : 7
-            height: upright ? 7 : 1
-            color: root.st.frame_marks
-        }
+    CornerBrackets {
+        anchors.fill: parent
+        color: root.st.frame_marks
+        inset: 0
+        arm: 7
+        all_corners: true
     }
 }

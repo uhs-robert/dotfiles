@@ -32,7 +32,6 @@ Singleton {
             frame_border_color: Theme.fg_muted,
             frame_chamfer: 0,
             frame_visor: false,
-            frame_brackets: "transparent",
             frame_inset_gap: 0,
             frame_inset_width: 0,
             frame_inset_color: "transparent",
@@ -101,7 +100,6 @@ Singleton {
             title_prefix: "",
             title_suffix: "",
             title_spacing: 2,
-            title_glow: "transparent",
             title_readout: "",
             title_readout_fg: "transparent",
             title_rule: "transparent",
@@ -118,7 +116,6 @@ Singleton {
             fade_fills: false,
             selection_border: "transparent",
             selection_glow: "transparent",
-            slant: 0,
             meter_shade: "transparent",
             meter_slant: 0,
             meter_bloom: false,
@@ -150,9 +147,9 @@ Singleton {
             hazard: "transparent",
             schematic: "transparent",
             status_strip: false,
-            osd_readout: false,
-            card_channels: false,
-            weather_spec: false,
+            osd_layout: "",
+            card_layout: "",
+            weather_header: "",
             bar_pill_square: false,
             bar_font_family: "JetBrainsMono Nerd Font",
             bar_font_size: Theme.font_size,
@@ -188,7 +185,6 @@ Singleton {
             tab_brackets: "transparent",
             tab_rule: "transparent",
             title_reticle: "transparent",
-            title_line: "transparent",
             chart_outline: "transparent",
             bar_workspace_diamond: false,
             bar_clock_brackets: "transparent",
@@ -196,12 +192,9 @@ Singleton {
             hairline_dim: "transparent",
             frame_ticks: "",
             tick_ruler: false,
-            ring_gauge: false,
             range_line: false,
             key_round: false,
             pill_chips: false,
-            card_rule: false,
-            selection_underline: "transparent",
             title_index: [],
             title_weight: 0,
             title_trail: "transparent",
@@ -227,7 +220,6 @@ Singleton {
                 frame_border_color: "transparent",
                 frame_chamfer: 0,
                 frame_visor: false,
-                frame_brackets: "transparent",
                 frame_inset_gap: 0,
                 frame_inset_width: 0,
                 frame_inset_color: "transparent",
@@ -296,7 +288,6 @@ Singleton {
                 title_prefix: "",
                 title_suffix: "",
                 title_spacing: 2,
-                title_glow: "transparent",
                 title_readout: "",
                 title_readout_fg: "transparent",
                 title_rule: "transparent",
@@ -313,7 +304,6 @@ Singleton {
                 fade_fills: false,
                 selection_border: "transparent",
                 selection_glow: "transparent",
-                slant: 0,
                 meter_shade: "transparent",
                 meter_slant: 0,
                 meter_bloom: false,
@@ -345,9 +335,9 @@ Singleton {
                 hazard: "transparent",
                 schematic: "transparent",
                 status_strip: false,
-                osd_readout: false,
-                card_channels: false,
-                weather_spec: false,
+                osd_layout: "",
+                card_layout: "",
+                weather_header: "",
                 bar_pill_square: false,
                 bar_font_family: Theme.font_family,
                 bar_font_size: Theme.font_size,
@@ -369,9 +359,6 @@ Singleton {
                 bar_inset_gap: 0,
                 bar_inset_width: 0,
                 bar_inset_color: "transparent",
-            bar_inset_gap: 0,
-            bar_inset_width: 0,
-            bar_inset_color: "transparent",
                 bar_hover_bg: Theme.bg_surface,
                 bar_glow_color: "transparent",
                 bar_text_raised: false,
@@ -386,10 +373,20 @@ Singleton {
                 tab_brackets: "transparent",
                 tab_rule: "transparent",
                 title_reticle: "transparent",
-                title_line: "transparent",
                 chart_outline: "transparent",
                 bar_workspace_diamond: false,
-                bar_clock_brackets: "transparent"
+                bar_clock_brackets: "transparent",
+                hairline: "transparent",
+                hairline_dim: "transparent",
+                frame_ticks: "",
+                tick_ruler: false,
+                range_line: false,
+                key_round: false,
+                pill_chips: false,
+                title_index: [],
+                title_weight: 0,
+                title_trail: "transparent",
+                bar_ticks: "transparent"
             },
             "terminal": terminal,
             "crt": Object.assign({}, terminal, {
@@ -709,57 +706,6 @@ Singleton {
                     toggle_off: Qt.alpha(Theme.theme_primary_light, 0.45)
                 }
             }),
-            "scifi":Object.assign({}, terminal, {
-                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
-                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.6)),
-                frame_color: Theme.bg_crust,
-                frame_shade: Theme.bg_mantle,
-                shade_vertical: true,
-                frame_border_width: 0,
-                frame_border_color: "transparent",
-                frame_chamfer: 14,
-                frame_brackets: Theme.theme_primary,
-                accent_color: Theme.theme_primary,
-                accent_height: 2,
-                selection_bg: Qt.alpha(Theme.theme_primary, 0.18),
-                selection_outline: "transparent",
-                slant: 0.28,
-                caret_color: Theme.theme_primary,
-                caret_blink: false,
-                row_cursor: "\u00bb",
-                tab_active_bg: Qt.alpha(Theme.theme_primary, 0.18),
-                tab_active_fg: Theme.fg_strong,
-                tab_fg: Theme.theme_primary_light,
-                key_fg: Theme.theme_primary,
-                key_border: Qt.alpha(Theme.theme_primary, 0.6),
-                section_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
-                section_rule: false,
-                section_fade: Qt.alpha(Theme.theme_primary, 0.6),
-                label_caps: true,
-                label_spacing: 2,
-                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
-                footer_rule: false,
-                meter_off: Theme.ui_visual_bg,
-                meter_slant: 0.45,
-                meter_bloom: true,
-                title_bg: "transparent",
-                title_fg: Theme.theme_primary,
-                title_spacing: 4,
-                title_glow: Qt.alpha(Theme.theme_primary, 0.45),
-                title_readout: "SYS 07.3 \u25a0\u25a0\u25a1",
-                chip_brackets: false,
-                chip_active_bg: Qt.alpha(Theme.theme_primary, 0.18),
-                chip_active_fg: Theme.fg_strong,
-                toggle_on: Theme.theme_primary,
-                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
-                bar_caps: true,
-                bar_letter_spacing: 1,
-                bar_fg: Theme.theme_primary_light,
-                bar_border_color: Theme.theme_primary,
-                bar_workspace_idle: Theme.ui_visual_bg,
-                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.18),
-                bar_glow_color: Qt.alpha(Theme.theme_primary, 0.2)
-            }),
             "metroid": Object.assign({}, terminal, {
                 // Greys lifted toward primary_light so they read on the visor glass.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
@@ -929,7 +875,7 @@ Singleton {
                     title_readout: "SCAN",
                     title_readout_fg: Theme.theme_secondary,
                     title_reticle: vec,
-                    title_line: vec_d,
+                    title_trail: vec_d,
                     chip_brackets: false,
                     chip_active_bg: lock,
                     chip_active_fg: Theme.bg_crust,
@@ -952,6 +898,7 @@ Singleton {
                     bar_workspace_idle: "transparent",
                     bar_workspace_ring: vec,
                     bar_workspace_diamond: true,
+                    bar_pill_square: true,
                     bar_clock_brackets: lock,
                     bar_hover_bg: Qt.alpha(vec, 0.15),
                     small: {
@@ -998,7 +945,7 @@ Singleton {
                 frame_ticks: "top",
                 selection_bg: Qt.alpha(Theme.theme_primary_light, 0.14),
                 selection_outline: "transparent",
-                selection_underline: Qt.alpha(Theme.theme_primary_light, 0.6),
+                selection_rule: Qt.alpha(Theme.theme_primary_light, 0.6),
                 fade_fills: true,
                 caret_color: Theme.theme_primary_light,
                 caret_blink: false,
@@ -1008,6 +955,7 @@ Singleton {
                 tab_fg: Qt.alpha(Theme.fg_strong, 0.55),
                 tab_caps: true,
                 tab_underline: Theme.fg_strong,
+                tab_rule: Qt.alpha(Theme.fg_strong, 0.12),
                 key_fg: Theme.theme_primary_light,
                 key_border: Qt.alpha(Theme.fg_strong, 0.24),
                 key_round: true,
@@ -1037,12 +985,13 @@ Singleton {
                 chip_pick: Theme.fg_strong,
                 chip_border: Qt.alpha(Theme.fg_strong, 0.24),
                 pill_chips: true,
-                card_rule: true,
+                card_layout: "rule",
                 toggle_brackets: false,
                 toggle_on: Theme.fg_strong,
                 toggle_off: Qt.alpha(Theme.fg_strong, 0.55),
                 marker_fill: false,
-                ring_gauge: true,
+                osd_layout: "ring",
+                weather_header: "ring",
                 range_line: true,
                 bar_font_family: "Jura",
                 bar_font_size: Theme.font_size,
@@ -1166,9 +1115,9 @@ Singleton {
                 hazard: Theme.theme_secondary,
                 schematic: Qt.alpha(Theme.theme_primary_light, 0.16),
                 status_strip: true,
-                osd_readout: true,
-                card_channels: true,
-                weather_spec: true,
+                osd_layout: "readout",
+                card_layout: "channel",
+                weather_header: "spec",
                 bar_font_family: "Barlow Condensed",
                 bar_font_size: Theme.font_size + 1,
                 bar_caps: true,
@@ -1212,6 +1161,7 @@ Singleton {
         o.number_font = o.number_font || o.font_family;
         o.label_font_family = o.label_font_family || o.font_family;
         o.mono_font = o.mono_font || o.font_family;
+        o.custom_frame = o.frame_octagon > 0 || o.frame_cut > 0;
         o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
         return o;
     }
@@ -1239,7 +1189,6 @@ Singleton {
     readonly property real frame_chamfer: root.active.frame_chamfer
     // Frames drawn as visor glass (VisorGlass) instead of a plain rectangle.
     readonly property bool frame_visor: root.active.frame_visor
-    readonly property color frame_brackets: root.active.frame_brackets
     // An inner ring frame_inset_gap inside the border; content keeps inset_pad clear of the frame edge.
     readonly property int frame_inset_gap: root.active.frame_inset_gap
     readonly property int frame_inset_width: root.active.frame_inset_width
@@ -1321,7 +1270,6 @@ Singleton {
     readonly property string title_prefix: root.active.title_prefix
     readonly property string title_suffix: root.active.title_suffix
     readonly property real title_spacing: root.active.title_spacing
-    readonly property color title_glow: root.active.title_glow
     // A static system readout drawn at the right end of the title row.
     readonly property string title_readout: root.active.title_readout
     // Transparent draws the readout in text_muted; {code} in the readout becomes the title's first three letters.
@@ -1343,8 +1291,6 @@ Singleton {
     readonly property bool fade_fills: root.active.fade_fills
     readonly property color selection_border: root.active.selection_border
     readonly property color selection_glow: root.active.selection_glow
-    // Leans selections, tabs and key badges into parallelograms; the shear per px of height.
-    readonly property real slant: root.active.slant
     readonly property color meter_shade: root.active.meter_shade
     // Leans meter and waveform tops right by this shear per px of height.
     readonly property real meter_slant: root.active.meter_slant
@@ -1357,70 +1303,65 @@ Singleton {
     readonly property real corner_scale: root.active.corner_scale
     // Sections, tabs and chips; empty uses font_family.
     readonly property string label_font_family: root.active.label_font_family || root.font_family
+    // Readouts, keys and ids; empty uses font_family.
+    readonly property string mono_font: root.active.mono_font || root.font_family
     // Frames cut to an octagon this many px at each corner (OctagonFrame).
     readonly property real frame_octagon: root.active.frame_octagon
     // Diagonal struts from the octagon's cut corners and ticks at its edge midpoints.
     readonly property color frame_struts: root.active.frame_struts
+    // Top-left and bottom-right corners cut by this many px (ChamferFrame), with frame_notch px stepped notches.
+    readonly property real frame_cut: root.active.frame_cut
+    readonly property real frame_notch: root.active.frame_notch
+    // A frame component draws the fill and border, so the base rectangle and FrameShade stay empty.
+    readonly property bool custom_frame: root.frame_octagon > 0 || root.frame_cut > 0
+    // The middle of a frame_cut border's vertical fade; its ends are frame_border_color.
+    readonly property color frame_line: root.active.frame_line
+    readonly property color frame_marks: root.active.frame_marks
+    // "top": a tick scale on the top edge, bottom rule and corner crosses; "left": a scale down the left side and a corner ring.
+    readonly property string frame_ticks: root.active.frame_ticks
+    // Major and minor tick color for frame scales, rules and ruler meters.
+    readonly property color hairline: root.active.hairline
+    readonly property color hairline_dim: root.active.hairline_dim
     readonly property real lcd_radius: root.active.lcd_radius
     readonly property color lcd_border: root.active.lcd_border
     // Corner brackets at all four corners inside the LCD panel.
     readonly property color lcd_brackets: root.active.lcd_brackets
     // Target-lock corner brackets on selected rows, cards and days.
     readonly property color selection_brackets: root.active.selection_brackets
+    // A 1px rule under the selected row; row_rule draws it under the others.
+    readonly property color selection_rule: root.active.selection_rule
+    readonly property color row_rule: root.active.row_rule
+    // "box" marks every row with a square, filled on the selected one; rows with a slot number show it instead.
+    readonly property string row_marker: root.active.row_marker
+    // A diagonal tick in the top-right corner of cards and the selected row.
+    readonly property color corner_tick: root.active.corner_tick
     // Brackets around the active tab's label.
     readonly property color tab_brackets: root.active.tab_brackets
     // A 1px baseline under every tab.
     readonly property color tab_rule: root.active.tab_rule
-    // A reticle glyph before popup titles.
-    readonly property color title_reticle: root.active.title_reticle
-    // A rule from the title to the readout, fading out to the right.
-    readonly property color title_line: root.active.title_line
-    readonly property color chart_outline: root.active.chart_outline
-    // The fallbacks below cover "default", which does not extend terminal.
-    // Major and minor tick color for frame scales, rules and ruler meters.
-    readonly property color hairline: root.active.hairline || "transparent"
-    readonly property color hairline_dim: root.active.hairline_dim || "transparent"
-    // "top": a tick scale on the top edge, bottom rule and corner crosses; "left": a scale down the left side and a corner ring.
-    readonly property string frame_ticks: root.active.frame_ticks || ""
-    readonly property bool tick_ruler: root.active.tick_ruler === true
-    // The OSD level and weather temperature drawn in ticked ring gauges.
-    readonly property bool ring_gauge: root.active.ring_gauge === true
-    // Daily temperature ranges as 1px lines with ring end caps.
-    readonly property bool range_line: root.active.range_line === true
-    readonly property bool key_round: root.active.key_round === true
-    // Chips, action chips, header buttons and the alert banner as outlined pills.
-    readonly property bool pill_chips: root.active.pill_chips === true
-    // Notification cards as an open left rule with a fading sweep when selected.
-    readonly property bool card_rule: root.active.card_rule === true
-    readonly property color selection_underline: root.active.selection_underline || "transparent"
-    // Popup names numbered 01, 02, ... in front of their titles.
-    readonly property var title_index: root.active.title_index || []
-    // 0 keeps titles bold when they share the body font.
-    readonly property int title_weight: root.active.title_weight || 0
-    readonly property color title_trail: root.active.title_trail || "transparent"
-    readonly property color bar_ticks: root.bar.bar_ticks || "transparent"
-    // Readouts, keys and ids; empty uses font_family.
-    readonly property string mono_font: root.active.mono_font || root.font_family
-    // Top-left and bottom-right corners cut by this many px (ChamferFrame), with frame_notch px stepped notches.
-    readonly property real frame_cut: root.active.frame_cut
-    readonly property real frame_notch: root.active.frame_notch
-    // The middle of a frame_cut border's vertical fade; its ends are frame_border_color.
-    readonly property color frame_line: root.active.frame_line
-    readonly property color frame_marks: root.active.frame_marks
-    // A title strip with a tab-cut band in this color (TabHeader); title_ids maps popup names to [id, readout].
-    readonly property color title_band: root.active.title_band
-    readonly property var title_ids: root.active.title_ids
-    // "box" marks every row with a square, filled on the selected one; rows with a slot number show it instead.
-    readonly property string row_marker: root.active.row_marker
-    readonly property color row_rule: root.active.row_rule
-    readonly property color selection_rule: root.active.selection_rule
-    // A diagonal tick in the top-right corner of cards and the selected row.
-    readonly property color corner_tick: root.active.corner_tick
-    readonly property real key_cut: root.active.key_cut
     readonly property color tab_bg: root.active.tab_bg
     readonly property real tab_cut: root.active.tab_cut
     readonly property color chip_bg: root.active.chip_bg
+    // Chips, action chips, header buttons and the alert banner as outlined pills.
+    readonly property bool pill_chips: root.active.pill_chips
+    readonly property bool key_round: root.active.key_round
+    readonly property real key_cut: root.active.key_cut
     readonly property color section_marker: root.active.section_marker
+    // A reticle glyph before popup titles.
+    readonly property color title_reticle: root.active.title_reticle
+    // Popup names numbered 01, 02, ... in front of their titles.
+    readonly property var title_index: root.active.title_index
+    // 0 keeps titles bold when they share the body font.
+    readonly property int title_weight: root.active.title_weight
+    // A rule from the title to the readout, fading out to the right.
+    readonly property color title_trail: root.active.title_trail
+    // A title strip with a tab-cut band in this color (TabHeader); title_ids maps popup names to [id, readout].
+    readonly property color title_band: root.active.title_band
+    readonly property var title_ids: root.active.title_ids
+    readonly property color chart_outline: root.active.chart_outline
+    // Daily temperature ranges as 1px lines with ring end caps.
+    readonly property bool range_line: root.active.range_line
+    readonly property bool tick_ruler: root.active.tick_ruler
     // Every fifth unlit meter segment; meter_height 0 keeps the default height.
     readonly property color meter_major: root.active.meter_major
     readonly property real meter_height: root.active.meter_height
@@ -1431,12 +1372,13 @@ Singleton {
     readonly property bool slider_readout: root.active.slider_readout
     // Hazard stripes on alert banners and critical cards.
     readonly property color hazard: root.active.hazard
-    // Per-style layouts: Start's schematic and status strip, the OSD readout, channel cards, the weather spec sheet.
+    // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    readonly property bool osd_readout: root.active.osd_readout
-    readonly property bool card_channels: root.active.card_channels
-    readonly property bool weather_spec: root.active.weather_spec
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring" or "spec", cards "rule" or "channel".
+    readonly property string osd_layout: root.active.osd_layout
+    readonly property string weather_header: root.active.weather_header
+    readonly property string card_layout: root.active.card_layout
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -1460,11 +1402,13 @@ Singleton {
     readonly property color bar_workspace_active: root.bar.bar_workspace_active
     readonly property color bar_workspace_idle: root.bar.bar_workspace_idle
     readonly property color bar_workspace_ring: root.bar.bar_workspace_ring
-    // Empty workspaces draw as diamonds, busy ones as square-cornered pills.
+    // Square-cornered workspace pills; bar_workspace_diamond also turns the empty ones into diamonds.
+    readonly property bool bar_pill_square: root.bar.bar_pill_square
     readonly property bool bar_workspace_diamond: root.bar.bar_workspace_diamond
     // Brackets around the bar clock's time.
     readonly property color bar_clock_brackets: root.bar.bar_clock_brackets
-    readonly property bool bar_pill_square: root.bar.bar_pill_square
+    // A tick scale rising from each island's bottom edge.
+    readonly property color bar_ticks: root.bar.bar_ticks
     // An inner line along each island's slants and bottom edge.
     readonly property int bar_inset_gap: root.bar.bar_inset_gap
     readonly property int bar_inset_width: root.bar.bar_inset_width

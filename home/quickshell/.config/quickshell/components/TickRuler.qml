@@ -1,7 +1,6 @@
 // home/quickshell/.config/quickshell/components/TickRuler.qml
 pragma ComponentBehavior: Bound
 import QtQuick
-import "../theme"
 
 // A Meter drawn as a tick ruler: a baseline with a tick per segment that lights up with the level.
 Item {

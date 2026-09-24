@@ -17,7 +17,7 @@ Item {
     property int focused_action: -1
     // The card's 1-based position in the list, shown by styles with channel cards.
     property int channel: 0
-    readonly property bool channels: Style.card_channels
+    readonly property bool channels: Style.card_layout === "channel"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
 
     signal invoke_requested()
@@ -70,8 +70,8 @@ Item {
         anchors.right: parent.right
         implicitHeight: layout.implicitHeight + 20
         radius: Style.radius(8)
-        color: Style.card_rule || root.channels ? "transparent" : Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
-        border.width: Style.card_rule || root.channels ? 0 : 1
+        color: Style.card_layout !== "" ? "transparent" : Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
+        border.width: Style.card_layout !== "" ? 0 : 1
         border.color: !Style.boxed_cards ? Theme.ui_border : root.selected && Style.selection_brackets.a <= 0 ? Style.caret_color : Qt.alpha(root.accent, 0.6)
         clip: true
 
@@ -80,7 +80,7 @@ Item {
         }
 
         CardRule {
-            visible: Style.card_rule
+            visible: Style.card_layout === "rule"
             selected: root.selected
         }
 

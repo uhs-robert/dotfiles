@@ -32,7 +32,7 @@ Rectangle {
     border.color: root.active ? root.st.chip_active_bg : root.st.chip_border
     readonly property color fill: !root.active ? (root.is_chip ? root.st.chip_bg : root.st.tab_bg) : root.is_chip ? root.st.chip_active_bg : root.st.tab_active_bg
     readonly property real cut: root.is_chip ? root.st.key_cut : root.st.tab_cut
-    color: root.st.slant > 0 || root.cut > 0 ? "transparent" : root.fill
+    color: root.cut > 0 ? "transparent" : root.fill
 
     CutBox {
         visible: root.cut > 0
@@ -43,11 +43,6 @@ Rectangle {
         fill: root.fill
         fill_end: root.active && !root.is_chip ? Qt.alpha(root.fill, root.fill.a * 0.6) : root.fill
         stroke: root.is_chip && !root.active ? root.st.chip_border : "transparent"
-    }
-
-    Slant {
-        visible: root.st.slant > 0 && root.active
-        color: root.fill
     }
 
     KeyBadge {
@@ -111,14 +106,6 @@ Rectangle {
         width: parent.width
         height: root.st.hairline.a > 0 ? 1 : 2
         color: root.st.tab_underline
-    }
-
-    Rectangle {
-        visible: !root.active && !root.is_chip && root.st.hairline_dim.a > 0
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: 1
-        color: Qt.alpha(root.st.hairline_dim, root.st.hairline_dim.a / 2)
     }
 
     MouseArea {

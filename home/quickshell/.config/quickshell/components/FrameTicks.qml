@@ -10,25 +10,19 @@ Item {
     property var st: Style.for_item(root)
     readonly property string mode: root.st.frame_ticks
     readonly property bool on_top: root.mode === "top"
-    readonly property int step: root.on_top ? 10 : 8
-    readonly property int major_every: 5
-    readonly property real span: root.on_top ? root.width : Math.max(0, root.height - 28)
 
     visible: root.mode !== ""
 
-    Repeater {
-        model: root.visible ? Math.floor(root.span / root.step) + 1 : 0
-
-        Rectangle {
-            required property int index
-            readonly property bool major: index % root.major_every === 0
-
-            x: root.on_top ? index * root.step : 0
-            y: root.on_top ? 0 : 14 + index * root.step
-            width: root.on_top ? 1 : major ? 7 : 4
-            height: root.on_top ? (major ? 10 : 5) : 1
-            color: major ? root.st.hairline : root.st.hairline_dim
-        }
+    TickScale {
+        y: root.on_top ? 0 : 14
+        width: root.on_top ? root.width : 7
+        height: root.on_top ? 10 : Math.max(0, root.height - 28)
+        vertical: !root.on_top
+        step: root.on_top ? 10 : 8
+        major_length: root.on_top ? 10 : 7
+        minor_length: root.on_top ? 5 : 4
+        major_color: root.st.hairline
+        minor_color: root.st.hairline_dim
     }
 
     Rectangle {

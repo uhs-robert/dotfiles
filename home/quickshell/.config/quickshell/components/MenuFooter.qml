@@ -118,7 +118,7 @@ Item {
         Text {
             id: slash_text
             text: "/"
-            color: root.st.footer_key_fg
+            color: root.st.footer_key_bg.a > 0 ? root.st.footer_key_bg : root.st.footer_key_fg
             font.family: root.st.font_family
             font.pixelSize: root.st.font_size - 4
         }

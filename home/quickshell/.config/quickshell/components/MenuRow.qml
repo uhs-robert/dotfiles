@@ -20,7 +20,7 @@ Rectangle {
     readonly property real key_space: (root.show_key ? key_badge.width + 6 : 0)
 
     radius: Style.radius(root.base_radius)
-    color: root.selected && !root.st.fade_fills && root.st.slant <= 0 ? root.st.selection_bg : "transparent"
+    color: root.selected && !root.st.fade_fills ? root.st.selection_bg : "transparent"
     border.width: root.selected && root.st.selection_border.a > 0 ? 1 : 0
     border.color: root.st.selection_border
 
@@ -43,11 +43,6 @@ Rectangle {
         return root.selected && root.st.selection_inverse ? root.st.selection_fg : c;
     }
 
-    Slant {
-        visible: root.selected && !root.st.fade_fills && root.st.slant > 0
-        color: root.st.selection_bg
-    }
-
     FadeFill {
         visible: root.selected && root.st.fade_fills
         fill: root.st.selection_bg
@@ -62,14 +57,6 @@ Rectangle {
 
     LockBrackets {
         shown: root.selected
-    }
-
-    Rectangle {
-        visible: root.selected && root.st.selection_underline.a > 0
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: 1
-        color: root.st.selection_underline
     }
 
     Rectangle {

@@ -18,7 +18,7 @@ Item {
     property var on_select: function (i) {}
 
     readonly property var sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
-    readonly property bool stat_columns: Style.weather_spec && root.sub === 0
+    readonly property bool stat_columns: Style.weather_header === "spec" && root.sub === 0
 
     FontMetrics {
         id: label_metrics

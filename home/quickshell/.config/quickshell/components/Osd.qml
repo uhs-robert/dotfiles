@@ -45,7 +45,8 @@ PanelWindow {
 
     readonly property bool showing_vox: root.content === "voxtype"
     readonly property bool vox_recording: root.showing_vox && root.vox_phase === "recording"
-    readonly property bool readout_layout: Style.osd_readout && !root.showing_vox
+    readonly property bool readout_layout: Style.osd_layout === "readout" && !root.showing_vox
+    readonly property bool ring_layout: Style.osd_layout === "ring" && !root.showing_vox
     readonly property bool banded: Style.show_title && Style.title_band.a > 0
 
     readonly property string title: root.showing_vox ? root.vox_phase.toUpperCase() : root.kind.toUpperCase()
@@ -227,17 +228,16 @@ PanelWindow {
         readonly property int pad_x: Style.px(16)
         readonly property int pad_y: Style.px(10)
         readonly property real top_rule: Style.frame_top_rule ? Style.accent_height : 0
-        readonly property real bracket_pad: Style.frame_brackets.a > 0 ? 4 : 0
         readonly property real band_height: Math.max(26, title_tab.height + 4)
-        readonly property real header_height: !title_tab.visible ? 0 : root.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.top_rule + frame.bracket_pad + Style.inset_pad
+        readonly property real header_height: !title_tab.visible ? 0 : root.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.top_rule + Style.inset_pad
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded && !Style.frame_visor ? height / 2 : Style.frame_radius
-        color: Style.frame_chamfer > 0 || Style.frame_visor || Style.frame_octagon > 0 || Style.frame_cut > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
-        border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.frame_octagon > 0 || Style.frame_cut > 0 ? 0 : Style.frame_border_width
+        color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
+        border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
 
         VisorGlass {
@@ -274,29 +274,13 @@ PanelWindow {
             chamfer: Style.frame_chamfer
         }
 
-        Loader {
-            anchors.fill: parent
-            active: Style.frame_octagon > 0
-            sourceComponent: OctagonFrame {}
-        }
-
-        ChamferFrame {
-            anchors.fill: parent
-        }
-
-        CornerBrackets {
+        CustomFrame {
             anchors.fill: parent
         }
 
         FrameInset {
             top_radius: frame.radius
             bottom_radius: frame.radius
-        }
-
-        Loader {
-            anchors.fill: parent
-            active: Style.frame_ticks !== ""
-            sourceComponent: FrameTicks {}
         }
 
         Item {
@@ -325,8 +309,8 @@ PanelWindow {
                 id: title_tab
                 visible: Style.show_title
                 opacity: root.banded ? 0 : 1
-                x: (Style.fade_fills || Style.rounded ? frame.radius : frame.bracket_pad * 1.5) + Style.inset_pad
-                y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + frame.bracket_pad + Style.inset_pad
+                x: (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
+                y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + Style.inset_pad
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20 + title_index.space, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20 + title_index.space
                 height: Math.max(title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
                 color: Style.fade_fills ? "transparent" : Style.title_bg
@@ -355,8 +339,6 @@ PanelWindow {
                     font.pixelSize: Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
-                    style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
-                    styleColor: Style.title_glow
                 }
             }
 
@@ -367,13 +349,12 @@ PanelWindow {
                 spacing: Style.px(10)
 
                 Loader {
-                    readonly property bool shown: Style.ring_gauge && !root.showing_vox
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: Style.px(84)
                     Layout.preferredHeight: Style.px(84)
                     Layout.rightMargin: Style.px(6)
-                    active: shown
-                    visible: shown
+                    active: root.ring_layout
+                    visible: root.ring_layout
                     sourceComponent: RingGauge {
                         value: root.level
                         label: String(root.percent)
@@ -429,7 +410,7 @@ PanelWindow {
                 }
 
                 Text {
-                    visible: !root.readout_layout && !(Style.ring_gauge && !root.showing_vox)
+                    visible: !root.readout_layout && !root.ring_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight

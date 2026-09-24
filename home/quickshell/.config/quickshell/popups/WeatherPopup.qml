@@ -195,25 +195,27 @@ Popup {
             anchors.top: parent.top
             spacing: 8
 
-            Loader {
-                active: Style.weather_spec
-                visible: active
-                Layout.fillWidth: true
-                sourceComponent: WeatherSpec {}
-            }
-
             // --- Current conditions header, shown above every tab ---
             Loader {
                 Layout.fillWidth: true
-                active: Style.ring_gauge
+                active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: RingHeader {}
+                sourceComponent: Style.weather_header === "spec" ? spec_header : ring_header
+
+                Component {
+                    id: spec_header
+                    WeatherSpec {}
+                }
+
+                Component {
+                    id: ring_header
+                    RingHeader {}
+                }
             }
 
             RowLayout {
-                visible: !Style.weather_spec
+                visible: Style.weather_header === ""
                 Layout.fillWidth: true
-                visible: !Style.ring_gauge
                 spacing: 14
 
                 Image {

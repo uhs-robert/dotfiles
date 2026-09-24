@@ -118,7 +118,7 @@ PanelWindow {
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
-        readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : Style.frame_brackets.a > 0 ? 6 : 0
+        readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : 0
         // The inner ring's room below the accent line, which already covers the border.
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && Style.title_band.a > 0
@@ -128,8 +128,8 @@ PanelWindow {
         width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
-        color: Style.frame_chamfer > 0 || Style.frame_visor || Style.frame_octagon > 0 || Style.frame_cut > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
-        border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.frame_octagon > 0 || Style.frame_cut > 0 ? 0 : Style.frame_border_width
+        color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
+        border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
 
         VisorGlass {
@@ -166,17 +166,7 @@ PanelWindow {
             chamfer: Style.frame_chamfer
         }
 
-        Loader {
-            anchors.fill: parent
-            active: Style.frame_octagon > 0
-            sourceComponent: OctagonFrame {}
-        }
-
-        ChamferFrame {
-            anchors.fill: parent
-        }
-
-        CornerBrackets {
+        CustomFrame {
             anchors.fill: parent
         }
 
@@ -184,12 +174,6 @@ PanelWindow {
             top_radius: frame.radius
             bottom_radius: frame.radius
             top_offset: frame.top_edge - Style.frame_border_width
-        }
-
-        Loader {
-            anchors.fill: parent
-            active: Style.frame_ticks !== ""
-            sourceComponent: FrameTicks {}
         }
 
         Rectangle {
@@ -245,8 +229,6 @@ PanelWindow {
                     font.pixelSize: Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
-                    style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
-                    styleColor: Style.title_glow
                 }
             }
 

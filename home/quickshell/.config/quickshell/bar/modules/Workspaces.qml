@@ -91,7 +91,7 @@ Item {
 
                 height: root.pill_height
                 width: is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
-                radius: Style.bar_workspace_diamond || Style.bar_pill_square ? 0 : height / 2
+                radius: Style.bar_pill_square ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
