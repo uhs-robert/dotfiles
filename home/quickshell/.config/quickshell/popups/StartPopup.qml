@@ -28,6 +28,10 @@ Popup {
         selected = 0;
         confirm = false;
     }
+    search_enabled: !root.confirm
+    search_rows: root.actions
+    search_cursor: root.selected
+    onSearch_select: index => root.selected = index
     onJump_first: root.selected = 0
     onJump_last: root.selected = root.actions.length - 1
 
@@ -123,8 +127,8 @@ Popup {
                             font.pixelSize: root.st.font_size
                         }
 
-                        Text {
-                            text: row.modelData
+                        RowLabel {
+                            label: row.modelData
                             color: row.fg(root.st.text_fg)
                             font.family: root.st.font_family
                             font.pixelSize: root.st.font_size
