@@ -202,7 +202,7 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 visible: Style.show_title
-                x: Style.fade_fills ? frame.radius : 0
+                x: Style.fade_fills || Style.rounded ? frame.radius : 0
                 y: Style.fade_fills ? Style.frame_border_width : 0
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
