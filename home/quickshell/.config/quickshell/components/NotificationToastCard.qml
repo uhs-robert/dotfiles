@@ -57,7 +57,7 @@ Rectangle {
         onTriggered: root.time_tick += 1
     }
 
-    implicitHeight: layout.implicitHeight + 16
+    implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
     radius: Style.radius(8)
     color: Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
@@ -137,7 +137,7 @@ Rectangle {
 
     Text {
         visible: root.selected && Style.row_cursor !== "" && Style.caret_phase
-        x: 3
+        x: 3 + Style.inset_pad
         y: layout.y + 1
         text: Style.row_cursor
         color: Style.caret_color
@@ -168,13 +168,17 @@ Rectangle {
         top_radius: root.radius
     }
 
+    InsetFrame {
+        visible: Style.boxed_cards && Style.frame_inset_width > 0
+    }
+
     RowLayout {
         id: layout
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: 8
-        anchors.leftMargin: Style.row_cursor !== "" ? 16 : 12
+        anchors.margins: 8 + Style.inset_pad
+        anchors.leftMargin: (Style.row_cursor !== "" ? 16 : 12) + Style.inset_pad
         spacing: 8
 
         Image {

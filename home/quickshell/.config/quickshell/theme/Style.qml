@@ -24,6 +24,9 @@ Singleton {
             frame_radius: 0,
             frame_border_width: 1,
             frame_border_color: Theme.fg_muted,
+            frame_inset: 0,
+            frame_inset_width: 0,
+            frame_inset_color: "transparent",
             accent_color: Theme.theme_secondary,
             accent_height: 3,
             accent_full_width: true,
@@ -115,6 +118,9 @@ Singleton {
                 frame_radius: 10,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
+                frame_inset: 0,
+                frame_inset_width: 0,
+                frame_inset_color: "transparent",
                 accent_color: Theme.theme_primary,
                 accent_height: 3,
                 accent_full_width: false,
@@ -233,6 +239,56 @@ Singleton {
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.35))
             }),
+            "nes": Object.assign({}, terminal, {
+                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.6)),
+                // A 16px pixel grid; Press Start 2P is not installed.
+                font_family: "ProggyClean Nerd Font",
+                font_size: Theme.popup_font_size + 9,
+                frame_color: Theme.bg_crust,
+                frame_border_width: 0,
+                frame_border_color: "transparent",
+                frame_inset: 4,
+                frame_inset_width: 3,
+                frame_inset_color: Theme.fg_strong,
+                accent_color: Theme.theme_primary,
+                accent_height: 4,
+                selection_bg: "transparent",
+                selection_outline: "transparent",
+                caret_color: Theme.theme_primary,
+                row_cursor: "\u25b6",
+                tab_active_bg: Theme.theme_primary,
+                tab_active_fg: Theme.bg_crust,
+                tab_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                key_bg: "transparent",
+                key_fg: Theme.theme_secondary,
+                key_border: "transparent",
+                section_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                section_rule: false,
+                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                footer_rule: false,
+                meter_on: Theme.theme_primary,
+                meter_off: Theme.bg_surface,
+                meter_hot: Theme.theme_label,
+                meter_radius: 0,
+                title_bg: "transparent",
+                title_fg: Theme.theme_primary,
+                chip_brackets: false,
+                chip_active_bg: Theme.theme_primary,
+                chip_active_fg: Theme.bg_crust,
+                toggle_on: Theme.theme_primary,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
+                bar_font_family: "ProggyClean Nerd Font",
+                bar_font_size: Theme.font_size + 7,
+                bar_side_bg: Theme.bg_crust,
+                bar_center_bg: Theme.bg_crust,
+                bar_fg: Theme.fg_strong,
+                bar_border_width: 0,
+                bar_border_color: "transparent",
+                bar_tip_fg: Theme.fg_strong,
+                bar_tip_border_width: 2,
+                bar_tip_border_color: Theme.fg_strong
+            }),
             "ps1": Object.assign({}, terminal, {
                 // Muted text brightened; the shaded, dithered frame swallows the theme greys.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
@@ -348,6 +404,11 @@ Singleton {
     readonly property real frame_radius: root.active.frame_radius
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
+    // An inner frame line, frame_inset in from the frame's edge; content keeps inset_pad clear.
+    readonly property int frame_inset: root.active.frame_inset
+    readonly property int frame_inset_width: root.active.frame_inset_width
+    readonly property color frame_inset_color: root.active.frame_inset_color
+    readonly property int inset_pad: root.frame_inset_width > 0 ? root.frame_inset + root.frame_inset_width : 0
     readonly property color accent_color: root.active.accent_color
     readonly property int accent_height: root.active.accent_height
     readonly property bool accent_full_width: root.active.accent_full_width

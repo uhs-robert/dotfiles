@@ -87,6 +87,9 @@ Item {
         scanline_color: Style.bar_scanline_color
         shade_color: Style.style_bar ? Style.frame_shade : "transparent"
         dither_color: Style.style_bar ? Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2)) : "transparent"
+        inset_gap: Math.round(Style.frame_inset / 2)
+        inset_width: Math.round(Style.frame_inset_width * 2 / 3)
+        inset_color: Style.style_bar ? Style.frame_inset_color : "transparent"
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -118,6 +121,9 @@ Item {
         scanline_color: Style.bar_scanline_color
         shade_color: Style.style_bar ? Style.frame_shade : "transparent"
         dither_color: Style.style_bar ? Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2)) : "transparent"
+        inset_gap: Math.round(Style.frame_inset / 2)
+        inset_width: Math.round(Style.frame_inset_width * 2 / 3)
+        inset_color: Style.style_bar ? Style.frame_inset_color : "transparent"
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -144,6 +150,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 6
         anchors.rightMargin: 6
+        anchors.bottomMargin: center_island.inset_color.a > 0 ? center_island.inset_gap + center_island.inset_width : 0
         active: MediaState.playing && root.has_center
     }
 
@@ -158,6 +165,9 @@ Item {
         scanline_color: Style.bar_scanline_color
         shade_color: Style.style_bar ? Style.frame_shade : "transparent"
         dither_color: Style.style_bar ? Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2)) : "transparent"
+        inset_gap: Math.round(Style.frame_inset / 2)
+        inset_width: Math.round(Style.frame_inset_width * 2 / 3)
+        inset_color: Style.style_bar ? Style.frame_inset_color : "transparent"
         cap_left: true
         visible: root.right_entries.length > 0
 

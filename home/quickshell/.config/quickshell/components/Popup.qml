@@ -116,8 +116,8 @@ PanelWindow {
     readonly property int line_height: Style.accent_height
     readonly property bool has_title: Style.show_title && title !== ""
     readonly property bool has_footer: Style.show_footer && footer_hint !== ""
-    readonly property real header_height: has_title ? title_tab.height : 0
-    readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 : 0
+    readonly property real header_height: has_title ? title_tab.height + Style.inset_pad : 0
+    readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 + Style.inset_pad : 0
     property real line_progress: 0
     property real drop_progress: 0
 
@@ -239,8 +239,8 @@ PanelWindow {
                 Rectangle {
                     id: title_tab
                     visible: root.has_title
-                    x: Style.fade_fills ? Style.frame_border_width : 0
-                    y: Style.fade_fills ? Style.frame_border_width : 0
+                    x: (Style.fade_fills ? Style.frame_border_width : 0) + Style.inset_pad
+                    y: (Style.fade_fills ? Style.frame_border_width : 0) + Style.inset_pad
                     width: Style.fade_fills ? parent.width - Style.frame_border_width * 2 : title_text.implicitWidth + 20
                     height: title_text.implicitHeight + 4
                     color: Style.fade_fills ? "transparent" : Style.title_bg
@@ -272,7 +272,7 @@ PanelWindow {
                     anchors.bottom: parent.bottom
                     anchors.leftMargin: 12
                     anchors.rightMargin: 12
-                    anchors.bottomMargin: 8
+                    anchors.bottomMargin: 8 + Style.inset_pad
                     text: root.footer_hint
                 }
 
@@ -355,6 +355,8 @@ PanelWindow {
                 color: Style.dither
                 radius: Style.frame_radius
             }
+
+            InsetFrame {}
         }
     }
 

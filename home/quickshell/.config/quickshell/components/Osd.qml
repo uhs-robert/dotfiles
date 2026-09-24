@@ -208,11 +208,11 @@ PanelWindow {
 
         readonly property int pad_x: Style.px(16)
         readonly property int pad_y: Style.px(10)
-        readonly property real header_height: title_tab.visible ? title_tab.height : 0
+        readonly property real header_height: title_tab.visible ? title_tab.height + Style.inset_pad : 0
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
-        width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width : 0)
+        width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded ? height / 2 : Style.frame_radius
         color: Style.frame_follows_island ? Theme.bg_core : Style.frame_color
@@ -258,8 +258,8 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 visible: Style.show_title
-                x: Style.fade_fills || Style.rounded ? frame.radius : 0
-                y: Style.fade_fills ? Style.frame_border_width : 0
+                x: (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
+                y: (Style.fade_fills ? Style.frame_border_width : 0) + Style.inset_pad
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.fade_fills ? "transparent" : Style.title_bg
@@ -402,5 +402,7 @@ PanelWindow {
             radius: frame.radius
             top_radius: frame.radius
         }
+
+        InsetFrame {}
     }
 }

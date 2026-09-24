@@ -110,9 +110,9 @@ PanelWindow {
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
         readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : 0
-        readonly property real header_height: title_tab.height
+        readonly property real header_height: title_tab.height + Style.inset_pad
 
-        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2)
+        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2)
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
         radius: Style.frame_radius
         color: Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
@@ -164,8 +164,8 @@ PanelWindow {
 
             Rectangle {
                 id: title_tab
-                x: frame.title_x
-                y: frame.top_edge
+                x: frame.title_x + Style.inset_pad
+                y: frame.top_edge + Style.inset_pad
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.show_title && !Style.fade_fills ? Style.title_bg : "transparent"
@@ -304,6 +304,10 @@ PanelWindow {
             color: Style.dither
             radius: frame.radius
             top_radius: frame.radius
+        }
+
+        InsetFrame {
+            top_offset: Style.accent_height
         }
     }
 }
