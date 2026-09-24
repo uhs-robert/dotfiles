@@ -69,10 +69,11 @@ Item {
 
                 Text {
                     id: desc_text
-                    text: parent.modelData.desc + (parent.index < root.groups.length - 1 ? " · " : "")
+                    text: (Style.caps_spacing > 0 ? parent.modelData.desc.toUpperCase() : parent.modelData.desc) + (parent.index < root.groups.length - 1 ? " · " : "")
                     color: Style.footer_fg
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 4
+                    font.letterSpacing: Style.caps_spacing / 2
                 }
             }
         }

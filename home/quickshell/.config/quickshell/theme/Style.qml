@@ -24,6 +24,8 @@ Singleton {
             frame_radius: 0,
             frame_border_width: 1,
             frame_border_color: Theme.fg_muted,
+            frame_chamfer: 0,
+            frame_brackets: "transparent",
             accent_color: Theme.theme_secondary,
             accent_height: 3,
             accent_full_width: true,
@@ -41,6 +43,8 @@ Singleton {
             key_border: Theme.bg_surface,
             section_fg: Theme.fg_muted,
             section_rule: true,
+            section_fade: "transparent",
+            caps_spacing: 0,
             footer_fg: Theme.fg_muted,
             footer_rule: true,
             footer_rule_color: Theme.bg_surface,
@@ -69,6 +73,8 @@ Singleton {
             selection_bar: false,
             title_prefix: "",
             title_suffix: "",
+            title_glow: "transparent",
+            title_readout: "",
             frame_glow: "transparent",
             scanlines: false,
             scanline_color: "transparent",
@@ -76,12 +82,16 @@ Singleton {
             glow_color: "transparent",
             glow_tint: 0,
             frame_shade: "transparent",
+            shade_vertical: false,
             dither: "transparent",
             text_shadow: "transparent",
             fade_fills: false,
             selection_border: "transparent",
             selection_glow: "transparent",
+            slant: 0,
             meter_shade: "transparent",
+            meter_slant: 0,
+            meter_glow: false,
             corner_scale: 1,
             bar_font_family: "JetBrainsMono Nerd Font",
             bar_font_size: Theme.font_size,
@@ -115,6 +125,8 @@ Singleton {
                 frame_radius: 10,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
+                frame_chamfer: 0,
+                frame_brackets: "transparent",
                 accent_color: Theme.theme_primary,
                 accent_height: 3,
                 accent_full_width: false,
@@ -132,6 +144,8 @@ Singleton {
                 key_border: Theme.ui_border,
                 section_fg: Theme.fg_muted,
                 section_rule: false,
+                section_fade: "transparent",
+                caps_spacing: 0,
                 footer_fg: Theme.fg_dim,
                 footer_rule: false,
                 footer_rule_color: Theme.bg_surface,
@@ -160,6 +174,8 @@ Singleton {
                 selection_bar: false,
                 title_prefix: "",
                 title_suffix: "",
+                title_glow: "transparent",
+                title_readout: "",
                 frame_glow: "transparent",
                 scanlines: false,
                 scanline_color: "transparent",
@@ -167,12 +183,16 @@ Singleton {
                 glow_color: "transparent",
                 glow_tint: 0,
                 frame_shade: "transparent",
+                shade_vertical: false,
                 dither: "transparent",
                 text_shadow: "transparent",
                 fade_fills: false,
                 selection_border: "transparent",
                 selection_glow: "transparent",
+                slant: 0,
                 meter_shade: "transparent",
+                meter_slant: 0,
+                meter_glow: false,
                 corner_scale: 1,
                 bar_font_family: Theme.font_family,
                 bar_font_size: Theme.font_size,
@@ -332,6 +352,55 @@ Singleton {
                 bar_tip_bg: Theme.bg_mantle,
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.4)
+            }),
+            "scifi": Object.assign({}, terminal, {
+                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.6)),
+                frame_color: Theme.bg_crust,
+                frame_shade: Theme.bg_mantle,
+                shade_vertical: true,
+                frame_border_width: 0,
+                frame_border_color: "transparent",
+                frame_chamfer: 14,
+                frame_brackets: Theme.theme_primary,
+                accent_color: Theme.theme_primary,
+                accent_height: 2,
+                selection_bg: Qt.alpha(Theme.theme_primary, 0.18),
+                selection_outline: "transparent",
+                slant: 0.28,
+                caret_color: Theme.theme_primary,
+                caret_blink: false,
+                row_cursor: "\u00bb",
+                tab_active_bg: Qt.alpha(Theme.theme_primary, 0.18),
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Theme.theme_primary_light,
+                key_fg: Theme.theme_primary,
+                key_border: Qt.alpha(Theme.theme_primary, 0.6),
+                section_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
+                section_rule: false,
+                section_fade: Qt.alpha(Theme.theme_primary, 0.6),
+                caps_spacing: 2,
+                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
+                footer_rule: false,
+                meter_off: Theme.ui_visual_bg,
+                meter_slant: 0.45,
+                meter_glow: true,
+                title_bg: "transparent",
+                title_fg: Theme.theme_primary,
+                title_glow: Qt.alpha(Theme.theme_primary, 0.45),
+                title_readout: "SYS 07.3 \u25a0\u25a0\u25a1",
+                chip_brackets: false,
+                chip_active_bg: Qt.alpha(Theme.theme_primary, 0.18),
+                chip_active_fg: Theme.fg_strong,
+                toggle_on: Theme.theme_primary,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
+                bar_fg: Theme.theme_primary_light,
+                bar_border_color: Theme.theme_primary,
+                bar_workspace_idle: Theme.ui_visual_bg,
+                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.18),
+                bar_glow_color: Qt.alpha(Theme.theme_primary, 0.2),
+                bar_tip_fg: Theme.theme_primary_light,
+                bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.6)
             })
         };
     }
@@ -348,6 +417,9 @@ Singleton {
     readonly property real frame_radius: root.active.frame_radius
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
+    // Bottom corners cut at 45 degrees by this many px.
+    readonly property real frame_chamfer: root.active.frame_chamfer
+    readonly property color frame_brackets: root.active.frame_brackets
     readonly property color accent_color: root.active.accent_color
     readonly property int accent_height: root.active.accent_height
     readonly property bool accent_full_width: root.active.accent_full_width
@@ -367,6 +439,10 @@ Singleton {
     readonly property color key_border: root.active.key_border
     readonly property color section_fg: root.active.section_fg
     readonly property bool section_rule: root.active.section_rule
+    // A rule after section labels that fades out to the right.
+    readonly property color section_fade: root.active.section_fade
+    // Letter spacing for section labels and footer hints, which turn uppercase when it is set.
+    readonly property real caps_spacing: root.active.caps_spacing
     readonly property color footer_fg: root.active.footer_fg
     readonly property bool footer_rule: root.active.footer_rule
     readonly property color footer_rule_color: root.active.footer_rule_color
@@ -395,6 +471,9 @@ Singleton {
     readonly property bool selection_bar: root.active.selection_bar
     readonly property string title_prefix: root.active.title_prefix
     readonly property string title_suffix: root.active.title_suffix
+    readonly property color title_glow: root.active.title_glow
+    // A static system readout drawn at the right end of the title row.
+    readonly property string title_readout: root.active.title_readout
     readonly property color frame_glow: root.active.frame_glow
     readonly property bool scanlines: root.active.scanlines
     readonly property color scanline_color: root.active.scanline_color
@@ -403,13 +482,19 @@ Singleton {
     readonly property real glow_tint: root.active.glow_tint
     // A diagonal shade from this color at the top left into frame_color.
     readonly property color frame_shade: root.active.frame_shade
+    // Runs frame_shade top to bottom instead of diagonally.
+    readonly property bool shade_vertical: root.active.shade_vertical
     readonly property color dither: root.active.dither
     readonly property color text_shadow: root.active.text_shadow
     // Selection and title fills fade out to the right.
     readonly property bool fade_fills: root.active.fade_fills
     readonly property color selection_border: root.active.selection_border
     readonly property color selection_glow: root.active.selection_glow
+    // Leans selections, tabs and key badges into parallelograms; the shear per px of height.
+    readonly property real slant: root.active.slant
     readonly property color meter_shade: root.active.meter_shade
+    readonly property real meter_slant: root.active.meter_slant
+    readonly property bool meter_glow: root.active.meter_glow
     // Multiplies every radius a rounded style draws.
     readonly property real corner_scale: root.active.corner_scale
 

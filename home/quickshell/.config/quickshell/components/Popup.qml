@@ -116,7 +116,9 @@ PanelWindow {
     readonly property int line_height: Style.accent_height
     readonly property bool has_title: Style.show_title && title !== ""
     readonly property bool has_footer: Style.show_footer && footer_hint !== ""
-    readonly property real header_height: has_title ? title_tab.height : 0
+    // Room kept clear of the corner brackets around the title.
+    readonly property real bracket_pad: Style.frame_brackets.a > 0 ? 4 : 0
+    readonly property real header_height: has_title ? title_tab.height + bracket_pad : 0
     readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 : 0
     property real line_progress: 0
     property real drop_progress: 0
@@ -193,7 +195,7 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: Style.frame_follows_island ? root.held_color : Style.frame_color
+                color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? root.held_color : Style.frame_color
                 bottomLeftRadius: Style.frame_radius
                 bottomRightRadius: Style.frame_radius
                 border.width: Style.frame_border_width
@@ -226,6 +228,11 @@ PanelWindow {
                 anchors.fill: parent
                 anchors.margins: Style.frame_border_width
                 bottom_radius: Math.max(0, Style.frame_radius - Style.frame_border_width)
+                chamfer: Style.frame_chamfer
+            }
+
+            CornerBrackets {
+                anchors.fill: parent
             }
 
             // Everything drawn on the frame; styles with a glow or text shadow render it as one layer.
@@ -239,8 +246,8 @@ PanelWindow {
                 Rectangle {
                     id: title_tab
                     visible: root.has_title
-                    x: Style.fade_fills ? Style.frame_border_width : 0
-                    y: Style.fade_fills ? Style.frame_border_width : 0
+                    x: Style.fade_fills ? Style.frame_border_width : root.bracket_pad * 1.5
+                    y: Style.fade_fills ? Style.frame_border_width : root.bracket_pad
                     width: Style.fade_fills ? parent.width - Style.frame_border_width * 2 : title_text.implicitWidth + 20
                     height: title_text.implicitHeight + 4
                     color: Style.fade_fills ? "transparent" : Style.title_bg
@@ -260,8 +267,22 @@ PanelWindow {
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size - 2
                         font.bold: true
-                        font.letterSpacing: 2
+                        font.letterSpacing: 2 + Style.caps_spacing
+                        style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
+                        styleColor: Style.title_glow
                     }
+                }
+
+                Text {
+                    visible: root.has_title && Style.title_readout !== ""
+                    anchors.right: parent.right
+                    anchors.rightMargin: 12 + root.bracket_pad
+                    y: title_tab.y + (title_tab.height - height) / 2
+                    text: Style.title_readout
+                    color: Style.text_muted
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 5
+                    font.letterSpacing: 1
                 }
 
                 MenuFooter {

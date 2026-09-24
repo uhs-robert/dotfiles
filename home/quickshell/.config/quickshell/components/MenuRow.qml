@@ -15,7 +15,7 @@ Rectangle {
     readonly property real key_space: root.show_key ? key_badge.width + 6 : 0
 
     radius: Style.radius(root.base_radius)
-    color: root.selected && !Style.fade_fills ? Style.selection_bg : "transparent"
+    color: root.selected && !Style.fade_fills && Style.slant <= 0 ? Style.selection_bg : "transparent"
     border.width: root.selected && Style.selection_border.a > 0 ? 1 : 0
     border.color: Style.selection_border
 
@@ -36,6 +36,11 @@ Rectangle {
     // Styles with an inverse selection repaint the row's text and glyphs in one color.
     function fg(c) {
         return root.selected && Style.selection_inverse ? Style.selection_fg : c;
+    }
+
+    Slant {
+        visible: root.selected && !Style.fade_fills && Style.slant > 0
+        color: Style.selection_bg
     }
 
     FadeFill {

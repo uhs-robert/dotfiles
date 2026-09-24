@@ -208,14 +208,15 @@ PanelWindow {
 
         readonly property int pad_x: Style.px(16)
         readonly property int pad_y: Style.px(10)
-        readonly property real header_height: title_tab.visible ? title_tab.height : 0
+        readonly property real bracket_pad: Style.frame_brackets.a > 0 ? 4 : 0
+        readonly property real header_height: title_tab.visible ? title_tab.height + bracket_pad : 0
 
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded ? height / 2 : Style.frame_radius
-        color: Style.frame_follows_island ? Theme.bg_core : Style.frame_color
+        color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
         border.width: Style.frame_border_width
         border.color: Style.frame_border_color
 
@@ -246,6 +247,11 @@ PanelWindow {
             anchors.margins: Style.frame_border_width
             top_radius: Math.max(0, frame.radius - Style.frame_border_width)
             bottom_radius: top_radius
+            chamfer: Style.frame_chamfer
+        }
+
+        CornerBrackets {
+            anchors.fill: parent
         }
 
         Item {
@@ -258,8 +264,8 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 visible: Style.show_title
-                x: Style.fade_fills || Style.rounded ? frame.radius : 0
-                y: Style.fade_fills ? Style.frame_border_width : 0
+                x: Style.fade_fills || Style.rounded ? frame.radius : frame.bracket_pad * 1.5
+                y: Style.fade_fills ? Style.frame_border_width : frame.bracket_pad
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.fade_fills ? "transparent" : Style.title_bg
@@ -279,7 +285,9 @@ PanelWindow {
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 2
                     font.bold: true
-                    font.letterSpacing: 2
+                    font.letterSpacing: 2 + Style.caps_spacing
+                    style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
+                    styleColor: Style.title_glow
                 }
             }
 

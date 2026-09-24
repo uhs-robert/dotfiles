@@ -9,14 +9,21 @@ Rectangle {
     // Set on a filled active tab so the badge takes the tab's text color.
     property bool on_fill: false
 
-    implicitWidth: Math.max(implicitHeight, key_text.implicitWidth + 8)
+    implicitWidth: Math.max(implicitHeight, key_text.implicitWidth + 8) + Style.slant * implicitHeight
     implicitHeight: key_text.implicitHeight + 2
     width: implicitWidth
     height: implicitHeight
     radius: Style.radius(3)
-    color: Style.key_bg
-    border.width: 1
+    color: Style.slant > 0 ? "transparent" : Style.key_bg
+    border.width: Style.slant > 0 ? 0 : 1
     border.color: root.on_fill ? Style.tab_active_fg : Style.key_border
+
+    Slant {
+        visible: Style.slant > 0
+        color: Style.key_bg
+        border.width: 1
+        border.color: root.border.color
+    }
 
     Text {
         id: key_text
