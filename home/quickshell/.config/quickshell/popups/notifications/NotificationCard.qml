@@ -66,13 +66,18 @@ Item {
         anchors.right: parent.right
         implicitHeight: layout.implicitHeight + 20
         radius: Style.radius(8)
-        color: Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
-        border.width: 1
+        color: Style.card_rule ? "transparent" : Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
+        border.width: Style.card_rule ? 0 : 1
         border.color: !Style.boxed_cards ? Theme.ui_border : root.selected && Style.selection_brackets.a <= 0 ? Style.caret_color : Qt.alpha(root.accent, 0.6)
         clip: true
 
         LockBrackets {
             shown: root.selected
+        }
+
+        CardRule {
+            visible: Style.card_rule
+            selected: root.selected
         }
 
         Text {
@@ -195,7 +200,7 @@ Item {
 
                             implicitWidth: Math.min(action_label.implicitWidth + 18, layout.width)
                             implicitHeight: 26
-                            radius: Style.radius(13)
+                            radius: Style.pill_chips ? height / 2 : Style.radius(13)
                             color: action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : Theme.bg_surface
                             border.width: Style.boxed_cards || action_chip.focused ? 1 : 0
                             border.color: action_chip.focused ? Style.chip_pick : Style.chip_border.a > 0 ? Style.chip_border : Style.key_border

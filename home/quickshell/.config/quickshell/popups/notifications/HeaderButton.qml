@@ -16,10 +16,10 @@ Rectangle {
 
     implicitWidth: row.implicitWidth + 28
     implicitHeight: row.implicitHeight + 16
-    radius: Style.radius(8)
-    color: root.active ? Theme.theme_primary : mouse_area.pressed ? Qt.darker(Theme.bg_surface, 1.3) : mouse_area.containsMouse ? Theme.ui_visual_bg : Theme.bg_surface
+    radius: Style.pill_chips ? height / 2 : Style.radius(8)
+    color: root.active ? Theme.theme_primary : mouse_area.pressed ? Qt.darker(Theme.bg_surface, 1.3) : mouse_area.containsMouse ? Theme.ui_visual_bg : Style.pill_chips ? "transparent" : Theme.bg_surface
     border.width: 1
-    border.color: Theme.ui_border
+    border.color: Style.pill_chips ? Style.chip_border : Theme.ui_border
 
     RowLayout {
         id: row
@@ -45,7 +45,7 @@ Rectangle {
             visible: root.key_hint !== ""
             implicitWidth: key_label.implicitWidth + 8
             implicitHeight: 16
-            radius: Style.radius(3)
+            radius: Style.key_round ? height / 2 : Style.radius(3)
             color: root.active ? Theme.bg_core : Style.key_bg
             border.width: 1
             border.color: root.active ? Theme.ui_border : Style.key_border

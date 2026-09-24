@@ -180,6 +180,12 @@ PanelWindow {
             top_offset: frame.top_edge - Style.frame_border_width
         }
 
+        Loader {
+            anchors.fill: parent
+            active: Style.frame_ticks !== ""
+            sourceComponent: FrameTicks {}
+        }
+
         Rectangle {
             x: frame.radius
             width: frame.width - frame.radius * 2
@@ -216,7 +222,7 @@ PanelWindow {
                     color: Style.show_title ? Style.title_fg : Style.accent_color
                     font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
-                    font.bold: Style.title_font_family === Style.font_family
+                    font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
                     style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
                     styleColor: Style.title_glow

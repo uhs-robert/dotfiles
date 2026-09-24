@@ -143,6 +143,12 @@ Rectangle {
         bottom_radius: root.radius
     }
 
+    Loader {
+        anchors.fill: parent
+        active: Style.frame_ticks !== ""
+        sourceComponent: FrameTicks {}
+    }
+
     Rectangle {
         visible: !Style.boxed_cards
         anchors.left: parent.left
@@ -322,7 +328,7 @@ Rectangle {
 
                         implicitWidth: Math.min(action_label.implicitWidth + 16, layout.width)
                         implicitHeight: 22
-                        radius: Style.radius(11)
+                        radius: Style.pill_chips ? height / 2 : Style.radius(11)
                         color: action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : Theme.bg_surface
                         border.width: Style.boxed_cards || action_chip.focused ? 1 : 0
                         border.color: action_chip.focused ? Style.chip_pick : Style.chip_border.a > 0 ? Style.chip_border : Style.key_border

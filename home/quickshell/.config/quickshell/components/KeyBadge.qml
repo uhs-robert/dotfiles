@@ -16,7 +16,7 @@ Rectangle {
     implicitHeight: key_text.implicitHeight + 2
     width: implicitWidth
     height: implicitHeight
-    radius: Style.radius(3)
+    radius: root.st.key_round ? height / 2 : Style.radius(3)
     color: root.st.slant > 0 ? "transparent" : root.st.key_bg
     border.width: root.st.slant > 0 ? 0 : 1
     border.color: root.tinted ? root.st.tab_active_fg : root.st.key_border
