@@ -3,14 +3,13 @@ import QtQuick
 import QtQuick.Shapes
 import "../theme"
 
-// A visor pane: rounded top, wide elliptical bottom, glass gradient, and a static arc just under the bottom edge.
+// A visor pane: rounded top, wide elliptical bottom and a glass gradient.
 Shape {
     id: root
 
     property real top_radius: Style.frame_radius
     property color border_color: Style.frame_border_color
     property real border_width: Math.max(1, Style.frame_border_width)
-    property color arc_color: Qt.alpha(Theme.theme_primary, 0.4)
 
     readonly property real rt: Math.min(root.top_radius, root.width / 2, root.height / 2)
     readonly property real rx: Math.min(34, root.width / 4)
@@ -30,29 +29,6 @@ Shape {
             + " L " + (i + x) + " " + (h - i)
             + " A " + x + " " + y + " 0 0 1 " + i + " " + (h - i - y)
             + " Z";
-    }
-
-    function inside(px, py, m) {
-        const w = root.width, h = root.height, x = root.rx - m, y = root.ry - m;
-        if (px < m || px > w - m || py > h - m) return false;
-        if (py < h - root.ry || x <= 0 || y <= 0) return true;
-        const cx = px < root.rx ? root.rx : px > w - root.rx ? w - root.rx : px;
-        const dx = (px - cx) / x, dy = (py - (h - root.ry)) / y;
-        return dx * dx + dy * dy <= 1;
-    }
-
-    // Samples the top of an ellipse centred below the pane and keeps what lies inside it.
-    readonly property var arc_points: {
-        const w = root.width, h = root.height;
-        if (w <= 0 || h <= 0) return [];
-        const a = w * 0.56, b = 48, cy = h + b - Math.min(28, h * 0.25);
-        const pts = [];
-        for (let n = 0; n <= 96; n++) {
-            const t = Math.PI + Math.PI * n / 96;
-            const p = Qt.point(w / 2 + a * Math.cos(t), cy + b * Math.sin(t));
-            if (root.inside(p.x, p.y, root.border_width + 1)) pts.push(p);
-        }
-        return pts;
     }
 
     ShapePath {
@@ -87,14 +63,6 @@ Shape {
             GradientStop { position: 0.6; color: Qt.alpha(Theme.theme_primary, 0) }
         }
         PathSvg { path: root.outline(0) }
-    }
-
-    ShapePath {
-        strokeWidth: 2
-        strokeColor: root.arc_points.length > 1 ? root.arc_color : "transparent"
-        fillColor: "transparent"
-        capStyle: ShapePath.RoundCap
-        PathPolyline { path: root.arc_points }
     }
 
     ShapePath {
