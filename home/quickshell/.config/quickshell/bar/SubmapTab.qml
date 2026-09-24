@@ -79,8 +79,8 @@ PanelWindow {
             y: -height * (1 - root.tab_progress)
             width: label.implicitWidth + 20
             height: label.implicitHeight + 2
-            bottomLeftRadius: 6
-            bottomRightRadius: 6
+            bottomLeftRadius: Style.bar_radius(6)
+            bottomRightRadius: Style.bar_radius(6)
             color: root.shown_color
 
             Text {
@@ -88,7 +88,7 @@ PanelWindow {
                 anchors.centerIn: parent
                 text: root.shown_name
                 color: Theme.bg_core
-                font.family: Theme.font_family
+                font.family: Style.bar_font_family
                 font.pixelSize: Theme.font_size
                 font.bold: true
             }
