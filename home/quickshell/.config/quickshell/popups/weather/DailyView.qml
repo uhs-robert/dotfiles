@@ -29,6 +29,11 @@ Item {
     readonly property bool custom_column: root.stat_columns || root.save_blocks
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
+    // SNES: columns standing on a Mode 7 floor.
+    readonly property bool mode7: Style.weather_header === "mode7"
+    readonly property bool floor_shown: root.mode7 && root.visible && Popups.open_name === "weather"
+
+    onFloor_shownChanged: if (root.floor_shown && floor_loader.item) floor_loader.item.run()
 
     function day_label(day, i) {
         const ddd = Qt.formatDate(new Date(day.date + "T00:00:00"), "ddd").toUpperCase();
@@ -98,6 +103,17 @@ Item {
         return Math.round(t) + "°" + WeatherState.unit_symbol();
     }
 
+    Loader {
+        id: floor_loader
+        active: root.mode7
+        x: day_row.x - 4
+        y: day_row.y + day_row.height * 0.42
+        width: day_row.width + 8
+        height: day_row.height * 0.58 + 4
+        sourceComponent: Mode7Floor {}
+        onLoaded: if (root.floor_shown) floor_loader.item.run()
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 6
@@ -110,6 +126,7 @@ Item {
         }
 
         RowLayout {
+            id: day_row
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 4
@@ -126,6 +143,25 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 0
                     Layout.fillHeight: true
+                    transformOrigin: Item.Bottom
+                    scale: root.mode7 && day_col.day_index !== root.day_cursor ? 0.93 : 1
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 120
+                        }
+                    }
+
+                    Rectangle {
+                        visible: root.mode7
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: -5
+                        width: parent.width * 0.8
+                        height: 8
+                        radius: 4
+                        color: Qt.alpha(Theme.bg_shadow, 0.7)
+                    }
 
                     Loader {
                         active: root.dq
@@ -138,7 +174,7 @@ Item {
                         anchors.fill: parent
                         anchors.margins: -2
                         radius: Style.radius(4)
-                        color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 || root.mission ? Style.selection_bg : Theme.bg_surface
+                        color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 || root.mission || root.mode7 ? Style.selection_bg : Theme.bg_surface
                         border.width: Style.range_line ? 1 : 0
                         border.color: Style.hairline_dim
                         visible: day_col.day_index === root.day_cursor && !root.custom_column && !root.dq
