@@ -84,6 +84,7 @@ Singleton {
             bar_workspace_idle: Theme.bg_surface,
             bar_hover_bg: Theme.bg_surface,
             bar_glow_color: "transparent",
+            bar_scanline_color: "transparent",
             bar_tip_bg: Theme.bg_crust,
             bar_tip_fg: Theme.fg_core,
             bar_tip_border_width: 1,
@@ -154,13 +155,14 @@ Singleton {
                 bar_side_bg: Theme.bg_core,
                 bar_center_bg: Theme.bg_mantle,
                 bar_fg: Theme.fg_core,
-                bar_border_width: 0,
-                bar_border_color: "transparent",
+                bar_border_width: 1,
+                bar_border_color: Qt.alpha(Theme.ui_border, 0.5),
                 bar_rounded: true,
                 bar_workspace_active: Theme.theme_primary,
                 bar_workspace_idle: Theme.bg_surface,
                 bar_hover_bg: Theme.bg_surface,
                 bar_glow_color: "transparent",
+                bar_scanline_color: "transparent",
                 bar_tip_bg: Theme.ui_float_bg,
                 bar_tip_fg: Theme.ui_float_fg,
                 bar_tip_border_width: 0,
@@ -195,13 +197,11 @@ Singleton {
                 glow: true,
                 glow_color: Theme.theme_primary,
                 glow_tint: 0.25,
-                bar_side_bg: Theme.ui_visual_bg,
-                bar_center_bg: Theme.ui_visual_bg,
                 bar_fg: Theme.theme_primary_light,
                 bar_border_color: Qt.alpha(Theme.theme_primary, 0.5),
-                bar_workspace_idle: Theme.bg_mantle,
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.4),
                 bar_glow_color: Qt.alpha(Theme.theme_primary, 0.3),
+                bar_scanline_color: Qt.alpha(Theme.theme_primary, 0.07),
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.theme_primary, 0.35))
             })
@@ -274,7 +274,11 @@ Singleton {
 
     // Saved with the style; off keeps the bar on the default look.
     property bool style_bar: false
-    readonly property var bar: root.style_bar ? root.active : root.styles["default"]
+    readonly property var plain_bar: Object.assign({}, root.styles["default"], {
+        bar_border_width: 0,
+        bar_border_color: "transparent"
+    })
+    readonly property var bar: root.style_bar ? root.active : root.plain_bar
     readonly property string bar_font_family: root.bar.bar_font_family
     readonly property color bar_side_bg: root.bar.bar_side_bg
     readonly property color bar_center_bg: root.bar.bar_center_bg
@@ -286,6 +290,7 @@ Singleton {
     readonly property color bar_workspace_idle: root.bar.bar_workspace_idle
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
+    readonly property color bar_scanline_color: root.bar.bar_scanline_color
     readonly property int bar_text_style: root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
     readonly property color bar_tip_bg: root.bar.bar_tip_bg
     readonly property color bar_tip_fg: root.bar.bar_tip_fg

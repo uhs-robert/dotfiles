@@ -84,6 +84,7 @@ Item {
         bg_color: Style.bar_side_bg
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
+        scanline_color: Style.bar_scanline_color
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -112,6 +113,7 @@ Item {
         bg_color: Style.bar_center_bg
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
+        scanline_color: Style.bar_scanline_color
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -149,6 +151,7 @@ Item {
         bg_color: Style.bar_side_bg
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
+        scanline_color: Style.bar_scanline_color
         cap_left: true
         visible: root.right_entries.length > 0
 
