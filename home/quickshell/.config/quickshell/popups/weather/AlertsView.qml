@@ -17,6 +17,8 @@ Item {
     readonly property var alerts: WeatherState.alerts
     // Alerts as red "avoid" objectives under a mission line.
     readonly property bool objectives: Style.weather_header === "watch"
+    // Alerts as Dragon Quest encounter lines.
+    readonly property bool encounter: Style.weather_header === "battle"
     readonly property var selected: root.alerts[Math.max(0, Math.min(root.alerts.length - 1, root.alert_cursor))]
 
     readonly property var weekday_names: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -102,7 +104,7 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             elide: Text.ElideRight
-                            text: root.objectives ? "OBJECTIVE: AVOID " + alert_row.modelData.event.toUpperCase() : alert_row.modelData.event
+                            text: root.objectives ? "OBJECTIVE: AVOID " + alert_row.modelData.event.toUpperCase() : root.encounter ? alert_row.modelData.event.toUpperCase() + " attacks!" : alert_row.modelData.event
                             color: alert_row.fg(root.objectives ? Theme.theme_label : alert_row.index === root.alert_cursor ? Theme.theme_secondary : Theme.fg_core)
                             font.family: Style.font_family
                             font.pixelSize: Style.font_size - 2

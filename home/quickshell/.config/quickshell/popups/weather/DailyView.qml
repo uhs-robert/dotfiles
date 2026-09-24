@@ -27,10 +27,13 @@ Item {
     // PS1: Temp & Precip as memory card save blocks.
     readonly property bool save_blocks: Style.weather_header === "memcard" && root.sub === 0
     readonly property bool custom_column: root.stat_columns || root.save_blocks
+    // NES: each column in a Dragon Quest window with a cursor on the selected day.
+    readonly property bool dq: Style.weather_header === "battle"
 
     function day_label(day, i) {
         const ddd = Qt.formatDate(new Date(day.date + "T00:00:00"), "ddd").toUpperCase();
         if (root.mission) return String.fromCharCode(97 + i) + ") " + ddd;
+        if (root.dq) return i === 0 ? "NOW" : ddd;
         return day.weekday;
     }
 
@@ -50,8 +53,10 @@ Item {
     readonly property int fit_days: {
         const f = label_metrics.font;
         const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
+        const dq_w = root.dq ? 2 * (small_metrics.advanceWidth(Style.row_cursor) + 3) : 0;
         const col = root.stat_columns ? 56
             : root.save_blocks ? small_metrics.advanceWidth("100°/88°") + 6
+            : root.dq ? Math.max(label_metrics.advanceWidth("100%"), label_metrics.advanceWidth("WED") + dq_w) + 16
             : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
         return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
     }
@@ -122,6 +127,13 @@ Item {
                     Layout.preferredWidth: 0
                     Layout.fillHeight: true
 
+                    Loader {
+                        active: root.dq
+                        anchors.fill: parent
+                        anchors.margins: -2
+                        sourceComponent: DqWindow {}
+                    }
+
                     Rectangle {
                         anchors.fill: parent
                         anchors.margins: -2
@@ -129,7 +141,7 @@ Item {
                         color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 || root.mission ? Style.selection_bg : Theme.bg_surface
                         border.width: Style.range_line ? 1 : 0
                         border.color: Style.hairline_dim
-                        visible: day_col.day_index === root.day_cursor && !root.custom_column
+                        visible: day_col.day_index === root.day_cursor && !root.custom_column && !root.dq
 
                         LockBrackets {}
 
@@ -170,7 +182,7 @@ Item {
                     ColumnLayout {
                         visible: !root.custom_column
                         anchors.fill: parent
-                        anchors.margins: 2
+                        anchors.margins: root.dq ? 8 : 2
                         spacing: 2
 
                         Item {
@@ -373,10 +385,22 @@ Item {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             elide: Text.ElideRight
+                            id: day_name
                             text: root.day_label(day_col.modelData, day_col.day_index)
-                            color: day_col.day_index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core
+                            color: root.dq ? Theme.fg_strong : day_col.day_index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core
                             font.family: Style.font_family
                             font.pixelSize: Style.font_size - 2
+
+                            Text {
+                                visible: root.dq && day_col.day_index === root.day_cursor && Style.caret_phase
+                                anchors.right: parent.horizontalCenter
+                                anchors.rightMargin: day_name.contentWidth / 2 + 3
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Style.row_cursor
+                                color: Style.caret_color
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size - 5
+                            }
                         }
 
                         Text {

@@ -201,7 +201,7 @@ Popup {
                 Layout.fillWidth: true
                 active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header })[Style.weather_header] || ring_header
+                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header })[Style.weather_header] || ring_header
 
                 Component {
                     id: spec_header
@@ -221,6 +221,11 @@ Popup {
                 Component {
                     id: memcard_header
                     MemCardHeader {}
+                }
+
+                Component {
+                    id: battle_header
+                    BattleHeader {}
                 }
 
                 Component {

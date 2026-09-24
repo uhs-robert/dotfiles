@@ -434,6 +434,7 @@ Singleton {
             }),
             "nes": Object.assign({}, terminal, {
                 done_anim: "pixel",
+                weather_header: "battle",
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.35)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.6)),
                 // Press Start 2P draws on an 8px grid and runs 1em wide; 14 sits between its 1.5x and 2x sizes, with a wider frame.
@@ -1385,7 +1386,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch" or "memcard", cards "rule" or "channel".
+    // Alternate layouts: "" keeps the default; osd "ring" or "readout", weather "ring", "spec", "scope", "watch", "memcard" or "battle", cards "rule" or "channel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
