@@ -1,15 +1,17 @@
 // home/quickshell/.config/quickshell/components/Waveform.qml
 import QtQuick
+import QtQuick.Shapes
 import "../theme"
 import "../services"
 
-// Mirrored bars of recent voxtype mic levels, newest on the right.
+// Recent voxtype mic levels, newest on the right: a mirrored line wave, or bars.
 Item {
     id: root
 
     // Polls VoxtypeAudio only while true.
     property bool running: false
-    property int bar_count: 30
+    property bool line: true
+    property int bar_count: root.line ? 90 : 30
     // Bars from this level up take the hot color.
     property real hot_from: 0.9
     property var levels: []
@@ -27,7 +29,42 @@ Item {
         onTriggered: root.levels = VoxtypeAudio.columns(root.bar_count)
     }
 
+    readonly property bool hot_now: (root.levels[root.bar_count - 1] || 0) >= root.hot_from
+    readonly property color line_color: root.hot_now ? Style.meter_hot : Style.meter_on
+    // Mirrored around the middle: the top edge left to right, then the bottom edge back.
+    readonly property var wave_points: {
+        const pts = [];
+        const n = root.bar_count;
+        const mid = root.height / 2;
+        for (let i = 0; i < n; i++) pts.push(Qt.point(i * root.width / (n - 1), mid - (root.levels[i] || 0) * mid));
+        for (let i = n - 1; i >= 0; i--) pts.push(Qt.point(i * root.width / (n - 1), mid + (root.levels[i] || 0) * mid));
+        return pts;
+    }
+
+    Shape {
+        visible: root.line
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeColor: Qt.alpha(root.line_color, 0.3)
+            strokeWidth: 4
+            fillColor: Qt.alpha(root.line_color, 0.12)
+            joinStyle: ShapePath.RoundJoin
+            PathPolyline { path: root.wave_points }
+        }
+
+        ShapePath {
+            strokeColor: root.line_color
+            strokeWidth: 1.5
+            fillColor: "transparent"
+            joinStyle: ShapePath.RoundJoin
+            PathPolyline { path: root.wave_points }
+        }
+    }
+
     Row {
+        visible: !root.line
         height: root.height
         spacing: root.gap
 
