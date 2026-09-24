@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Shapes
 import "../theme"
 
-// The style's diagonal frame shade, from frame_shade at the top left into frame_color.
+// The style's frame shade, from frame_shade at the top left (or top) into frame_color.
 Shape {
     id: root
 
@@ -18,7 +18,7 @@ Shape {
         fillGradient: LinearGradient {
             x1: 0
             y1: 0
-            x2: root.width
+            x2: Style.frame_shade_vertical ? 0 : root.width
             y2: root.height
             GradientStop { position: 0; color: Style.frame_shade }
             GradientStop { position: 1; color: Style.frame_color }

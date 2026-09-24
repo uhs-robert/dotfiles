@@ -60,7 +60,7 @@ PanelWindow {
     margins.left: root.gap
     margins.right: root.gap
     implicitWidth: frame.width
-    implicitHeight: frame.height
+    implicitHeight: frame.height + Style.frame_drop
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -104,6 +104,15 @@ PanelWindow {
     }
 
     Rectangle {
+        visible: Style.frame_drop > 0
+        y: Style.frame_drop
+        width: frame.width
+        height: frame.height
+        radius: frame.radius
+        color: Theme.bg_shadow
+    }
+
+    Rectangle {
         id: frame
 
         readonly property int pad_x: Style.px(14)
@@ -142,6 +151,13 @@ PanelWindow {
         }
 
         FrameShade {
+            anchors.fill: parent
+            anchors.margins: Style.frame_border_width
+            top_radius: Math.max(0, frame.radius - Style.frame_border_width)
+            bottom_radius: top_radius
+        }
+
+        FrameInset {
             anchors.fill: parent
             anchors.margins: Style.frame_border_width
             top_radius: Math.max(0, frame.radius - Style.frame_border_width)

@@ -109,6 +109,14 @@ Rectangle {
         bottom_radius: top_radius
     }
 
+    FrameInset {
+        visible: Style.boxed_cards && Style.frame_inset_width > 0
+        anchors.fill: parent
+        anchors.margins: root.border.width
+        top_radius: Math.max(0, root.radius - root.border.width)
+        bottom_radius: top_radius
+    }
+
     Rectangle {
         visible: !Style.boxed_cards
         anchors.left: parent.left

@@ -83,7 +83,7 @@ PanelWindow {
 
     // Never narrower than the island's bottom edge (its body, between the slants).
     implicitWidth: Math.max(Style.px(preferred_width), island_width)
-    implicitHeight: body_height + header_height + footer_height
+    implicitHeight: body_height + header_height + footer_height + Style.frame_drop
     default property alias content: content_scope.data
 
     readonly property bool wanted: Popups.open_name === root.popup_name && Popups.open_screen_name !== ""
@@ -116,7 +116,9 @@ PanelWindow {
     readonly property int line_height: Style.accent_height
     readonly property bool has_title: Style.show_title && title !== ""
     readonly property bool has_footer: Style.show_footer && footer_hint !== ""
-    readonly property real header_height: has_title ? title_tab.height : 0
+    // Styles with an inset ring keep the title inside both rings.
+    readonly property real frame_edge: Style.frame_inset_width > 0 ? Style.frame_border_width + Style.frame_inset_width : 0
+    readonly property real header_height: has_title ? title_tab.height + frame_edge : 0
     readonly property real footer_height: has_footer ? base_footer.implicitHeight + 10 : 0
     property real line_progress: 0
     property real drop_progress: 0
@@ -186,9 +188,19 @@ PanelWindow {
         height: (root.height - root.line_height) * root.drop_progress
         clip: true
 
+        Rectangle {
+            visible: Style.frame_drop > 0
+            y: Style.frame_drop
+            width: root.width
+            height: root.height - root.line_height - Style.frame_drop
+            color: Theme.bg_shadow
+            bottomLeftRadius: Style.frame_radius
+            bottomRightRadius: Style.frame_radius
+        }
+
         Item {
             width: root.width
-            height: root.height - root.line_height
+            height: root.height - root.line_height - Style.frame_drop
 
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
@@ -228,6 +240,12 @@ PanelWindow {
                 bottom_radius: Math.max(0, Style.frame_radius - Style.frame_border_width)
             }
 
+            FrameInset {
+                anchors.fill: parent
+                anchors.margins: Style.frame_border_width
+                bottom_radius: Math.max(0, Style.frame_radius - Style.frame_border_width)
+            }
+
             // Everything drawn on the frame; styles with a glow or text shadow render it as one layer.
             Item {
                 id: glow_layer
@@ -239,8 +257,8 @@ PanelWindow {
                 Rectangle {
                     id: title_tab
                     visible: root.has_title
-                    x: Style.fade_fills ? Style.frame_border_width : 0
-                    y: Style.fade_fills ? Style.frame_border_width : 0
+                    x: Style.fade_fills ? Style.frame_border_width : root.frame_edge
+                    y: Style.fade_fills ? Style.frame_border_width : root.frame_edge
                     width: Style.fade_fills ? parent.width - Style.frame_border_width * 2 : title_text.implicitWidth + 20
                     height: title_text.implicitHeight + 4
                     color: Style.fade_fills ? "transparent" : Style.title_bg

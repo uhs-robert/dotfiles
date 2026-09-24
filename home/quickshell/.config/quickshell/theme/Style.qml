@@ -24,6 +24,9 @@ Singleton {
             frame_radius: 0,
             frame_border_width: 1,
             frame_border_color: Theme.fg_muted,
+            frame_inset_width: 0,
+            frame_inset_color: "transparent",
+            frame_drop: 0,
             accent_color: Theme.theme_secondary,
             accent_height: 3,
             accent_full_width: true,
@@ -76,6 +79,7 @@ Singleton {
             glow_color: "transparent",
             glow_tint: 0,
             frame_shade: "transparent",
+            frame_shade_vertical: false,
             dither: "transparent",
             text_shadow: "transparent",
             fade_fills: false,
@@ -94,6 +98,7 @@ Singleton {
             bar_workspace_focused: Theme.theme_secondary,
             bar_workspace_active: Theme.theme_primary,
             bar_workspace_idle: Theme.bg_surface,
+            bar_workspace_ring: "transparent",
             bar_hover_bg: Theme.bg_surface,
             bar_glow_color: "transparent",
             bar_text_raised: false,
@@ -115,6 +120,9 @@ Singleton {
                 frame_radius: 10,
                 frame_border_width: 0,
                 frame_border_color: "transparent",
+                frame_inset_width: 0,
+                frame_inset_color: "transparent",
+                frame_drop: 0,
                 accent_color: Theme.theme_primary,
                 accent_height: 3,
                 accent_full_width: false,
@@ -167,6 +175,7 @@ Singleton {
                 glow_color: "transparent",
                 glow_tint: 0,
                 frame_shade: "transparent",
+                frame_shade_vertical: false,
                 dither: "transparent",
                 text_shadow: "transparent",
                 fade_fills: false,
@@ -185,6 +194,7 @@ Singleton {
                 bar_workspace_focused: Theme.theme_secondary,
                 bar_workspace_active: Theme.theme_primary,
                 bar_workspace_idle: Theme.bg_surface,
+                bar_workspace_ring: "transparent",
                 bar_hover_bg: Theme.bg_surface,
                 bar_glow_color: "transparent",
                 bar_text_raised: false,
@@ -332,6 +342,62 @@ Singleton {
                 bar_tip_bg: Theme.bg_mantle,
                 bar_tip_fg: Theme.theme_primary_light,
                 bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.4)
+            }),
+            "snes": Object.assign({}, terminal, {
+                // Greys lifted toward primary_light so they read on the shaded window.
+                text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
+                font_family: "ProFontWindows Nerd Font",
+                font_size: Theme.popup_font_size + 7,
+                frame_color: Theme.bg_crust,
+                frame_shade: Theme.bg_mantle,
+                frame_shade_vertical: true,
+                frame_radius: 6,
+                frame_border_width: 3,
+                frame_border_color: Theme.theme_primary,
+                frame_inset_width: 2,
+                frame_inset_color: Theme.fg_muted,
+                frame_drop: 4,
+                accent_color: Theme.theme_secondary,
+                accent_height: 4,
+                selection_bg: Qt.alpha(Theme.fg_strong, 0.12),
+                selection_outline: "transparent",
+                caret_color: Theme.theme_secondary,
+                caret_blink: false,
+                row_cursor: "\uf0a4",
+                tab_active_bg: Qt.alpha(Theme.fg_strong, 0.12),
+                tab_active_fg: Theme.theme_secondary,
+                tab_fg: Theme.theme_primary_light,
+                key_fg: Theme.theme_secondary,
+                key_border: "transparent",
+                section_fg: Theme.theme_primary_light,
+                section_rule: false,
+                footer_fg: Theme.theme_primary_light,
+                footer_rule: false,
+                meter_shade: Theme.theme_primary_light,
+                meter_radius: 1,
+                title_bg: "transparent",
+                title_fg: Theme.theme_secondary,
+                chip_brackets: false,
+                chip_active_bg: Qt.alpha(Theme.fg_strong, 0.12),
+                chip_active_fg: Theme.theme_secondary,
+                toggle_brackets: false,
+                toggle_on: Theme.theme_secondary,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
+                text_shadow: Theme.bg_shadow,
+                bar_font_family: "ProFontWindows Nerd Font",
+                bar_font_size: Theme.font_size + 5,
+                bar_side_bg: Theme.bg_core,
+                bar_center_bg: Theme.bg_core,
+                bar_border_width: 2,
+                bar_border_color: Theme.theme_primary,
+                bar_workspace_idle: Theme.bg_mantle,
+                bar_workspace_ring: Theme.theme_primary,
+                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.3),
+                bar_glow_color: Theme.bg_shadow,
+                bar_text_raised: true,
+                bar_tip_border_width: 2,
+                bar_tip_border_color: Theme.theme_primary
             })
         };
     }
@@ -348,6 +414,11 @@ Singleton {
     readonly property real frame_radius: root.active.frame_radius
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
+    // A second ring just inside the border.
+    readonly property int frame_inset_width: root.active.frame_inset_width
+    readonly property color frame_inset_color: root.active.frame_inset_color
+    // A hard shadow this many px below floating frames.
+    readonly property int frame_drop: root.active.frame_drop
     readonly property color accent_color: root.active.accent_color
     readonly property int accent_height: root.active.accent_height
     readonly property bool accent_full_width: root.active.accent_full_width
@@ -403,6 +474,7 @@ Singleton {
     readonly property real glow_tint: root.active.glow_tint
     // A diagonal shade from this color at the top left into frame_color.
     readonly property color frame_shade: root.active.frame_shade
+    readonly property bool frame_shade_vertical: root.active.frame_shade_vertical
     readonly property color dither: root.active.dither
     readonly property color text_shadow: root.active.text_shadow
     // Selection and title fills fade out to the right.
@@ -433,6 +505,7 @@ Singleton {
     readonly property color bar_workspace_focused: root.bar.bar_workspace_focused
     readonly property color bar_workspace_active: root.bar.bar_workspace_active
     readonly property color bar_workspace_idle: root.bar.bar_workspace_idle
+    readonly property color bar_workspace_ring: root.bar.bar_workspace_ring
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color
