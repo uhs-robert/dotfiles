@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../../theme"
 import "../../services"
 
-// One day as a PS2 boot-screen tower: a translucent prism as tall as the day's high, its label, range and rain chance beneath.
+// One day as a PS2 boot-screen tower: a translucent prism as tall as the day's high, filled with water to its rain chance.
 Item {
     id: root
 
@@ -18,6 +18,10 @@ Item {
     readonly property real tower_h: root.area_h * (0.12 + 0.78 * root.frac(root.day.max || 0))
     readonly property real lo_y: root.area_h * (0.12 + 0.78 * root.frac(root.day.min || 0))
     readonly property real tower_w: Math.max(14, Math.min(34, root.width * 0.46))
+    readonly property real pop: Math.max(0, Math.min(1, (root.day.pop || 0) / 100))
+    readonly property color hi_color: WeatherState.temp_color(root.day.max || 0)
+    readonly property color lo_color: WeatherState.temp_color(root.day.min || 0)
+    readonly property color rain_color: root.pop > 0 ? Theme.info : Style.text_muted
 
     function frac(v) {
         return Math.max(0, Math.min(1, (v - root.scale_min) / Math.max(0.01, root.scale_max - root.scale_min)));
@@ -67,7 +71,7 @@ Item {
             width: parent.width
             height: 2
             radius: 1
-            color: Qt.alpha(Theme.fg_strong, root.selected ? 0.9 : 0.55)
+            color: Qt.alpha(root.hi_color, root.selected ? 0.95 : 0.6)
         }
 
         Rectangle {
@@ -87,7 +91,7 @@ Item {
             x: 2
             width: parent.width - 4
             height: 1
-            color: Qt.alpha(Theme.fg_strong, 0.4)
+            color: Qt.alpha(root.lo_color, 0.7)
         }
 
         Rectangle {
@@ -98,6 +102,37 @@ Item {
                 GradientStop { position: 0; color: Qt.alpha(Theme.theme_primary_strong, 0.3) }
                 GradientStop { position: 1; color: "transparent" }
             }
+        }
+    }
+
+    Item {
+        visible: root.pop > 0
+        x: tower.x + 1
+        width: root.tower_w - 2
+        height: Math.max(2, root.tower_h * root.pop)
+        y: root.area_h - height
+        opacity: root.selected ? 1 : 0.8
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 1
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.alpha(Theme.info, 0.95) }
+                GradientStop { position: 1; color: Qt.alpha(Theme.info, 0.55) }
+            }
+        }
+
+        Rectangle {
+            anchors.right: parent.right
+            width: parent.width * 0.38
+            height: parent.height
+            color: Qt.alpha(Theme.bg_shadow, 0.22)
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 2
+            color: Qt.lighter(Theme.info, 1.35)
         }
     }
 
@@ -128,18 +163,29 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             textFormat: Text.StyledText
-            text: root.day.max !== undefined ? "<font color=\"" + Theme.fg_strong + "\">" + Math.round(root.day.max) + "°</font> <font color=\"" + Style.text_muted + "\">" + Math.round(root.day.min) + "°</font>" : ""
+            text: root.day.max !== undefined ? "<font color=\"" + root.hi_color + "\">" + Math.round(root.day.max) + "°</font> <font color=\"" + root.lo_color + "\">" + Math.round(root.day.min) + "°</font>" : ""
             font.family: Style.font_family
             font.pixelSize: Style.font_size - 3
         }
 
-        Text {
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
-            text: (root.day.pop || 0) + "%"
-            color: Theme.info
-            font.family: Style.font_family
-            font.pixelSize: Style.font_size - 4
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 2
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "\u{f058c}"
+                color: root.rain_color
+                font.family: "Symbols Nerd Font"
+                font.pixelSize: Style.font_size - 4
+            }
+
+            Text {
+                text: (root.day.pop || 0) + "%"
+                color: root.rain_color
+                font.family: Style.font_family
+                font.pixelSize: Style.font_size - 4
+            }
         }
     }
 }
