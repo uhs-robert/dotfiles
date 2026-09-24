@@ -7,7 +7,7 @@ import "../theme"
 Item {
     id: root
 
-    property color color: Style.frame_brackets
+    property color color: Style.for_item(root).frame_brackets
     property int inset: 4
     property int arm: 10
 

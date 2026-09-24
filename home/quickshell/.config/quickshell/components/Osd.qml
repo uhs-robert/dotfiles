@@ -230,7 +230,7 @@ PanelWindow {
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded && !Style.frame_visor ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
-        border.width: Style.frame_visor ? 0 : Style.frame_border_width
+        border.width: Style.frame_visor || Style.frame_chamfer > 0 ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
 
         VisorGlass {
@@ -305,9 +305,9 @@ PanelWindow {
                     y: (parent.height - height) / 2
                     text: Style.title_prefix + root.title + Style.title_suffix
                     color: Style.title_fg
-                    font.family: Style.font_family
+                    font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
-                    font.bold: true
+                    font.bold: Style.title_font_family === Style.font_family
                     font.letterSpacing: Style.title_spacing
                     style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
                     styleColor: Style.title_glow

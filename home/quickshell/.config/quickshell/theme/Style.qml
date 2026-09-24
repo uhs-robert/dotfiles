@@ -16,9 +16,14 @@ Singleton {
         const terminal = {
             text_muted: Theme.fg_muted,
             text_dim: Theme.fg_dim,
+            text_fg: Theme.fg_core,
+            text_strong: Theme.fg_strong,
+            text_primary: Theme.theme_primary,
+            text_accent: Theme.theme_secondary,
             font_family: "JetBrainsMono Nerd Font",
             font_size: Theme.popup_font_size + 2,
             number_font: "",
+            title_font_family: "",
             rounded: false,
             frame_follows_island: false,
             frame_color: Theme.bg_crust,
@@ -34,6 +39,11 @@ Singleton {
             frame_inset_color: "transparent",
             frame_pad: 0,
             frame_drop: 0,
+            lcd_top: "transparent",
+            lcd_bottom: "transparent",
+            lcd_scan: "transparent",
+            lcd_margin: 0,
+            frame_engraving: "",
             accent_color: Theme.theme_secondary,
             accent_height: 3,
             accent_full_width: true,
@@ -47,6 +57,8 @@ Singleton {
             tab_active_bg: Theme.theme_secondary,
             tab_active_fg: Theme.bg_crust,
             tab_fg: Theme.fg_muted,
+            tab_caps: false,
+            tab_underline: "transparent",
             key_bg: "transparent",
             key_fg: Theme.fg_muted,
             key_border: Theme.bg_surface,
@@ -56,6 +68,7 @@ Singleton {
             label_spacing: 0,
             section_fade: "transparent",
             footer_fg: Theme.fg_muted,
+            footer_key_fg: Theme.theme_secondary,
             footer_rule: true,
             footer_rule_color: Theme.bg_surface,
             meter_on: Theme.theme_primary,
@@ -79,6 +92,9 @@ Singleton {
             chip_brackets: true,
             chip_active_bg: "transparent",
             chip_active_fg: Theme.theme_primary,
+            chip_pick: Theme.theme_secondary,
+            chip_border: "transparent",
+            card_edge: "transparent",
             toggle_brackets: true,
             toggle_on: Theme.ok,
             toggle_off: Theme.fg_muted,
@@ -90,6 +106,7 @@ Singleton {
             title_glow: "transparent",
             title_readout: "",
             title_readout_fg: "transparent",
+            title_rule: "transparent",
             frame_glow: "transparent",
             scanlines: false,
             scanline_color: "transparent",
@@ -107,6 +124,8 @@ Singleton {
             meter_shade: "transparent",
             meter_slant: 0,
             meter_bloom: false,
+            chart_slant: 0,
+            chart_fill: Theme.yellow,
             corner_scale: 1,
             bar_font_family: "JetBrainsMono Nerd Font",
             bar_font_size: Theme.font_size,
@@ -115,6 +134,9 @@ Singleton {
             bar_side_bg: Theme.bg_crust,
             bar_center_bg: Theme.bg_crust,
             bar_fg: Theme.fg_core,
+            bar_clock_bg: "transparent",
+            bar_clock_fg: Theme.fg_core,
+            bar_clock_font: "",
             bar_border_width: 1,
             bar_border_color: Theme.fg_muted,
             bar_rounded: false,
@@ -138,9 +160,14 @@ Singleton {
             "default": {
                 text_muted: Theme.fg_muted,
                 text_dim: Theme.fg_dim,
+                text_fg: Theme.fg_core,
+                text_strong: Theme.fg_strong,
+                text_primary: Theme.theme_primary,
+                text_accent: Theme.theme_secondary,
                 font_family: Theme.font_family,
                 font_size: Theme.popup_font_size,
                 number_font: "",
+                title_font_family: "",
                 rounded: true,
                 frame_follows_island: true,
                 frame_color: Theme.bg_mantle,
@@ -156,6 +183,11 @@ Singleton {
                 frame_inset_color: "transparent",
                 frame_pad: 0,
                 frame_drop: 0,
+                lcd_top: "transparent",
+                lcd_bottom: "transparent",
+                lcd_scan: "transparent",
+                lcd_margin: 0,
+                frame_engraving: "",
                 accent_color: Theme.theme_primary,
                 accent_height: 3,
                 accent_full_width: false,
@@ -169,6 +201,8 @@ Singleton {
                 tab_active_bg: Theme.bg_surface,
                 tab_active_fg: Theme.theme_secondary,
                 tab_fg: Theme.fg_muted,
+                tab_caps: false,
+                tab_underline: "transparent",
                 key_bg: Theme.bg_mantle,
                 key_fg: Theme.fg_dim,
                 key_border: Theme.ui_border,
@@ -178,6 +212,7 @@ Singleton {
                 label_spacing: 0,
                 section_fade: "transparent",
                 footer_fg: Theme.fg_dim,
+                footer_key_fg: Theme.theme_secondary,
                 footer_rule: false,
                 footer_rule_color: Theme.bg_surface,
                 meter_on: Theme.theme_primary,
@@ -201,6 +236,9 @@ Singleton {
                 chip_brackets: false,
                 chip_active_bg: Theme.bg_surface,
                 chip_active_fg: Theme.theme_secondary,
+                chip_pick: Theme.theme_secondary,
+                chip_border: "transparent",
+                card_edge: "transparent",
                 toggle_brackets: false,
                 toggle_on: Theme.theme_primary,
                 toggle_off: Theme.fg_dim,
@@ -212,6 +250,7 @@ Singleton {
                 title_glow: "transparent",
                 title_readout: "",
                 title_readout_fg: "transparent",
+                title_rule: "transparent",
                 frame_glow: "transparent",
                 scanlines: false,
                 scanline_color: "transparent",
@@ -229,6 +268,8 @@ Singleton {
                 meter_shade: "transparent",
                 meter_slant: 0,
                 meter_bloom: false,
+                chart_slant: 0,
+                chart_fill: Theme.yellow,
                 corner_scale: 1,
                 bar_font_family: Theme.font_family,
                 bar_font_size: Theme.font_size,
@@ -237,6 +278,9 @@ Singleton {
                 bar_side_bg: Theme.bg_core,
                 bar_center_bg: Theme.bg_mantle,
                 bar_fg: Theme.fg_core,
+                bar_clock_bg: "transparent",
+                bar_clock_fg: Theme.fg_core,
+                bar_clock_font: "",
                 bar_border_width: 1,
                 bar_border_color: Qt.alpha(Theme.ui_border, 0.5),
                 bar_rounded: true,
@@ -510,7 +554,132 @@ Singleton {
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.25),
                 bar_tip_border_color: Theme.theme_primary
             }),
-            "scifi": Object.assign({}, terminal, {
+            // Perfect Dark panels; `small` turns the small popups into the Q-branch watch LCD.
+            "goldeneye": Object.assign({}, terminal, {
+                text_muted: Qt.tint(Theme.fg_muted, Qt.alpha(Theme.fg_core, 0.3)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                font_family: "Share Tech Mono",
+                title_font_family: "Michroma",
+                number_font: "DSEG7 Classic",
+                frame_color: Theme.bg_crust,
+                frame_shade: Qt.tint(Theme.bg_crust, Qt.alpha(Theme.ui_visual_bg, 0.6)),
+                frame_border_color: Qt.alpha(Theme.theme_label, 0.6),
+                frame_chamfer: 14,
+                accent_color: Theme.theme_label,
+                accent_height: 2,
+                frame_top_rule: true,
+                selection_bg: Qt.alpha(Theme.theme_label, 0.16),
+                selection_outline: "transparent",
+                selection_bar: true,
+                caret_color: Theme.theme_label,
+                caret_blink: false,
+                row_cursor: "",
+                tab_active_bg: "transparent",
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                tab_caps: true,
+                tab_underline: Theme.theme_label,
+                key_fg: Theme.theme_secondary,
+                key_border: Qt.alpha(Theme.theme_secondary, 0.5),
+                section_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                section_rule: false,
+                section_fade: Qt.alpha(Theme.theme_label, 0.5),
+                label_caps: true,
+                label_spacing: 2,
+                footer_fg: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                footer_rule_color: Qt.alpha(Theme.theme_label, 0.25),
+                meter_on: Theme.theme_primary_light,
+                meter_off: Theme.bg_surface,
+                meter_slant: 0.36,
+                chart_slant: 0.21,
+                chart_fill: Theme.theme_secondary,
+                title_bg: "transparent",
+                title_fg: Theme.fg_strong,
+                title_spacing: 4,
+                title_readout: "CI · {code}-07",
+                title_readout_fg: Theme.theme_label,
+                chip_brackets: false,
+                chip_active_bg: Theme.theme_label,
+                chip_active_fg: Theme.bg_crust,
+                chip_pick: Theme.theme_label,
+                chip_border: Qt.alpha(Theme.theme_label, 0.5),
+                card_edge: Theme.theme_label,
+                toggle_on: Theme.theme_primary_light,
+                toggle_off: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2)),
+                marker_fill: false,
+                bar_font_family: "Michroma",
+                bar_font_size: Theme.font_size - 3,
+                bar_caps: true,
+                bar_letter_spacing: 1.5,
+                bar_side_bg: Theme.bg_crust,
+                bar_center_bg: Theme.bg_crust,
+                bar_border_color: Qt.alpha(Theme.theme_label, 0.5),
+                bar_hover_bg: Qt.alpha(Theme.theme_label, 0.18),
+                bar_clock_bg: Theme.theme_primary_light,
+                bar_clock_fg: Theme.bg_core,
+                bar_clock_font: "DSEG7 Classic",
+                bar_tip_border_color: Qt.alpha(Theme.theme_label, 0.6),
+                small: {
+                    text_fg: Theme.bg_core,
+                    text_strong: Theme.bg_core,
+                    text_primary: Qt.tint(Theme.theme_primary_strong, Qt.alpha(Theme.bg_core, 0.5)),
+                    text_accent: Qt.tint(Theme.theme_label, Qt.alpha(Theme.bg_core, 0.45)),
+                    text_muted: Qt.alpha(Theme.bg_core, 0.75),
+                    text_dim: Qt.alpha(Theme.bg_core, 0.6),
+                    title_font_family: "Share Tech Mono",
+                    frame_shade: Theme.bg_surface,
+                    shade_vertical: true,
+                    frame_radius: 22,
+                    frame_chamfer: 0,
+                    frame_border_width: 2,
+                    frame_border_color: Qt.tint(Theme.bg_surface, Qt.alpha(Theme.fg_muted, 0.4)),
+                    frame_inset_width: 3,
+                    frame_inset_color: Theme.bg_shadow,
+                    lcd_top: Theme.theme_primary_light,
+                    lcd_bottom: Qt.tint(Theme.theme_primary_light, Qt.alpha(Theme.theme_primary_strong, 0.3)),
+                    lcd_scan: Qt.alpha(Theme.bg_core, 0.05),
+                    lcd_margin: 7,
+                    frame_engraving: "Q BRANCH",
+                    accent_color: Qt.tint(Theme.bg_surface, Qt.alpha(Theme.fg_muted, 0.4)),
+                    frame_top_rule: false,
+                    selection_bg: Theme.bg_core,
+                    selection_inverse: true,
+                    selection_fg: Theme.theme_primary_light,
+                    selection_bar: false,
+                    caret_color: Theme.theme_primary_light,
+                    row_cursor: "▸",
+                    tab_active_bg: Theme.bg_core,
+                    tab_active_fg: Theme.theme_primary_light,
+                    tab_fg: Qt.alpha(Theme.bg_core, 0.75),
+                    tab_caps: false,
+                    tab_underline: "transparent",
+                    key_fg: Theme.bg_core,
+                    key_border: Theme.bg_core,
+                    section_fg: Theme.bg_core,
+                    section_fade: Qt.alpha(Theme.bg_core, 0.4),
+                    footer_fg: Qt.alpha(Theme.bg_core, 0.75),
+                    footer_key_fg: Theme.bg_core,
+                    footer_rule_color: Qt.alpha(Theme.bg_core, 0.4),
+                    meter_on: Theme.bg_core,
+                    meter_off: Qt.alpha(Theme.bg_core, 0.15),
+                    meter_hot: Qt.tint(Theme.theme_label, Qt.alpha(Theme.bg_core, 0.4)),
+                    meter_slant: 0.32,
+                    title_bg: Theme.bg_core,
+                    title_fg: Theme.theme_primary_light,
+                    title_spacing: 2,
+                    title_readout: "WATCH   MAG",
+                    title_readout_fg: Theme.bg_core,
+                    title_rule: Qt.alpha(Theme.bg_core, 0.35),
+                    chip_active_bg: Theme.bg_core,
+                    chip_active_fg: Theme.theme_primary_light,
+                    chip_pick: Theme.bg_core,
+                    chip_border: Theme.bg_core,
+                    card_edge: "transparent",
+                    toggle_on: Theme.bg_core,
+                    toggle_off: Qt.alpha(Theme.bg_core, 0.5)
+                }
+            }),
+            "scifi":Object.assign({}, terminal, {
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.35)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.6)),
                 frame_color: Theme.bg_crust,
@@ -604,7 +773,7 @@ Singleton {
                 title_bg: "transparent",
                 title_fg: Theme.theme_primary,
                 title_spacing: 3,
-                title_readout: "COMBAT VISOR",
+                title_readout: "SCAN VISOR",
                 title_readout_fg: Theme.theme_primary,
                 chip_brackets: false,
                 chip_active_bg: Theme.theme_secondary,
@@ -621,7 +790,10 @@ Singleton {
                 bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.18),
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.18),
                 bar_tip_fg: Theme.theme_primary_light,
-                bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.45)
+                bar_tip_border_color: Qt.alpha(Theme.theme_primary, 0.45),
+                small: {
+                    title_readout: "COMBAT VISOR"
+                }
             }),
             "ps2": Object.assign({}, terminal, {
                 font_family: "Exo 2",
@@ -680,6 +852,29 @@ Singleton {
     }
 
     readonly property var active: root.styles[root.name] || root.styles["default"]
+    // Small popups read this token set; it is the singleton itself unless the style has a `small` block.
+    readonly property var small: root.active.small ? root.resolve(Object.assign({}, root.active, root.active.small)) : root
+
+    // The token set for an item: small inside a popup whose size_class is small, else this singleton.
+    function for_item(item) {
+        for (let p = item; p; p = p.parent) {
+            if (p.size_class !== undefined) return p.size_class === "small" ? root.small : root;
+        }
+        return root;
+    }
+
+    // A raw style object with its colors typed and its derived tokens filled, like the properties below.
+    function resolve(d) {
+        const o = {};
+        for (const k in d) {
+            const v = d[k];
+            o[k] = typeof v === "string" && (v === "transparent" || v.startsWith("#")) ? Qt.tint(v, "transparent") : v;
+        }
+        o.title_font_family = o.title_font_family || o.font_family;
+        o.number_font = o.number_font || o.font_family;
+        o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
+        return o;
+    }
 
     readonly property string font_family: root.active.font_family
     readonly property int font_size: root.active.font_size
@@ -687,6 +882,12 @@ Singleton {
     readonly property string number_font: root.active.number_font !== "" ? root.active.number_font : root.font_family
     readonly property color text_muted: root.active.text_muted
     readonly property color text_dim: root.active.text_dim
+    readonly property color text_fg: root.active.text_fg
+    readonly property color text_strong: root.active.text_strong
+    // Primary and secondary colored text in popups.
+    readonly property color text_primary: root.active.text_primary
+    readonly property color text_accent: root.active.text_accent
+    readonly property string title_font_family: root.active.title_font_family || root.font_family
     readonly property bool rounded: root.active.rounded
     readonly property bool frame_follows_island: root.active.frame_follows_island
     readonly property color frame_color: root.active.frame_color
@@ -707,6 +908,13 @@ Singleton {
     readonly property int inset_pad: root.frame_inset_width > 0 ? root.frame_border_width + root.frame_inset_gap + root.frame_inset_width : root.active.frame_pad
     // A hard shadow this many px below floating frames.
     readonly property int frame_drop: root.active.frame_drop
+    // A panel lcd_margin inside the frame, shaded lcd_top to lcd_bottom, that holds the title, body and footer.
+    readonly property color lcd_top: root.active.lcd_top
+    readonly property color lcd_bottom: root.active.lcd_bottom
+    readonly property color lcd_scan: root.active.lcd_scan
+    readonly property int lcd_margin: root.active.lcd_margin
+    // Lettering on the frame under the panel.
+    readonly property string frame_engraving: root.active.frame_engraving
     readonly property color accent_color: root.active.accent_color
     readonly property int accent_height: root.active.accent_height
     readonly property bool accent_full_width: root.active.accent_full_width
@@ -723,6 +931,8 @@ Singleton {
     readonly property color tab_active_bg: root.active.tab_active_bg
     readonly property color tab_active_fg: root.active.tab_active_fg
     readonly property color tab_fg: root.active.tab_fg
+    readonly property bool tab_caps: root.active.tab_caps
+    readonly property color tab_underline: root.active.tab_underline
     readonly property color key_bg: root.active.key_bg
     readonly property color key_fg: root.active.key_fg
     readonly property color key_border: root.active.key_border
@@ -734,6 +944,7 @@ Singleton {
     // A rule after section labels that fades out to the right.
     readonly property color section_fade: root.active.section_fade
     readonly property color footer_fg: root.active.footer_fg
+    readonly property color footer_key_fg: root.active.footer_key_fg
     readonly property bool footer_rule: root.active.footer_rule
     readonly property color footer_rule_color: root.active.footer_rule_color
     readonly property color meter_on: root.active.meter_on
@@ -760,6 +971,10 @@ Singleton {
     readonly property bool chip_brackets: root.active.chip_brackets
     readonly property color chip_active_bg: root.active.chip_active_bg
     readonly property color chip_active_fg: root.active.chip_active_fg
+    // A picked action chip's fill; chip_border outlines the rest, key_border when transparent.
+    readonly property color chip_pick: root.active.chip_pick
+    readonly property color chip_border: root.active.chip_border
+    readonly property color card_edge: root.active.card_edge
     readonly property bool toggle_brackets: root.active.toggle_brackets
     readonly property color toggle_on: root.active.toggle_on
     readonly property color toggle_off: root.active.toggle_off
@@ -771,8 +986,9 @@ Singleton {
     readonly property color title_glow: root.active.title_glow
     // A static system readout drawn at the right end of the title row.
     readonly property string title_readout: root.active.title_readout
-    // Transparent draws the readout in text_muted.
+    // Transparent draws the readout in text_muted; {code} in the readout becomes the title's first three letters.
     readonly property color title_readout_fg: root.active.title_readout_fg
+    readonly property color title_rule: root.active.title_rule
     readonly property color frame_glow: root.active.frame_glow
     readonly property bool scanlines: root.active.scanlines
     readonly property color scanline_color: root.active.scanline_color
@@ -796,6 +1012,9 @@ Singleton {
     readonly property real meter_slant: root.active.meter_slant
     // A blurred copy of the whole meter behind it.
     readonly property bool meter_bloom: root.active.meter_bloom
+    // Leans chart bars like meter_slant.
+    readonly property real chart_slant: root.active.chart_slant
+    readonly property color chart_fill: root.active.chart_fill
     // Multiplies every radius a rounded style draws.
     readonly property real corner_scale: root.active.corner_scale
 
@@ -815,6 +1034,10 @@ Singleton {
     readonly property color bar_side_bg: root.bar.bar_side_bg
     readonly property color bar_center_bg: root.bar.bar_center_bg
     readonly property color bar_fg: root.bar.bar_fg
+    // The clock's time sits on a chip of this color when it is not transparent.
+    readonly property color bar_clock_bg: root.bar.bar_clock_bg
+    readonly property color bar_clock_fg: root.bar.bar_clock_fg
+    readonly property string bar_clock_font: root.bar.bar_clock_font || root.bar_font_family
     readonly property int bar_border_width: root.bar.bar_border_width
     readonly property color bar_border_color: root.bar.bar_border_color
     readonly property bool bar_rounded: root.bar.bar_rounded

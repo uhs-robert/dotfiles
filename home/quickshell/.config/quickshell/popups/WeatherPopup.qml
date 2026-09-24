@@ -11,6 +11,7 @@ Popup {
     id: root
 
     popup_name: "weather"
+    size_class: "large"
     preferred_width: 760
     body_height: content.implicitHeight + 24
 
