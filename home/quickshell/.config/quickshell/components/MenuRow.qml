@@ -15,11 +15,16 @@ Rectangle {
     readonly property real key_space: root.show_key ? key_badge.width + 6 : 0
 
     radius: Style.radius(root.base_radius)
-    color: root.selected ? Style.selection_bg : "transparent"
+    color: root.selected && !Style.fade_fills ? Style.selection_bg : "transparent"
 
     // Styles with an inverse selection repaint the row's text and glyphs in one color.
     function fg(c) {
         return root.selected && Style.selection_inverse ? Style.selection_fg : c;
+    }
+
+    FadeFill {
+        visible: root.selected && Style.fade_fills
+        fill: Style.selection_bg
     }
 
     DashedOutline {

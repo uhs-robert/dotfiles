@@ -185,22 +185,39 @@ PanelWindow {
             }
         }
 
+        FrameShade {
+            anchors.fill: parent
+            anchors.margins: Style.frame_border_width
+            top_radius: Math.max(0, frame.radius - Style.frame_border_width)
+            bottom_radius: top_radius
+        }
+
         Item {
             id: glow_layer
+            readonly property bool layered: Style.glow || Style.text_shadow.a > 0
             anchors.fill: parent
-            layer.enabled: Style.glow
-            opacity: Style.glow ? 0 : 1
+            layer.enabled: glow_layer.layered
+            opacity: glow_layer.layered ? 0 : 1
 
             Rectangle {
                 id: title_tab
                 visible: Style.show_title
-                width: title_text.implicitWidth + 20
+                x: Style.fade_fills ? frame.radius : 0
+                y: Style.fade_fills ? Style.frame_border_width : 0
+                width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
-                color: Style.title_bg
+                color: Style.fade_fills ? "transparent" : Style.title_bg
+
+                FadeFill {
+                    visible: Style.fade_fills
+                    fill: Style.title_bg
+                }
 
                 Text {
                     id: title_text
-                    anchors.centerIn: parent
+                    anchors.centerIn: Style.fade_fills ? undefined : parent
+                    x: 10
+                    y: (parent.height - height) / 2
                     text: Style.title_prefix + root.kind.toUpperCase() + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.font_family
@@ -269,6 +286,19 @@ PanelWindow {
             colorizationColor: Theme.theme_primary_light
         }
 
+        MultiEffect {
+            visible: !Style.glow && Style.text_shadow.a > 0
+            anchors.fill: glow_layer
+            source: glow_layer
+            autoPaddingEnabled: false
+            shadowEnabled: true
+            shadowBlur: 0
+            shadowOpacity: 1
+            shadowColor: Style.text_shadow
+            shadowHorizontalOffset: 2
+            shadowVerticalOffset: 2
+        }
+
         Item {
             visible: Style.scanlines
             anchors.fill: parent
@@ -284,6 +314,14 @@ PanelWindow {
                     color: Style.scanline_color
                 }
             }
+        }
+
+        Dither {
+            anchors.fill: parent
+            anchors.margins: Style.frame_border_width
+            color: Style.dither
+            radius: frame.radius
+            top_radius: frame.radius
         }
     }
 }
