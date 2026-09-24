@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import "../theme"
 
-// The style's own frame shape (OctagonFrame, ChamferFrame) and FrameTicks, each loaded only when its token is set.
+// The style's own frame shape (OctagonFrame, ChamferFrame, WindowGradient) and FrameTicks, each loaded only when its token is set.
 Item {
     id: root
 
@@ -12,6 +12,19 @@ Item {
     property color chamfer_edge: root.st.frame_border_color
     property real octagon_cut: root.st.frame_octagon
     property bool struts: true
+    // The frame's outer radii; the window gradient sits inside its border.
+    property real top_radius: root.parent && typeof root.parent.radius === "number" ? root.parent.radius : 0
+    property real bottom_radius: root.top_radius
+
+    Loader {
+        anchors.fill: parent
+        anchors.margins: root.st.frame_border_width
+        active: root.st.window_gradient.length > 0
+        sourceComponent: WindowGradient {
+            top_radius: Math.max(0, root.top_radius - root.st.frame_border_width)
+            bottom_radius: Math.max(0, root.bottom_radius - root.st.frame_border_width)
+        }
+    }
 
     Loader {
         anchors.fill: parent

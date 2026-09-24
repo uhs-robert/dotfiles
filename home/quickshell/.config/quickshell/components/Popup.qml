@@ -425,6 +425,8 @@ PanelWindow {
 
             CustomFrame {
                 anchors.fill: parent
+                top_radius: 0
+                bottom_radius: root.frame_radius
             }
 
             FrameInset {
