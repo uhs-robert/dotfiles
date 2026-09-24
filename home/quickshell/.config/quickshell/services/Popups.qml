@@ -66,7 +66,8 @@ Singleton {
             // Anchors are island bodies; read the Island's color, since a shaded body is transparent.
             const island = found && found.item ? found.item.parent : null;
             open_color = found ? (island && island.bg_color !== undefined ? island.bg_color : found.color) : (color || Theme.bg_mantle);
-            open_screen_name = found ? found.screen_name : "";
+            // A popup with no module (the docked picker) opens on the screen it names.
+            open_screen_name = found ? found.screen_name : (screen_name || "");
         }
         open_name = name;
     }

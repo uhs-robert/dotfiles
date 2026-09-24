@@ -161,6 +161,9 @@ PanelWindow {
 
     // Set by popups whose layout is fluid: from a side island they take exactly the island body's width.
     property bool fit_island: false
+    // Full width along the bottom of the screen, rising from its edge; the frame loses its rounded corners.
+    property bool dock_bottom: false
+    readonly property real frame_radius: root.dock_bottom ? 0 : root.st.frame_radius
     // Never narrower than the island's bottom edge (its body, between the slants).
     implicitWidth: root.passive ? root.island_width : root.fit_island && root.island_width > 0 && root.side !== "center" ? root.island_width : Math.max(Style.px(preferred_width) + root.st.lcd_margin * 2, island_width, root.st.popup_min_width)
     implicitHeight: body_height + header_height + footer_height + root.st.frame_drop
@@ -183,9 +186,10 @@ PanelWindow {
 
     // A layer surface pinned to the screen edge: xdg popups landed a few px short of it.
     screen: Quickshell.screens.find(s => s.name === root.held_screen_name) || null
-    anchors.top: true
-    anchors.left: side === "left"
-    anchors.right: side === "right"
+    anchors.top: !dock_bottom
+    anchors.bottom: dock_bottom
+    anchors.left: side === "left" || dock_bottom
+    anchors.right: side === "right" || dock_bottom
     exclusiveZone: 0
     color: "transparent"
     visible: false
@@ -315,8 +319,9 @@ PanelWindow {
 
     Rectangle {
         id: accent_line
-        readonly property real w: (root.st.accent_full_width ? root.width : root.island_width) * root.line_progress
+        readonly property real w: (root.st.accent_full_width || root.dock_bottom ? root.width : root.island_width) * root.line_progress
         x: root.edge_x(w)
+        y: root.dock_bottom ? reveal.y - root.line_height : 0
         width: w
         height: root.line_height
         color: root.st.accent_color
@@ -330,7 +335,7 @@ PanelWindow {
         readonly property string size_class: root.size_class
         // Lets MenuFooter and RowLabel inside draw this popup's search.
         readonly property var search_popup: root
-        y: root.line_height
+        y: root.dock_bottom ? root.height - reveal.height : root.line_height
         width: root.width
         height: (root.height - root.line_height) * root.drop_progress
         clip: true
@@ -341,8 +346,8 @@ PanelWindow {
             width: root.width
             height: root.height - root.line_height - root.st.frame_drop
             color: Theme.bg_shadow
-            bottomLeftRadius: root.st.frame_radius
-            bottomRightRadius: root.st.frame_radius
+            bottomLeftRadius: root.frame_radius
+            bottomRightRadius: root.frame_radius
         }
 
         Item {
@@ -353,8 +358,8 @@ PanelWindow {
             Rectangle {
                 anchors.fill: parent
                 color: root.st.frame_chamfer > 0 || root.st.frame_visor ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
-                bottomLeftRadius: root.st.frame_radius
-                bottomRightRadius: root.st.frame_radius
+                bottomLeftRadius: root.frame_radius
+                bottomRightRadius: root.frame_radius
                 border.width: root.st.frame_visor || root.st.frame_chamfer > 0 ? 0 : root.st.frame_border_width
                 border.color: root.st.frame_border_color
             }
@@ -388,7 +393,7 @@ PanelWindow {
             FrameShade {
                 anchors.fill: parent
                 anchors.margins: root.st.frame_border_width
-                bottom_radius: Math.max(0, root.st.frame_radius - root.st.frame_border_width)
+                bottom_radius: Math.max(0, root.frame_radius - root.st.frame_border_width)
                 chamfer: root.st.frame_chamfer
             }
 
@@ -397,7 +402,7 @@ PanelWindow {
             }
 
             FrameInset {
-                bottom_radius: root.st.frame_radius
+                bottom_radius: root.frame_radius
             }
 
             // The watch face: a shaded panel with static scan rows, and the engraving on the bezel below it.
@@ -656,7 +661,7 @@ PanelWindow {
                 anchors.fill: parent
                 anchors.margins: root.st.frame_border_width
                 color: root.st.dither
-                radius: root.st.frame_radius
+                radius: root.frame_radius
             }
         }
     }
