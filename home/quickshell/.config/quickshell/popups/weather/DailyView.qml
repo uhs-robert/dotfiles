@@ -41,6 +41,8 @@ Item {
     readonly property bool floor_shown: root.mode7 && root.visible && Popups.open_name === "weather"
     // Terminal: `curl wttr.in`, the window as one box-drawn table.
     readonly property bool wttr_table: Style.weather_header === "wttr" && root.sub === 0
+    // Half-Life: HL1 weapon-slot buckets, the selected day open wider.
+    readonly property bool hev_slots: Style.weather_header === "hev" && root.sub === 0
 
     onFloor_shownChanged: {
         if (!floor_loader.item) return;
@@ -78,6 +80,7 @@ Item {
         const f = [label_metrics.font, table_metrics.font];
         const mission_w = root.mission ? Math.max(label_metrics.advanceWidth("a) WED"), small_metrics.advanceWidth("PROGRESS") + 8) : 0;
         const dq_w = root.dq ? 2 * (small_metrics.advanceWidth(Style.row_cursor) + 3) : 0;
+        if (root.hev_slots) return Math.max(1, Math.min(5, 1 + Math.floor((root.width - 100) / 52)));
         const col = root.stat_columns ? 56
             : Style.weather_header === "wttr" ? table_metrics.advanceWidth("─") * 8 - 4
             : root.dq ? Math.max(label_metrics.advanceWidth("100%"), label_metrics.advanceWidth("WED") + dq_w) + 16
@@ -180,9 +183,21 @@ Item {
             }
         }
 
+        Loader {
+            Layout.fillWidth: true
+            active: root.hev_slots
+            visible: active
+            sourceComponent: WeaponSlots {
+                days: root.window_days
+                first_day: root.first_day
+                day_cursor: root.day_cursor
+                on_select: root.on_select
+            }
+        }
+
         RowLayout {
             id: day_row
-            visible: !root.wttr_table
+            visible: !root.wttr_table && !root.hev_slots
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 4
@@ -575,6 +590,11 @@ Item {
                 font.family: Style.font_family
                 font.pixelSize: Style.font_size
             }
+        }
+
+        Item {
+            visible: root.hev_slots
+            Layout.fillHeight: true
         }
     }
 }
