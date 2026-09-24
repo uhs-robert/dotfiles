@@ -15,9 +15,16 @@ Item {
     readonly property string shown_text: root.filtered_text.replace(/\b(Enter|Esc|Tab|space|Backspace)\b/g, k => root.key_glyphs[k])
     readonly property int rule_gap: Style.footer_rule ? 5 : 0
 
+    // Each "key desc" group; "[ ]" is the one key that contains a space.
+    readonly property var groups: root.shown_text === "" ? [] : root.shown_text.split(" · ").map(g => {
+        const key = g.startsWith("[ ]") ? "[ ]" : g.split(" ")[0];
+        return { key: key, desc: g.slice(key.length).trim() };
+    })
+
     Layout.minimumWidth: 0
-    implicitWidth: hint.implicitWidth
-    implicitHeight: hint.implicitHeight + root.rule_gap
+    implicitWidth: hint.childrenRect.width
+    implicitHeight: hint.childrenRect.height + root.rule_gap
+    clip: !root.wrap
 
     Row {
         visible: Style.footer_rule
@@ -36,16 +43,36 @@ Item {
         }
     }
 
-    Text {
+    Flow {
         id: hint
         y: root.rule_gap
-        width: parent.width
-        elide: root.wrap ? Text.ElideNone : Text.ElideRight
-        wrapMode: root.wrap ? Text.WordWrap : Text.NoWrap
-        // Wrapped hints break only between groups, never inside "j/k move".
-        text: root.wrap ? root.shown_text.split(" · ").map(g => g.replace(/ /g, "\u00a0").replace(/\//g, "/\u2060")).join("\u00a0· ") : root.shown_text
-        color: Style.footer_fg
-        font.family: Style.font_family
-        font.pixelSize: Style.font_size - 4
+        width: root.wrap ? parent.width : 100000
+
+        Repeater {
+            model: root.groups
+
+            Row {
+                required property var modelData
+                required property int index
+                spacing: 4
+
+                Text {
+                    height: desc_text.implicitHeight
+                    verticalAlignment: Text.AlignVCenter
+                    text: parent.modelData.key
+                    color: Theme.theme_secondary
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 4
+                }
+
+                Text {
+                    id: desc_text
+                    text: parent.modelData.desc + (parent.index < root.groups.length - 1 ? " · " : "")
+                    color: Style.footer_fg
+                    font.family: Style.font_family
+                    font.pixelSize: Style.font_size - 4
+                }
+            }
+        }
     }
 }
