@@ -19,6 +19,8 @@ Rectangle {
     readonly property bool is_chip: !root.Layout.fillWidth
     readonly property bool show_key: root.st.tab_keys && !root.is_chip && root.key !== ""
     readonly property real key_space: root.show_key ? key_badge.width + 6 : 0
+    readonly property bool bracketed: root.active && !root.is_chip && root.st.tab_brackets.a > 0
+    readonly property real bracket_space: root.bracketed ? open_bracket.implicitWidth * 2 + 4 : 0
 
     signal clicked()
 
@@ -38,7 +40,7 @@ Rectangle {
         id: key_badge
         visible: root.show_key
         anchors.right: label_text.left
-        anchors.rightMargin: 6
+        anchors.rightMargin: 6 + root.bracket_space / 2
         anchors.verticalCenter: parent.verticalCenter
         key: root.key
         on_fill: root.active
@@ -48,16 +50,45 @@ Rectangle {
         id: label_text
         anchors.centerIn: parent
         anchors.horizontalCenterOffset: root.key_space / 2
-        width: Math.min(implicitWidth, parent.width - 8 - root.key_space)
+        width: Math.min(implicitWidth, parent.width - 8 - root.key_space - root.bracket_space)
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         text: root.st.chip_brackets && root.is_chip ? (root.active ? "[" + root.label + "]" : " " + root.label + " ") : root.label
         color: !root.active ? root.st.tab_fg : root.is_chip ? root.st.chip_active_fg : root.st.tab_active_fg
         font.bold: root.active
-        font.family: root.st.font_family
+        font.family: root.st.label_font_family
         font.pixelSize: root.font_size
         font.capitalization: root.st.tab_caps ? Font.AllUppercase : Font.MixedCase
         font.letterSpacing: root.st.tab_caps ? root.st.label_spacing : 0
+    }
+
+    Text {
+        id: open_bracket
+        visible: root.bracketed
+        anchors.right: label_text.left
+        anchors.rightMargin: 2
+        anchors.verticalCenter: label_text.verticalCenter
+        text: "["
+        color: root.st.tab_brackets
+        font: label_text.font
+    }
+
+    Text {
+        visible: root.bracketed
+        anchors.left: label_text.right
+        anchors.leftMargin: 2
+        anchors.verticalCenter: label_text.verticalCenter
+        text: "]"
+        color: root.st.tab_brackets
+        font: label_text.font
+    }
+
+    Rectangle {
+        visible: !root.is_chip && root.st.tab_rule.a > 0
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: 1
+        color: root.st.tab_rule
     }
 
     Rectangle {

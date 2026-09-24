@@ -13,7 +13,7 @@ Text {
     clip: root.st.section_rule
     text: root.st.section_rule ? "── " + root.label + " " + "─".repeat(160) : root.label
     color: root.st.section_fg
-    font.family: root.st.font_family
+    font.family: root.st.label_font_family
     font.pixelSize: root.st.font_size - 3
     font.capitalization: root.st.label_caps ? Font.AllUppercase : Font.MixedCase
     font.letterSpacing: root.st.label_spacing

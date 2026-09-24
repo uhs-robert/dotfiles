@@ -302,10 +302,10 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: root.st.frame_chamfer > 0 || root.st.frame_visor ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
+                color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.frame_octagon > 0 ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
                 bottomLeftRadius: root.st.frame_radius
                 bottomRightRadius: root.st.frame_radius
-                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 ? 0 : root.st.frame_border_width
+                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.frame_octagon > 0 ? 0 : root.st.frame_border_width
                 border.color: root.st.frame_border_color
             }
 
@@ -342,6 +342,12 @@ PanelWindow {
                 chamfer: root.st.frame_chamfer
             }
 
+            Loader {
+                anchors.fill: parent
+                active: root.st.frame_octagon > 0
+                sourceComponent: OctagonFrame {}
+            }
+
             CornerBrackets {
                 anchors.fill: parent
             }
@@ -359,9 +365,9 @@ PanelWindow {
                 y: lcd_panel.edge
                 width: parent.width - lcd_panel.edge * 2
                 height: parent.height - lcd_panel.edge * 2 - root.engraving_height
-                radius: 8
+                radius: root.st.lcd_radius
                 border.width: 1
-                border.color: Qt.alpha(Theme.bg_shadow, 0.6)
+                border.color: root.st.lcd_border
                 clip: true
                 gradient: Gradient {
                     GradientStop { position: 0; color: root.st.lcd_top }
@@ -378,6 +384,14 @@ PanelWindow {
                         height: 1
                         color: root.st.lcd_scan
                     }
+                }
+
+                CornerBrackets {
+                    anchors.fill: parent
+                    color: root.st.lcd_brackets
+                    inset: 5
+                    arm: 14
+                    all_corners: true
                 }
             }
 
@@ -408,9 +422,20 @@ PanelWindow {
                     visible: root.has_title
                     x: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad * 1.5) + root.st.inset_pad + root.st.lcd_margin * 2
                     y: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad) + root.st.inset_pad + root.st.lcd_margin * 2
-                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_text.implicitWidth + 20, parent.width - title_tab.x * 2)
+                    readonly property real reticle_space: root.st.title_reticle.a > 0 ? title_text.implicitHeight + 4 : 0
+                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_text.implicitWidth + 20 + title_tab.reticle_space, parent.width - title_tab.x * 2)
                     height: title_text.implicitHeight + 4
                     color: root.st.fade_fills ? "transparent" : root.st.title_bg
+
+                    Reticle {
+                        visible: title_tab.reticle_space > 0
+                        x: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: title_tab.reticle_space - 4
+                        height: width
+                        color: root.st.title_reticle
+                        center_color: root.st.caret_color
+                    }
 
                     FadeFill {
                         visible: root.st.fade_fills
@@ -420,9 +445,10 @@ PanelWindow {
                     Text {
                         id: title_text
                         anchors.centerIn: root.st.fade_fills ? undefined : parent
+                        anchors.horizontalCenterOffset: title_tab.reticle_space / 2
                         x: 10
                         y: (parent.height - height) / 2
-                        width: Math.min(implicitWidth, parent.width - 20)
+                        width: Math.min(implicitWidth, parent.width - 20 - title_tab.reticle_space)
                         elide: Text.ElideRight
                         text: root.st.title_prefix + root.title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
@@ -436,6 +462,7 @@ PanelWindow {
                 }
 
                 Text {
+                    id: title_readout
                     // Dropped on narrow popups rather than drawn over the title.
                     visible: root.has_title && root.st.title_readout !== "" && title_tab.x + (root.st.fade_fills ? 10 + title_text.implicitWidth : title_tab.width) + 12 <= parent.width - anchors.rightMargin - implicitWidth
                     anchors.right: parent.right
@@ -446,6 +473,19 @@ PanelWindow {
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 5
                     font.letterSpacing: 1
+                }
+
+                Rectangle {
+                    visible: root.has_title && root.st.title_line.a > 0 && width > 8
+                    x: title_tab.x + title_tab.width
+                    y: title_tab.y + Math.round(title_tab.height / 2)
+                    width: (title_readout.visible ? title_readout.x - 8 : parent.width - title_readout.anchors.rightMargin) - x
+                    height: 1
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0; color: root.st.title_line }
+                        GradientStop { position: 1; color: Qt.alpha(root.st.title_line, 0) }
+                    }
                 }
 
                 Rectangle {
@@ -539,11 +579,11 @@ PanelWindow {
 
             // Static scanlines; nothing animates them.
             Item {
-                visible: root.st.scanlines
+                visible: root.st.scanlines && root.st.frame_octagon <= 0
                 anchors.fill: parent
 
                 Repeater {
-                    model: root.st.scanlines ? Math.max(0, Math.ceil(parent.height / 3)) : 0
+                    model: root.st.scanlines && root.st.frame_octagon <= 0 ? Math.max(0, Math.ceil(parent.height / 3)) : 0
 
                     Rectangle {
                         required property int index

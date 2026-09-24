@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import "../../components"
 import "../../theme"
 import "../../services"
 
@@ -94,8 +95,10 @@ Item {
                         anchors.fill: parent
                         anchors.margins: -2
                         radius: Style.radius(4)
-                        color: Theme.bg_surface
+                        color: Style.selection_brackets.a > 0 ? Style.selection_bg : Theme.bg_surface
                         visible: day_col.day_index === root.day_cursor
+
+                        LockBrackets {}
                     }
 
                     MouseArea {
@@ -130,6 +133,8 @@ Item {
                                 width: parent.width * 0.3
                                 radius: Style.radius(2)
                                 color: Style.chart_fill
+                                border.width: Style.chart_outline.a > 0 ? 1 : 0
+                                border.color: Style.chart_outline
                                 y: root.inner_top_y(day_col.modelData)
                                 height: Math.max(4, root.inner_bottom_y(day_col.modelData) - root.inner_top_y(day_col.modelData))
                                 antialiasing: Style.chart_slant > 0

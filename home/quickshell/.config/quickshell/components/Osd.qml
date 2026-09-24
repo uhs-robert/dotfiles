@@ -229,8 +229,8 @@ PanelWindow {
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         radius: Style.rounded && !Style.frame_visor ? height / 2 : Style.frame_radius
-        color: Style.frame_chamfer > 0 || Style.frame_visor ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
-        border.width: Style.frame_visor || Style.frame_chamfer > 0 ? 0 : Style.frame_border_width
+        color: Style.frame_chamfer > 0 || Style.frame_visor || Style.frame_octagon > 0 ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
+        border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.frame_octagon > 0 ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
 
         VisorGlass {
@@ -265,6 +265,12 @@ PanelWindow {
             top_radius: Math.max(0, frame.radius - Style.frame_border_width)
             bottom_radius: top_radius
             chamfer: Style.frame_chamfer
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: Style.frame_octagon > 0
+            sourceComponent: OctagonFrame {}
         }
 
         CornerBrackets {
@@ -411,11 +417,11 @@ PanelWindow {
         }
 
         Item {
-            visible: Style.scanlines
+            visible: Style.scanlines && Style.frame_octagon <= 0
             anchors.fill: parent
 
             Repeater {
-                model: Style.scanlines ? Math.max(0, Math.ceil(parent.height / 3)) : 0
+                model: Style.scanlines && Style.frame_octagon <= 0 ? Math.max(0, Math.ceil(parent.height / 3)) : 0
 
                 Rectangle {
                     required property int index

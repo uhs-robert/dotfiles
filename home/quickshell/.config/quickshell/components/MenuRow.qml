@@ -57,6 +57,10 @@ Rectangle {
         color: root.st.selection_outline
     }
 
+    LockBrackets {
+        shown: root.selected
+    }
+
     Rectangle {
         visible: root.selected && root.st.selection_bar
         width: 2

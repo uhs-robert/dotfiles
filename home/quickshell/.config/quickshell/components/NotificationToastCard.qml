@@ -27,7 +27,7 @@ Rectangle {
         if (!root.notification) return Style.text_dim;
         if (root.notification.urgency === NotificationUrgency.Critical) return Theme.error;
         if (root.notification.urgency === NotificationUrgency.Low) return Style.text_dim;
-        return Theme.theme_primary;
+        return Style.text_primary;
     }
 
     readonly property string urgency_tag: {
@@ -59,10 +59,10 @@ Rectangle {
 
     implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
     radius: Style.radius(8)
-    color: Style.frame_visor ? "transparent" : Style.boxed_cards
+    color: Style.frame_visor || Style.frame_octagon > 0 ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: Style.frame_visor ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor || Style.frame_octagon > 0 ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
@@ -107,11 +107,26 @@ Rectangle {
     }
 
     FrameShade {
-        visible: Style.boxed_cards && Style.frame_shade.a > 0
+        visible: Style.boxed_cards && Style.frame_shade.a > 0 && Style.frame_octagon <= 0
         anchors.fill: parent
         anchors.margins: root.border.width
         top_radius: Math.max(0, root.radius - root.border.width)
         bottom_radius: top_radius
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: Style.frame_octagon > 0
+        sourceComponent: OctagonFrame {
+            cut: Math.min(Style.frame_octagon, 10)
+            edge_color: root.selected ? Style.caret_color : root.accent
+            strut_color: "transparent"
+        }
+    }
+
+    LockBrackets {
+        anchors.margins: 3
+        shown: root.selected
     }
 
     CornerBrackets {
@@ -185,7 +200,7 @@ Rectangle {
 
     // Static scanlines; nothing animates them.
     Repeater {
-        model: Style.scanlines ? Math.ceil(root.height / 3) : 0
+        model: Style.scanlines && Style.frame_octagon <= 0 ? Math.ceil(root.height / 3) : 0
 
         Rectangle {
             required property int index
