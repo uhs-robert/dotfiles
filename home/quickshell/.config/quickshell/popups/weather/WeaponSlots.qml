@@ -29,6 +29,8 @@ Item {
     readonly property real open_inner_w: Math.floor(root.unit * root.open_weight) - 14
     // Grows the open bucket's contents so it fills tall Daily areas instead of sitting content-sized.
     readonly property real bucket_scale: Math.max(1, Math.min(2.2, root.bucket_h / 130))
+    readonly property real closed_scale: Math.max(1, Math.min(1.5, root.bucket_scale))
+    readonly property real stat_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
     readonly property real temps_scale: Math.max(1, Math.min(root.bucket_scale, (root.open_inner_w - 2) / Math.max(1, probe_temps.implicitWidth)))
 
     Temps {
@@ -101,7 +103,7 @@ Item {
                 Rectangle {
                     id: bucket_box
                     width: parent.width
-                    height: slot.open ? root.bucket_h : bucket.implicitHeight + 13
+                    height: root.bucket_h
                     color: slot.open ? Style.selection_bg : "transparent"
                     border.width: slot.open ? 1 : 0
                     border.color: Style.hairline
@@ -121,33 +123,33 @@ Item {
                     }
 
                     ColumnLayout {
-                        id: bucket
-                        x: slot.open ? 7 : 5
+                        visible: slot.open
+                        x: 7
                         y: 6
-                        width: parent.width - x * 2
-                        height: slot.open ? bucket_box.height - 12 : bucket.implicitHeight
-                        spacing: slot.open ? 3 * root.bucket_scale : 3
+                        width: parent.width - 14
+                        height: bucket_box.height - 14
+                        spacing: 3 * root.bucket_scale
 
                         DayIcon {
-                            visible: slot.open
                             code: slot.modelData.code
-                            size: Math.min(22 * root.bucket_scale, root.open_inner_w * 0.45)
+                            size: Math.min(26 * root.bucket_scale, root.open_inner_w * 0.6)
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
                         }
 
                         Temps {
-                            visible: slot.open
                             hi_size: 20 * root.temps_scale
                             lo_size: 14 * root.temps_scale
                             day: slot.modelData
                         }
 
                         Item {
-                            visible: slot.open
                             Layout.fillHeight: true
                         }
 
                         Text {
-                            visible: slot.open
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
                             maximumLineCount: 2
@@ -155,72 +157,78 @@ Item {
                             text: slot.modelData.cond.toUpperCase()
                             color: root.hl
                             font.family: Style.font_family
-                            font.pixelSize: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
+                            font.pixelSize: root.stat_size
                             font.bold: true
                             font.letterSpacing: 1.4
                         }
 
-                        DayIcon {
-                            visible: !slot.open
-                            Layout.alignment: Qt.AlignHCenter
-                            code: slot.modelData.code
-                        }
-
-                        Temps {
-                            visible: !slot.open
-                            Layout.alignment: Qt.AlignHCenter
-                            hi_size: 13
-                            lo_size: 13
-                            day: slot.modelData
-                        }
-
                         Stat {
-                            visible: slot.open
                             label: "RAIN"
                             value: slot.modelData.pop + "%"
                             value_color: Theme.info
-                            font_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
                         }
 
-                        Rectangle {
-                            Layout.fillWidth: true
+                        AmmoBar {
+                            pop: slot.modelData.pop
                             Layout.preferredHeight: Math.round(4 * Math.min(root.bucket_scale, 1.8))
-                            color: Style.meter_off
-
-                            Rectangle {
-                                width: parent.width * Math.max(0, Math.min(100, slot.modelData.pop)) / 100
-                                height: parent.height
-                                color: Theme.info
-                            }
-                        }
-
-                        Text {
-                            visible: !slot.open
-                            Layout.alignment: Qt.AlignHCenter
-                            text: slot.modelData.pop + "%"
-                            color: Theme.info
-                            font.family: Style.number_font
-                            font.pixelSize: Style.font_size - 5
-                            font.bold: true
                         }
 
                         Stat {
-                            visible: slot.open
                             label: "WIND"
                             value: Math.round(slot.modelData.wind_speed_max) + " " + WeatherState.wind_unit()
-                            font_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
                         }
 
                         Stat {
-                            visible: slot.open
                             label: "UV"
                             value: slot.modelData.uv_max.toFixed(1)
-                            font_size: Style.font_size - 6 + Math.round((root.bucket_scale - 1) * 3)
+                        }
+                    }
+
+                    ColumnLayout {
+                        visible: !slot.open
+                        x: 5
+                        y: 8
+                        width: parent.width - 10
+                        height: bucket_box.height - 16
+                        spacing: 3 * root.closed_scale
+
+                        DayIcon {
+                            Layout.alignment: Qt.AlignHCenter
+                            code: slot.modelData.code
+                            size: Math.min(22 * root.bucket_scale, slot.width - 18)
                         }
 
                         Item {
-                            visible: slot.open
                             Layout.fillHeight: true
+                        }
+
+                        FitText {
+                            text: Math.round(slot.modelData.max) + "°"
+                            color: Theme.fg_strong
+                            font.pixelSize: 15 * root.closed_scale
+                            font.bold: true
+                        }
+
+                        FitText {
+                            text: Math.round(slot.modelData.min) + "°"
+                            color: root.hl_t
+                            font.pixelSize: 12 * root.closed_scale
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                        }
+
+                        FitText {
+                            text: slot.modelData.pop + "%"
+                            color: Theme.info
+                            font.pixelSize: (Style.font_size - 5) * Math.min(root.closed_scale, 1.3)
+                            font.bold: true
+                        }
+
+                        AmmoBar {
+                            pop: slot.modelData.pop
+                            Layout.preferredHeight: Math.round(3 * Math.min(root.bucket_scale, 1.8))
                         }
                     }
                 }
@@ -288,7 +296,7 @@ Item {
         property string label: ""
         property string value: ""
         property color value_color: Theme.fg_strong
-        property real font_size: Style.font_size - 6
+        property real font_size: root.stat_size
         Layout.fillWidth: true
         spacing: 4
 
@@ -311,5 +319,26 @@ Item {
             font.pixelSize: stat.font_size + 1
             font.bold: true
         }
+    }
+
+    component AmmoBar: Rectangle {
+        id: ammo
+        property real pop: 0
+        Layout.fillWidth: true
+        color: Style.meter_off
+
+        Rectangle {
+            width: ammo.width * Math.max(0, Math.min(100, ammo.pop)) / 100
+            height: ammo.height
+            color: Theme.info
+        }
+    }
+
+    component FitText: Text {
+        Layout.fillWidth: true
+        horizontalAlignment: Text.AlignHCenter
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: 8
+        font.family: Style.number_font
     }
 }
