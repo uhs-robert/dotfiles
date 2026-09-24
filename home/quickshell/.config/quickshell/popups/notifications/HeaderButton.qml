@@ -19,9 +19,9 @@ Rectangle {
     implicitHeight: row.implicitHeight + 16
     radius: Style.pill_chips ? height / 2 : Style.radius(8)
     readonly property bool cut: Style.key_cut > 0
-    color: root.cut ? "transparent" : root.active ? Theme.theme_primary : mouse_area.pressed ? Qt.darker(Theme.bg_surface, 1.3) : mouse_area.containsMouse ? Theme.ui_visual_bg : Style.pill_chips ? "transparent" : Theme.bg_surface
+    color: root.cut ? "transparent" : root.active ? Theme.theme_primary : mouse_area.pressed ? Qt.darker(Theme.bg_surface, 1.3) : mouse_area.containsMouse ? Theme.ui_visual_bg : Style.pill_chips ? "transparent" : Style.tab_outline.a > 0 ? Style.tab_active_bg : Theme.bg_surface
     border.width: root.cut ? 0 : 1
-    border.color: Style.pill_chips ? Style.chip_border : Theme.ui_border
+    border.color: Style.pill_chips || Style.tab_outline.a > 0 ? Style.chip_border : Theme.ui_border
 
     CutBox {
         visible: root.cut
@@ -50,8 +50,8 @@ Rectangle {
             font.bold: root.active || root.cut
             font.family: Style.font_family
             font.pixelSize: Style.font_size - 2
-            font.capitalization: Style.tab_caps ? Font.AllUppercase : Font.MixedCase
-            font.letterSpacing: Style.tab_caps ? Style.label_spacing * 0.6 : 0
+            font.capitalization: Style.tab_caps || Style.caps_tracking > 0 ? Font.AllUppercase : Font.MixedCase
+            font.letterSpacing: Style.caps_tracking > 0 ? Style.caps_tracking * 0.7 : Style.tab_caps ? Style.label_spacing * 0.6 : 0
         }
 
         Rectangle {

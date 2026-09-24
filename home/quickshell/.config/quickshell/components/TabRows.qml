@@ -28,8 +28,8 @@ ColumnLayout {
         font.family: root.st.label_font_family
         font.pixelSize: root.font_size
         font.bold: true
-        font.capitalization: root.st.tab_caps ? Font.AllUppercase : Font.MixedCase
-        font.letterSpacing: root.st.tab_caps ? root.st.label_spacing : 0
+        font.capitalization: root.st.tab_caps || root.st.caps_tracking > 0 ? Font.AllUppercase : Font.MixedCase
+        font.letterSpacing: root.st.caps_tracking > 0 ? root.st.caps_tracking * (root.chips ? 0.3 : 1) : root.st.tab_caps ? root.st.label_spacing : 0
     }
 
     FontMetrics {

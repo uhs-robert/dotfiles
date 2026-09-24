@@ -11,7 +11,7 @@ Item {
     property color color: Theme.theme_primary
     property string font_family: Style.bar_font_family
     property int glyph_size: Theme.glyph_size
-    // hearts, pixel (stepped, integer motion) or lcd (pixel-styled, then the glyph blinks twice at the end).
+    // hearts, pixel (stepped, integer motion), lcd (pixel-styled, then the glyph blinks twice at the end) or hev_pickup.
     property string mode: Style.done_anim
     // How far the hearts climb; defaults to the window's top edge.
     property real rise: 12
@@ -30,9 +30,13 @@ Item {
 
     readonly property bool pixel: root.mode === "pixel"
     readonly property bool lcd: root.mode === "lcd"
+    // A health pickup: the glyph and count flash bright and a + rises into the pickup history.
+    readonly property bool hev: root.mode === "hev_pickup"
+    // Drawn over the glyph row so its bright count covers the module's own.
+    readonly property bool over: root.hev
     // lcd reuses the pixel stepping/snapping machinery, just on a coarser refresh.
     readonly property bool stepped: root.pixel || root.lcd
-    readonly property int duration: (root.lcd ? 1300 : 1100) - (root.nudge ? 400 : 0)
+    readonly property int duration: root.hev ? (root.nudge ? 700 : 1000) : (root.lcd ? 1300 : 1100) - (root.nudge ? 400 : 0)
     property real elapsed
     readonly property real t: root.pixel ? Math.floor(root.elapsed / 80) * 80 : root.lcd ? Math.floor(root.elapsed / 100) * 100 : root.elapsed
     // lcd's final blink phase fills the last 200ms, once the hearts are done.
@@ -81,7 +85,7 @@ Item {
 
     Rectangle {
         readonly property real p: root.phase(0, 600)
-        visible: p > 0 && p < 1
+        visible: !root.hev && p > 0 && p < 1
         width: root.stepped ? 2 * Math.round((root.ring_min + (root.ring_max - root.ring_min) * p) / 2) : root.ring_min + (root.ring_max - root.ring_min) * root.out_quad(p)
         height: width
         x: -width / 2
@@ -94,7 +98,7 @@ Item {
     }
 
     Repeater {
-        model: root.nudge ? [{ dx: 0, delay: 100 }] : [{ dx: -3, delay: 120 }, { dx: 3, delay: 260 }, { dx: 0, delay: 400 }]
+        model: root.hev ? [] : root.nudge ? [{ dx: 0, delay: 100 }] : [{ dx: -3, delay: 120 }, { dx: 3, delay: 260 }, { dx: 0, delay: 400 }]
 
         Item {
             id: heart
@@ -134,16 +138,62 @@ Item {
         }
     }
 
+    readonly property bool hev_flash: root.hev && root.elapsed >= 80 && root.elapsed < root.duration - 300
+    readonly property real hev_fade: root.hev && root.elapsed >= root.duration - 300 ? 0.75 + 0.25 * root.phase(root.duration - 150, 150) : 1
+
     Text {
         x: -width / 2
         y: -height / 2
         text: root.glyph
-        color: root.color
+        color: root.hev_flash ? Theme.fg_strong : root.color
+        opacity: root.hev_fade
         font.family: root.font_family
         font.pixelSize: root.glyph_size
-        style: Style.bar_text_style
-        styleColor: Style.bar_glow_color
-        scale: root.pop_scale
+        style: root.hev_flash ? Text.Outline : Style.bar_text_style
+        styleColor: root.hev_flash ? Qt.alpha(Theme.ok, 0.7) : Style.bar_glow_color
+        scale: root.hev ? 1 : root.pop_scale
         visible: !root.lcd || root.elapsed < root.blink_start || root.blink_step % 2 === 1
+    }
+
+    Text {
+        visible: root.hev && !!root.slot && root.slot.badge
+        x: root.slot ? root.slot.badge_x : 0
+        y: root.slot ? root.slot.badge_y : 0
+        text: root.slot ? root.slot.count : ""
+        color: root.hev_flash ? Theme.fg_strong : root.color
+        opacity: root.hev_fade
+        font.family: root.font_family
+        font.pixelSize: Style.bar_font_size - 3
+        font.bold: true
+        style: root.hev_flash ? Text.Outline : Style.bar_text_style
+        styleColor: root.hev_flash ? Qt.alpha(Theme.ok, 0.7) : Style.bar_glow_color
+    }
+
+    // The pickup +, kept inside the glyph's slot and the bar's height.
+    Item {
+        readonly property real p: root.phase(250, 450)
+        readonly property real size: 7
+        readonly property real start_y: -root.glyph_size / 2 + 1
+        readonly property real end_y: Math.max(-root.room + 0.5, start_y - 6)
+        visible: root.hev && root.elapsed >= 250
+        width: size
+        height: size
+        x: Math.round(Math.min(root.slot ? root.slot.right - 1 : root.glyph_half + 5, (root.slot ? root.slot.content_right : root.glyph_half) + 1 + size / 2) - size)
+        y: Math.round(start_y + (end_y - start_y) * root.out_quad(p))
+        opacity: (root.nudge ? 0.7 : 1) * (p < 1 ? 1 : 0.45 * (1 - root.phase(700, Math.max(1, root.duration - 700))))
+
+        Rectangle {
+            x: 2.5
+            width: 2
+            height: parent.height
+            color: Theme.ok
+        }
+
+        Rectangle {
+            y: 2.5
+            width: parent.width
+            height: 2
+            color: Theme.ok
+        }
     }
 }
