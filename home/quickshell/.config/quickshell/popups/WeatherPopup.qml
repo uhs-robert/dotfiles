@@ -202,7 +202,7 @@ Popup {
                 Layout.fillWidth: true
                 active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header })[Style.weather_header] || ring_header
+                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, status: status_header })[Style.weather_header] || ring_header
 
                 Component {
                     id: spec_header
@@ -252,6 +252,13 @@ Popup {
                 Component {
                     id: scan_header
                     ScanHeader {}
+                }
+
+                Component {
+                    id: status_header
+                    StatusPanel {
+                        onAlert_clicked: root.set_tab(root.tabs.length - 1)
+                    }
                 }
 
                 Component {
@@ -333,11 +340,12 @@ Popup {
                 }
             }
 
-            // --- Active-alert banner ---
+            // --- Active-alert banner; the status header carries its own ---
             Rectangle {
+                readonly property bool shown: root.has_alerts && Style.weather_header !== "status"
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.has_alerts ? 28 : 0
-                visible: root.has_alerts
+                Layout.preferredHeight: shown ? 28 : 0
+                visible: shown
                 radius: Style.pill_chips ? height / 2 : Style.radius(4)
                 readonly property color alert_color: root.mission || root.threat ? Theme.theme_label : WeatherState.alerts.length > 0 ? WeatherState.alert_color(WeatherState.alerts[0].severity) : Style.text_dim
                 color: Style.boxed_cards ? Qt.alpha(alert_color, 0.1) : Theme.bg_surface
