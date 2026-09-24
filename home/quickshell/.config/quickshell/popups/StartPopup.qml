@@ -11,12 +11,12 @@ Popup {
 
     popup_name: "start"
     preferred_width: 180
-    footer_hint: root.confirm ? "y/Enter confirm · n/Esc back" : "j/k move · gg/G first/last · Enter run · a/s/l/o/r/p pick · q close"
+    footer_hint: root.confirm ? "y/Enter confirm · n/Esc back" : "j/k move · gg/G first/last · Enter run · 1-" + root.actions.length + " pick · q close"
     body_height: content.implicitHeight + 24
     jumps_enabled: !root.confirm
 
     readonly property var actions: ["Apps", "Style", "Lock", "Logout", "Reboot", "Power Off"]
-    readonly property var keys: ["a", "s", "l", "o", "r", "p"]
+    readonly property var keys: root.actions.map((a, i) => String(i + 1))
     readonly property var glyphs: ["󰣇", "󰏘", "󰌾", "󰍃", "󰜉", "󰐥"]
     readonly property var glyph_colors: [Theme.green, Theme.theme_secondary, root.st.text_fg, Theme.info, Theme.warning, Theme.theme_label]
 
