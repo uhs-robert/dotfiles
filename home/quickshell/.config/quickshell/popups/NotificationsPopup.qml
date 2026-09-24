@@ -110,7 +110,7 @@ Popup {
 
     function move_selected(delta) {
         if (root.entry_rows.length === 0) return;
-        root.selected = Math.max(0, Math.min(root.entry_rows.length - 1, root.selected + delta));
+        root.selected = root.wrap_index(root.selected, delta, 0, root.entry_rows.length);
         root.scroll_to_selected();
     }
 

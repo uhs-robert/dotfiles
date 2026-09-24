@@ -55,6 +55,12 @@ PanelWindow {
         if (sub_views.length > 0) current_sub = (current_sub + delta + sub_views.length) % sub_views.length;
     }
 
+    // Wraps a j/k list index by delta within `count` items starting at `min` (e.g. min -1 for a switch row above the list).
+    function wrap_index(i, delta, min, count) {
+        if (count <= 0) return min;
+        return ((i - min + delta) % count + count) % count + min;
+    }
+
     function is_help_key(event) {
         return event.key === Qt.Key_Question || event.text === "?";
     }

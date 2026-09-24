@@ -101,7 +101,7 @@ Popup {
 
     function move_selected(delta) {
         if (root.sessions.length === 0) return;
-        root.selected = (root.selected + delta + root.sessions.length) % root.sessions.length;
+        root.selected = root.wrap_index(root.selected, delta, 0, root.sessions.length);
         session_list.positionViewAtIndex(root.selected, ListView.Contain);
     }
 

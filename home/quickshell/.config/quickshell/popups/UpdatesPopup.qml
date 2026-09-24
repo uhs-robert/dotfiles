@@ -34,7 +34,7 @@ Popup {
 
     function move_selected(delta) {
         if (root.current_list.length === 0) return;
-        root.selected = Math.max(0, Math.min(root.current_list.length - 1, root.selected + delta));
+        root.selected = root.wrap_index(root.selected, delta, 0, root.current_list.length);
         row_list.positionViewAtIndex(root.selected, ListView.Contain);
     }
 

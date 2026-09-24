@@ -96,7 +96,7 @@ Popup {
         if (jump) {
             root.alert_cursor = dir < 0 ? 0 : n - 1;
         } else if (WeatherState.alerts.length > 1) {
-            root.alert_cursor = Math.max(0, Math.min(n - 1, root.alert_cursor + dir));
+            root.alert_cursor = root.wrap_index(root.alert_cursor, dir, 0, WeatherState.alerts.length);
         } else if (alerts_view) {
             alerts_view.scroll_detail(dir);
         }
