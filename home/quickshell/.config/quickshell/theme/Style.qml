@@ -1191,7 +1191,7 @@ Singleton {
                 bar_pill_square: true,
                 bar_hover_bg: Qt.alpha(Theme.theme_primary_light, 0.24)
             }),
-            // Half-Life's VGUI windows and HEV HUD: translucent panels on a primary hairline, Exo 2 text, Chakra Petch readouts.
+            // Half-Life's VGUI windows and HEV HUD: dark panels on a primary hairline, Exo 2 text, Chakra Petch readouts.
             "halflife": (() => {
                 const hl = Theme.theme_primary;
                 const hl_t = Qt.alpha(hl, 0.72);
@@ -1212,7 +1212,7 @@ Singleton {
                     font_size: Theme.popup_font_size + 2,
                     number_font: "Chakra Petch",
                     mono_font: "Chakra Petch",
-                    frame_color: Qt.alpha(Theme.bg_core, 0.97),
+                    frame_color: Theme.bg_core,
                     frame_border_color: hl_l,
                     accent_color: hl,
                     accent_height: 1,
@@ -1267,10 +1267,7 @@ Singleton {
                     bar_workspace_idle: hl_f,
                     bar_workspace_ring: hl_d,
                     bar_pill_square: true,
-                    bar_hover_bg: hl_d,
-                    small: {
-                        frame_color: Qt.alpha(Theme.bg_core, 0.96)
-                    }
+                    bar_hover_bg: hl_d
                 });
             })(),
             // A backlit Game Boy screen in four shades of the primary; `small` popups sit in the handheld's shell.
