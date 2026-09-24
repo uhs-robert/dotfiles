@@ -4,14 +4,14 @@ import QtQuick.Layouts
 import "../../theme"
 import "../../services"
 
-// A Dragon Quest encounter: the condition appears as the enemy, with temperature and humidity as its HP and MP.
+// A Dragon Quest encounter: the condition appears as the enemy, with its stats in the status line.
 Item {
     id: root
 
     readonly property var cur: WeatherState.current
     readonly property bool has: WeatherState.has_data && !!root.cur
     readonly property int sprite: root.width >= 300 ? 48 : 32
-    readonly property var stats: root.has ? [["HP", Math.round(root.cur.temp)], ["MP", root.cur.humidity], ["FEEL", Math.round(root.cur.feels)], ["WIND", Math.round(root.cur.wind_speed)]] : []
+    readonly property var stats: root.has ? [["TEMP", Math.round(root.cur.temp) + "°"], ["HUM", root.cur.humidity + "%"], ["FEEL", Math.round(root.cur.feels) + "°"], ["WIND", Math.round(root.cur.wind_speed)]] : []
 
     implicitHeight: body.implicitHeight + 30
 
