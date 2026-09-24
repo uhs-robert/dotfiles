@@ -14,11 +14,16 @@ Item {
     property int glyph_size: Theme.glyph_size
     property string mode: Style.wait_anim
     property bool nudge: false
+    // The glyph's free slot from the module: left/right reach from the centre, badge edges, opened room.
+    property var slot: null
 
     signal finished()
 
     // These redraw the glyph themselves, so the module hides the real one while they play.
     readonly property bool hides_glyph: root.mode === "rumble" || root.mode === "transmission"
+    // Drawn beneath the glyph row so the glyph and its count badge stay on top.
+    readonly property bool under: ["pressanykey", "rumble", "transmission", "scan", "comms", "ping", "orders"].indexOf(root.mode) !== -1
+    readonly property bool text_entry: !root.nudge && ["pressanykey", "scan", "comms", "orders"].indexOf(root.mode) !== -1
     readonly property real strength: root.nudge ? 0.6 : 1
     readonly property real half: root.glyph_size / 2
     readonly property var durations: ({ bubble: [1200, 700], cursor: [1200, 600], pressanykey: [1400, 700], advance: [1400, 600], hand: [1200, 600], alert: [1000, 600], rumble: [1000, 450], transmission: [1200, 500], scan: [1300, 700], comms: [1200, 500], ping: [1400, 900], orders: [1400, 600] })
@@ -29,6 +34,18 @@ Item {
     property real room_up: 16
     property real room_down: 16
     readonly property real room: Math.min(root.room_up, root.room_down)
+
+    readonly property real glyph_half: root.slot ? root.slot.glyph_half : root.half
+    readonly property real room_left: root.slot ? root.slot.left : root.half + 5
+    readonly property real room_right: root.slot ? root.slot.right : root.half + 5
+    readonly property real base_right: root.room_right - (root.slot ? root.slot.open : 0)
+    readonly property real content_right: root.slot ? root.slot.content_right : root.glyph_half
+    readonly property real badge_bottom: root.slot && root.slot.badge ? root.slot.badge_bottom : -root.room_up
+
+    // Text cues ask the module to open room for their label, and give it back before they end.
+    property real label_width: 0
+    readonly property real want_right: root.text_entry && root.elapsed < root.duration - 260 ? root.label_width + 6 : 0
+    readonly property real label_fade: 1 - root.phase(root.duration - 260, 200)
 
     function phase(start, length) {
         return Math.max(0, Math.min(1, (root.elapsed - start) / length));
@@ -62,6 +79,17 @@ Item {
         onFinished: root.finished()
     }
 
+    // The room opened right of the glyph and its badge; children use window-relative y (0 is the top edge).
+    component Side: Item {
+        x: root.content_right + 4
+        y: -root.room_up
+        width: Math.max(0, root.room_right - root.content_right - 5)
+        height: root.room_up + root.room_down
+        clip: true
+        visible: !root.nudge
+        opacity: root.label_fade
+    }
+
     Loader {
         sourceComponent: ({ bubble: bubble_c, cursor: cursor_c, pressanykey: pressanykey_c, advance: advance_c, hand: hand_c, alert: alert_c, rumble: rumble_c, transmission: transmission_c, scan: scan_c, comms: comms_c, ping: ping_c, orders: orders_c })[root.mode] || bubble_c
     }
@@ -72,12 +100,13 @@ Item {
         Item {
             id: bubble
             readonly property real base: root.nudge ? 50 : 250
-            x: root.half - 1
-            y: Math.max(-root.room_up, -root.half - 7)
-            width: 17
-            height: 10
-            transformOrigin: Item.BottomLeft
-            scale: root.nudge ? 1 : root.out_back(root.phase(0, 220))
+            readonly property real grow: root.nudge ? 1 : root.out_back(root.phase(0, 220))
+            width: Math.min(15, root.room_left + 1)
+            height: 9
+            x: 2 - width
+            y: Math.max(-root.room_up + 1, -root.half - 5)
+            transformOrigin: Item.BottomRight
+            scale: Math.min(bubble.grow, (root.room_left + 2) / width, (y + height + root.room_up) / height)
             opacity: root.tail * (root.nudge ? 0.75 : 1)
 
             Rectangle {
@@ -94,10 +123,10 @@ Item {
                     fillColor: Theme.bg_core
                     strokeColor: root.color
                     strokeWidth: 1
-                    startX: 3
+                    startX: bubble.width - 3
                     startY: bubble.height - 1.5
-                    PathLine { x: 1; y: bubble.height + 3 }
-                    PathLine { x: 7; y: bubble.height - 1.5 }
+                    PathLine { x: bubble.width - 1; y: bubble.height + 3 }
+                    PathLine { x: bubble.width - 7; y: bubble.height - 1.5 }
                 }
             }
 
@@ -106,8 +135,8 @@ Item {
 
                 Rectangle {
                     required property int index
-                    x: 3.5 + index * 4
-                    y: 4 - (root.nudge ? 1.5 : 2.5) * Math.sin(Math.PI * root.phase(bubble.base + index * 120, 300))
+                    x: bubble.width / 2 - 5 + index * 4
+                    y: 3.5 - (root.nudge ? 1.5 : 2) * Math.sin(Math.PI * root.phase(bubble.base + index * 120, 300))
                     width: 2
                     height: 2
                     radius: 1
@@ -120,13 +149,13 @@ Item {
     Component {
         id: cursor_c
 
-        Text {
-            x: root.half + 2
-            y: -height / 2
-            text: "▌"
+        Rectangle {
+            readonly property real foot: Math.min(root.room_down - 1, root.half)
+            x: root.glyph_half + 1
+            y: Math.max(root.badge_bottom + 1, root.half - root.glyph_size * 0.6)
+            width: Math.max(2, Math.min(5, root.room_right - root.glyph_half - 2))
+            height: foot - y
             color: Theme.theme_cursor
-            font.family: root.font_family
-            font.pixelSize: root.glyph_size
             opacity: root.strength
             visible: root.step(150) % 2 === 0
         }
@@ -136,31 +165,42 @@ Item {
         id: pressanykey_c
 
         Item {
+            id: pak
             readonly property int frame: root.step(50)
             readonly property bool lit: frame >= 8 || [1, 0, 1, 1, 0, 1, 0, 1][frame] === 1
+            readonly property real x0: -Math.min(root.room_left - 1, root.glyph_half + 2)
+            readonly property real x1: Math.min(root.room_right - 1, root.nudge ? root.glyph_half + 2 : root.content_right + 6 + label.width)
 
-            Rectangle {
-                x: -root.half - 2
-                y: label.y - 1
-                width: label.x + label.width + 3 - x
-                height: label.height + 2
-                radius: 2
-                color: root.color
-                opacity: root.nudge ? 0 : 0.35 * (1 - root.phase(0, 350))
+            Binding {
+                target: root
+                property: "label_width"
+                value: label.implicitWidth
             }
 
-            Text {
-                id: label
-                x: root.half + 4
+            Rectangle {
+                x: pak.x0
                 y: -height / 2
-                text: "PRESS ANY KEY"
+                width: pak.x1 - pak.x0
+                height: Math.min(root.glyph_size + 2, 2 * root.room - 2)
+                radius: 2
                 color: root.color
-                font.family: "VT323"
-                font.pixelSize: 13
-                style: Style.bar_text_style
-                styleColor: Style.bar_glow_color
-                visible: parent.lit
-                opacity: root.tail * root.strength
+                visible: !root.nudge || pak.lit
+                opacity: root.nudge ? 0.3 * (1 - root.phase(0, 500)) : 0.35 * (1 - root.phase(0, 350))
+            }
+
+            Side {
+                Text {
+                    id: label
+                    y: root.room_up - height / 2
+                    text: "PRESS ANY KEY"
+                    color: root.color
+                    font.family: "VT323"
+                    font.pixelSize: 13
+                    style: Style.bar_text_style
+                    styleColor: Style.bar_glow_color
+                    visible: pak.lit
+                    opacity: root.tail
+                }
             }
         }
     }
@@ -169,8 +209,8 @@ Item {
         id: advance_c
 
         Item {
-            x: Math.round(root.half - 2)
-            y: Math.round(Math.min(root.room_down - 7, root.half - 4 + (root.step(200) % 2 ? 2 : 0)))
+            x: Math.round(Math.min(root.glyph_half - 2, root.room_right - 10))
+            y: Math.round(Math.min(root.room_down - 6, root.half - 4 + (root.step(200) % 2 ? 2 : 0)))
             opacity: root.strength
 
             Repeater {
@@ -193,8 +233,8 @@ Item {
 
         Item {
             readonly property var fills: [[0, 2, 5, 5], [5, 1, 6, 2], [5, 4, 3, 1], [5, 6, 2, 1], [1, 1, 3, 1]]
-            x: -Math.round(root.half) - 13 + (root.step(150) % 2 ? 2 : 0)
-            y: -4
+            x: Math.round(-root.room_left + 2 + (root.step(150) % 2 ? 2 : 0))
+            y: Math.round(Math.min(root.room_down - 9, root.half - 8))
             opacity: root.strength
 
             Repeater {
@@ -230,13 +270,13 @@ Item {
 
         Text {
             readonly property real p: root.phase(0, 180)
-            readonly property real peak: root.nudge ? 1.2 : 1.5
-            x: root.half - width / 2 - 1
-            y: Math.max(-root.room_up, -root.half - height * 0.6)
+            readonly property real peak: root.nudge ? 1.15 : 1.3
+            x: Math.max(-root.room_left + 1 + width * (peak - 1) / 2, -root.glyph_half + 1 - width / 2)
+            y: Math.max(-root.room_up + height * (peak - 1), -root.half - height * 0.6)
             text: "!"
             color: Theme.theme_label
             font.family: root.font_family
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.bold: true
             style: Text.Outline
             styleColor: Theme.bg_shadow
@@ -252,7 +292,8 @@ Item {
         Text {
             readonly property var bursts: root.nudge ? [[0, 420]] : [[0, 380], [560, 940]]
             readonly property bool shaking: bursts.some(b => root.elapsed >= b[0] && root.elapsed < b[1])
-            x: -width / 2 + (shaking ? (root.step(35) % 2 ? 1 : -1) * (root.nudge ? 1 : 2) : 0)
+            readonly property real amp: Math.max(0, Math.min(root.nudge ? 1 : 2, Math.min(root.room_left, root.room_right) - root.glyph_half - 1))
+            x: -width / 2 + (shaking ? (root.step(35) % 2 ? 1 : -1) * amp : 0)
             y: -height / 2
             text: root.glyph
             color: root.color
@@ -267,8 +308,11 @@ Item {
         id: transmission_c
 
         Item {
+            id: transmission
             readonly property int frame: root.step(100)
             readonly property int blinks: root.nudge ? 2 : 5
+            readonly property real foot: Math.min(root.room_down - 1, root.half)
+            readonly property real tall: Math.max(3, Math.min(6, foot - root.badge_bottom - 1))
 
             Text {
                 x: -width / 2
@@ -279,7 +323,7 @@ Item {
                 font.pixelSize: root.glyph_size
                 style: Style.bar_text_style
                 styleColor: Style.bar_glow_color
-                visible: parent.frame % 2 === 1 || parent.frame >= parent.blinks * 2
+                visible: transmission.frame % 2 === 1 || transmission.frame >= transmission.blinks * 2
             }
 
             Repeater {
@@ -287,10 +331,10 @@ Item {
 
                 Rectangle {
                     required property int index
-                    x: Math.round(root.half) + 2 + index * 3
-                    y: 5 - height
+                    x: Math.round(Math.min(root.glyph_half + 1, root.room_right - 9)) + index * 3
+                    y: Math.round(transmission.foot) - height
                     width: 2
-                    height: 3 + 2 * index
+                    height: Math.round(transmission.tall * (index + 1) / 3)
                     color: root.color
                     visible: root.step(100) >= index * 2 + 1
                 }
@@ -298,34 +342,50 @@ Item {
         }
     }
 
+    // Corner brackets hug the glyph and its badge, tightened to the slot; `grow` widens every side.
+    component Frame: CornerBrackets {
+        property real grow: 0
+        readonly property real x0: -Math.min(root.room_left - 1, root.glyph_half + 2 + grow)
+        readonly property real x1: Math.min(root.base_right - 1, root.content_right + 2 + grow)
+        readonly property real y0: -Math.min(root.room_up - 1, root.half + 2 + grow)
+        readonly property real y1: Math.min(root.room_down - 1, root.half + 2 + grow)
+        x: x0
+        y: y0
+        width: x1 - x0
+        height: y1 - y0
+        inset: 0
+        thickness: 1.5
+        all_corners: true
+    }
+
     Component {
         id: scan_c
 
         Item {
-            readonly property real w: root.glyph_size + 6 + (root.nudge ? 4 : 10) * (1 - root.out_quad(root.phase(0, 350)))
-            readonly property real h: Math.min(w, 2 * root.room - 2)
             opacity: root.tail * root.strength * (root.elapsed < 350 ? 1 : 0.55 + 0.45 * Math.cos((root.elapsed - 350) / 300 * 2 * Math.PI))
 
-            CornerBrackets {
-                x: -parent.w / 2
-                y: -parent.h / 2
-                width: parent.w
-                height: parent.h
-                color: root.color
-                inset: 0
-                arm: 4
-                thickness: 1.5
-                all_corners: true
+            Binding {
+                target: root
+                property: "label_width"
+                value: scan_label.implicitWidth
             }
 
-            Text {
-                visible: !root.nudge
-                x: parent.w / 2 + 2
-                y: parent.h / 2 - height + 1
-                text: "SCAN"
+            Frame {
+                id: scan_frame
+                grow: (root.nudge ? 2 : 5) * (1 - root.out_quad(root.phase(0, 350)))
                 color: root.color
-                font.family: Style.mono_font
-                font.pixelSize: 8
+                arm: 4
+            }
+
+            Side {
+                Text {
+                    id: scan_label
+                    y: root.room_up + scan_frame.y1 - height + 1
+                    text: "SCAN"
+                    color: root.color
+                    font.family: Style.mono_font
+                    font.pixelSize: 8
+                }
             }
         }
     }
@@ -334,50 +394,53 @@ Item {
         id: comms_c
 
         Item {
-            readonly property real w: root.glyph_size + 6
-            readonly property real h: Math.min(w, 2 * root.room - 2)
             opacity: root.tail * root.strength
 
-            CornerBrackets {
-                x: -parent.w / 2
-                y: -parent.h / 2
-                width: parent.w
-                height: parent.h
+            Binding {
+                target: root
+                property: "label_width"
+                value: comms_label.implicitWidth
+            }
+
+            Frame {
+                id: comms_frame
                 color: Theme.theme_label
-                inset: 0
                 arm: 5
-                thickness: 1.5
-                all_corners: true
                 visible: root.step(120) % 2 === 0
             }
 
-            Text {
-                visible: !root.nudge
-                x: parent.w / 2 + 2
-                y: parent.h / 2 - height + 1
-                text: "COMMS"
-                color: Theme.theme_label
-                font.family: Style.mono_font
-                font.pixelSize: 8
+            Side {
+                Text {
+                    id: comms_label
+                    y: root.room_up + comms_frame.y1 - height + 1
+                    text: "COMMS"
+                    color: Theme.theme_label
+                    font.family: Style.mono_font
+                    font.pixelSize: 8
+                }
             }
         }
     }
+
+    // Rings grow from inside the glyph out to the nearer slot edge, and to the window's edges.
+    readonly property real ping_rx: Math.max(4, Math.min(root.room_left, root.base_right) - 1)
+    readonly property real ping_ry: Math.max(4, root.room - 1)
 
     component Ring: ShapePath {
         id: ring
         property int delay
         property bool live: true
         readonly property real p: root.phase(delay, root.nudge ? 800 : 1000)
-        readonly property real grow: root.out_quad(p)
+        readonly property real grow: 0.35 + 0.65 * root.out_quad(p)
         fillColor: "transparent"
         strokeColor: Qt.alpha(root.color, live && p > 0 && p < 1 ? 0.8 * root.strength * (1 - p) : 0)
         strokeWidth: 1
 
         PathAngleArc {
-            centerX: 80
-            centerY: 40
-            radiusX: root.half + root.glyph_size * 1.4 * ring.grow
-            radiusY: Math.min(root.half + root.glyph_size * 0.6 * ring.grow, root.room - 1)
+            centerX: root.ping_rx + 1
+            centerY: root.ping_ry + 1
+            radiusX: root.ping_rx * ring.grow
+            radiusY: root.ping_ry * ring.grow
             startAngle: 0
             sweepAngle: 360
         }
@@ -387,10 +450,10 @@ Item {
         id: ping_c
 
         Shape {
-            x: -80
-            y: -40
-            width: 160
-            height: 80
+            x: -root.ping_rx - 1
+            y: -root.ping_ry - 1
+            width: 2 * root.ping_rx + 2
+            height: 2 * root.ping_ry + 2
             preferredRendererType: Shape.CurveRenderer
 
             Ring { delay: 0 }
@@ -402,43 +465,50 @@ Item {
         id: orders_c
 
         Item {
+            id: orders
             readonly property int frame: root.step(140)
             readonly property bool lit: frame % 2 === 0 && frame < (root.nudge ? 2 : 6)
             readonly property color amber: Theme.bright_yellow
 
+            Binding {
+                target: root
+                property: "label_width"
+                value: orders_label.implicitWidth
+            }
+
             Rectangle {
-                visible: parent.lit
-                x: -root.half - 3
+                readonly property real x1: Math.min(root.base_right - 1, root.glyph_half + 3)
+                visible: orders.lit
+                x: -Math.min(root.room_left - 1, root.glyph_half + 3)
                 y: -height / 2
-                width: root.glyph_size + 6
+                width: x1 - x
                 height: Math.min(root.glyph_size + 4, 2 * root.room - 2)
                 radius: 3
-                color: Qt.alpha(parent.amber, 0.35 * root.strength)
-                border.color: parent.amber
+                color: Qt.alpha(orders.amber, 0.35 * root.strength)
+                border.color: orders.amber
                 border.width: 1
             }
 
-            Text {
-                id: orders_label
-                visible: !root.nudge
-                x: root.half + 4
-                y: -height + 2
-                text: "AWAITING ORDERS"
-                color: parent.amber
-                font.family: Style.mono_font
-                font.pixelSize: 8
-                opacity: root.tail
-            }
+            Side {
+                Text {
+                    id: orders_label
+                    y: root.room_up - height + 2
+                    text: "AWAITING ORDERS"
+                    color: orders.amber
+                    font.family: Style.mono_font
+                    font.pixelSize: 8
+                    opacity: root.tail
+                }
 
-            Hazard {
-                visible: parent.lit
-                x: root.half + 4
-                y: 4
-                width: root.nudge ? 20 : orders_label.width
-                height: 4
-                stripe: Style.hazard.a > 0 ? Style.hazard : parent.amber
-                tile: 6
-                line: 2
+                Hazard {
+                    visible: orders.lit
+                    y: root.room_up + 4
+                    width: orders_label.width
+                    height: 4
+                    stripe: Style.hazard.a > 0 ? Style.hazard : orders.amber
+                    tile: 6
+                    line: 2
+                }
             }
         }
     }

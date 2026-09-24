@@ -95,6 +95,7 @@ Singleton {
                         root.inject_wait(runs);
                         waiting = Math.max(waiting, 1);
                     }
+                    if (root.debug_done) root.inject_done(runs);
                     root.runs = runs;
                     let wait_rose;
                     if (typeof data.waiting_seq === "number") {
@@ -104,7 +105,7 @@ Singleton {
                         wait_rose = root.primed && waiting > root.waiting_count;
                     }
                     root.waiting_count = waiting;
-                    const done = root.count("DONE");
+                    const done = root.debug_done ? Math.max(root.count("DONE"), 1) : root.count("DONE");
                     const was_running = root.running_count;
                     let rose;
                     if (typeof data.finished_seq === "number") {
@@ -129,12 +130,21 @@ Singleton {
         }
     }
 
-    // TEMP: simulates a session entering or leaving waiting; remove before the PR.
+    // TEMP: simulates a session entering or leaving waiting or done; remove before the PR.
     property bool debug_wait: false
+    property bool debug_done: false
 
     function inject_wait(runs) {
         if (!runs.some(r => r.text.indexOf(root.wait_glyph) !== -1))
-            runs.unshift({ text: root.wait_glyph, color: Theme.error, rise: 0, debug: true });
+            runs.unshift({ text: root.wait_glyph, color: Theme.error, rise: 0, debug: "wait" });
+    }
+
+    // Sits right after the waiting group (past its count) so the two cues are neighbours.
+    function inject_done(runs) {
+        if (runs.some(r => r.text.indexOf(root.done_glyph) !== -1)) return;
+        let i = runs.findIndex(r => r.text.indexOf(root.wait_glyph) !== -1);
+        if (i !== -1 && i + 1 < runs.length && /^\s*\d+\s*$/.test(runs[i + 1].text)) i++;
+        runs.splice(i + 1, 0, { text: root.done_glyph, color: Theme.ok, rise: 0, debug: "done" });
     }
 
     IpcHandler {
@@ -151,8 +161,23 @@ Singleton {
 
         function wait_off(): void {
             root.debug_wait = false;
-            root.runs = root.runs.filter(r => !r.debug);
+            root.runs = root.runs.filter(r => r.debug !== "wait");
             root.waiting_count = root.waiting_in(root.runs);
+        }
+
+        function done(): void {
+            root.debug_done = true;
+            const runs = root.runs.slice();
+            root.inject_done(runs);
+            root.runs = runs;
+            root.done_count = Math.max(root.done_count, 1);
+            root.finished();
+        }
+
+        function undone(): void {
+            root.debug_done = false;
+            root.runs = root.runs.filter(r => r.debug !== "done");
+            root.done_count = root.count("DONE");
         }
     }
 
