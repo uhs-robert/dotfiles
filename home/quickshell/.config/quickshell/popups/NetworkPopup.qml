@@ -165,6 +165,11 @@ Popup {
         }
     }
 
+    function open_advanced() {
+        Popups.close();
+        Quickshell.execDetached(["env", "-u", "TMUX", "-u", "TMUX_PANE", "sh", "-c", "t=\"$HOME/.config/hypr/scripts/term\"; [ -x \"$t\" ] || t=\"${TERMINAL:-kitty}\"; exec \"$t\" -e nmtui"]);
+    }
+
     function toggle_wifi() {
         Networking.wifiEnabled = !Networking.wifiEnabled;
     }
@@ -230,7 +235,7 @@ Popup {
                 event.accepted = true;
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                 if (root.selected === -1) root.toggle_wifi();
-                else if (row && row.advanced) Quickshell.execDetached(["nm-connection-editor"]);
+                else if (row && row.advanced) root.open_advanced();
                 else root.connect_to(row);
                 event.accepted = true;
             }
@@ -355,7 +360,7 @@ Popup {
                         onClicked: {
                             root.selected = net_row.index;
                             root.forget_confirm = false;
-                            if (net_row.is_advanced) Quickshell.execDetached(["nm-connection-editor"]);
+                            if (net_row.is_advanced) root.open_advanced();
                             else root.connect_to(net_row.modelData);
                         }
                     }
