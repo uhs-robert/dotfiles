@@ -15,13 +15,13 @@ Popup {
     preferred_width: 760
     body_height: content.implicitHeight + 24
 
-    readonly property var base_tab_names: ["Daily", "Hourly", "Precipitation", "Sun & Moon", "Air"]
+    readonly property var base_tab_names: ["Daily", "Hourly", "Precip", "Sun & Moon", "Air"]
     readonly property bool has_alerts: WeatherState.alerts.length > 0
     tabs: root.has_alerts ? root.base_tab_names.concat(["Alerts"]) : root.base_tab_names
     readonly property bool on_alerts_tab: root.has_alerts && root.current_tab === 5
 
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
-    readonly property var hourly_sub_names: ["Temperature", "Precipitation", "Wind", "UV", "Humidity"]
+    readonly property var hourly_sub_names: ["Temperature", "Precip", "Wind", "UV", "Humidity"]
     sub_views: root.current_tab === 0 ? root.daily_sub_names : root.current_tab === 1 ? root.hourly_sub_names : []
     jumps_enabled: true
 

@@ -15,7 +15,7 @@ Item {
     // Called with the clicked hour index; the popup owns hour_cursor, so clicks report up rather than assign it locally.
     property var on_select: function (i) {}
 
-    readonly property var sub_names: ["Temperature", "Precipitation", "Wind", "UV", "Humidity"]
+    readonly property var sub_names: ["Temperature", "Precip", "Wind", "UV", "Humidity"]
 
     readonly property int hour_col_w: 56
     readonly property int icon_row_h: 30
