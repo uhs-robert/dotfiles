@@ -19,6 +19,7 @@ Popup {
     preferred_width: 320
     title: root.provider ? root.provider.title.toUpperCase() : "PICKER"
     footer_hint: "Enter open · Esc normal · q close"
+    footer_override: root.insert ? "Enter open · Esc normal" : ""
     key_help: ["Enter open", "Up/Down move", "Ctrl+j/k move", "Tab/Shift+Tab next/prev", "Ctrl+u clear", "Esc normal mode", "j/k rows", "h/l columns", "gg/G first/last", "i/a insert", "/ search"].concat(root.provider ? root.provider.actions.map(a => a.key + " " + a.desc) : []).concat(["q/Esc close"]).join(" · ")
     jumps_enabled: !root.insert
 
@@ -230,6 +231,15 @@ Popup {
                 }
 
                 Keys.onEscapePressed: root.set_insert(false)
+                // Runs before TextInput's own handling, so Ctrl+K never falls through to delete-to-end-of-line.
+                Keys.onPressed: event => {
+                    const ctrl = event.modifiers & Qt.ControlModifier;
+                    const k = event.key;
+                    const nav = k === Qt.Key_Up || k === Qt.Key_Down || k === Qt.Key_Tab || k === Qt.Key_Backtab
+                        || k === Qt.Key_Return || k === Qt.Key_Enter
+                        || (ctrl && (k === Qt.Key_J || k === Qt.Key_K || k === Qt.Key_N || k === Qt.Key_P || k === Qt.Key_U));
+                    if (nav) root.handle_key(event);
+                }
 
                 Text {
                     visible: query_input.text === ""

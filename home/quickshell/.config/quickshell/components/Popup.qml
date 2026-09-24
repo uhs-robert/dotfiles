@@ -20,6 +20,8 @@ PanelWindow {
     // The full key list behind `?`; while set, the footer shows only help_hint.
     property string key_help: footer_hint
     readonly property string help_hint: "? help · q close"
+    // Overrides help_hint/footer_hint outright when non-empty, for popups whose ? and q are typed rather than pressed.
+    property string footer_override: ""
     property bool help_open: false
     // Styles with a `small` block draw "small" popups apart from "large" ones (notifications, weather, media).
     property string size_class: "small"
@@ -341,7 +343,7 @@ PanelWindow {
         clip: true
 
         Rectangle {
-            visible: root.st.frame_drop > 0
+            visible: !root.dock_bottom && root.st.frame_drop > 0
             y: root.st.frame_drop
             width: root.width
             height: root.height - root.line_height - root.st.frame_drop
@@ -352,7 +354,7 @@ PanelWindow {
 
         Item {
             width: root.width
-            height: root.height - root.line_height - root.st.frame_drop
+            height: root.height - root.line_height - (root.dock_bottom ? 0 : root.st.frame_drop)
 
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
@@ -535,7 +537,7 @@ PanelWindow {
                     anchors.leftMargin: 12 + root.st.lcd_margin
                     anchors.rightMargin: 12 + root.st.lcd_margin
                     anchors.bottomMargin: (root.search_overlay ? 4 : 8) + root.st.inset_pad + root.st.lcd_margin * 2 + root.engraving_height
-                    text: root.key_help !== "" ? root.help_hint : root.footer_hint
+                    text: root.footer_override !== "" ? root.footer_override : (root.key_help !== "" ? root.help_hint : root.footer_hint)
                 }
 
                 // Takes the typed query off screen; MenuFooter draws it in the footer line.
