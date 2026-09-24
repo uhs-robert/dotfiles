@@ -195,8 +195,16 @@ Popup {
             spacing: 8
 
             // --- Current conditions header, shown above every tab ---
+            Loader {
+                Layout.fillWidth: true
+                active: Style.ring_gauge
+                visible: active
+                sourceComponent: RingHeader {}
+            }
+
             RowLayout {
                 Layout.fillWidth: true
+                visible: !Style.ring_gauge
                 spacing: 14
 
                 Image {
@@ -272,7 +280,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.has_alerts ? 28 : 0
                 visible: root.has_alerts
-                radius: Style.radius(4)
+                radius: Style.pill_chips ? height / 2 : Style.radius(4)
                 readonly property color alert_color: WeatherState.alerts.length > 0 ? WeatherState.alert_color(WeatherState.alerts[0].severity) : Style.text_dim
                 color: Style.boxed_cards ? Qt.alpha(alert_color, 0.1) : Theme.bg_surface
                 border.width: Style.boxed_cards ? 1 : 0

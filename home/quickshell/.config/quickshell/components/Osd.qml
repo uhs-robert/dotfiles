@@ -276,6 +276,12 @@ PanelWindow {
             bottom_radius: frame.radius
         }
 
+        Loader {
+            anchors.fill: parent
+            active: Style.frame_ticks !== ""
+            sourceComponent: FrameTicks {}
+        }
+
         Item {
             id: glow_layer
             readonly property bool layered: Style.glow || Style.text_shadow.a > 0
@@ -289,8 +295,8 @@ PanelWindow {
                 visible: Style.show_title
                 x: (Style.fade_fills || Style.rounded ? frame.radius : frame.bracket_pad * 1.5) + Style.inset_pad
                 y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + frame.bracket_pad + Style.inset_pad
-                width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20
-                height: title_text.implicitHeight + 4
+                width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20 + title_index.space, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20 + title_index.space
+                height: Math.max(title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
                 color: Style.fade_fills ? "transparent" : Style.title_bg
 
                 FadeFill {
@@ -298,16 +304,24 @@ PanelWindow {
                     fill: Style.title_bg
                 }
 
+                TitleIndex {
+                    id: title_index
+                    x: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    name: root.showing_vox ? "" : root.kind
+                }
+
                 Text {
                     id: title_text
                     anchors.centerIn: Style.fade_fills ? undefined : parent
-                    x: 10
+                    anchors.horizontalCenterOffset: title_index.space / 2
+                    x: 10 + title_index.space
                     y: (parent.height - height) / 2
                     text: Style.title_prefix + root.title + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
-                    font.bold: Style.title_font_family === Style.font_family
+                    font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
                     style: Style.title_glow.a > 0 ? Text.Outline : Text.Normal
                     styleColor: Style.title_glow
@@ -319,6 +333,22 @@ PanelWindow {
                 x: frame.pad_x
                 y: frame.header_height + frame.pad_y
                 spacing: Style.px(10)
+
+                Loader {
+                    readonly property bool shown: Style.ring_gauge && !root.showing_vox
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Style.px(84)
+                    Layout.preferredHeight: Style.px(84)
+                    Layout.rightMargin: Style.px(6)
+                    active: shown
+                    visible: shown
+                    sourceComponent: RingGauge {
+                        value: root.level
+                        label: String(root.percent)
+                        unit: "%"
+                        opacity: root.muted ? 0.5 : 1
+                    }
+                }
 
                 Text {
                     Layout.alignment: Qt.AlignVCenter
@@ -356,6 +386,7 @@ PanelWindow {
                 }
 
                 Text {
+                    visible: !(Style.ring_gauge && !root.showing_vox)
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight

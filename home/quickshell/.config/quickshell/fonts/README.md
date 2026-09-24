@@ -12,3 +12,5 @@ Every `.ttf`/`.otf` here is registered for the whole qs process by `services/Bun
 | Orbitron-Variable.ttf | Orbitron | google/fonts ofl/orbitron | OFL-Orbitron.txt |
 | Michroma-Regular.ttf | Michroma | google/fonts ofl/michroma | OFL-Michroma.txt |
 | DSEG7Classic-Regular.ttf, DSEG7Classic-Bold.ttf | DSEG7 Classic | keshikan/DSEG v0.46 | OFL-DSEG.txt |
+| Jura-Variable.ttf | Jura | google/fonts ofl/jura | OFL-Jura.txt |
+| Saira-Variable.ttf | Saira | google/fonts ofl/saira | OFL-Saira.txt |

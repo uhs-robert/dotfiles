@@ -58,6 +58,14 @@ Rectangle {
     }
 
     Rectangle {
+        visible: root.selected && root.st.selection_underline.a > 0
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: 1
+        color: root.st.selection_underline
+    }
+
+    Rectangle {
         visible: root.selected && root.st.selection_bar
         width: 2
         height: parent.height

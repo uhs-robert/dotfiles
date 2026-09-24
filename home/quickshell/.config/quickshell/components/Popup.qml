@@ -350,6 +350,12 @@ PanelWindow {
                 bottom_radius: root.st.frame_radius
             }
 
+            Loader {
+                anchors.fill: parent
+                active: root.st.frame_ticks !== ""
+                sourceComponent: FrameTicks {}
+            }
+
             // The watch face: a shaded panel with static scan rows, and the engraving on the bezel below it.
             Rectangle {
                 id: lcd_panel
@@ -408,8 +414,8 @@ PanelWindow {
                     visible: root.has_title
                     x: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad * 1.5) + root.st.inset_pad + root.st.lcd_margin * 2
                     y: (root.st.fade_fills ? root.st.frame_border_width : root.bracket_pad) + root.st.inset_pad + root.st.lcd_margin * 2
-                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_text.implicitWidth + 20, parent.width - title_tab.x * 2)
-                    height: title_text.implicitHeight + 4
+                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_text.implicitWidth + 20 + title_index.space, parent.width - title_tab.x * 2)
+                    height: Math.max(title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
                     color: root.st.fade_fills ? "transparent" : root.st.title_bg
 
                     FadeFill {
@@ -417,18 +423,27 @@ PanelWindow {
                         fill: root.st.title_bg
                     }
 
+                    TitleIndex {
+                        id: title_index
+                        x: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        st: root.st
+                        name: root.popup_name
+                    }
+
                     Text {
                         id: title_text
                         anchors.centerIn: root.st.fade_fills ? undefined : parent
-                        x: 10
+                        anchors.horizontalCenterOffset: title_index.space / 2
+                        x: 10 + title_index.space
                         y: (parent.height - height) / 2
-                        width: Math.min(implicitWidth, parent.width - 20)
+                        width: Math.min(implicitWidth, parent.width - 20 - title_index.space)
                         elide: Text.ElideRight
                         text: root.st.title_prefix + root.title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
                         font.pixelSize: root.st.font_size - 2
-                        font.bold: root.st.title_font_family === root.st.font_family
+                        font.weight: root.st.title_weight > 0 ? root.st.title_weight : root.st.title_font_family === root.st.font_family ? Font.Bold : Font.Normal
                         font.letterSpacing: root.st.title_spacing
                         style: root.st.title_glow.a > 0 ? Text.Outline : Text.Normal
                         styleColor: root.st.title_glow
@@ -436,8 +451,9 @@ PanelWindow {
                 }
 
                 Text {
+                    id: readout_text
                     // Dropped on narrow popups rather than drawn over the title.
-                    visible: root.has_title && root.st.title_readout !== "" && title_tab.x + (root.st.fade_fills ? 10 + title_text.implicitWidth : title_tab.width) + 12 <= parent.width - anchors.rightMargin - implicitWidth
+                    visible: root.has_title && root.st.title_readout !== "" && title_tab.x + (root.st.fade_fills ? 10 + title_index.space + title_text.implicitWidth : title_tab.width) + 12 <= parent.width - anchors.rightMargin - implicitWidth
                     anchors.right: parent.right
                     anchors.rightMargin: (root.lcd ? root.st.lcd_margin * 2 : 12) + root.bracket_pad + root.st.inset_pad
                     y: title_tab.y + (title_tab.height - height) / 2
@@ -446,6 +462,19 @@ PanelWindow {
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 5
                     font.letterSpacing: 1
+                }
+
+                Rectangle {
+                    visible: root.has_title && root.st.title_trail.a > 0 && width > 8
+                    x: title_tab.x + 10 + title_index.space + title_text.implicitWidth + 12
+                    y: title_tab.y + Math.round(title_tab.height / 2)
+                    width: (readout_text.visible ? readout_text.x - 12 : parent.width - title_tab.x - 12) - x
+                    height: 1
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0; color: root.st.title_trail }
+                        GradientStop { position: 1; color: Qt.alpha(root.st.title_trail, 0) }
+                    }
                 }
 
                 Rectangle {

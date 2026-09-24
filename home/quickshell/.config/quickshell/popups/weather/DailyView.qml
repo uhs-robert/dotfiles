@@ -94,7 +94,9 @@ Item {
                         anchors.fill: parent
                         anchors.margins: -2
                         radius: Style.radius(4)
-                        color: Theme.bg_surface
+                        color: Style.range_line ? "transparent" : Theme.bg_surface
+                        border.width: Style.range_line ? 1 : 0
+                        border.color: Style.hairline_dim
                         visible: day_col.day_index === root.day_cursor
                     }
 
@@ -127,31 +129,35 @@ Item {
                             Rectangle {
                                 id: inner_band
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                width: parent.width * 0.3
+                                width: Style.range_line ? 1 : parent.width * 0.3
                                 radius: Style.radius(2)
-                                color: Style.chart_fill
+                                color: !Style.range_line ? Style.chart_fill : day_col.day_index === root.day_cursor ? Style.text_accent : Style.text_strong
                                 y: root.inner_top_y(day_col.modelData)
                                 height: Math.max(4, root.inner_bottom_y(day_col.modelData) - root.inner_top_y(day_col.modelData))
                                 antialiasing: Style.chart_slant > 0
                                 transform: Matrix4x4 {
                                     matrix: Qt.matrix4x4(1, -Style.chart_slant, 0, Style.chart_slant * inner_band.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
                                 }
+
+                                RangeCaps {
+                                    visible: Style.range_line
+                                }
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                y: inner_band.y - implicitHeight - 1
+                                y: inner_band.y - implicitHeight - (Style.range_line ? 5 : 1)
                                 text: Math.round(day_col.modelData.max) + "°"
-                                color: Theme.yellow
+                                color: Style.range_line ? Style.text_strong : Theme.yellow
                                 font.family: Style.font_family
                                 font.pixelSize: Style.font_size - 3
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                y: inner_band.y + inner_band.height + 1
+                                y: inner_band.y + inner_band.height + (Style.range_line ? 5 : 1)
                                 text: Math.round(day_col.modelData.min) + "°"
-                                color: Theme.yellow
+                                color: Style.range_line ? Style.text_muted : Theme.yellow
                                 font.family: Style.font_family
                                 font.pixelSize: Style.font_size - 3
                             }

@@ -25,7 +25,9 @@ Rectangle {
     // Filling tabs share their row evenly, so they must not ask for the label's width.
     implicitWidth: root.is_chip ? label_text.implicitWidth + 20 : 0
     implicitHeight: Style.px(24)
-    radius: Style.radius(root.base_radius)
+    radius: root.is_chip && root.st.pill_chips ? height / 2 : Style.radius(root.base_radius)
+    border.width: root.is_chip && root.st.pill_chips ? 1 : 0
+    border.color: root.active ? root.st.chip_active_bg : root.st.chip_border
     readonly property color fill: !root.active ? "transparent" : root.is_chip ? root.st.chip_active_bg : root.st.tab_active_bg
     color: root.st.slant > 0 ? "transparent" : root.fill
 
@@ -64,8 +66,16 @@ Rectangle {
         visible: root.active && !root.is_chip && root.st.tab_underline.a > 0
         anchors.bottom: parent.bottom
         width: parent.width
-        height: 2
+        height: root.st.hairline.a > 0 ? 1 : 2
         color: root.st.tab_underline
+    }
+
+    Rectangle {
+        visible: !root.active && !root.is_chip && root.st.hairline_dim.a > 0
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: 1
+        color: Qt.alpha(root.st.hairline_dim, root.st.hairline_dim.a / 2)
     }
 
     MouseArea {

@@ -148,7 +148,21 @@ Singleton {
             bar_hover_bg: Theme.bg_surface,
             bar_glow_color: "transparent",
             bar_text_raised: false,
-            bar_scanline_color: "transparent"
+            bar_scanline_color: "transparent",
+            hairline: "transparent",
+            hairline_dim: "transparent",
+            frame_ticks: "",
+            tick_ruler: false,
+            ring_gauge: false,
+            range_line: false,
+            key_round: false,
+            pill_chips: false,
+            card_rule: false,
+            selection_underline: "transparent",
+            title_index: [],
+            title_weight: 0,
+            title_trail: "transparent",
+            bar_ticks: "transparent"
         };
         return {
             "default": {
@@ -770,6 +784,103 @@ Singleton {
                 bar_rounded: true,
                 bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.12),
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.2)
+            }),
+            // The Tet and bubble-ship displays: pale hairlines on near-black, thin caps, tick scales and ring gauges.
+            "oblivion": Object.assign({}, terminal, {
+                text_muted: Qt.alpha(Theme.fg_strong, 0.55),
+                text_dim: Qt.alpha(Theme.fg_strong, 0.7),
+                text_fg: Qt.alpha(Theme.fg_strong, 0.86),
+                text_strong: Theme.fg_strong,
+                text_primary: Theme.theme_primary_light,
+                text_accent: Theme.theme_primary_light,
+                font_family: "Jura",
+                font_size: Theme.popup_font_size - 1,
+                title_font_family: "Jura",
+                number_font: "Saira",
+                scale: 1.1,
+                frame_color: Qt.alpha(Theme.bg_crust, 0.97),
+                frame_shade: Qt.alpha(Theme.bg_core, 0.97),
+                shade_vertical: true,
+                frame_border_width: 0,
+                frame_border_color: Qt.alpha(Theme.fg_strong, 0.24),
+                frame_pad: 10,
+                accent_color: Qt.alpha(Theme.fg_strong, 0.55),
+                accent_height: 1,
+                frame_top_rule: true,
+                hairline: Qt.alpha(Theme.fg_strong, 0.55),
+                hairline_dim: Qt.alpha(Theme.fg_strong, 0.24),
+                frame_ticks: "top",
+                selection_bg: Qt.alpha(Theme.theme_primary_light, 0.14),
+                selection_outline: "transparent",
+                selection_underline: Qt.alpha(Theme.theme_primary_light, 0.6),
+                fade_fills: true,
+                caret_color: Theme.theme_primary_light,
+                caret_blink: false,
+                row_cursor: "○",
+                tab_active_bg: "transparent",
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Qt.alpha(Theme.fg_strong, 0.55),
+                tab_caps: true,
+                tab_underline: Theme.fg_strong,
+                key_fg: Theme.theme_primary_light,
+                key_border: Qt.alpha(Theme.fg_strong, 0.24),
+                key_round: true,
+                section_fg: Qt.alpha(Theme.fg_strong, 0.55),
+                section_rule: false,
+                section_fade: Qt.alpha(Theme.fg_strong, 0.18),
+                label_caps: true,
+                label_spacing: 3,
+                footer_fg: Qt.alpha(Theme.fg_strong, 0.55),
+                footer_key_fg: Theme.theme_primary_light,
+                footer_rule_color: Qt.alpha(Theme.fg_strong, 0.18),
+                meter_on: Theme.fg_strong,
+                meter_off: Qt.alpha(Theme.fg_strong, 0.1),
+                meter_hot: Theme.theme_label,
+                tick_ruler: true,
+                title_bg: "transparent",
+                title_fg: Theme.fg_strong,
+                title_spacing: 5,
+                title_weight: Font.Light,
+                title_index: ["start", "volume", "notifications", "weather", "media", "clock", "battery", "network", "bluetooth", "system", "updates", "tray", "keeptabs", "style"],
+                title_trail: Qt.alpha(Theme.fg_strong, 0.24),
+                title_readout: "TET · LINK",
+                title_readout_fg: Qt.alpha(Theme.fg_strong, 0.55),
+                chip_brackets: false,
+                chip_active_bg: Theme.fg_strong,
+                chip_active_fg: Theme.bg_crust,
+                chip_pick: Theme.fg_strong,
+                chip_border: Qt.alpha(Theme.fg_strong, 0.24),
+                pill_chips: true,
+                card_rule: true,
+                toggle_brackets: false,
+                toggle_on: Theme.fg_strong,
+                toggle_off: Qt.alpha(Theme.fg_strong, 0.55),
+                marker_fill: false,
+                ring_gauge: true,
+                range_line: true,
+                bar_font_family: "Jura",
+                bar_font_size: Theme.font_size,
+                bar_letter_spacing: 1.5,
+                bar_side_bg: Qt.alpha(Theme.bg_core, 0.85),
+                bar_center_bg: Qt.alpha(Theme.bg_core, 0.85),
+                bar_fg: Qt.alpha(Theme.fg_strong, 0.86),
+                bar_clock_fg: Qt.alpha(Theme.fg_strong, 0.86),
+                bar_border_color: Qt.alpha(Theme.fg_strong, 0.24),
+                bar_workspace_focused: Theme.fg_strong,
+                bar_workspace_active: Qt.alpha(Theme.theme_secondary, 0.45),
+                bar_workspace_idle: "transparent",
+                bar_workspace_ring: Qt.alpha(Theme.fg_strong, 0.55),
+                bar_hover_bg: Qt.alpha(Theme.fg_strong, 0.08),
+                bar_ticks: Qt.alpha(Theme.fg_strong, 0.24),
+                small: {
+                    frame_ticks: "left",
+                    frame_color: Qt.alpha(Theme.bg_core, 0.96),
+                    frame_shade: "transparent",
+                    frame_border_width: 1,
+                    accent_color: Qt.alpha(Theme.fg_strong, 0.24),
+                    frame_pad: 6,
+                    title_readout: ""
+                }
             })
         };
     }
@@ -938,6 +1049,29 @@ Singleton {
     readonly property color chart_fill: root.active.chart_fill
     // Multiplies every radius a rounded style draws.
     readonly property real corner_scale: root.active.corner_scale
+    // The fallbacks below cover "default", which does not extend terminal.
+    // Major and minor tick color for frame scales, rules and ruler meters.
+    readonly property color hairline: root.active.hairline || "transparent"
+    readonly property color hairline_dim: root.active.hairline_dim || "transparent"
+    // "top": a tick scale on the top edge, bottom rule and corner crosses; "left": a scale down the left side and a corner ring.
+    readonly property string frame_ticks: root.active.frame_ticks || ""
+    readonly property bool tick_ruler: root.active.tick_ruler === true
+    // The OSD level and weather temperature drawn in ticked ring gauges.
+    readonly property bool ring_gauge: root.active.ring_gauge === true
+    // Daily temperature ranges as 1px lines with ring end caps.
+    readonly property bool range_line: root.active.range_line === true
+    readonly property bool key_round: root.active.key_round === true
+    // Chips, action chips, header buttons and the alert banner as outlined pills.
+    readonly property bool pill_chips: root.active.pill_chips === true
+    // Notification cards as an open left rule with a fading sweep when selected.
+    readonly property bool card_rule: root.active.card_rule === true
+    readonly property color selection_underline: root.active.selection_underline || "transparent"
+    // Popup names numbered 01, 02, ... in front of their titles.
+    readonly property var title_index: root.active.title_index || []
+    // 0 keeps titles bold when they share the body font.
+    readonly property int title_weight: root.active.title_weight || 0
+    readonly property color title_trail: root.active.title_trail || "transparent"
+    readonly property color bar_ticks: root.bar.bar_ticks || "transparent"
 
     property bool cava_line: true
     readonly property var bar: root.active

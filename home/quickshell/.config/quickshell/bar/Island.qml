@@ -113,6 +113,30 @@ Item {
         width: Math.ceil(layout.implicitWidth) + 16
         color: root.shaded ? "transparent" : root.bg_color
 
+        // A tick scale rising from the bottom edge.
+        Loader {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: root.border_width
+            height: 5
+            active: Style.bar_ticks.a > 0
+            sourceComponent: Item {
+                Repeater {
+                    model: Math.floor(parent.width / 12) + 1
+
+                    Rectangle {
+                        required property int index
+                        x: index * 12
+                        width: 1
+                        height: index % 5 === 0 ? 5 : 3
+                        anchors.bottom: parent.bottom
+                        color: Style.bar_ticks
+                    }
+                }
+            }
+        }
+
         // Declared before the layout so module MouseAreas stack above it.
         MouseArea {
             anchors.fill: parent

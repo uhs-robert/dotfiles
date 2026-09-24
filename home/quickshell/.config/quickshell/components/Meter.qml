@@ -51,8 +51,18 @@ Item {
         }
     }
 
+    Loader {
+        width: root.width
+        height: root.implicitHeight
+        active: root.st.tick_ruler
+        sourceComponent: TickRuler {
+            meter: root
+        }
+    }
+
     Item {
         id: segments
+        visible: !root.st.tick_ruler
         width: root.width
         height: root.implicitHeight
         layer.enabled: root.st.meter_bloom
