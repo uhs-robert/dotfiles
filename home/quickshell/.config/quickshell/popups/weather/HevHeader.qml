@@ -42,15 +42,16 @@ ColumnLayout {
 
             Shape {
                 id: cross
-                Layout.preferredWidth: root.wide ? 30 : 24
-                Layout.preferredHeight: Layout.preferredWidth
+                readonly property real zoom: root.wide ? 1.25 : 1
+                Layout.preferredWidth: 24 * zoom
+                Layout.preferredHeight: 24 * zoom
                 Layout.alignment: Qt.AlignVCenter
                 preferredRendererType: Shape.CurveRenderer
 
                 ShapePath {
                     strokeWidth: -1
                     fillColor: root.hl
-                    scale: Qt.size(cross.width / 24, cross.height / 24)
+                    scale: Qt.size(cross.zoom, cross.zoom)
                     PathSvg { path: "M8.5 1h7v7.5H23v7h-7.5V23h-7v-7.5H1v-7h7.5z" }
                 }
             }

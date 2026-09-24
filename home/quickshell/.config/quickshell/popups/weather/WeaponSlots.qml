@@ -75,7 +75,7 @@ Item {
                         height: parent.height
                         verticalAlignment: Text.AlignVCenter
                         elide: Text.ElideRight
-                        text: slot.modelData.weekday.toUpperCase()
+                        text: (slot.open || slot.width >= 60 ? slot.modelData.weekday : Qt.formatDate(new Date(slot.modelData.date + "T00:00:00"), "ddd")).toUpperCase()
                         color: slot.open ? Theme.bg_crust : root.hl_t
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size - 6
