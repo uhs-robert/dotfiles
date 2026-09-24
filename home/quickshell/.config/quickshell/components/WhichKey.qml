@@ -23,7 +23,7 @@ PanelWindow {
         const t = root.payload.title || "";
         return Style.show_title ? t.toUpperCase() : t;
     }
-    readonly property string footer_hint: (root.payload.footer || []).map(f => (f.key === "ESC" ? "Esc" : f.key) + " " + f.desc).join(" · ")
+    readonly property string footer_hint: (root.payload.footer || []).map(f => ({ ESC: "Esc", BS: "Backspace", RET: "Enter", TAB: "Tab", SPACE: "space" }[f.key] || f.key) + " " + f.desc).join(" · ")
     readonly property bool has_footer: Style.show_footer && root.footer_hint !== ""
 
     readonly property int gap: Style.px(18)
