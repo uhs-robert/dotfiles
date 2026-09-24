@@ -53,6 +53,7 @@ Singleton {
             row_cursor: ">",
             segmented_levels: true,
             tab_keys: true,
+            row_keys: true,
             chip_brackets: true,
             chip_active_bg: "transparent",
             chip_active_fg: Theme.theme_primary,
@@ -101,6 +102,7 @@ Singleton {
                 row_cursor: "",
                 segmented_levels: false,
                 tab_keys: false,
+                row_keys: false,
                 chip_brackets: false,
                 chip_active_bg: Theme.bg_surface,
                 chip_active_fg: Theme.theme_secondary,
@@ -155,6 +157,7 @@ Singleton {
     readonly property string row_cursor: root.active.row_cursor
     readonly property bool segmented_levels: root.active.segmented_levels
     readonly property bool tab_keys: root.active.tab_keys
+    readonly property bool row_keys: root.active.row_keys
     readonly property bool chip_brackets: root.active.chip_brackets
     readonly property color chip_active_bg: root.active.chip_active_bg
     readonly property color chip_active_fg: root.active.chip_active_fg
