@@ -3,9 +3,9 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Notifications
+import "../../components"
 import "../../theme"
 import "../../services"
-import "../../components"
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -34,7 +34,7 @@ Item {
         if (!root.notification) return Style.text_dim;
         if (root.notification.urgency === NotificationUrgency.Critical) return Theme.error;
         if (root.notification.urgency === NotificationUrgency.Low) return Style.text_dim;
-        return Theme.theme_primary;
+        return Style.text_primary;
     }
 
     readonly property string urgency_tag: {
@@ -68,8 +68,12 @@ Item {
         radius: Style.radius(8)
         color: Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
         border.width: 1
-        border.color: !Style.boxed_cards ? Theme.ui_border : root.selected ? Style.caret_color : Qt.alpha(root.accent, 0.6)
+        border.color: !Style.boxed_cards ? Theme.ui_border : root.selected && Style.selection_brackets.a <= 0 ? Style.caret_color : Qt.alpha(root.accent, 0.6)
         clip: true
+
+        LockBrackets {
+            shown: root.selected
+        }
 
         Text {
             visible: Style.boxed_cards && root.selected && Style.row_cursor !== "" && Style.caret_phase
@@ -206,7 +210,7 @@ Item {
                                 text: action_chip.modelData.text
                                 color: action_chip.focused ? Theme.bg_crust : Theme.theme_secondary
                                 font.bold: action_chip.focused
-                                font.family: Style.font_family
+                                font.family: Style.label_font_family
                                 font.pixelSize: Style.font_size - 3
                             }
 

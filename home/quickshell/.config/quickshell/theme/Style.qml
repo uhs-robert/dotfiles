@@ -148,7 +148,21 @@ Singleton {
             bar_hover_bg: Theme.bg_surface,
             bar_glow_color: "transparent",
             bar_text_raised: false,
-            bar_scanline_color: "transparent"
+            bar_scanline_color: "transparent",
+            label_font_family: "",
+            frame_octagon: 0,
+            frame_struts: "transparent",
+            lcd_radius: 8,
+            lcd_border: Qt.alpha(Theme.bg_shadow, 0.6),
+            lcd_brackets: "transparent",
+            selection_brackets: "transparent",
+            tab_brackets: "transparent",
+            tab_rule: "transparent",
+            title_reticle: "transparent",
+            title_line: "transparent",
+            chart_outline: "transparent",
+            bar_workspace_diamond: false,
+            bar_clock_brackets: "transparent"
         };
         return {
             "default": {
@@ -289,7 +303,21 @@ Singleton {
                 bar_hover_bg: Theme.bg_surface,
                 bar_glow_color: "transparent",
                 bar_text_raised: false,
-                bar_scanline_color: "transparent"
+                bar_scanline_color: "transparent",
+                label_font_family: "",
+                frame_octagon: 0,
+                frame_struts: "transparent",
+                lcd_radius: 8,
+                lcd_border: Qt.alpha(Theme.bg_shadow, 0.6),
+                lcd_brackets: "transparent",
+                selection_brackets: "transparent",
+                tab_brackets: "transparent",
+                tab_rule: "transparent",
+                title_reticle: "transparent",
+                title_line: "transparent",
+                chart_outline: "transparent",
+                bar_workspace_diamond: false,
+                bar_clock_brackets: "transparent"
             },
             "terminal": terminal,
             "crt": Object.assign({}, terminal, {
@@ -770,7 +798,107 @@ Singleton {
                 bar_rounded: true,
                 bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.12),
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.2)
-            })
+            }),
+            // TIE Fighter cockpit: large popups in the octagonal viewport, `small` ones the targeting computer.
+            "tie": (() => {
+                const vec = Theme.ok;
+                const vec_d = Qt.alpha(vec, 0.4);
+                const lock = Theme.theme_label;
+                return Object.assign({}, terminal, {
+                    text_muted: Qt.alpha(vec, 0.55),
+                    text_dim: Qt.alpha(vec, 0.7),
+                    text_fg: Qt.tint(Theme.fg_core, Qt.alpha(vec, 0.72)),
+                    text_strong: Theme.fg_strong,
+                    text_primary: vec,
+                    text_accent: Theme.theme_secondary,
+                    font_family: "B612 Mono",
+                    font_size: Theme.popup_font_size - 1,
+                    title_font_family: "Oxanium",
+                    label_font_family: "Oxanium",
+                    number_font: "Oxanium",
+                    frame_color: Theme.bg_crust,
+                    frame_shade: Theme.bg_mantle,
+                    shade_vertical: true,
+                    frame_border_color: vec,
+                    frame_octagon: 20,
+                    frame_struts: vec,
+                    frame_pad: 12,
+                    accent_color: vec,
+                    accent_height: 0,
+                    selection_bg: Qt.alpha(lock, 0.08),
+                    selection_outline: "transparent",
+                    selection_brackets: lock,
+                    caret_color: lock,
+                    caret_blink: false,
+                    row_cursor: "\u25b8",
+                    tab_active_bg: Qt.alpha(vec, 0.09),
+                    tab_active_fg: Theme.fg_strong,
+                    tab_fg: Qt.alpha(vec, 0.55),
+                    tab_caps: true,
+                    tab_underline: vec,
+                    tab_brackets: lock,
+                    tab_rule: vec_d,
+                    key_fg: Theme.theme_secondary,
+                    key_border: Qt.alpha(Theme.theme_secondary, 0.45),
+                    section_fg: vec,
+                    section_rule: false,
+                    section_fade: vec_d,
+                    label_caps: true,
+                    label_spacing: 2.5,
+                    footer_fg: Qt.alpha(vec, 0.55),
+                    footer_rule_color: vec_d,
+                    meter_on: Qt.alpha(vec, 0.75),
+                    meter_off: Qt.alpha(vec, 0.1),
+                    meter_hot: lock,
+                    meter_bloom: true,
+                    title_bg: "transparent",
+                    title_fg: vec,
+                    title_spacing: 3.5,
+                    title_readout: "SCAN",
+                    title_readout_fg: Theme.theme_secondary,
+                    title_reticle: vec,
+                    title_line: vec_d,
+                    chip_brackets: false,
+                    chip_active_bg: lock,
+                    chip_active_fg: Theme.bg_crust,
+                    chip_pick: lock,
+                    chip_border: vec_d,
+                    toggle_on: vec,
+                    toggle_off: Qt.alpha(vec, 0.45),
+                    scanlines: true,
+                    scanline_color: Qt.alpha(vec, 0.05),
+                    chart_fill: Qt.alpha(vec, 0.09),
+                    chart_outline: vec,
+                    bar_font_family: "B612 Mono",
+                    bar_font_size: Theme.font_size - 1,
+                    bar_side_bg: Theme.bg_crust,
+                    bar_center_bg: Theme.bg_crust,
+                    bar_fg: vec,
+                    bar_border_color: vec,
+                    bar_workspace_focused: Theme.theme_secondary,
+                    bar_workspace_active: vec,
+                    bar_workspace_idle: "transparent",
+                    bar_workspace_ring: vec,
+                    bar_workspace_diamond: true,
+                    bar_clock_brackets: lock,
+                    bar_hover_bg: Qt.alpha(vec, 0.15),
+                    small: {
+                        frame_octagon: 0,
+                        frame_radius: 5,
+                        frame_border_color: Theme.bg_surface,
+                        frame_pad: 0,
+                        lcd_top: Qt.tint(Theme.bg_core, Qt.alpha(vec, 0.06)),
+                        lcd_bottom: Theme.bg_crust,
+                        lcd_scan: Qt.alpha(vec, 0.05),
+                        lcd_margin: 9,
+                        lcd_radius: 16,
+                        lcd_border: vec_d,
+                        lcd_brackets: vec,
+                        scanlines: false,
+                        title_readout: "TRGT CMP"
+                    }
+                });
+            })()
         };
     }
 
@@ -795,6 +923,7 @@ Singleton {
         }
         o.title_font_family = o.title_font_family || o.font_family;
         o.number_font = o.number_font || o.font_family;
+        o.label_font_family = o.label_font_family || o.font_family;
         o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
         return o;
     }
@@ -938,6 +1067,27 @@ Singleton {
     readonly property color chart_fill: root.active.chart_fill
     // Multiplies every radius a rounded style draws.
     readonly property real corner_scale: root.active.corner_scale
+    // Sections, tabs and chips; empty uses font_family.
+    readonly property string label_font_family: root.active.label_font_family || root.font_family
+    // Frames cut to an octagon this many px at each corner (OctagonFrame).
+    readonly property real frame_octagon: root.active.frame_octagon
+    // Diagonal struts from the octagon's cut corners and ticks at its edge midpoints.
+    readonly property color frame_struts: root.active.frame_struts
+    readonly property real lcd_radius: root.active.lcd_radius
+    readonly property color lcd_border: root.active.lcd_border
+    // Corner brackets at all four corners inside the LCD panel.
+    readonly property color lcd_brackets: root.active.lcd_brackets
+    // Target-lock corner brackets on selected rows, cards and days.
+    readonly property color selection_brackets: root.active.selection_brackets
+    // Brackets around the active tab's label.
+    readonly property color tab_brackets: root.active.tab_brackets
+    // A 1px baseline under every tab.
+    readonly property color tab_rule: root.active.tab_rule
+    // A reticle glyph before popup titles.
+    readonly property color title_reticle: root.active.title_reticle
+    // A rule from the title to the readout, fading out to the right.
+    readonly property color title_line: root.active.title_line
+    readonly property color chart_outline: root.active.chart_outline
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -961,6 +1111,10 @@ Singleton {
     readonly property color bar_workspace_active: root.bar.bar_workspace_active
     readonly property color bar_workspace_idle: root.bar.bar_workspace_idle
     readonly property color bar_workspace_ring: root.bar.bar_workspace_ring
+    // Empty workspaces draw as diamonds, busy ones as square-cornered pills.
+    readonly property bool bar_workspace_diamond: root.bar.bar_workspace_diamond
+    // Brackets around the bar clock's time.
+    readonly property color bar_clock_brackets: root.bar.bar_clock_brackets
     // An inner line along each island's slants and bottom edge.
     readonly property int bar_inset_gap: root.bar.bar_inset_gap
     readonly property int bar_inset_width: root.bar.bar_inset_width
