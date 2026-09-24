@@ -18,6 +18,7 @@ Item {
     property var on_select: function (i) {}
 
     readonly property var sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine"]
+    readonly property bool stat_columns: Style.weather_spec && root.sub === 0
 
     FontMetrics {
         id: label_metrics
@@ -28,7 +29,7 @@ Item {
     // Columns that fit without clipping their widest label, capped at five.
     readonly property int fit_days: {
         const f = label_metrics.font;
-        const col = Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%")) + 8;
+        const col = root.stat_columns ? 56 : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%")) + 8;
         return Math.max(1, Math.min(5, Math.floor((root.width + 4) / (col + 4))));
     }
     readonly property var window_days: WeatherState.days.slice(root.first_day, root.first_day + root.fit_days)
@@ -98,9 +99,21 @@ Item {
                         color: Style.range_line ? "transparent" : Style.selection_brackets.a > 0 ? Style.selection_bg : Theme.bg_surface
                         border.width: Style.range_line ? 1 : 0
                         border.color: Style.hairline_dim
-                        visible: day_col.day_index === root.day_cursor
+                        visible: day_col.day_index === root.day_cursor && !root.stat_columns
 
                         LockBrackets {}
+                    }
+
+                    Loader {
+                        active: root.stat_columns
+                        anchors.fill: parent
+                        sourceComponent: DayStatColumn {
+                            day: day_col.modelData
+                            day_index: day_col.day_index
+                            selected: day_col.day_index === root.day_cursor
+                            scale_min: root.week_temp_range.min
+                            scale_max: root.week_temp_range.max
+                        }
                     }
 
                     MouseArea {
@@ -109,6 +122,7 @@ Item {
                     }
 
                     ColumnLayout {
+                        visible: !root.stat_columns
                         anchors.fill: parent
                         anchors.margins: 2
                         spacing: 2

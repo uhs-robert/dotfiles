@@ -14,6 +14,7 @@ Popup {
     size_class: "large"
     preferred_width: 440
     fit_island: true
+    title_value: WeatherState.has_data ? root.day_span + "D" : ""
     body_height: content.implicitHeight + 24
     key_help: "[ ] tabs · 1-" + root.tabs.length + " select · Tab view · h/l move · H/L jump · gg now · G end · r refresh" + (root.has_alerts ? " · a alerts" : "")
 
@@ -194,6 +195,13 @@ Popup {
             anchors.top: parent.top
             spacing: 8
 
+            Loader {
+                active: Style.weather_spec
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: WeatherSpec {}
+            }
+
             // --- Current conditions header, shown above every tab ---
             Loader {
                 Layout.fillWidth: true
@@ -203,6 +211,7 @@ Popup {
             }
 
             RowLayout {
+                visible: !Style.weather_spec
                 Layout.fillWidth: true
                 visible: !Style.ring_gauge
                 spacing: 14
@@ -286,12 +295,24 @@ Popup {
                 border.width: Style.boxed_cards ? 1 : 0
                 border.color: alert_color
 
+                Hazard {
+                    visible: Style.hazard.a > 0
+                    x: 1
+                    y: 1
+                    width: 30
+                    height: parent.height - 2
+                    color: Theme.bg_crust
+                    stripe: Style.hazard
+                }
+
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 6
+                    anchors.leftMargin: Style.hazard.a > 0 ? 40 : 6
                     spacing: 8
 
                     Rectangle {
+                        visible: Style.hazard.a === 0
                         Layout.preferredWidth: 8
                         Layout.preferredHeight: 8
                         radius: Style.radius(4)

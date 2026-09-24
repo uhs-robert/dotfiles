@@ -125,6 +125,35 @@ Singleton {
             chart_slant: 0,
             chart_fill: Theme.yellow,
             corner_scale: 1,
+            mono_font: "",
+            frame_cut: 0,
+            frame_notch: 0,
+            frame_line: "transparent",
+            frame_marks: "transparent",
+            title_band: "transparent",
+            title_ids: ({}),
+            row_marker: "",
+            row_rule: "transparent",
+            selection_rule: "transparent",
+            corner_tick: "transparent",
+            key_cut: 0,
+            tab_bg: "transparent",
+            tab_cut: 0,
+            chip_bg: "transparent",
+            section_marker: "transparent",
+            meter_major: "transparent",
+            meter_height: 0,
+            footer_key_bg: "transparent",
+            footer_separator: " \u00b7 ",
+            footer_rule_solid: false,
+            slider_readout: false,
+            hazard: "transparent",
+            schematic: "transparent",
+            status_strip: false,
+            osd_readout: false,
+            card_channels: false,
+            weather_spec: false,
+            bar_pill_square: false,
             bar_font_family: "JetBrainsMono Nerd Font",
             bar_font_size: Theme.font_size,
             bar_caps: false,
@@ -291,6 +320,35 @@ Singleton {
                 chart_slant: 0,
                 chart_fill: Theme.yellow,
                 corner_scale: 1,
+                mono_font: "",
+                frame_cut: 0,
+                frame_notch: 0,
+                frame_line: "transparent",
+                frame_marks: "transparent",
+                title_band: "transparent",
+                title_ids: ({}),
+                row_marker: "",
+                row_rule: "transparent",
+                selection_rule: "transparent",
+                corner_tick: "transparent",
+                key_cut: 0,
+                tab_bg: "transparent",
+                tab_cut: 0,
+                chip_bg: "transparent",
+                section_marker: "transparent",
+                meter_major: "transparent",
+                meter_height: 0,
+                footer_key_bg: "transparent",
+                footer_separator: " \u00b7 ",
+                footer_rule_solid: false,
+                slider_readout: false,
+                hazard: "transparent",
+                schematic: "transparent",
+                status_strip: false,
+                osd_readout: false,
+                card_channels: false,
+                weather_spec: false,
+                bar_pill_square: false,
                 bar_font_family: Theme.font_family,
                 bar_font_size: Theme.font_size,
                 bar_caps: false,
@@ -1009,6 +1067,124 @@ Singleton {
                     frame_pad: 6,
                     title_readout: ""
                 }
+            }),
+            // Mecha hangar panels in the manner of Armored Core VI and MechWarrior 5.
+            "mech": Object.assign({}, terminal, {
+                text_fg: Qt.alpha(Theme.fg_core, 0.92),
+                text_muted: Qt.alpha(Theme.theme_primary_light, 0.66),
+                text_dim: Qt.alpha(Theme.theme_primary_light, 0.8),
+                text_primary: Theme.theme_primary_light,
+                font_family: "Barlow Condensed",
+                font_size: Theme.popup_font_size,
+                title_font_family: "Barlow Condensed",
+                number_font: "Saira Stencil One",
+                mono_font: "Share Tech Mono",
+                frame_color: Theme.bg_crust,
+                frame_shade: Qt.tint(Theme.bg_core, Qt.alpha(Theme.ui_visual_bg, 0.3)),
+                shade_vertical: true,
+                frame_border_color: Qt.alpha(Theme.theme_primary_light, 0.55),
+                frame_line: Qt.alpha(Theme.theme_primary_light, 0.24),
+                frame_marks: Qt.alpha(Theme.theme_primary_light, 0.66),
+                frame_cut: 14,
+                frame_notch: 4,
+                frame_pad: 4,
+                accent_color: Theme.theme_secondary,
+                accent_height: 0,
+                selection_bg: Qt.alpha(Theme.theme_secondary, 0.17),
+                selection_outline: "transparent",
+                selection_bar: true,
+                selection_rule: Qt.alpha(Theme.theme_secondary, 0.45),
+                fade_fills: true,
+                caret_color: Theme.theme_secondary,
+                caret_blink: false,
+                row_cursor: "",
+                row_marker: "box",
+                row_rule: Qt.alpha(Theme.theme_primary_light, 0.09),
+                corner_tick: Qt.alpha(Theme.theme_primary_light, 0.24),
+                tab_bg: Qt.alpha(Theme.theme_primary_light, 0.09),
+                tab_active_bg: Qt.tint(Theme.bg_core, Qt.alpha(Theme.theme_primary_strong, 0.55)),
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Qt.alpha(Theme.theme_primary_light, 0.66),
+                tab_caps: true,
+                tab_underline: Theme.theme_secondary,
+                tab_cut: 9,
+                key_bg: Qt.alpha(Theme.theme_secondary, 0.09),
+                key_fg: Theme.theme_secondary,
+                key_border: Qt.alpha(Theme.theme_secondary, 0.45),
+                key_cut: 4,
+                section_fg: Qt.alpha(Theme.theme_primary_light, 0.66),
+                section_rule: false,
+                section_fade: Qt.alpha(Theme.theme_primary_light, 0.24),
+                section_marker: Theme.theme_secondary,
+                label_caps: true,
+                label_spacing: 2.5,
+                footer_fg: Qt.alpha(Theme.theme_primary_light, 0.66),
+                footer_key_fg: Theme.bg_crust,
+                footer_key_bg: Theme.theme_primary_light,
+                footer_separator: "",
+                footer_rule_solid: true,
+                footer_rule_color: Qt.alpha(Theme.theme_primary_light, 0.24),
+                meter_on: Theme.theme_primary_light,
+                meter_off: Qt.alpha(Theme.theme_primary_light, 0.09),
+                meter_major: Qt.alpha(Theme.theme_primary_light, 0.24),
+                meter_hot: Theme.theme_label,
+                meter_height: 7,
+                slider_readout: true,
+                chart_fill: Theme.theme_primary_light,
+                title_bg: "transparent",
+                title_fg: Theme.fg_strong,
+                title_spacing: 3,
+                title_band: Qt.tint(Theme.bg_core, Qt.alpha(Theme.theme_primary_strong, 0.55)),
+                title_readout_fg: Qt.alpha(Theme.theme_primary_light, 0.66),
+                title_ids: {
+                    start: ["01", "HANGAR"],
+                    volume: ["02", "LOADOUT"],
+                    notifications: ["03", "COMMS"],
+                    weather: ["04", "RECON"],
+                    media: ["05", "AUDIO"],
+                    battery: ["06", "POWER"],
+                    system: ["07", "DIAG"],
+                    network: ["08", "UPLINK"],
+                    bluetooth: ["09", "LINK"],
+                    tray: ["10", "AUX"],
+                    updates: ["11", "PARTS"],
+                    keeptabs: ["12", "TABS"],
+                    clock: ["13", "CHRONO"],
+                    style: ["14", "PAINT"],
+                    osd: ["OSD", "OUTPUT"],
+                    whichkey: ["KEY", "BINDS"]
+                },
+                chip_brackets: false,
+                chip_bg: Qt.alpha(Theme.theme_primary_light, 0.09),
+                chip_active_bg: Theme.theme_secondary,
+                chip_active_fg: Theme.bg_crust,
+                chip_pick: Theme.theme_secondary,
+                chip_border: Qt.alpha(Theme.theme_primary_light, 0.24),
+                toggle_brackets: false,
+                toggle_on: Theme.theme_primary_light,
+                toggle_off: Qt.alpha(Theme.theme_primary_light, 0.5),
+                hazard: Theme.theme_secondary,
+                schematic: Qt.alpha(Theme.theme_primary_light, 0.16),
+                status_strip: true,
+                osd_readout: true,
+                card_channels: true,
+                weather_spec: true,
+                bar_font_family: "Barlow Condensed",
+                bar_font_size: Theme.font_size + 1,
+                bar_caps: true,
+                bar_letter_spacing: 1.5,
+                bar_side_bg: Theme.bg_crust,
+                bar_center_bg: Theme.bg_crust,
+                bar_fg: Theme.fg_core,
+                bar_clock_font: "Share Tech Mono",
+                bar_border_width: 2,
+                bar_border_color: Qt.alpha(Theme.theme_primary_light, 0.24),
+                bar_workspace_focused: Theme.theme_secondary,
+                bar_workspace_active: Qt.alpha(Theme.theme_primary_strong, 0.6),
+                bar_workspace_idle: Qt.alpha(Theme.theme_primary_light, 0.09),
+                bar_workspace_ring: Qt.alpha(Theme.theme_primary_light, 0.24),
+                bar_pill_square: true,
+                bar_hover_bg: Qt.alpha(Theme.theme_primary_light, 0.24)
             })
         };
     }
@@ -1035,6 +1211,7 @@ Singleton {
         o.title_font_family = o.title_font_family || o.font_family;
         o.number_font = o.number_font || o.font_family;
         o.label_font_family = o.label_font_family || o.font_family;
+        o.mono_font = o.mono_font || o.font_family;
         o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
         return o;
     }
@@ -1222,6 +1399,44 @@ Singleton {
     readonly property int title_weight: root.active.title_weight || 0
     readonly property color title_trail: root.active.title_trail || "transparent"
     readonly property color bar_ticks: root.bar.bar_ticks || "transparent"
+    // Readouts, keys and ids; empty uses font_family.
+    readonly property string mono_font: root.active.mono_font || root.font_family
+    // Top-left and bottom-right corners cut by this many px (ChamferFrame), with frame_notch px stepped notches.
+    readonly property real frame_cut: root.active.frame_cut
+    readonly property real frame_notch: root.active.frame_notch
+    // The middle of a frame_cut border's vertical fade; its ends are frame_border_color.
+    readonly property color frame_line: root.active.frame_line
+    readonly property color frame_marks: root.active.frame_marks
+    // A title strip with a tab-cut band in this color (TabHeader); title_ids maps popup names to [id, readout].
+    readonly property color title_band: root.active.title_band
+    readonly property var title_ids: root.active.title_ids
+    // "box" marks every row with a square, filled on the selected one; rows with a slot number show it instead.
+    readonly property string row_marker: root.active.row_marker
+    readonly property color row_rule: root.active.row_rule
+    readonly property color selection_rule: root.active.selection_rule
+    // A diagonal tick in the top-right corner of cards and the selected row.
+    readonly property color corner_tick: root.active.corner_tick
+    readonly property real key_cut: root.active.key_cut
+    readonly property color tab_bg: root.active.tab_bg
+    readonly property real tab_cut: root.active.tab_cut
+    readonly property color chip_bg: root.active.chip_bg
+    readonly property color section_marker: root.active.section_marker
+    // Every fifth unlit meter segment; meter_height 0 keeps the default height.
+    readonly property color meter_major: root.active.meter_major
+    readonly property real meter_height: root.active.meter_height
+    // Footer keys drawn as filled caps in footer_key_fg on this color.
+    readonly property color footer_key_bg: root.active.footer_key_bg
+    readonly property string footer_separator: root.active.footer_separator
+    readonly property bool footer_rule_solid: root.active.footer_rule_solid
+    readonly property bool slider_readout: root.active.slider_readout
+    // Hazard stripes on alert banners and critical cards.
+    readonly property color hazard: root.active.hazard
+    // Per-style layouts: Start's schematic and status strip, the OSD readout, channel cards, the weather spec sheet.
+    readonly property color schematic: root.active.schematic
+    readonly property bool status_strip: root.active.status_strip
+    readonly property bool osd_readout: root.active.osd_readout
+    readonly property bool card_channels: root.active.card_channels
+    readonly property bool weather_spec: root.active.weather_spec
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -1249,6 +1464,7 @@ Singleton {
     readonly property bool bar_workspace_diamond: root.bar.bar_workspace_diamond
     // Brackets around the bar clock's time.
     readonly property color bar_clock_brackets: root.bar.bar_clock_brackets
+    readonly property bool bar_pill_square: root.bar.bar_pill_square
     // An inner line along each island's slants and bottom edge.
     readonly property int bar_inset_gap: root.bar.bar_inset_gap
     readonly property int bar_inset_width: root.bar.bar_inset_width

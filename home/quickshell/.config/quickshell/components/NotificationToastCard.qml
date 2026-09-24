@@ -59,10 +59,10 @@ Rectangle {
 
     implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
     radius: Style.radius(8)
-    color: Style.frame_visor || Style.frame_octagon > 0 ? "transparent" : Style.boxed_cards
+    color: Style.frame_visor || Style.frame_octagon > 0 || Style.frame_cut > 0 ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: Style.frame_visor || Style.frame_octagon > 0 ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor || Style.frame_octagon > 0 || Style.frame_cut > 0 ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
@@ -106,8 +106,13 @@ Rectangle {
         border_color: root.selected ? Style.caret_color : Qt.alpha(root.accent, 0.5)
     }
 
+    ChamferFrame {
+        anchors.fill: parent
+        border_color: root.selected ? Style.caret_color : Style.frame_border_color
+    }
+
     FrameShade {
-        visible: Style.boxed_cards && Style.frame_shade.a > 0 && Style.frame_octagon <= 0
+        visible: Style.boxed_cards && Style.frame_shade.a > 0 && Style.frame_octagon <= 0 && Style.frame_cut <= 0
         anchors.fill: parent
         anchors.margins: root.border.width
         top_radius: Math.max(0, root.radius - root.border.width)
@@ -186,10 +191,10 @@ Rectangle {
 
     Rectangle {
         visible: root.selected && Style.selection_bar && !Style.frame_visor
-        x: 1
-        y: 1
+        x: 1 + (Style.frame_cut > 0 ? Style.inset_pad : 0)
+        y: x
         width: 2
-        height: root.height - 2
+        height: root.height - y * 2
         color: Style.caret_color
     }
 

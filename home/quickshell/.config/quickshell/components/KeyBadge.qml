@@ -17,8 +17,9 @@ Rectangle {
     width: implicitWidth
     height: implicitHeight
     radius: root.st.key_round ? height / 2 : Style.radius(3)
-    color: root.st.slant > 0 ? "transparent" : root.st.key_bg
-    border.width: root.st.slant > 0 ? 0 : 1
+    readonly property bool cut: root.st.key_cut > 0
+    color: root.st.slant > 0 || root.cut ? "transparent" : root.st.key_bg
+    border.width: root.st.slant > 0 || root.cut ? 0 : 1
     border.color: root.tinted ? root.st.tab_active_fg : root.st.key_border
 
     Slant {
@@ -28,13 +29,22 @@ Rectangle {
         border.color: root.border.color
     }
 
+    CutBox {
+        visible: root.cut
+        anchors.fill: parent
+        cut_tl: root.st.key_cut
+        cut_br: root.st.key_cut
+        fill: root.st.key_bg
+        stroke: root.tinted ? root.st.tab_active_fg : root.st.key_border
+    }
+
     Text {
         id: key_text
         anchors.centerIn: parent
         text: root.key
         color: root.tinted ? root.st.tab_active_fg : root.st.key_fg
-        font.family: root.st.font_family
+        font.family: root.st.mono_font
         font.pixelSize: root.st.font_size - 5
-        font.bold: true
+        font.bold: root.st.mono_font === root.st.font_family
     }
 }

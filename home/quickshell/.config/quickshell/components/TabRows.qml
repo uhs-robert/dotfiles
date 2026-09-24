@@ -34,9 +34,9 @@ ColumnLayout {
 
     FontMetrics {
         id: key_metrics
-        font.family: root.st.font_family
+        font.family: root.st.mono_font
         font.pixelSize: root.st.font_size - 5
-        font.bold: true
+        font.bold: root.st.mono_font === root.st.font_family
     }
 
     // Mirrors MenuTab and KeyBadge sizing so rows can be split before the tabs exist.

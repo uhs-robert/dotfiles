@@ -30,8 +30,20 @@ Rectangle {
     radius: root.is_chip && root.st.pill_chips ? height / 2 : Style.radius(root.base_radius)
     border.width: root.is_chip && root.st.pill_chips ? 1 : 0
     border.color: root.active ? root.st.chip_active_bg : root.st.chip_border
-    readonly property color fill: !root.active ? "transparent" : root.is_chip ? root.st.chip_active_bg : root.st.tab_active_bg
-    color: root.st.slant > 0 ? "transparent" : root.fill
+    readonly property color fill: !root.active ? (root.is_chip ? root.st.chip_bg : root.st.tab_bg) : root.is_chip ? root.st.chip_active_bg : root.st.tab_active_bg
+    readonly property real cut: root.is_chip ? root.st.key_cut : root.st.tab_cut
+    color: root.st.slant > 0 || root.cut > 0 ? "transparent" : root.fill
+
+    CutBox {
+        visible: root.cut > 0
+        anchors.fill: parent
+        cut_tl: root.is_chip ? root.cut : 0
+        cut_tr: root.is_chip ? 0 : root.cut
+        cut_br: root.is_chip ? root.cut : 0
+        fill: root.fill
+        fill_end: root.active && !root.is_chip ? Qt.alpha(root.fill, root.fill.a * 0.6) : root.fill
+        stroke: root.is_chip && !root.active ? root.st.chip_border : "transparent"
+    }
 
     Slant {
         visible: root.st.slant > 0 && root.active
