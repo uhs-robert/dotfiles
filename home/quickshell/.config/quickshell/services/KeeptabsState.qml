@@ -85,16 +85,6 @@ Singleton {
         }
     }
 
-    // TEMP debug, remove before PR: qs ipc call keeptabs_debug done
-    IpcHandler {
-        target: "keeptabs_debug"
-        function done(): void {
-            if (!root.runs.some(r => r.text.indexOf(root.done_glyph) >= 0))
-                root.runs = [{ text: root.done_glyph + " 1", color: "#A3E39A", rise: 0 }].concat(root.runs);
-            root.finished();
-        }
-    }
-
     Timer {
         id: restart_timer
         interval: 5000
