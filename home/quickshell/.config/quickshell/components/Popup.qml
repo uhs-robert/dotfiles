@@ -205,11 +205,15 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: Style.frame_chamfer > 0 ? "transparent" : Style.frame_follows_island ? root.held_color : Style.frame_color
+                color: Style.frame_chamfer > 0 || Style.frame_visor ? "transparent" : Style.frame_follows_island ? root.held_color : Style.frame_color
                 bottomLeftRadius: Style.frame_radius
                 bottomRightRadius: Style.frame_radius
-                border.width: Style.frame_border_width
+                border.width: Style.frame_visor ? 0 : Style.frame_border_width
                 border.color: Style.frame_border_color
+            }
+
+            VisorGlass {
+                anchors.fill: parent
             }
 
             Shape {
@@ -291,10 +295,10 @@ PanelWindow {
                 Text {
                     visible: root.has_title && Style.title_readout !== ""
                     anchors.right: parent.right
-                    anchors.rightMargin: 12 + root.bracket_pad
+                    anchors.rightMargin: 12 + root.bracket_pad + Style.inset_pad
                     y: title_tab.y + (title_tab.height - height) / 2
                     text: Style.title_readout
-                    color: Style.text_muted
+                    color: Style.title_readout_fg.a > 0 ? Style.title_readout_fg : Style.text_muted
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - 5
                     font.letterSpacing: 1

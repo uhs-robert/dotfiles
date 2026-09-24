@@ -59,10 +59,10 @@ Rectangle {
 
     implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
     radius: Style.radius(8)
-    color: Style.boxed_cards
+    color: Style.frame_visor ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
@@ -99,6 +99,11 @@ Rectangle {
             else if (exit_anim.action === "default") NotificationState.invoke_default(root.entry);
             else NotificationState.hide_toast(root.entry);
         }
+    }
+
+    VisorGlass {
+        anchors.fill: parent
+        border_color: root.selected ? Style.caret_color : Qt.alpha(root.accent, 0.5)
     }
 
     FrameShade {
@@ -150,7 +155,7 @@ Rectangle {
     }
 
     Rectangle {
-        visible: root.selected && Style.selection_bar
+        visible: root.selected && Style.selection_bar && !Style.frame_visor
         x: 1
         y: 1
         width: 2
