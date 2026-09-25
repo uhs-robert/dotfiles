@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "updates" as Updates
 
 Popup {
     id: root
@@ -16,7 +17,8 @@ Popup {
     key_help: "Tab views · j/k move · gg/G ends · r refresh · u upgrade · q close"
 
     readonly property int content_height: Style.px(320)
-    sub_views: ["Official (" + UpdatesState.official.length + ")", "AUR (" + UpdatesState.aur.length + ")"]
+    readonly property bool nes: root.st.console_skin === "nes"
+    sub_views: root.nes ? ["Official x" + UpdatesState.official.length, "AUR x" + UpdatesState.aur.length] : ["Official (" + UpdatesState.official.length + ")", "AUR (" + UpdatesState.aur.length + ")"]
     jumps_enabled: true
     readonly property var current_list: root.current_sub === 0 ? UpdatesState.official : UpdatesState.aur
 
@@ -101,7 +103,7 @@ Popup {
 
                 Text {
                     width: Math.min(implicitWidth, parent.width)
-                    text: UpdatesState.total + " update" + (UpdatesState.total === 1 ? "" : "s") + " · " + UpdatesState.official.length + " official, " + UpdatesState.aur.length + " AUR"
+                    text: root.nes ? "UPDATES x" + UpdatesState.total : UpdatesState.total + " update" + (UpdatesState.total === 1 ? "" : "s") + " · " + UpdatesState.official.length + " official, " + UpdatesState.aur.length + " AUR"
                     color: root.st.text_fg
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size
@@ -135,10 +137,18 @@ Popup {
                     font.pixelSize: root.st.font_size - 1
                 }
 
+                Loader {
+                    anchors.fill: parent
+                    active: root.nes && root.current_list.length > 0
+                    sourceComponent: Updates.NesInventory {
+                        popup: root
+                    }
+                }
+
                 ListView {
                     id: row_list
                     anchors.fill: parent
-                    visible: root.current_list.length > 0
+                    visible: root.current_list.length > 0 && !root.nes
                     clip: true
                     spacing: 4
                     model: root.current_list
