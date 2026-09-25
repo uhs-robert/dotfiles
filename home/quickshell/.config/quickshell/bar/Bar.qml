@@ -152,25 +152,35 @@ Item {
 
     // Lualine section c after the buffers: the focused app and a terminal's directory.
     Loader {
+        id: segment_loader
         active: Style.bar_lualine && root.left_entries.length > 0
         x: left_island.width
         anchors.verticalCenter: parent.verticalCenter
         sourceComponent: Neovim.WindowSegment {
             screen_name: root.screen_name
             bar_height: root.bar_height
-            max_width: Math.max(0, root.width - left_island.width - (right_island.visible ? right_island.width : 0) - 24 - (lualine_cava.shown ? lualine_cava.width + 12 : 0))
+            max_width: Math.max(0, root.section_c - 8 - (lualine_cava.shown ? lualine_cava.width + 16 : 0))
         }
     }
 
-    // Lualine has no center island: cava plays at the end of section c, left of the right island's cap.
+    // Lualine section c: from the left island's end to the right island's cap.
+    readonly property real section_c: (right_island.visible ? right_island.x : root.width) - (left_island.visible ? left_island.width : 0)
+
+    // Lualine has no center island: cava plays at the end of section c, left of the right island's cap,
+    // in whatever room the window segment's minimum leaves; under 48px it hides on this screen.
     Item {
         id: lualine_cava
-        readonly property bool shown: Style.bar_lualine && right_island.visible && MediaState.playing && Power.on_ac
-        visible: Style.bar_lualine && right_island.visible
+        readonly property real room: root.section_c - (segment_loader.item ? segment_loader.item.min_width : 0) - 16
+        readonly property bool shown: Style.bar_lualine && right_island.visible && MediaState.playing && Power.on_ac && lualine_cava.room >= 48
+        visible: lualine_cava.shown
         x: right_island.x - width - 8
-        width: 120
+        width: Math.max(0, Math.min(120, lualine_cava.room))
         height: root.bar_height
         anchors.verticalCenter: parent.verticalCenter
+
+        onShownChanged: CavaState.lualine_viewers += lualine_cava.shown ? 1 : -1
+        Component.onCompleted: if (lualine_cava.shown) CavaState.lualine_viewers += 1
+        Component.onDestruction: if (lualine_cava.shown) CavaState.lualine_viewers -= 1
 
         CavaBars {
             anchors.left: parent.left
@@ -183,7 +193,6 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            enabled: lualine_cava.shown
             onClicked: Popups.toggle("media", right_island.body_item, right_island.bg_color, root.screen_name)
         }
     }

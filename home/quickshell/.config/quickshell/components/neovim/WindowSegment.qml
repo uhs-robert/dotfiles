@@ -23,7 +23,10 @@ Item {
     readonly property string home: Quickshell.env("HOME")
 
     visible: root.app_name !== ""
-    implicitWidth: row.implicitWidth + 24
+    // Everything but the path, and the narrowest the segment gets: the app plus up to 120px of path.
+    readonly property real lead: 24 + app_text.implicitWidth + (root.cwd !== "" ? 22 : 0)
+    readonly property real min_width: root.visible ? root.lead + (root.cwd !== "" ? Math.min(path_text.implicitWidth, 120) : 0) : 0
+    implicitWidth: root.lead + (root.cwd !== "" ? path_text.width : 0)
     implicitHeight: root.bar_height
 
     function class_of(t) {
@@ -121,6 +124,7 @@ Item {
         spacing: 8
 
         Text {
+            id: app_text
             anchors.verticalCenter: parent.verticalCenter
             text: root.app_name
             color: Style.bar_fg
@@ -147,9 +151,10 @@ Item {
         }
 
         Text {
+            id: path_text
             visible: root.cwd !== ""
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(implicitWidth, Math.max(40, root.max_width - 24 - x))
+            width: Math.max(0, Math.min(implicitWidth, root.max_width - root.lead))
             elide: Text.ElideLeft
             text: root.cwd
             color: Style.text_dim
