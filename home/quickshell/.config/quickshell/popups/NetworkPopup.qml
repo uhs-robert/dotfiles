@@ -637,9 +637,10 @@ Popup {
                             // Console signal art in place of the glyph; SNES puts its gauge at the row's end.
                             Loader {
                                 id: signal_art
-                                active: !net_row.is_advanced && !!sourceComponent
+                                readonly property Component view: ({ nes: nes_signal, ps1: ps1_signal })[root.st.console_views] || null
+                                active: !net_row.is_advanced && !!view
                                 visible: active
-                                sourceComponent: ({ nes: nes_signal, ps1: ps1_signal })[root.st.console_views] || null
+                                sourceComponent: view
 
                                 Component {
                                     id: nes_signal

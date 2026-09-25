@@ -176,10 +176,11 @@ Popup {
 
             // Console clock screens above the calendar.
             Loader {
-                active: !!sourceComponent
+                readonly property Component view: ({ snes: snes_clock, ps1: ps1_clock, ps2: ps2_clock })[root.st.console_views] || null
+                active: !!view
                 visible: active
                 Layout.fillWidth: true
-                sourceComponent: ({ snes: snes_clock, ps1: ps1_clock, ps2: ps2_clock })[root.st.console_views] || null
+                sourceComponent: view
 
                 Component {
                     id: snes_clock

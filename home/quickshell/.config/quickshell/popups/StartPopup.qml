@@ -195,11 +195,12 @@ Popup {
         // Console menus replace the action rows.
         Loader {
             id: menu_view
-            active: !!sourceComponent
+            readonly property Component view: ({ nes: nes_menu, snes: snes_menu })[root.st.console_views] || null
+            active: !!view
             visible: !root.confirm
             anchors.left: parent.left
             anchors.right: parent.right
-            sourceComponent: ({ nes: nes_menu, snes: snes_menu })[root.st.console_views] || null
+            sourceComponent: view
         }
 
         Component {

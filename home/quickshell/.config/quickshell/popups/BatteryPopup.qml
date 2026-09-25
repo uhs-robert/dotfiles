@@ -160,10 +160,11 @@ Popup {
             // Console status views replace the readout lines.
             Loader {
                 id: status_view
-                active: !!sourceComponent
+                readonly property Component view: ({ snes: snes_status, ps1: ps1_status, ps2: ps2_status })[root.st.console_views] || null
+                active: !!view
                 visible: active
                 Layout.fillWidth: true
-                sourceComponent: ({ snes: snes_status, ps1: ps1_status, ps2: ps2_status })[root.st.console_views] || null
+                sourceComponent: view
             }
 
             Component {

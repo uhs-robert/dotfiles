@@ -189,9 +189,10 @@ Popup {
                 Loader {
                     id: list_view
                     anchors.fill: parent
-                    active: !!sourceComponent && root.current_list.length > 0
+                    readonly property Component view: ({ nes: nes_inventory, snes: snes_inventory, ps1: ps1_blocks })[root.st.console_views] || null
+                    active: !!view && root.current_list.length > 0
                     visible: active
-                    sourceComponent: ({ nes: nes_inventory, snes: snes_inventory, ps1: ps1_blocks })[root.st.console_views] || null
+                    sourceComponent: view
                 }
 
                 Component {
