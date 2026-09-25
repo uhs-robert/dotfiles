@@ -616,7 +616,6 @@ Singleton {
 
     readonly property var month_names: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-    // Formats a UTC instant as "H:MMam" (or 24h "HH:MM") in the forecast location's clock.
     // "until 6:00 AM", with the weekday when the end falls on another day at the location.
     function fmt_until(iso) {
         if (!iso) return "";
@@ -626,6 +625,7 @@ Singleton {
         return "until " + day + root.fmt_location_time(d);
     }
 
+    // Formats a UTC instant as "H:MMam" (or 24h "HH:MM") in the forecast location's clock.
     function fmt_location_time(date) {
         if (!date) return null;
         const shifted = new Date(date.getTime() + root.utc_offset * 1000);

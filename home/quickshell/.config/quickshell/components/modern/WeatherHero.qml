@@ -166,7 +166,7 @@ ColumnLayout {
                 Text {
                     Layout.fillWidth: true
                     elide: Text.ElideRight
-                    text: root.alert && root.alert.ends ? "until " + WeatherState.fmt_location_time(new Date(root.alert.ends)) : ""
+                    text: root.alert ? WeatherState.fmt_until(root.alert.ends) : ""
                     color: Style.text_dim
                     font.family: Style.mono_font
                     font.pixelSize: Style.font_size - 4
