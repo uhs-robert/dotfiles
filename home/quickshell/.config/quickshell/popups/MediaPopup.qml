@@ -8,6 +8,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "media" as Media
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -21,6 +22,7 @@ Popup {
     readonly property var player: MediaState.active
     readonly property var players: MediaState.players
     readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
+    readonly property bool ps2: Style.controller === "ps2"
 
     readonly property bool is_open: Popups.open_name === "media"
     onIs_openChanged: MediaState.tracking = root.is_open
@@ -249,7 +251,7 @@ Popup {
                         color: Theme.fg_core
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size + 5
-                        font.bold: true
+                        font.weight: root.ps2 ? Font.ExtraLight : Font.Bold
                     }
 
                     Text {
@@ -261,6 +263,7 @@ Popup {
                         color: Theme.theme_primary
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size
+                        font.weight: root.ps2 ? Font.Light : Font.Normal
                     }
 
                     Text {
@@ -272,6 +275,7 @@ Popup {
                         color: Style.text_dim
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size - 2
+                        font.weight: root.ps2 ? Font.Light : Font.Normal
                     }
 
                     Item { Layout.fillHeight: true }
@@ -306,11 +310,23 @@ Popup {
                             visible: progress_item.has_length && !Style.segmented_levels
                         }
 
+                        Loader {
+                            active: root.ps2
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: progress_item.has_length
+                            sourceComponent: Ps2.SphereTrack {
+                                sphere: Style.px(8)
+                                value: progress_item.ratio
+                            }
+                        }
+
                         Meter {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            visible: progress_item.has_length && Style.segmented_levels
+                            visible: progress_item.has_length && Style.segmented_levels && !root.ps2
                             segment_count: 40
                             implicitHeight: Style.px(8)
                             value: progress_item.ratio
