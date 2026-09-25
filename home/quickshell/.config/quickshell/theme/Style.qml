@@ -1896,6 +1896,7 @@ Singleton {
                     bar_font_family: "Maple Mono NF",
                     bar_font_size: Theme.font_size,
                     bar_clock_size: 17,
+                    bar_height: 32,
                     bar_side_bg: Theme.bg_surface,
                     bar_center_bg: Theme.bg_surface,
                     bar_fg: Theme.fg_core,
