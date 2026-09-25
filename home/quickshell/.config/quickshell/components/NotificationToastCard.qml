@@ -24,6 +24,8 @@ Rectangle {
     readonly property bool tile: Style.card_layout === "tile"
     // An nvim-notify window: border and title line in the level color.
     readonly property bool notify: Style.card_layout === "notify"
+    // Card layouts that draw their own surface behind the toast.
+    readonly property bool own_surface: root.dq || root.oasis || root.tile
     property real typed: 1
     readonly property string summary: root.notification ? root.notification.summary : ""
 
@@ -72,10 +74,10 @@ Rectangle {
 
     implicitHeight: layout.implicitHeight + (root.tile ? 28 : 16) + Style.inset_pad * 2
     radius: root.tile ? Style.frame_radius : root.notify ? 6 : Style.radius(8)
-    color: Style.frame_visor || Style.custom_frame || root.dq || root.oasis || root.tile ? "transparent" : Style.boxed_cards
+    color: Style.frame_visor || Style.custom_frame || root.own_surface ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: Style.frame_visor || Style.custom_frame || root.dq || root.oasis || root.tile ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor || Style.custom_frame || root.own_surface ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : root.notify ? Qt.tint(Style.frame_color, Qt.alpha(root.accent, 0.7)) : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
@@ -258,7 +260,7 @@ Rectangle {
     }
 
     Rectangle {
-        visible: !Style.boxed_cards && !root.oasis && !root.tile
+        visible: !Style.boxed_cards && !root.own_surface
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom

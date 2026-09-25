@@ -221,7 +221,7 @@ Item {
         }
 
         Rectangle {
-            visible: !Style.boxed_cards && Style.card_layout !== "oasis" && !root.tile
+            visible: !Style.boxed_cards && ["oasis", "tile"].indexOf(Style.card_layout) < 0
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
