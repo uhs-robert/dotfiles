@@ -14,3 +14,24 @@ function parse(text) {
         return { key: key, desc: g.slice(key.length).trim() };
     });
 }
+
+// Keyboard key -> controller button, per Style.controller; unmapped keys keep their badge.
+const pad_maps = {
+    snes: { "Enter": "a", "q": "b", "Esc": "b", "Backspace": "b", "Tab": "start", "[ ]": "lr", "t": "y", "?": "x", "j/k": "dpad_v", "h/l": "dpad_h" }
+};
+
+// A key's parts as { button, text }, e.g. "t/Enter" gives y then a; empty when no part maps.
+function pad_parts(controller, key) {
+    const map = pad_maps[controller];
+    if (!map) return [];
+    if (map[key]) return [{ button: map[key], text: key }];
+    const parts = [];
+    let hit = false;
+    for (const k of key.split("/")) {
+        const button = map[k] || "";
+        if (button !== "" && parts.some(p => p.button === button)) continue;
+        if (button !== "") hit = true;
+        parts.push({ button: button, text: k });
+    }
+    return hit ? parts : [];
+}
