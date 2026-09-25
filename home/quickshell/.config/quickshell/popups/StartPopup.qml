@@ -5,12 +5,13 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "snes" as Snes
 
 Popup {
     id: root
 
     popup_name: "start"
-    preferred_width: root.st.status_strip ? 235 : 180
+    preferred_width: root.st.status_strip ? 235 : root.st.console === "snes" ? 210 : 180
     footer_hint: root.confirm ? "y/Enter confirm · n/Esc back" : "j/k move · gg/G first/last · Enter run · 1-" + root.actions.length + " pick · q close"
     body_height: content.implicitHeight + 24
     jumps_enabled: !root.confirm
@@ -64,7 +65,7 @@ Popup {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: 12
-        implicitHeight: root.confirm ? confirm_row.implicitHeight : actions_col.implicitHeight + (strip_loader.active ? strip_loader.height + 10 : 0)
+        implicitHeight: root.confirm ? confirm_row.implicitHeight : (snes_menu.active ? snes_menu.implicitHeight : actions_col.implicitHeight) + (strip_loader.active ? strip_loader.height + 10 : 0)
         focus: true
 
         Loader {
@@ -112,7 +113,7 @@ Popup {
             anchors.right: parent.right
             anchors.top: parent.top
             spacing: 4
-            visible: !root.confirm
+            visible: !root.confirm && !snes_menu.active
 
             Repeater {
                 model: root.actions
@@ -155,6 +156,20 @@ Popup {
                         onClicked: root.choose(row.index)
                     }
                 }
+            }
+        }
+
+        Loader {
+            id: snes_menu
+            active: root.st.console === "snes"
+            visible: !root.confirm
+            anchors.left: parent.left
+            anchors.right: parent.right
+            sourceComponent: Snes.SnesStartView {
+                labels: root.actions
+                keys: root.keys
+                selected: root.selected
+                onPicked: index => root.choose(index)
             }
         }
 
