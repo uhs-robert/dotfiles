@@ -120,7 +120,9 @@ Popup {
 
     // Equal-width columns need the exact available width, not a guess, so the grid never clips.
     readonly property real grid_column_spacing: 4
-    readonly property real available_cell_width: (content.width - grid_column_spacing * 7) / 8
+    // The SNES calendar window keeps its cells clear of its border and drop shadow.
+    readonly property real calendar_inset: root.st.console_views === "snes" ? 10 : 0
+    readonly property real available_cell_width: (content.width - (root.calendar_inset > 0 ? root.calendar_inset * 2 + 3 : 0) - grid_column_spacing * 7) / 8
     readonly property int grid_font_size: available_cell_width < 20 ? root.st.font_size - 2 : root.st.font_size - 1
 
     Item {
@@ -160,9 +162,9 @@ Popup {
         // SNES: the zones and calendar sit in their own RPG window.
         Loader {
             active: root.st.console_views === "snes"
-            x: main_column.x + grid.x - 10
+            x: main_column.x
             y: main_column.y + zone_row.y - 8
-            width: grid.width + 20
+            width: main_column.width
             height: grid.y + grid.height - zone_row.y + 19
             sourceComponent: SnesParts.SnesWindow {}
         }
@@ -257,6 +259,8 @@ Popup {
                 id: grid
                 Layout.fillWidth: true
                 Layout.bottomMargin: root.st.console_views === "snes" ? 12 : 0
+                Layout.leftMargin: root.calendar_inset
+                Layout.rightMargin: root.calendar_inset > 0 ? root.calendar_inset + 3 : 0
                 columns: 8
                 rowSpacing: 4
                 columnSpacing: root.grid_column_spacing
