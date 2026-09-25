@@ -60,7 +60,7 @@ PanelWindow {
             rpg: { art: rpg_osd, hides: ["glyph", "meter", "percent"] },
             alert: { art: alert_osd, hides: ["glyph"] },
             glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) },
-            horizon: { art: horizon_osd, hides: ["glyph", "meter", "percent"], untitled: true, panel: true },
+            horizon: { art: horizon_osd, hides: ["glyph", "meter", "percent"], framed: true, untitled: true },
             tile: { art: tile_osd, hides: ["glyph", "meter", "percent"], framed: true, untitled: true }
         })[Style.osd_layout] || null
 
@@ -276,7 +276,7 @@ PanelWindow {
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         // Sized console art makes the frame near square, where a pill radius would round it into a circle; framed art keeps the frame radius.
-        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && (root.console_osd.size || root.console_osd.panel || root.console_osd.framed)) ? height / 2 : Style.frame_radius
+        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && (root.console_osd.size || root.console_osd.framed)) ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
         border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
