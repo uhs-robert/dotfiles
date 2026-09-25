@@ -6,6 +6,7 @@ import Quickshell.Services.UPower
 import "../components"
 import "../theme"
 import "../services"
+import "snes" as Snes
 
 Popup {
     id: root
@@ -140,7 +141,20 @@ Popup {
             anchors.top: parent.top
             spacing: 4
 
+            Loader {
+                active: root.st.console === "snes"
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Snes.SnesBatteryStatus {
+                    percent: root.percent
+                    state_label: root.state_label
+                    time_label: root.time_label
+                    rate: root.rate
+                }
+            }
+
             Text {
+                visible: root.st.console !== "snes"
                 text: Math.round(root.percent) + "%"
                 color: root.st.text_strong
                 font.family: root.st.font_family
@@ -148,6 +162,7 @@ Popup {
             }
 
             Text {
+                visible: root.st.console !== "snes"
                 text: root.state_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -155,7 +170,7 @@ Popup {
             }
 
             Text {
-                visible: root.time_label !== ""
+                visible: root.time_label !== "" && root.st.console !== "snes"
                 text: root.time_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -163,7 +178,7 @@ Popup {
             }
 
             Text {
-                visible: root.rate > 0
+                visible: root.rate > 0 && root.st.console !== "snes"
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted
                 font.family: root.st.font_family
