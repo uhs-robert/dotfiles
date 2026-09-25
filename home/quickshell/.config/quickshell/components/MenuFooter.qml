@@ -31,6 +31,8 @@ Item {
     readonly property bool searching: !!root.popup && root.popup.search_shown
     readonly property int match_count: root.searching ? root.popup.search_matches.length : 0
     readonly property int match_position: root.searching ? root.popup.search_matches.indexOf(root.popup.search_cursor) : -1
+    // Vim-modal popups (search_starts_open) show an INSERT chip and a mode-specific hint in the query line.
+    readonly property bool modal: !!root.popup && root.popup.search_starts_open
 
     Layout.minimumWidth: 0
     implicitWidth: hint.childrenRect.width
@@ -160,7 +162,18 @@ Item {
         height: query_text.implicitHeight
 
         Text {
+            id: mode_chip
+            visible: root.modal
+            text: "INSERT"
+            color: root.st.text_accent
+            font.family: root.st.font_family
+            font.pixelSize: root.text_px
+            font.bold: true
+        }
+
+        Text {
             id: slash_text
+            x: root.modal ? mode_chip.implicitWidth + 6 : 0
             text: "/"
             color: root.st.footer_key_bg.a > 0 ? root.st.footer_key_bg : root.st.footer_key_fg
             font.family: root.st.font_family
@@ -169,7 +182,7 @@ Item {
 
         Text {
             id: query_text
-            x: slash_text.implicitWidth + 2
+            x: slash_text.x + slash_text.implicitWidth + 2
             width: Math.min(implicitWidth, Math.max(0, status_text.x - x - 10))
             elide: Text.ElideLeft
             text: root.searching ? root.popup.search_query : ""
@@ -191,8 +204,8 @@ Item {
         Text {
             id: status_text
             anchors.right: parent.right
-            text: !root.searching || root.popup.search_query === "" ? "" : root.match_count === 0 ? "no match" : (root.match_position >= 0 ? root.match_position + 1 : "-") + "/" + root.match_count
-            color: root.match_count === 0 ? Theme.warning : root.st.footer_fg
+            text: !root.searching ? "" : root.popup.search_query === "" ? (root.modal ? KeyHints.with_glyphs("Enter") + " apply" : "") : root.match_count === 0 ? "no match" : (root.match_position >= 0 ? root.match_position + 1 : "-") + "/" + root.match_count
+            color: root.searching && root.popup.search_query !== "" && root.match_count === 0 ? Theme.warning : root.st.footer_fg
             font.family: root.st.font_family
             font.pixelSize: root.text_px
             font.capitalization: root.st.label_caps ? Font.AllUppercase : Font.MixedCase

@@ -21,11 +21,14 @@ Popup {
         if (is_open) root.selected = Math.max(0, Style.names.indexOf(Style.saved_name));
         else Style.preview(Style.saved_name);
     }
-    onSelectedChanged: if (is_open) Style.preview(Style.names[root.selected])
+    // Typing to find only highlights a row; NORMAL-mode navigation (j/k, gg/G, 1-9) still previews live.
+    onSelectedChanged: if (is_open && !root.search_typing) Style.preview(Style.names[root.selected])
     search_enabled: true
+    search_starts_open: true
     search_rows: Style.names.map(n => root.label(n))
     search_cursor: root.selected
     onSearch_select: index => root.selected = index
+    onSearch_accept: root.apply()
     onJump_first: root.selected = 0
     onJump_last: root.selected = Style.names.length - 1
 

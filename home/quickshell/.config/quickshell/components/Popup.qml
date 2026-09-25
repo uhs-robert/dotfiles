@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 import "Search.js" as Search
+import "../picker/Fuzzy.js" as Fuzzy
 import "neovim" as Neovim
 
 PanelWindow {
@@ -68,8 +69,36 @@ PanelWindow {
     signal search_select(int index)
     property string search_query: ""
     property bool search_typing: false
-    readonly property bool search_shown: root.search_enabled && (root.search_typing || root.search_query !== "")
-    readonly property var search_matches: root.search_shown ? Search.matches(root.search_rows, root.search_query) : []
+    // Opt-in: the popup opens straight into typing (INSERT), fuzzy-matches search_rows like the HyprVim
+    // prompt, and Esc leaves typing (NORMAL) without clearing the query rather than canceling the search.
+    property bool search_starts_open: false
+    signal search_accept()
+    readonly property bool search_shown: root.search_enabled && (root.search_starts_open ? root.search_typing : (root.search_typing || root.search_query !== ""))
+    readonly property var search_matches: root.search_shown ? (root.search_starts_open ? root.fuzzy_matches(root.search_rows, root.search_query) : Search.matches(root.search_rows, root.search_query)) : []
+
+    function fuzzy_matches(rows, query) {
+        const terms = Fuzzy.terms_of(query);
+        if (terms.length === 0) return [];
+        const found = [];
+        for (let i = 0; i < rows.length; i++) if (Fuzzy.score_item(terms, { label: rows[i] })) found.push(i);
+        return found;
+    }
+
+    // Highest-scoring row, or -1 when nothing matches.
+    function fuzzy_best(rows, query) {
+        const terms = Fuzzy.terms_of(query);
+        if (terms.length === 0) return -1;
+        let best = -1;
+        let best_score = -Infinity;
+        for (let i = 0; i < rows.length; i++) {
+            const m = Fuzzy.score_item(terms, { label: rows[i] });
+            if (m && m.score > best_score) {
+                best_score = m.score;
+                best = i;
+            }
+        }
+        return best;
+    }
     // The base footer is hidden in some styles; it then overlays the content's bottom edge while searching.
     readonly property bool search_overlay: root.search_shown && !root.has_footer && root.footer_hint !== ""
 
@@ -115,6 +144,13 @@ PanelWindow {
         search_input.forceActiveFocus();
     }
 
+    // Resumes typing without losing the query, for `i`/`/` back into INSERT on a search_starts_open popup.
+    function enter_search() {
+        root.search_typing = true;
+        search_input.forceActiveFocus();
+        search_input.cursorPosition = search_input.text.length;
+    }
+
     function clear_search() {
         const refocus = search_input.activeFocus;
         root.search_typing = false;
@@ -149,7 +185,9 @@ PanelWindow {
         if (root.key_help !== "" && root.is_help_key(event)) {
             help_open = true;
         } else if (root.search_enabled && (event.key === Qt.Key_Slash || event.text === "/")) {
-            root.open_search();
+            if (root.search_starts_open) root.enter_search(); else root.open_search();
+        } else if (root.search_starts_open && event.key === Qt.Key_I) {
+            root.enter_search();
         } else if (root.search_enabled && root.search_query !== "" && event.key === Qt.Key_N) {
             root.step_search(back ? -1 : 1);
         } else if (event.key === Qt.Key_Backspace && Popups.back_name !== "") {
@@ -320,10 +358,11 @@ PanelWindow {
             held_screen_name = Popups.open_screen_name;
             held_color = Popups.open_color;
             help_open = false;
-            clear_search();
+            if (!root.search_starts_open) clear_search();
             visible = true;
             open_anim.restart();
-            content_scope.forceActiveFocus();
+            if (root.search_starts_open) root.open_search();
+            else content_scope.forceActiveFocus();
         } else if (visible && passive && Popups.open_name !== "") {
             open_anim.stop();
             close_anim.stop();
@@ -780,16 +819,21 @@ PanelWindow {
                     onTextChanged: {
                         root.search_query = text;
                         if (root.search_typing && text !== "") {
-                            const i = Search.best(root.search_rows, text);
+                            const i = root.search_starts_open ? root.fuzzy_best(root.search_rows, text) : Search.best(root.search_rows, text);
                             if (i >= 0) root.search_select(i);
                         }
                     }
 
                     Keys.onPressed: event => {
-                        if (event.key === Qt.Key_Escape || (event.key === Qt.Key_Backspace && search_input.text === "")) {
-                            root.clear_search();
+                        if (event.key === Qt.Key_Escape) {
+                            if (root.search_starts_open) root.accept_search();
+                            else root.clear_search();
+                        } else if (event.key === Qt.Key_Backspace && search_input.text === "") {
+                            if (!root.search_starts_open) root.clear_search();
+                            else return;
                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            root.accept_search();
+                            if (root.search_starts_open) root.search_accept();
+                            else root.accept_search();
                         } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Up) {
                             root.step_search(event.key === Qt.Key_Down ? 1 : -1);
                         } else {
