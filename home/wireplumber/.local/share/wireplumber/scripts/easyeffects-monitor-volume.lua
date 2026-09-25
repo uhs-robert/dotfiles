@@ -1,6 +1,4 @@
--- Easy Effects creates its virtual sink with monitor.channel-volumes = false,
--- so sink volume never reaches the monitor Easy Effects reads audio from.
--- https://github.com/uhs-robert/dotfiles/issues/254
+-- Easy Effects reads its sink's monitor, which ignores the sink volume unless channel-volumes is on.
 
 log = Log.open_topic ("s-easyeffects-monitor-volume")
 
