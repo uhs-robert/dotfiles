@@ -175,7 +175,7 @@ Popup {
             Loader {
                 id: sink_ring
                 readonly property var sink_audio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
-                active: root.st.controller === "ps2" && !!sink_audio
+                active: root.st.console_views === "ps2" && !!sink_audio
                 visible: active
                 Layout.fillWidth: true
                 Layout.preferredHeight: active ? Style.px(112) : 0
@@ -217,7 +217,7 @@ Popup {
                     }
 
                     Loader {
-                        active: root.st.console === "snes"
+                        active: root.st.console_views === "snes"
                         visible: active
                         width: row_wrap.width
                         sourceComponent: Snes.SnesVolumeRow {
@@ -243,7 +243,7 @@ Popup {
 
                     MenuRow {
                         id: vol_row
-                        visible: root.st.console !== "snes"
+                        visible: root.st.console_views !== "snes"
                         width: row_wrap.width
                         height: Style.px(22)
                         selected: row_wrap.index === root.selected
@@ -337,7 +337,7 @@ Popup {
                             }
 
                             Text {
-                                visible: root.st.console_skin === "nes"
+                                visible: root.st.console_views === "nes"
                                 text: Math.round((row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0) * 100) + "%"
                                 color: vol_row.fg(root.st.text_fg)
                                 font.family: root.st.font_family

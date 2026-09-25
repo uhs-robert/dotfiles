@@ -49,11 +49,8 @@ Popup {
         return "";
     }
 
-    // An MGS LIFE-style gauge in place of the readout lines.
-    readonly property bool life_bar: root.st.console_views === "ps1"
-    readonly property bool ps2: root.st.controller === "ps2"
     property bool ppd_available: false
-    readonly property bool nes: root.st.console_skin === "nes"
+    readonly property bool nes: root.st.console_views === "nes"
     readonly property real status_indent: root.nes ? 22 : 0
     property int selected: 0
 
@@ -160,11 +157,18 @@ Popup {
             anchors.top: parent.top
             spacing: 4
 
+            // Console status views replace the readout lines.
             Loader {
-                active: root.st.console === "snes"
+                id: status_view
+                active: !!sourceComponent
                 visible: active
                 Layout.fillWidth: true
-                sourceComponent: Snes.SnesBatteryStatus {
+                sourceComponent: ({ snes: snes_status, ps1: ps1_status, ps2: ps2_status })[root.st.console_views] || null
+            }
+
+            Component {
+                id: snes_status
+                Snes.SnesBatteryStatus {
                     percent: root.percent
                     state_label: root.state_label
                     time_label: root.time_label
@@ -172,21 +176,17 @@ Popup {
                 }
             }
 
-            Loader {
-                active: root.life_bar
-                visible: active
-                Layout.fillWidth: true
-                sourceComponent: Ps1.LifeBar {
+            Component {
+                id: ps1_status
+                Ps1.LifeBar {
                     value: root.percent / 100
                     detail: [root.state_label.toUpperCase(), root.time_label, root.rate > 0 ? root.rate.toFixed(1) + " W" : ""].filter(t => t !== "").join("  ")
                 }
             }
 
-            Loader {
-                active: root.ps2
-                visible: active
-                Layout.fillWidth: true
-                sourceComponent: Column {
+            Component {
+                id: ps2_status
+                Column {
                     spacing: 0
 
                     Ps2.ConfigRow {
@@ -220,7 +220,7 @@ Popup {
             }
 
             Text {
-                visible: root.st.console !== "snes" && !root.life_bar && !root.ps2
+                visible: !status_view.active
                 Layout.leftMargin: root.status_indent
                 text: (root.nes ? "BAT " : "") + Math.round(root.percent) + "%"
                 color: root.st.text_strong
@@ -229,7 +229,7 @@ Popup {
             }
 
             Text {
-                visible: root.st.console !== "snes" && !root.life_bar && !root.ps2
+                visible: !status_view.active
                 Layout.leftMargin: root.status_indent
                 text: root.state_label
                 color: root.st.text_muted
@@ -238,7 +238,7 @@ Popup {
             }
 
             Text {
-                visible: root.time_label !== "" && root.st.console !== "snes" && !root.life_bar && !root.ps2
+                visible: root.time_label !== "" && !status_view.active
                 Layout.leftMargin: root.status_indent
                 text: root.time_label
                 color: root.st.text_muted
@@ -247,7 +247,7 @@ Popup {
             }
 
             Text {
-                visible: root.rate > 0 && root.st.console !== "snes" && !root.life_bar && !root.ps2
+                visible: root.rate > 0 && !status_view.active
                 Layout.leftMargin: root.status_indent
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted

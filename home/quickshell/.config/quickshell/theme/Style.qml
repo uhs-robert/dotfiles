@@ -215,9 +215,7 @@ Singleton {
             hand_cursor: false,
             meter_solid: false,
             controller: "",
-            console_skin: "",
             meter_art: ({}),
-            console: "",
             toast_enter: "",
             bar_hud_box: "transparent",
             console_views: ""
@@ -425,10 +423,8 @@ Singleton {
                 hand_cursor: false,
                 meter_solid: false,
                 controller: "",
-                console_skin: "",
-                meter_art: ({}),
-                console: "",
-                toast_enter: "",
+                    meter_art: ({}),
+                    toast_enter: "",
                 bar_hud_box: "transparent",
                 console_views: ""
             },
@@ -535,7 +531,8 @@ Singleton {
                 bar_inset_color: Theme.fg_strong,
                 card_layout: "dq",
                 controller: "nes",
-                console_skin: "nes",
+                console_views: "nes",
+                toast_enter: "type",
                 meter_art: ({ volume: "nes/HeartMeter.qml", battery: "nes/EnergyBar.qml", osd: "nes/EnergyBar.qml", media: "nes/PianoRoll.qml" })
             }),
             "snes": Object.assign({}, terminal, {
@@ -543,7 +540,7 @@ Singleton {
                 done_anim: "pixel",
                 weather_header: "mode7",
                 controller: "snes",
-                console: "snes",
+                console_views: "snes",
                 osd_layout: "rpg",
                 card_layout: "dialogue",
                 toast_enter: "mode7",
@@ -604,6 +601,7 @@ Singleton {
             }),
             "ps1": Object.assign({}, terminal, {
                 controller: "ps1",
+                toast_enter: "wobble",
                 console_views: "ps1",
                 osd_layout: "alert",
                 wait_anim: "alert",
@@ -902,7 +900,9 @@ Singleton {
                 bar_inset_color: Qt.alpha(Theme.theme_primary_light, 0.22),
                 card_layout: "dialog",
                 osd_layout: "glow",
-                controller: "ps2"
+                controller: "ps2",
+                console_views: "ps2",
+                toast_enter: "bloom"
             }),
             // TIE Fighter cockpit: large popups in the octagonal viewport, `small` ones the targeting computer.
             "tie": (() => {
@@ -1773,19 +1773,15 @@ Singleton {
     readonly property bool hand_cursor: root.active.hand_cursor
     // Meters as one continuous gauge (AtbBar) instead of segments.
     readonly property bool meter_solid: root.active.meter_solid
-    // Key badges and footer keys drawn as this console's buttons (components/<controller>/ControllerButton.qml).
+    // Key badges, footers and help draw this console's buttons (KeyHints.controller_maps, components/<console>/<Console>Button.qml).
     readonly property string controller: root.active.controller
-    // Per-module console views, e.g. the NES title menu, inventory grid and ? block workspaces.
-    readonly property string console_skin: root.active.console_skin
     // Meter art by popup name (or "osd"): a component path relative to components/ that replaces the segments.
     readonly property var meter_art: root.active.meter_art
-    // Console-specific popup views ("snes"); empty keeps the shared layouts.
-    readonly property string console: root.active.console
-    // Toast arrival: "" fades in, "mode7" also zooms in from a tilted distance once.
+    // Toast arrival: "" fades in; "type" slides and types, "mode7" zooms from a tilted plane, "wobble" settles, "bloom" glows, each once.
     readonly property string toast_enter: root.active.toast_enter
     // Bar readouts sit in HUD boxes outlined in this color.
     readonly property color bar_hud_box: root.bar.bar_hud_box
-    // Popups, toasts and bar pills swap in this console's module views (components/<console>/).
+    // Popups, toasts and bar modules swap in this console's views ("nes", "snes", "ps1", "ps2"); "" keeps the shared ones.
     readonly property string console_views: root.active.console_views
 
     property bool cava_line: true

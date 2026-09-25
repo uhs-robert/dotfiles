@@ -50,7 +50,7 @@ Popup {
 
     // The MGS codec: signal read out as a 140.xx frequency.
     readonly property bool codec: root.st.console_views === "ps1"
-    readonly property bool ps2: root.st.controller === "ps2"
+    readonly property bool ps2: root.st.console_views === "ps2"
     readonly property var wifi_glyphs: ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
 
     function signal_glyph(strength) {
@@ -634,31 +634,37 @@ Popup {
                             anchors.rightMargin: 6 + net_row.key_space
                             spacing: 6
 
+                            // Console signal art in place of the glyph; SNES puts its gauge at the row's end.
                             Loader {
-                                active: root.codec && !net_row.is_advanced
+                                id: signal_art
+                                active: !net_row.is_advanced && !!sourceComponent
                                 visible: active
-                                sourceComponent: Ps1.Digits {
-                                    text: Codec.freq(net_row.modelData.signalStrength)
-                                    size: root.st.font_size - 7
-                                    color: net_row.modelData.connected ? Theme.green : Qt.tint(Theme.green, Qt.alpha(root.st.text_dim, 0.5))
+                                sourceComponent: ({ nes: nes_signal, ps1: ps1_signal })[root.st.console_views] || null
+
+                                Component {
+                                    id: nes_signal
+                                    Nes.BlockMeter {
+                                        size: 12
+                                        value: net_row.modelData.signalStrength || 0
+                                    }
+                                }
+
+                                Component {
+                                    id: ps1_signal
+                                    Ps1.Digits {
+                                        text: Codec.freq(net_row.modelData.signalStrength)
+                                        size: root.st.font_size - 7
+                                        color: net_row.modelData.connected ? Theme.green : Qt.tint(Theme.green, Qt.alpha(root.st.text_dim, 0.5))
+                                    }
                                 }
                             }
 
                             Text {
-                                visible: !root.codec && !net_row.is_advanced && root.st.console_skin !== "nes" && root.st.console !== "snes"
+                                visible: !net_row.is_advanced && !signal_art.active && root.st.console_views !== "snes"
                                 text: root.signal_glyph(net_row.modelData.signalStrength || 0)
                                 color: net_row.fg(net_row.modelData.connected ? root.st.text_primary : root.st.text_fg)
                                 font.family: root.st.font_family
                                 font.pixelSize: root.st.font_size - 1
-                            }
-
-                            Loader {
-                                active: !net_row.is_advanced && root.st.console_skin === "nes"
-                                visible: active
-                                sourceComponent: Nes.BlockMeter {
-                                    size: 12
-                                    value: net_row.modelData.signalStrength || 0
-                                }
                             }
 
                             RowLabel {
@@ -695,7 +701,7 @@ Popup {
                             }
 
                             Loader {
-                                active: !net_row.is_advanced && root.st.console === "snes"
+                                active: !net_row.is_advanced && root.st.console_views === "snes"
                                 visible: active
                                 Layout.preferredWidth: Style.px(36)
                                 Layout.alignment: Qt.AlignVCenter

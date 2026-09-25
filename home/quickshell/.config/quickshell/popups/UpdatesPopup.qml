@@ -20,20 +20,18 @@ Popup {
     key_help: "Tab views · j/k move · gg/G ends · r refresh · u upgrade · q close"
 
     readonly property int content_height: Style.px(320)
-    readonly property bool nes: root.st.console_skin === "nes"
+    readonly property bool nes: root.st.console_views === "nes"
     sub_views: root.nes ? ["Official x" + UpdatesState.official.length, "AUR x" + UpdatesState.aur.length] : ["Official (" + UpdatesState.official.length + ")", "AUR (" + UpdatesState.aur.length + ")"]
     jumps_enabled: true
     readonly property var current_list: root.current_sub === 0 ? UpdatesState.official : UpdatesState.aur
 
     property int selected: 0
-    // A memory card block grid in place of the list.
-    readonly property bool blocks: root.st.console_views === "ps1"
 
     function reveal(index) {
-        if (root.blocks && block_loader.item) block_loader.item.reveal(index);
+        if (list_view.item && list_view.item.reveal) list_view.item.reveal(index);
         else row_list.positionViewAtIndex(index, ListView.Contain);
     }
-    readonly property bool ps2: root.st.controller === "ps2"
+    readonly property bool ps2: root.st.console_views === "ps2"
 
     readonly property bool is_open: Popups.open_name === "updates"
     onIs_openChanged: if (is_open) {
@@ -187,18 +185,25 @@ Popup {
                     font.pixelSize: root.st.font_size - 1
                 }
 
+                // Console grids replace the package list.
                 Loader {
+                    id: list_view
                     anchors.fill: parent
-                    active: root.nes && root.current_list.length > 0
-                    sourceComponent: Updates.NesInventory {
+                    active: !!sourceComponent && root.current_list.length > 0
+                    visible: active
+                    sourceComponent: ({ nes: nes_inventory, snes: snes_inventory, ps1: ps1_blocks })[root.st.console_views] || null
+                }
+
+                Component {
+                    id: nes_inventory
+                    Updates.NesInventory {
                         popup: root
                     }
                 }
 
-                Loader {
-                    anchors.fill: parent
-                    active: root.st.console === "snes" && root.current_list.length > 0
-                    sourceComponent: Snes.SnesInventory {
+                Component {
+                    id: snes_inventory
+                    Snes.SnesInventory {
                         items: root.current_list
                         selected: root.selected
                         aur: root.current_sub === 1
@@ -206,12 +211,9 @@ Popup {
                     }
                 }
 
-                Loader {
-                    id: block_loader
-                    anchors.fill: parent
-                    active: root.blocks && root.current_list.length > 0
-                    visible: active
-                    sourceComponent: Ps1.UpdateBlocks {
+                Component {
+                    id: ps1_blocks
+                    Ps1.UpdateBlocks {
                         packages: root.current_list
                         selected: root.selected
                         onPicked: index => root.selected = index
@@ -221,7 +223,7 @@ Popup {
                 ListView {
                     id: row_list
                     anchors.fill: parent
-                    visible: !root.blocks && root.current_list.length > 0 && !root.nes && root.st.console !== "snes"
+                    visible: root.current_list.length > 0 && !list_view.active
                     clip: true
                     spacing: 4
                     model: root.current_list

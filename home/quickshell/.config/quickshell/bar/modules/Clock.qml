@@ -30,7 +30,7 @@ Row {
     readonly property string time_text: root.zone_text === "" ? root.digits_text : root.digits_text + " " + root.zone_text
 
     // A Mario HUD line: TIME and WORLD captions, the date as month-day.
-    readonly property bool hud: Style.console_skin === "nes"
+    readonly property bool hud: Style.console_views === "nes"
     readonly property string date_text: root.hud ? Qt.formatDateTime(Timezones.shift(clock.date), "M-d") : Qt.formatDateTime(Timezones.shift(clock.date), "ddd MMM dd")
 
     // Proportional fonts would resize the island every tick; tabular digits and a width floor hold it still.

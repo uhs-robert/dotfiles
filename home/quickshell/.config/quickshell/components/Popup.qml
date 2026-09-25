@@ -628,7 +628,7 @@ PanelWindow {
                 }
 
                 Loader {
-                    active: root.has_title && !root.banded && !root.passive && root.st.controller === "ps2"
+                    active: root.has_title && !root.banded && !root.passive && root.st.console_views === "ps2"
                     visible: title_tab.x + title_tab.width + 10 <= x
                     anchors.right: parent.right
                     anchors.rightMargin: title_readout.anchors.rightMargin

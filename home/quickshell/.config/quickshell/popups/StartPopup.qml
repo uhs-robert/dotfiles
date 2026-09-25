@@ -14,7 +14,7 @@ Popup {
     id: root
 
     popup_name: "start"
-    preferred_width: root.st.status_strip ? 235 : root.st.console === "snes" ? 210 : 180
+    preferred_width: root.st.status_strip ? 235 : root.st.console_views === "snes" ? 210 : 180
     footer_hint: root.confirm ? "y/Enter confirm · n/Esc back" : "j/k move · gg/G first/last · Enter run · 1-" + root.actions.length + " pick · q close"
     body_height: content.implicitHeight + 24
     jumps_enabled: !root.confirm
@@ -69,11 +69,11 @@ Popup {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: 12
-        implicitHeight: root.confirm ? confirm_row.implicitHeight : (nes_menu.active ? nes_menu.implicitHeight : snes_menu.active ? snes_menu.implicitHeight : actions_col.implicitHeight) + (strip_loader.active ? strip_loader.height + 10 : 0)
+        implicitHeight: root.confirm ? confirm_row.implicitHeight : (menu_view.active ? menu_view.implicitHeight : actions_col.implicitHeight) + (strip_loader.active ? strip_loader.height + 10 : 0)
         focus: true
 
         Loader {
-            active: root.st.controller === "ps2"
+            active: root.st.console_views === "ps2"
             anchors.fill: parent
             anchors.margins: -12
             z: -2
@@ -125,7 +125,7 @@ Popup {
             anchors.right: parent.right
             anchors.top: parent.top
             spacing: root.bios ? 6 : 4
-            visible: !root.confirm && !nes_menu.active && !snes_menu.active
+            visible: !root.confirm && !menu_view.active
 
             Repeater {
                 model: root.actions
@@ -144,20 +144,22 @@ Popup {
                     hand: root.st.hand_cursor || root.bios
 
                     Loader {
-                        active: root.bios
                         anchors.fill: parent
                         z: -1
-                        sourceComponent: Ps1.BiosPanel {
-                            lit: row.selected
-                        }
-                    }
+                        sourceComponent: ({ ps1: bios_panel, ps2: ps2_block })[root.st.console_views] || null
 
-                    Loader {
-                        active: root.st.controller === "ps2"
-                        anchors.fill: parent
-                        z: -1
-                        sourceComponent: Ps2.Block {
-                            selected: row.selected
+                        Component {
+                            id: bios_panel
+                            Ps1.BiosPanel {
+                                lit: row.selected
+                            }
+                        }
+
+                        Component {
+                            id: ps2_block
+                            Ps2.Block {
+                                selected: row.selected
+                            }
                         }
                     }
 
@@ -190,23 +192,26 @@ Popup {
             }
         }
 
+        // Console menus replace the action rows.
         Loader {
-            id: nes_menu
-            active: root.st.console_skin === "nes"
+            id: menu_view
+            active: !!sourceComponent
             visible: !root.confirm
-            width: parent.width
-            sourceComponent: Start.NesMenu {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            sourceComponent: ({ nes: nes_menu, snes: snes_menu })[root.st.console_views] || null
+        }
+
+        Component {
+            id: nes_menu
+            Start.NesMenu {
                 popup: root
             }
         }
 
-        Loader {
+        Component {
             id: snes_menu
-            active: root.st.console === "snes"
-            visible: !root.confirm
-            anchors.left: parent.left
-            anchors.right: parent.right
-            sourceComponent: Snes.SnesStartView {
+            Snes.SnesStartView {
                 labels: root.actions
                 keys: root.keys
                 selected: root.selected

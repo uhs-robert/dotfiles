@@ -52,9 +52,16 @@ PanelWindow {
     readonly property bool ring_layout: Style.osd_layout === "ring" && !root.showing_vox
     readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
     readonly property bool hud_layout: Style.osd_layout === "hud" && !root.showing_vox
-    readonly property bool rpg_layout: Style.osd_layout === "rpg" && !root.showing_vox
-    readonly property bool alert_layout: Style.osd_layout === "alert" && !root.showing_vox
-    readonly property bool glow_layout: Style.osd_layout === "glow" && !root.showing_vox
+    // Console OSD art picked by osd_layout, with the default parts it replaces.
+    readonly property var console_osd: root.showing_vox ? null : ({
+            rpg: { art: rpg_osd, hides: ["glyph", "meter", "percent"] },
+            alert: { art: alert_osd, hides: ["glyph"] },
+            glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) }
+        })[Style.osd_layout] || null
+
+    function replaced(part) {
+        return !!root.console_osd && root.console_osd.hides.indexOf(part) >= 0;
+    }
 
     readonly property string title: root.showing_vox ? root.vox_phase.toUpperCase() : root.kind.toUpperCase()
 
@@ -108,7 +115,7 @@ PanelWindow {
         root.muted = new_muted;
         root.delta = Math.round(root.level * 100) - Math.round(prev * 100);
         root.hold_screen();
-        if (!root.level_wanted && alert_loader.item) alert_loader.item.pop();
+        if (!root.level_wanted && Style.osd_layout === "alert" && console_osd_loader.item) console_osd_loader.item.pop();
         root.level_wanted = true;
         root.refresh();
         hide_timer.restart();
@@ -384,31 +391,6 @@ PanelWindow {
                     }
                 }
 
-                Loader {
-                    Layout.alignment: Qt.AlignVCenter
-                    active: root.rpg_layout
-                    visible: active
-                    sourceComponent: Snes.SnesOsd {
-                        level: root.level
-                        percent: root.percent
-                        muted: root.muted
-                    }
-                }
-
-                Loader {
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.preferredWidth: Style.px(84)
-                    Layout.preferredHeight: Style.px(84)
-                    active: root.glow_layout
-                    visible: root.glow_layout
-                    sourceComponent: Ps2.GlowRing {
-                        value: root.level
-                        label: String(root.percent)
-                        caption: root.muted ? "Muted" : ""
-                        dimmed: root.muted
-                    }
-                }
-
                 OsdReadout {
                     visible: root.readout_layout
                     level: root.level
@@ -419,18 +401,17 @@ PanelWindow {
                 }
 
                 Loader {
-                    id: alert_loader
-                    active: root.alert_layout
+                    id: console_osd_loader
+                    active: !!root.console_osd
                     visible: active
                     Layout.alignment: Qt.AlignVCenter
-                    sourceComponent: Ps1.AlertMark {
-                        size: Theme.glyph_size + 10
-                        opacity: root.muted ? 0.5 : 1
-                    }
+                    Layout.preferredWidth: root.console_osd && root.console_osd.size ? root.console_osd.size : -1
+                    Layout.preferredHeight: root.console_osd && root.console_osd.size ? root.console_osd.size : -1
+                    sourceComponent: root.console_osd ? root.console_osd.art : null
                 }
 
                 Text {
-                    visible: !root.readout_layout && !root.rpg_layout && !root.alert_layout
+                    visible: !root.readout_layout && !root.replaced("glyph")
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: Theme.glyph_size + 4
                     horizontalAlignment: Text.AlignHCenter
@@ -442,7 +423,7 @@ PanelWindow {
                 }
 
                 Item {
-                    visible: !root.readout_layout && !root.rpg_layout && !root.glow_layout
+                    visible: !root.readout_layout && !root.replaced("meter")
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: root.showing_vox ? Style.px(260) : Style.px(180)
                     Layout.preferredHeight: root.showing_vox ? Style.px(44) : meter.implicitHeight
@@ -468,7 +449,7 @@ PanelWindow {
                 }
 
                 Text {
-                    visible: !root.readout_layout && !root.ring_layout && !root.rpg_layout && !root.glow_layout
+                    visible: !root.readout_layout && !root.ring_layout && !root.replaced("percent")
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight
@@ -478,6 +459,33 @@ PanelWindow {
                     font.pixelSize: percent_metrics.font.pixelSize
                     font.bold: Style.number_font !== Style.font_family
                 }
+            }
+        }
+
+        Component {
+            id: rpg_osd
+            Snes.SnesOsd {
+                level: root.level
+                percent: root.percent
+                muted: root.muted
+            }
+        }
+
+        Component {
+            id: alert_osd
+            Ps1.AlertMark {
+                size: Theme.glyph_size + 10
+                opacity: root.muted ? 0.5 : 1
+            }
+        }
+
+        Component {
+            id: glow_osd
+            Ps2.GlowRing {
+                value: root.level
+                label: String(root.percent)
+                caption: root.muted ? "Muted" : ""
+                dimmed: root.muted
             }
         }
 

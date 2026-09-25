@@ -86,7 +86,7 @@ Item {
         id: card
         anchors.left: parent.left
         anchors.right: parent.right
-        implicitHeight: layout.implicitHeight + (Style.card_layout === "dq" ? 28 : 20) + (root.dialogue ? 3 : 0)
+        implicitHeight: layout.implicitHeight + 20 + (({ dq: 8, dialogue: 3 })[Style.card_layout] || 0)
         radius: Style.radius(8)
         color: Style.card_layout !== "" ? "transparent" : Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
         border.width: Style.card_layout !== "" ? 0 : 1
@@ -97,47 +97,16 @@ Item {
             shown: root.selected
         }
 
+        // Console windows behind the card, one per card_layout.
         Loader {
-            active: root.dialog
             anchors.fill: parent
             z: -1
-            sourceComponent: Ps2.DialogPanel {
-                selected: root.selected
-                accent: root.critical ? Theme.error : Theme.theme_primary_light
-            }
+            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card })[Style.card_layout] || null
         }
 
         CardRule {
             visible: Style.card_layout === "rule"
             selected: root.selected
-        }
-
-        Loader {
-            active: Style.card_layout === "dq"
-            anchors.fill: parent
-            sourceComponent: Weather.DqWindow {
-                border.color: root.selected ? Style.caret_color : Theme.fg_strong
-
-                Text {
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.rightMargin: 10
-                    anchors.bottomMargin: 8
-                    opacity: !root.selected || Style.caret_phase ? 1 : 0
-                    text: "\u25bc"
-                    color: root.selected ? Style.caret_color : Theme.fg_strong
-                    font.family: Style.font_family
-                    font.pixelSize: 8
-                }
-            }
-        }
-
-        Loader {
-            active: root.dialogue
-            anchors.fill: parent
-            sourceComponent: Snes.SnesWindow {
-                lit: root.selected
-            }
         }
 
         HandCursor {
@@ -451,6 +420,40 @@ Item {
                 root.select_requested();
                 root.invoke_requested();
             }
+        }
+    }
+
+    Component {
+        id: dq_card
+        Weather.DqWindow {
+            border.color: root.selected ? Style.caret_color : Theme.fg_strong
+
+            Text {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 10
+                anchors.bottomMargin: 8
+                opacity: !root.selected || Style.caret_phase ? 1 : 0
+                text: "\u25bc"
+                color: root.selected ? Style.caret_color : Theme.fg_strong
+                font.family: Style.font_family
+                font.pixelSize: 8
+            }
+        }
+    }
+
+    Component {
+        id: dialogue_card
+        Snes.SnesWindow {
+            lit: root.selected
+        }
+    }
+
+    Component {
+        id: dialog_card
+        Ps2.DialogPanel {
+            selected: root.selected
+            accent: root.critical ? Theme.error : Theme.theme_primary_light
         }
     }
 }

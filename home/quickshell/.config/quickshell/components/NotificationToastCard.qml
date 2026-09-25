@@ -15,7 +15,7 @@ Rectangle {
     property bool selected: false
     property int focused_action: -1
     readonly property var notification: root.entry ? root.entry.notification : null
-    // A Dragon Quest window that slides in and types its summary out once.
+    // A Dragon Quest window; toast_enter "type" types its summary out once.
     readonly property bool dq: Style.card_layout === "dq"
     property real typed: 1
     readonly property string summary: root.notification ? root.notification.summary : ""
@@ -72,69 +72,58 @@ Rectangle {
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
-    readonly property string console_views: Style.console_views
-
     opacity: 0
     Component.onCompleted: {
         enter_anim.start();
-        if (Style.toast_enter === "mode7") mode7_enter.start();
-        if (root.dq) {
-            root.typed = 0;
-            dq_anim.start();
-        }
-        if (root.console_views === "ps1") wobble_anim.start();
+        if (Style.toast_enter === "type") root.typed = 0;
+        const arrival = ({ type: type_enter, mode7: mode7_enter, wobble: wobble_enter })[Style.toast_enter];
+        if (arrival) arrival.start();
     }
 
     transform: [
         Rotation {
-            id: mode7_tilt
-            origin.x: root.width / 2
-            origin.y: root.height
-            axis { x: 1; y: 0; z: 0 }
+            id: enter_tilt
+            readonly property bool plane: Style.toast_enter === "mode7"
+            origin.x: enter_tilt.plane ? root.width / 2 : root.width
+            origin.y: enter_tilt.plane ? root.height : 0
+            axis { x: enter_tilt.plane ? 1 : 0; y: 0; z: enter_tilt.plane ? 0 : 1 }
         },
         Scale {
-            id: mode7_zoom
+            id: enter_zoom
             origin.x: root.width / 2
             origin.y: root.height / 2
         },
         Translate {
-            id: slide_shift
-        },
-        Rotation {
-            id: wobble_tilt
-            origin.x: root.width
-            origin.y: 0
-        },
-        Translate {
-            id: wobble_shift
+            id: enter_shift
         }
     ]
 
-    // Flies in once from a small, tilted-back plane to flat, then stays still.
+    // Slides in, then types the summary out once.
+    SequentialAnimation {
+        id: type_enter
+        NumberAnimation { target: enter_shift; property: "x"; from: (root.parent ? root.parent.width : 400) + 16; to: 0; duration: 240; easing.type: Easing.OutCubic }
+        NumberAnimation { target: root; property: "typed"; from: 0; to: 1; duration: Math.min(1200, root.summary.length * 35) }
+    }
+
+    // Flies in once from a small, tilted-back plane to flat.
     ParallelAnimation {
         id: mode7_enter
-        NumberAnimation { target: mode7_tilt; property: "angle"; from: 70; to: 0; duration: 420; easing.type: Easing.OutCubic }
-        NumberAnimation { target: mode7_zoom; property: "xScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
-        NumberAnimation { target: mode7_zoom; property: "yScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
+        NumberAnimation { target: enter_tilt; property: "angle"; from: 70; to: 0; duration: 420; easing.type: Easing.OutCubic }
+        NumberAnimation { target: enter_zoom; property: "xScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
+        NumberAnimation { target: enter_zoom; property: "yScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
     }
 
     // A PS1 affine wobble: slides in tilted and settles through a few overshoots.
     ParallelAnimation {
-        id: wobble_anim
+        id: wobble_enter
 
-        NumberAnimation { target: wobble_shift; property: "x"; from: 64; to: 0; duration: 260; easing.type: Easing.OutBack }
+        NumberAnimation { target: enter_shift; property: "x"; from: 64; to: 0; duration: 260; easing.type: Easing.OutBack }
 
         SequentialAnimation {
-            NumberAnimation { target: wobble_tilt; property: "angle"; from: 7; to: -3; duration: 140; easing.type: Easing.OutQuad }
-            NumberAnimation { target: wobble_tilt; property: "angle"; to: 1.5; duration: 90 }
-            NumberAnimation { target: wobble_tilt; property: "angle"; to: 0; duration: 80 }
+            NumberAnimation { target: enter_tilt; property: "angle"; from: 7; to: -3; duration: 140; easing.type: Easing.OutQuad }
+            NumberAnimation { target: enter_tilt; property: "angle"; to: 1.5; duration: 90 }
+            NumberAnimation { target: enter_tilt; property: "angle"; to: 0; duration: 80 }
         }
-    }
-
-    SequentialAnimation {
-        id: dq_anim
-        NumberAnimation { target: slide_shift; property: "x"; from: (root.parent ? root.parent.width : 400) + 16; to: 0; duration: 240; easing.type: Easing.OutCubic }
-        NumberAnimation { target: root; property: "typed"; from: 0; to: 1; duration: Math.min(1200, root.summary.length * 35) }
     }
 
     Loader {
@@ -151,13 +140,13 @@ Rectangle {
         property: "opacity"
         from: 0
         to: 1
-        duration: Style.controller === "ps2" ? 420 : 180
+        duration: Style.toast_enter === "bloom" ? 420 : 180
         easing.type: Easing.OutCubic
     }
 
     // The PS2 bloom: a soft light that swells in with the card and fades once.
     Loader {
-        active: Style.controller === "ps2"
+        active: Style.toast_enter === "bloom"
         anchors.fill: parent
         z: 2
         sourceComponent: Rectangle {
@@ -334,7 +323,7 @@ Rectangle {
         spacing: 8
 
         Loader {
-            active: root.console_views === "ps1"
+            active: Style.console_views === "ps1"
             visible: active
             Layout.alignment: Qt.AlignTop
             sourceComponent: Ps1.CodecPortrait {
@@ -347,7 +336,7 @@ Rectangle {
             Layout.alignment: Qt.AlignTop
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
-            visible: root.console_views !== "ps1" && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+            visible: Style.console_views !== "ps1" && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
             source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
             fillMode: Image.PreserveAspectFit
         }

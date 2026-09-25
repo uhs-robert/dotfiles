@@ -94,10 +94,10 @@ Item {
                 readonly property bool is_empty: modelData.toplevels.values.length === 0
                 readonly property bool diamond: Style.bar_workspace_diamond && is_empty
                 // Mario ? blocks; the focused workspace is the one already hit.
-                readonly property bool qblock: Style.console_skin === "nes"
+                readonly property bool qblock: Style.console_views === "nes"
 
                 readonly property real slot_space: root.slots ? slot_text.implicitWidth + 6 : 0
-                readonly property bool ps2: Style.controller === "ps2"
+                readonly property bool ps2: Style.console_views === "ps2"
 
                 height: root.pill_height
                 width: is_empty ? Math.max(height, pill.slot_space + 6) : icons.implicitWidth + (modelData.active ? 22 : 12) + pill.slot_space
