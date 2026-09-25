@@ -246,7 +246,7 @@ Popup {
                         visible: active
                         width: row_wrap.width
                         sourceComponent: Snes.SnesVolumeRow {
-                            readonly property var audio: row_wrap.modelData.node.audio
+                            readonly property var audio: row_wrap.modelData.node?.audio
                             label: root.row_label(row_wrap.modelData)
                             key: root.row_key(row_wrap.index)
                             selected: row_wrap.index === root.selected
@@ -364,9 +364,9 @@ Popup {
                                 Layout.preferredHeight: Style.px(12)
                                 sourceComponent: Ps1.VuMeter {
                                     levels: root.channel_levels(row_wrap.modelData.node)
-                                    muted: !!row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted
+                                    muted: !!row_wrap.modelData.node?.audio && row_wrap.modelData.node?.audio.muted
                                     onMoved: v => {
-                                        if (row_wrap.modelData.node.audio) row_wrap.modelData.node.audio.volume = v;
+                                        if (row_wrap.modelData.node?.audio) row_wrap.modelData.node.audio.volume = v;
                                     }
                                 }
                             }
@@ -375,22 +375,22 @@ Popup {
                                 visible: !root.cd
                                 Layout.fillWidth: true
                                 on_selection: vol_row.selected
-                                value: row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0
+                                value: row_wrap.modelData.node?.audio ? row_wrap.modelData.node?.audio.volume : 0
                                 onMoved: v => {
-                                    if (row_wrap.modelData.node.audio) row_wrap.modelData.node.audio.volume = v;
+                                    if (row_wrap.modelData.node?.audio) row_wrap.modelData.node.audio.volume = v;
                                 }
                             }
 
                             Text {
                                 visible: root.st.console_views === "nes"
-                                text: Math.round((row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0) * 100) + "%"
+                                text: Math.round((row_wrap.modelData.node?.audio ? row_wrap.modelData.node?.audio.volume : 0) * 100) + "%"
                                 color: vol_row.fg(root.st.text_fg)
                                 font.family: root.st.font_family
                                 font.pixelSize: root.st.fs(-4)
                             }
 
                             Text {
-                                text: row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted ? "" : ""
+                                text: row_wrap.modelData.node?.audio && row_wrap.modelData.node?.audio.muted ? "" : ""
                                 color: vol_row.fg(root.st.text_primary)
                                 font.family: root.st.font_family
                                 font.pixelSize: root.st.fs(-1)
