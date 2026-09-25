@@ -16,6 +16,7 @@ Rectangle {
     property bool with_key: false
     // A bare key with no cap, e.g. a tab's jump digit.
     property bool plain: false
+    property int font_px: 0
     readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, root.key, root.desc).length > 0
     readonly property bool tinted: root.on_fill && root.st.key_bg.a === 0 && !root.orb
 
@@ -88,7 +89,7 @@ Rectangle {
         text: root.key
         color: root.tinted ? root.st.tab_active_fg : root.st.key_fg
         font.family: root.st.mono_font
-        font.pixelSize: root.st.font_size - 5
+        font.pixelSize: root.font_px > 0 ? root.font_px : root.st.font_size - 5
         font.bold: root.orb || root.st.mono_font === root.st.font_family
     }
 }

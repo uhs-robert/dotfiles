@@ -28,8 +28,9 @@ PanelWindow {
     readonly property bool has_footer: Style.show_footer && root.footer_hint !== ""
 
     readonly property int gap: Style.px(18)
-    readonly property int row_height: Style.px(22)
-    readonly property int text_size: Style.font_size - 2
+    readonly property int text_size: Style.whichkey_size > 0 ? Style.whichkey_size : Style.font_size - 2
+    readonly property int key_size: Style.whichkey_size > 0 ? Style.whichkey_size : Style.font_size - 5
+    readonly property int row_height: Math.max(Style.px(22), root.text_size + Style.px(8))
     readonly property real screen_width: root.screen ? root.screen.width : 1920
     readonly property real screen_height: root.screen ? root.screen.height : 1080
 
@@ -112,7 +113,7 @@ PanelWindow {
     TextMetrics {
         id: key_metrics
         font.family: Style.mono_font
-        font.pixelSize: Style.font_size - 5
+        font.pixelSize: root.key_size
         font.bold: Style.mono_font === Style.font_family
         text: root.longest_key
     }
@@ -130,6 +131,7 @@ PanelWindow {
                 required property var modelData
                 key: modelData.key
                 desc: modelData.desc || ""
+                font_px: Style.whichkey_size
             }
         }
     }
@@ -345,6 +347,7 @@ PanelWindow {
                                 anchors.verticalCenter: parent.verticalCenter
                                 key: row.modelData.key
                                 desc: row.modelData.desc || ""
+                                font_px: Style.whichkey_size
                             }
 
                             Text {

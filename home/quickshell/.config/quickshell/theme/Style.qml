@@ -261,6 +261,7 @@ Singleton {
             section_fold: false,
             footer_arrow: "",
             footer_italic: false,
+            whichkey_size: 0,
             meter_gap: 2,
             bar_lualine: false
         };
@@ -507,6 +508,7 @@ Singleton {
                 section_fold: false,
                 footer_arrow: "",
                 footer_italic: false,
+                whichkey_size: 0,
                 meter_gap: 2,
                 bar_lualine: false
             },
@@ -1880,6 +1882,7 @@ Singleton {
                     footer_separator: "",
                     footer_arrow: "\u279c",
                     footer_italic: true,
+                    whichkey_size: 16,
                     meter_on: Theme.theme_primary,
                     meter_off: Theme.bg_surface,
                     meter_hot: Theme.theme_label,
@@ -2242,6 +2245,8 @@ Singleton {
     // Drawn between each footer key and its description.
     readonly property string footer_arrow: root.active.footer_arrow
     readonly property bool footer_italic: root.active.footer_italic
+    // Which-key keys and labels in px; 0 keeps the popup-derived sizes.
+    readonly property int whichkey_size: root.active.whichkey_size
     readonly property real meter_gap: root.active.meter_gap
 
     property bool cava_line: true
