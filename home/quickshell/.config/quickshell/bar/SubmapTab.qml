@@ -32,7 +32,8 @@ PanelWindow {
 
         function onSubmap_nameChanged() {
             if (!root.bar_present) return;
-            if (SubmapState.active) {
+            // A lualine bar shows the submap in its mode chip instead.
+            if (SubmapState.active && !Style.bar_lualine) {
                 root.shown_name = SubmapState.submap_name;
                 root.shown_color = SubmapState.submap_color;
                 hide_anim.stop();

@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import "../../theme"
 import "../../services"
+import "../../components/neovim" as Neovim
 
 Item {
     id: root
@@ -12,10 +13,22 @@ Item {
     property Item island: null
     property color island_color: "transparent"
 
-    implicitWidth: icon.implicitSize
-    implicitHeight: icon.implicitSize
+    // Lualine: the button is the HyprVim mode chip, full bar height.
+    readonly property bool lualine: Style.bar_lualine
+    implicitWidth: root.lualine && chip_loader.item ? chip_loader.item.implicitWidth : icon.implicitSize
+    implicitHeight: root.lualine ? (root.island ? root.island.height : 30) : icon.implicitSize
+
+    Loader {
+        id: chip_loader
+        active: root.lualine
+        anchors.fill: parent
+        sourceComponent: Neovim.ModeChip {
+            hovered: hover_handler.hovered
+        }
+    }
 
     Rectangle {
+        visible: !root.lualine
         anchors.fill: parent
         anchors.margins: -6
         radius: Style.bar_radius(4)
@@ -30,6 +43,7 @@ Item {
     // Load the SVG file directly: the icon provider returns a small raster that blurs when scaled.
     Image {
         id: icon
+        visible: !root.lualine
         readonly property int implicitSize: root.compact ? 26 : 30
         readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
 

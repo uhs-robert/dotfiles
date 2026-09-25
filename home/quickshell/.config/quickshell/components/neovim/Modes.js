@@ -1,0 +1,16 @@
+// home/quickshell/.config/quickshell/components/neovim/Modes.js
+.pragma library
+
+// The Neovim mode family of a Hyprland submap name; "" is the global (reset) submap.
+function kind(name) {
+    const n = (name || "").toUpperCase();
+    if (n === "" || n === "NORMAL" || n === "GOTO") return "normal";
+    if (n === "INSERT") return "insert";
+    if (n === "VISUAL" || n === "G-VISUAL" || n === "G-VLINE" || n.startsWith("V-")) return "visual";
+    if (n === "R-CHAR") return "replace";
+    return "submap";
+}
+
+function label(name) {
+    return name === "" ? "HYPR" : name.toUpperCase();
+}

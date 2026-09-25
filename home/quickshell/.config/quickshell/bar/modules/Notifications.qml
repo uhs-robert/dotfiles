@@ -46,7 +46,9 @@ Item {
             Text {
                 id: glyph
                 text: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
-                color: NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
+                // Lualine puts this module in section z, on the primary.
+                color: Style.bar_lualine ? Theme.bg_crust : NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
+                opacity: Style.bar_lualine && NotificationState.dnd ? 0.55 : 1
                 font.family: Style.bar_font_family
                 style: Style.bar_text_style
                 styleColor: Style.bar_glow_color
