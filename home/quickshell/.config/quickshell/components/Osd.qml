@@ -50,6 +50,8 @@ PanelWindow {
     }
 
     readonly property bool showing_vox: root.content === "voxtype"
+    // Metroid's volume meter is the visor level row with the default sink's live wave.
+    readonly property bool visor_wave: Style.level_layout === "visor" && !root.showing_vox && root.kind === "volume"
     readonly property bool vox_recording: root.showing_vox && root.vox_phase === "recording"
     readonly property bool readout_layout: Style.osd_layout === "readout" && !root.showing_vox
     readonly property bool ring_layout: Style.osd_layout === "ring" && !root.showing_vox
@@ -467,13 +469,25 @@ PanelWindow {
                     visible: !root.readout_layout && !root.replaced("meter")
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: root.showing_vox ? Style.px(260) : Style.px(180)
-                    Layout.preferredHeight: root.showing_vox ? Style.px(44) : meter.implicitHeight
+                    Layout.preferredHeight: root.showing_vox ? Style.px(44) : root.visor_wave ? Style.px(24) : meter.implicitHeight
+
+                    Modern.CapsuleSlider {
+                        visible: root.visor_wave
+                        width: parent.width
+                        height: parent.height
+                        value: root.level
+                        muted: root.muted
+                        interactive: false
+                        show_readout: false
+                        node: root.sink
+                        peaks_on: root.visor_wave && root.wanted && root.visible && Power.on_ac
+                    }
 
                     Meter {
                         id: meter
                         // Volume OSD matches the Volume popup's art (hearts on NES); brightness keeps its own.
                         art_key: root.kind === "volume" ? "volume" : "osd"
-                        visible: !root.showing_vox
+                        visible: !root.showing_vox && !root.visor_wave
                         width: parent.width
                         anchors.verticalCenter: parent.verticalCenter
                         value: root.showing_vox ? 0 : root.level

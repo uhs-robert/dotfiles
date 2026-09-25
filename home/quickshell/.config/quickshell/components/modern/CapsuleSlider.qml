@@ -34,12 +34,33 @@ Item {
 
     readonly property real level: Math.max(0, Math.min(1, root.value))
     readonly property real fill_width: root.width * root.level
-    readonly property real radius: root.slanted ? 0 : height / 2
+    readonly property real radius: root.shaped ? 0 : height / 2
     // Oasis: slanted ends at the bar islands' angle instead of round ones, sand at the level.
     readonly property bool slanted: Style.level_layout === "slant"
     readonly property real slant: root.slanted ? root.height / 2 : 0
-    readonly property real end_inset: root.slanted ? root.slant : root.radius * 0.5
-    readonly property color marker_color: root.slanted ? Theme.theme_secondary : Theme.theme_primary
+    // Metroid: a visor-glass bar with cut corners and scan ticks.
+    readonly property bool visor: Style.level_layout === "visor"
+    readonly property real cut: root.visor ? Math.round(root.height * 0.32) : 0
+    readonly property bool shaped: root.slanted || root.visor
+    readonly property real end_inset: root.slanted ? root.slant : root.visor ? root.cut : root.radius * 0.5
+    readonly property color marker_color: root.shaped ? Theme.theme_secondary : Theme.theme_primary
+
+    function outline() {
+        const w = root.width, h = root.height, s = root.slant, c = root.cut;
+        if (root.visor) return [Qt.point(c, 0), Qt.point(w, 0), Qt.point(w, h - c), Qt.point(w - c, h), Qt.point(0, h), Qt.point(0, c), Qt.point(c, 0)];
+        return [Qt.point(0, 0), Qt.point(w, 0), Qt.point(w - s, h), Qt.point(s, h), Qt.point(0, 0)];
+    }
+
+    // The level wash's outline, from the left end up to the level.
+    function wash() {
+        const w = root.width, h = root.height, s = root.slant, c = root.cut;
+        if (root.visor) {
+            const f = Math.max(c, root.fill_width), yb = f > w - c ? h - (f - (w - c)) : h;
+            return [Qt.point(c, 0), Qt.point(f, 0), Qt.point(f, yb), Qt.point(Math.min(f, w - c), h), Qt.point(0, h), Qt.point(0, c), Qt.point(c, 0)];
+        }
+        const f = Math.max(s, root.fill_width), d = s * 0.3;
+        return [Qt.point(0, 0), Qt.point(f + d, 0), Qt.point(f - d, h), Qt.point(s, h), Qt.point(0, 0)];
+    }
     readonly property real pad: Math.round(height * 0.42)
 
     implicitHeight: Style.px(34)
@@ -66,7 +87,7 @@ Item {
     }
 
     Rectangle {
-        visible: !root.slanted
+        visible: !root.shaped
         anchors.fill: parent
         radius: root.radius
         gradient: Gradient {
@@ -77,21 +98,21 @@ Item {
         border.color: root.selected ? Theme.theme_primary : Style.frame_border_color
     }
 
-    // Slanted well and level wash: wide at the top like the bar islands.
+    // Shaped well and level wash: slanted like the bar islands, or visor glass with cut corners.
     Shape {
-        visible: root.slanted
+        visible: root.shaped
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             strokeWidth: root.selected ? 1.5 : 1
-            strokeColor: root.selected ? Theme.theme_secondary : Style.frame_border_color
+            strokeColor: root.selected ? (root.visor ? Theme.theme_primary : Theme.theme_secondary) : Style.frame_border_color
             fillGradient: LinearGradient {
                 y2: root.height
-                GradientStop { position: 0; color: Qt.darker(Style.tab_well, 1.25) }
-                GradientStop { position: 1; color: Style.tab_well }
+                GradientStop { position: 0; color: root.visor ? Qt.alpha(Theme.ui_visual_bg, 0.55) : Qt.darker(Style.tab_well, 1.25) }
+                GradientStop { position: 1; color: root.visor ? Theme.bg_crust : Style.tab_well }
             }
-            PathPolyline { path: [Qt.point(0, 0), Qt.point(root.width, 0), Qt.point(root.width - root.slant, root.height), Qt.point(root.slant, root.height), Qt.point(0, 0)] }
+            PathPolyline { path: root.outline() }
         }
 
         ShapePath {
@@ -101,12 +122,21 @@ Item {
                 GradientStop { position: 0; color: Qt.alpha(Theme.theme_primary, 0.04) }
                 GradientStop { position: 1; color: Qt.alpha(Theme.theme_primary, root.glow ? 0.3 : 0.16) }
             }
-            PathPolyline {
-                path: {
-                    const f = Math.max(root.slant, root.fill_width), d = root.slant * 0.3;
-                    return [Qt.point(0, 0), Qt.point(f + d, 0), Qt.point(f - d, root.height), Qt.point(root.slant, root.height), Qt.point(0, 0)];
-                }
-            }
+            PathPolyline { path: root.wash() }
+        }
+    }
+
+    // Scan ticks along the visor's foot, every tenth.
+    Repeater {
+        model: root.visor ? 9 : 0
+
+        Rectangle {
+            required property int index
+            x: Math.round(root.width * (index + 1) / 10)
+            y: root.height - (index === 4 ? 6 : 4) - 1
+            width: 1
+            height: index === 4 ? 6 : 4
+            color: Qt.alpha(Theme.theme_primary, 0.4)
         }
     }
 
@@ -136,7 +166,7 @@ Item {
         opacity: root.muted ? 0.4 : 1
 
         Rectangle {
-            visible: !root.slanted
+            visible: !root.shaped
             x: -wave_region.x
             width: root.fill_width
             height: parent.height
@@ -171,7 +201,7 @@ Item {
             height: root.height * 0.76
             sample: n => root.sample(n)
             gain: 1
-            tint: Theme.theme_primary_light
+            tint: root.visor ? Theme.info : Theme.theme_primary_light
             running: root.peaks_on && !root.solid && !root.glow
         }
 
@@ -234,14 +264,14 @@ Item {
     }
 
     Shape {
-        visible: root.slanted && !root.solid && !root.sparkline && root.level > 0
+        visible: root.shaped && !root.solid && !root.sparkline && root.level > 0
         anchors.fill: parent
         opacity: root.muted ? 0.4 : 1
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             id: marker_path
-            readonly property real f: Math.max(root.slant, Math.min(root.width - root.slant, root.fill_width))
+            readonly property real f: Math.max(root.end_inset, Math.min(root.width - root.end_inset, root.fill_width))
             strokeColor: root.level > 0.9 ? Theme.theme_label : root.marker_color
             strokeWidth: 2
             fillColor: "transparent"
@@ -253,7 +283,7 @@ Item {
     }
 
     Rectangle {
-        visible: !root.slanted && !root.solid && !root.sparkline && root.level > 0
+        visible: !root.shaped && !root.solid && !root.sparkline && root.level > 0
         x: Math.max(root.radius * 0.5, Math.min(root.width - root.radius * 0.5, root.fill_width)) - 1
         y: root.height * 0.2
         width: 2
