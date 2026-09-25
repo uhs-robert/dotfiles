@@ -39,6 +39,12 @@ Item {
         for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)));
         return Math.min(list.width * 0.45, Math.max(h, w + 8));
     }
+    // Controller rows share the tallest badge's height so button and key rows keep one pitch.
+    readonly property real pad_row_height: {
+        let h = 0;
+        for (let i = 0; i < measure.children.length; i++) h = Math.max(h, measure.children[i].height || 0);
+        return h;
+    }
     readonly property real step: desc_metrics.height * 2
     readonly property real max_y: Math.max(0, flick.contentHeight - flick.height)
     property double last_g_ms: 0
@@ -117,11 +123,11 @@ Item {
             id: help_row
             required property var modelData
             width: list.width
-            height: Math.max(badge_clip.height, desc_text.implicitHeight)
+            height: Math.max(root.pad_row_height, badge_clip.height, desc_text.implicitHeight)
 
             Item {
                 id: badge_clip
-                y: Math.max(0, (desc_metrics.height - height) / 2)
+                y: Math.max(0, (Math.max(desc_metrics.height, root.pad_row_height) - height) / 2)
                 width: root.key_column
                 height: badge.height
                 clip: badge.width > width
@@ -136,6 +142,7 @@ Item {
             Text {
                 id: desc_text
                 x: root.key_column + 8
+                y: Math.max(0, (root.pad_row_height - desc_metrics.height) / 2)
                 width: Math.max(0, help_row.width - x)
                 text: help_row.modelData.desc
                 wrapMode: Text.Wrap
