@@ -142,10 +142,10 @@ Row {
     }
 
     Text {
-        visible: !root.compact && !root.horizon && !root.capsule && !root.on_accent
+        visible: !root.compact && !root.capsule && !root.on_accent
         anchors.verticalCenter: parent.verticalCenter
         text: root.hud ? " WORLD" : root.lualine ? "\u00b7" : "|"
-        color: root.on_accent ? Qt.alpha(root.ink, 0.6) : root.lualine ? Style.text_dim : Theme.theme_primary
+        color: root.on_accent ? Qt.alpha(root.ink, 0.6) : root.lualine || root.horizon ? Style.text_muted : Theme.theme_primary
         font.family: Style.bar_font_family
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color
