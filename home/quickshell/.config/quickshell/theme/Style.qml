@@ -234,7 +234,6 @@ Singleton {
             chip_tabs: false,
             title_case: false,
             title_size: 0,
-            footer_key_round: false,
             frame_float: 0,
             frame_shadow: "transparent",
             sheen: "transparent",
@@ -473,7 +472,6 @@ Singleton {
                 chip_tabs: false,
                 title_case: false,
                 title_size: 0,
-                footer_key_round: false,
                 frame_float: 0,
                 frame_shadow: "transparent",
                 sheen: "transparent",
@@ -1644,7 +1642,6 @@ Singleton {
                     footer_fg: Theme.fg_dim,
                     footer_key_fg: sand,
                     footer_key_bg: Qt.alpha(sand, 0.1),
-                    footer_key_round: true,
                     footer_rule: true,
                     footer_rule_color: hair,
                     meter_on: Theme.theme_primary_light,
@@ -2175,8 +2172,6 @@ Singleton {
     readonly property bool chip_tabs: root.active.chip_tabs
     // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
-    // Footer keycaps with rounded corners and a key_border outline.
-    readonly property bool footer_key_round: root.active.footer_key_round
     readonly property int title_size: root.active.title_size
     // Bar clock art: "horizon" puts a horizon with the sun or moon in the clock's island.
     readonly property string clock_art: root.active.clock_art
