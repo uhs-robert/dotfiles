@@ -16,7 +16,8 @@ Item {
     readonly property bool compact: BarConfig.compact_for(root.rule, root.screen_name)
     readonly property int bar_height: BarConfig.height_for(root.rule)
     readonly property real center_width: center_island.body_item.width
-    readonly property bool has_center: root.center_entries.length > 0
+    // Lualine has no center island; its modules move into the right island's sections.
+    readonly property bool has_center: !Style.bar_lualine && root.center_entries.length > 0
 
     readonly property var module_map: ({
         start: start_component,
@@ -54,13 +55,17 @@ Item {
     readonly property var left_entries: root.build_entries(root.rule ? root.rule.left : [])
     readonly property var center_entries: root.build_entries(root.rule ? root.rule.center : [])
     readonly property var right_entries: root.build_entries(root.rule ? root.rule.right : [])
-    // Lualine's right-island section for a module; bars.json order is kept inside each.
+    // Lualine's right-island section for a module; bars.json order is kept inside each, center modules after right ones.
     function lualine_section(base) {
-        return base === "notifications" ? "z" : ["network", "bluetooth", "voxtype"].indexOf(base) >= 0 ? "y" : "x";
+        return base === "notifications" || base === "clock" ? "z" : ["network", "bluetooth", "voxtype"].indexOf(base) >= 0 ? "y" : "x";
     }
 
+    readonly property bool lists_media: [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "media"))
+    // Everything the lualine right island holds: right and center modules, plus media in x when no island lists it.
+    readonly property var lualine_entries: root.right_entries.concat(root.center_entries, root.lists_media ? [] : [{ base: "media", arg: "", component: media_component }])
+    readonly property var right_side: Style.bar_lualine ? root.lualine_entries : root.right_entries
     // Right-island entries in drawn order.
-    readonly property var right_drawn: Style.bar_lualine ? ["x", "y", "z"].reduce((out, k) => out.concat(root.right_entries.filter(e => root.lualine_section(e.base) === k)), []) : root.right_entries
+    readonly property var right_drawn: Style.bar_lualine ? ["x", "y", "z"].reduce((out, k) => out.concat(root.lualine_entries.filter(e => root.lualine_section(e.base) === k)), []) : root.right_entries
 
     // The start button draws the HyprVim mode chip on a lualine bar.
     readonly property bool has_mode_chip: Style.bar_lualine && [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "start"))
@@ -83,7 +88,7 @@ Item {
 
     Component { id: start_component; StartButton { compact: root.compact; screen_name: root.screen_name; bar_height: root.bar_height } }
     Component { id: workspaces_component; Workspaces { compact: root.compact; screen_name: root.screen_name; bar_height: root.bar_height } }
-    Component { id: clock_component; Clock { compact: root.compact } }
+    Component { id: clock_component; Clock { compact: root.compact; screen_name: root.screen_name } }
     Component { id: tray_component; Tray { compact: root.compact; screen_name: root.screen_name } }
     Component { id: volume_component; Volume { compact: root.compact; screen_name: root.screen_name } }
     Component { id: battery_component; Battery { compact: root.compact; screen_name: root.screen_name } }
@@ -158,12 +163,12 @@ Item {
         cap_left: true
         cap_right: true
         tab_joined: SubmapState.active && !root.has_mode_chip
-        visible: root.center_entries.length > 0
+        visible: root.has_center
 
         onClicked: if (root.center_entries.some(e => e.base === "clock")) Popups.toggle("clock", center_island.body_item, center_island.bg_color, root.screen_name)
 
         Repeater {
-            model: root.center_entries
+            model: root.has_center ? root.center_entries : []
 
             Loader {
                 required property var modelData
@@ -218,7 +223,7 @@ Item {
         cap_left: true
         visible: root.right_entries.length > 0
 
-        onClicked: if (root.right_entries.some(e => e.base === "clock")) Popups.toggle("clock", right_island.body_item, right_island.bg_color, root.screen_name)
+        onClicked: if (!Style.bar_lualine && root.right_entries.some(e => e.base === "clock")) Popups.toggle("clock", right_island.body_item, right_island.bg_color, root.screen_name)
 
         Repeater {
             model: Style.bar_lualine ? [] : root.right_entries
@@ -243,7 +248,7 @@ Item {
                 Neovim.LualineSection {
                     id: x_section
                     height: right_island.height
-                    entries: root.right_entries.filter(e => root.lualine_section(e.base) === "x")
+                    entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "x")
                     wire: parent.wire
                     fill: Style.bar_side_bg
                 }
@@ -251,7 +256,7 @@ Item {
                 Neovim.LualineSection {
                     id: y_section
                     height: right_island.height
-                    entries: root.right_entries.filter(e => root.lualine_section(e.base) === "y")
+                    entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "y")
                     wire: parent.wire
                     fill: Theme.ui_visual_bg
                     lead_bg: x_section.shown ? x_section.fill : "transparent"
@@ -260,7 +265,7 @@ Item {
 
                 Neovim.LualineSection {
                     height: right_island.height
-                    entries: root.right_entries.filter(e => root.lualine_section(e.base) === "z")
+                    entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "z")
                     wire: parent.wire
                     fill: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
                     accent: true
@@ -273,13 +278,12 @@ Item {
     // The clock has no module item of its own, so its popup anchor follows whichever island lists it.
     function sync_clock_anchor() {
         const has_clock = entries => entries.some(e => e.base === "clock");
-        const island = has_clock(root.left_entries) ? left_island : has_clock(root.center_entries) ? center_island : has_clock(root.right_entries) ? right_island : null;
+        const island = has_clock(root.left_entries) ? left_island : root.has_center && has_clock(root.center_entries) ? center_island : has_clock(root.right_side) ? right_island : null;
         for (const i of [left_island, center_island, right_island]) Popups.unregister("clock", root.screen_name, i.body_item);
         if (island) Popups.register_default("clock", island.body_item, island.bg_color, root.screen_name);
         // Without a media module in bars.json, the media popup drops from the center island.
         Popups.unregister("media", root.screen_name, center_island.body_item);
-        const has_media = [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "media"));
-        if (root.has_center && !has_media) Popups.register_default("media", center_island.body_item, center_island.bg_color, root.screen_name);
+        if (root.has_center && !root.lists_media) Popups.register_default("media", center_island.body_item, center_island.bg_color, root.screen_name);
     }
 
     // Popup names in bar order for Ctrl+H/L walking; workspaces and voxtype have no popup.
@@ -288,9 +292,8 @@ Item {
     }
 
     function sync_popup_order() {
-        const has_media = [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "media"));
-        const center_names = root.popup_names(root.center_entries);
-        if (root.has_center && !has_media) center_names.push("media");
+        const center_names = root.has_center ? root.popup_names(root.center_entries) : [];
+        if (root.has_center && !root.lists_media) center_names.push("media");
         Popups.register_order(root.screen_name, root.popup_names(root.left_entries).concat(center_names, root.popup_names(root.right_drawn)));
     }
 
@@ -301,6 +304,7 @@ Item {
 
     onLeft_entriesChanged: sync_popups()
     onCenter_entriesChanged: sync_popups()
+    onHas_centerChanged: sync_popups()
     onRight_drawnChanged: sync_popups()
     Component.onCompleted: sync_popups()
     Component.onDestruction: Popups.unregister_screen(root.screen_name)

@@ -9,6 +9,12 @@ Row {
     id: root
 
     property bool compact: false
+    property string screen_name: ""
+    property Item island: null
+    property color island_color: "transparent"
+    // Set by a lualine section with a strong fill (lualine_z); the clock then opens its own popup.
+    property bool on_accent: false
+    readonly property color ink: Theme.bg_crust
     // Set by the bar when its oasis horizon art sits behind this clock; it needs room for the palm and sky.
     property bool horizon: false
     readonly property date date: clock.date
@@ -16,6 +22,11 @@ Row {
     leftPadding: root.horizon ? 24 : 0
     rightPadding: root.horizon ? 22 : 0
     transform: Translate { y: root.horizon ? -4 : 0 }
+
+    TapHandler {
+        enabled: root.on_accent && !!root.island
+        onTapped: Popups.toggle("clock", root.island, root.island_color, root.screen_name)
+    }
 
     SystemClock {
         id: clock
@@ -76,7 +87,7 @@ Row {
         visible: root.lualine
         anchors.verticalCenter: parent.verticalCenter
         text: "\u{f017}"
-        color: Theme.theme_primary
+        color: root.on_accent ? root.ink : Theme.theme_primary
         font.family: Style.bar_font_family
         font.pixelSize: Style.bar_font_size
     }
@@ -105,7 +116,7 @@ Row {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.max(implicitWidth, Math.ceil(time_metrics.advanceWidth))
             text: root.chip || root.lualine ? root.digits_text : root.time_text
-            color: root.chip || root.lualine ? Style.bar_clock_fg : Style.bar_fg
+            color: root.on_accent ? root.ink : root.chip || root.lualine ? Style.bar_clock_fg : Style.bar_fg
             font.family: root.chip ? Style.bar_clock_font : Style.bar_font_family
             font.features: { "tnum": 1 }
             font.weight: root.lualine ? Font.Bold : root.horizon ? Font.DemiBold : Font.Normal
@@ -118,7 +129,7 @@ Row {
     }
 
     Text {
-        visible: (root.chip || root.lualine) && root.zone_text !== "" && !root.capsule
+        visible: (root.chip || root.lualine) && root.zone_text !== "" && !root.capsule && !root.on_accent
         anchors.verticalCenter: parent.verticalCenter
         text: root.zone_text
         color: root.lualine ? Style.text_dim : Style.bar_fg
@@ -134,7 +145,7 @@ Row {
         visible: !root.compact && !root.horizon && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: root.hud ? " WORLD" : root.lualine ? "\u00b7" : "|"
-        color: root.lualine ? Style.text_dim : Theme.theme_primary
+        color: root.on_accent ? Qt.alpha(root.ink, 0.6) : root.lualine ? Style.text_dim : Theme.theme_primary
         font.family: Style.bar_font_family
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color
@@ -147,7 +158,7 @@ Row {
         visible: !root.compact && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: root.date_text
-        color: root.lualine ? Style.text_dim : Style.bar_fg
+        color: root.on_accent ? Qt.alpha(root.ink, 0.75) : root.lualine ? Style.text_dim : Style.bar_fg
         font.family: Style.bar_font_family
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color

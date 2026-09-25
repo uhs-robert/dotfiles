@@ -87,7 +87,7 @@ Item {
 
                     ShapePath {
                         strokeWidth: 1.2
-                        strokeColor: Style.text_muted
+                        strokeColor: root.accent ? Qt.alpha(Theme.bg_crust, 0.55) : Style.text_muted
                         fillColor: "transparent"
                         startX: 5
                         startY: 1
