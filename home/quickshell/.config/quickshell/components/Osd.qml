@@ -9,6 +9,7 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "../theme"
 import "../services"
+import "ps1" as Ps1
 
 PanelWindow {
     id: root
@@ -49,6 +50,7 @@ PanelWindow {
     readonly property bool ring_layout: Style.osd_layout === "ring" && !root.showing_vox
     readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
     readonly property bool hud_layout: Style.osd_layout === "hud" && !root.showing_vox
+    readonly property bool alert_layout: Style.osd_layout === "alert" && !root.showing_vox
 
     readonly property string title: root.showing_vox ? root.vox_phase.toUpperCase() : root.kind.toUpperCase()
 
@@ -102,6 +104,7 @@ PanelWindow {
         root.muted = new_muted;
         root.delta = Math.round(root.level * 100) - Math.round(prev * 100);
         root.hold_screen();
+        if (!root.level_wanted && alert_loader.item) alert_loader.item.pop();
         root.level_wanted = true;
         root.refresh();
         hide_timer.restart();
@@ -386,8 +389,19 @@ PanelWindow {
                     label: root.kind === "brightness" ? "Backlight" : root.muted ? "Muted" : "\u25d6 " + (root.sink ? root.sink.description || root.sink.name : "")
                 }
 
+                Loader {
+                    id: alert_loader
+                    active: root.alert_layout
+                    visible: active
+                    Layout.alignment: Qt.AlignVCenter
+                    sourceComponent: Ps1.AlertMark {
+                        size: Theme.glyph_size + 10
+                        opacity: root.muted ? 0.5 : 1
+                    }
+                }
+
                 Text {
-                    visible: !root.readout_layout
+                    visible: !root.readout_layout && !root.alert_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: Theme.glyph_size + 4
                     horizontalAlignment: Text.AlignHCenter

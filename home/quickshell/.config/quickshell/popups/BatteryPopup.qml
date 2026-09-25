@@ -6,6 +6,7 @@ import Quickshell.Services.UPower
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -45,6 +46,8 @@ Popup {
         return "";
     }
 
+    // An MGS LIFE-style gauge in place of the readout lines.
+    readonly property bool life_bar: root.st.console_views === "ps1"
     property bool ppd_available: false
     property int selected: 0
 
@@ -140,7 +143,18 @@ Popup {
             anchors.top: parent.top
             spacing: 4
 
+            Loader {
+                active: root.life_bar
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Ps1.LifeBar {
+                    value: root.percent / 100
+                    detail: [root.state_label.toUpperCase(), root.time_label, root.rate > 0 ? root.rate.toFixed(1) + " W" : ""].filter(t => t !== "").join("  ")
+                }
+            }
+
             Text {
+                visible: !root.life_bar
                 text: Math.round(root.percent) + "%"
                 color: root.st.text_strong
                 font.family: root.st.font_family
@@ -148,6 +162,7 @@ Popup {
             }
 
             Text {
+                visible: !root.life_bar
                 text: root.state_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -155,7 +170,7 @@ Popup {
             }
 
             Text {
-                visible: root.time_label !== ""
+                visible: !root.life_bar && root.time_label !== ""
                 text: root.time_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -163,7 +178,7 @@ Popup {
             }
 
             Text {
-                visible: root.rate > 0
+                visible: !root.life_bar && root.rate > 0
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted
                 font.family: root.st.font_family
