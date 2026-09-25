@@ -224,7 +224,14 @@ Singleton {
             meter_art: ({}),
             toast_enter: "",
             console_views: "",
-            workspace_art: ""
+            workspace_art: "",
+            frame_float: false,
+            row_gutter: false,
+            tab_marker: "transparent",
+            section_fold: false,
+            footer_arrow: "",
+            meter_gap: 2,
+            bar_lualine: false
         };
         return {
             "default": {
@@ -432,7 +439,14 @@ Singleton {
                     meter_art: ({}),
                     toast_enter: "",
                 console_views: "",
-                workspace_art: ""
+                workspace_art: "",
+                frame_float: false,
+                row_gutter: false,
+                tab_marker: "transparent",
+                section_fold: false,
+                footer_arrow: "",
+                meter_gap: 2,
+                bar_lualine: false
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1798,6 +1812,17 @@ Singleton {
     readonly property string console_views: root.active.console_views
     // Bar workspace indicator art for non-console styles ("dial", "materia", "doors"); "" keeps pills.
     readonly property string workspace_art: root.active.workspace_art
+    // Frames float free of the bar with all corners rounded and the title as a chip set into the top border (FloatFrame).
+    readonly property bool frame_float: root.active.frame_float
+    // Rows get a line-number gutter showing their key; the selected row's number takes text_accent.
+    readonly property bool row_gutter: root.active.row_gutter
+    // A 2px bar down the active tab's left edge.
+    readonly property color tab_marker: root.active.tab_marker
+    // Sections as open folds: a fold marker, the label and a dotted fill.
+    readonly property bool section_fold: root.active.section_fold
+    // Drawn between each footer key and its description.
+    readonly property string footer_arrow: root.active.footer_arrow
+    readonly property real meter_gap: root.active.meter_gap
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -1835,6 +1860,8 @@ Singleton {
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color
+    // A lualine statusline: flat sections with arrow separators, the start button as the HyprVim mode chip.
+    readonly property bool bar_lualine: root.bar.bar_lualine
     readonly property int bar_text_style: root.bar.bar_text_raised ? Text.Raised : root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
 
     // Corner radius for a shape that is rounded by `r` in the default look.

@@ -40,7 +40,8 @@ PanelWindow {
     }
     readonly property string longest_key: root.items.reduce((a, item) => item.key.length > a.length ? item.key : a, "")
     readonly property real key_width: Style.controller !== "" ? Math.max(key_metrics.height + 2, key_measure.implicitWidth) : Math.max(key_metrics.height + 2, key_metrics.advanceWidth + 8)
-    readonly property real desc_max_width: Math.max(Style.px(80), (root.screen_width * 0.9 - frame.pad_x * 2) / root.columns - root.key_width - Style.px(24))
+    readonly property real arrow_space: Style.footer_arrow !== "" ? arrow_metrics.advanceWidth + Style.px(6) : 0
+    readonly property real desc_max_width: Math.max(Style.px(80), (root.screen_width * 0.9 - frame.pad_x * 2) / root.columns - root.key_width - root.arrow_space - Style.px(24))
 
     screen: {
         const by_payload = Quickshell.screens.find(s => s.name === root.payload.screen);
@@ -60,7 +61,9 @@ PanelWindow {
     margins.left: root.gap
     margins.right: root.gap
     implicitWidth: frame.width
-    implicitHeight: frame.height + Style.frame_drop
+    // Floating frames set the title chip into the top border, half of it above the frame.
+    readonly property real float_top: Style.frame_float ? Math.round(title_tab.height / 2) : 0
+    implicitHeight: frame.height + Style.frame_drop + root.float_top
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -93,6 +96,13 @@ PanelWindow {
                 console.warn("WhichKey: invalid payload (" + e + ")");
             }
         }
+    }
+
+    TextMetrics {
+        id: arrow_metrics
+        font.family: Style.font_family
+        font.pixelSize: root.text_size
+        text: Style.footer_arrow
     }
 
     TextMetrics {
@@ -140,7 +150,9 @@ PanelWindow {
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
         readonly property real band_height: Math.max(26, title_tab.height + 4)
-        readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.ring_pad
+        readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : Style.frame_float ? root.float_top : title_tab.height + frame.ring_pad
+
+        y: root.float_top
 
         width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
@@ -238,22 +250,33 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 opacity: frame.banded ? 0 : 1
-                x: frame.title_x + Style.inset_pad
-                y: frame.top_edge + frame.ring_pad
+                x: Style.frame_float ? 12 : frame.title_x + Style.inset_pad
+                y: Style.frame_float ? -root.float_top : frame.top_edge + frame.ring_pad
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.show_title && !Style.fade_fills ? Style.title_bg : "transparent"
+                radius: Style.frame_float ? 3 : 0
 
                 FadeFill {
                     visible: Style.show_title && Style.fade_fills
                     fill: Style.title_bg
                 }
 
+                Rectangle {
+                    visible: Style.frame_float
+                    z: -1
+                    x: -4
+                    y: Math.round(parent.height / 2) - 1
+                    width: parent.width + 8
+                    height: Style.frame_border_width + 2
+                    color: Style.frame_color
+                }
+
                 Text {
                     id: title_text
                     x: 10
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + root.title + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
+                    text: Style.title_prefix + (Style.frame_float ? root.title.charAt(0).toUpperCase() + root.title.slice(1).toLowerCase() : root.title) + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
                     color: Style.show_title ? Style.title_fg : Style.accent_color
                     font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
@@ -293,7 +316,7 @@ PanelWindow {
                             id: row
                             required property var modelData
 
-                            Layout.preferredWidth: root.key_width + Style.px(8) + desc_text.width
+                            Layout.preferredWidth: root.key_width + Style.px(8) + root.arrow_space + desc_text.width
                             Layout.preferredHeight: root.row_height
 
                             KeyBadge {
@@ -303,8 +326,18 @@ PanelWindow {
                             }
 
                             Text {
+                                visible: root.arrow_space > 0
+                                x: root.key_width + Style.px(5)
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Style.footer_arrow
+                                color: Style.text_muted
+                                font.family: Style.font_family
+                                font.pixelSize: root.text_size
+                            }
+
+                            Text {
                                 id: desc_text
-                                x: root.key_width + Style.px(8)
+                                x: root.key_width + Style.px(8) + root.arrow_space
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: Math.min(implicitWidth, root.desc_max_width)
                                 elide: Text.ElideRight

@@ -114,6 +114,15 @@ Item {
                 }
 
                 Text {
+                    visible: root.st.footer_arrow !== "" && !group.pad
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: root.st.footer_arrow
+                    color: root.st.text_muted
+                    font.family: root.st.font_family
+                    font.pixelSize: root.st.font_size - 5
+                }
+
+                Text {
                     id: desc_text
                     anchors.verticalCenter: parent.verticalCenter
                     text: KeyHints.with_glyphs(parent.modelData.desc) + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
