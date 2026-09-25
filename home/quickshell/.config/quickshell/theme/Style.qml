@@ -1906,7 +1906,8 @@ Singleton {
                     bar_workspace_focused: Theme.theme_primary,
                     bar_workspace_active: Theme.theme_secondary,
                     bar_workspace_idle: Theme.fg_muted,
-                    bar_hover_bg: Theme.ui_visual_bg
+                    // LualineSection lights hovered components itself.
+                    bar_hover_bg: "transparent"
                 });
             })()
         };

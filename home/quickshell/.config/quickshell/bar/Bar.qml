@@ -221,6 +221,7 @@ Item {
         visor: Style.frame_visor
         capsule_inset: Style.bar_capsule
         sheen_color: Style.sheen
+        cap_left_fill: Style.bar_lualine && LualineState.right_first_fill[root.screen_name] ? LualineState.right_first_fill[root.screen_name] : "transparent"
         cap_left: true
         visible: root.right_entries.length > 0
 
@@ -252,6 +253,7 @@ Item {
                     entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "x")
                     wire: parent.wire
                     fill: Style.bar_side_bg
+                    screen_name: root.screen_name
                 }
 
                 Neovim.LualineSection {
@@ -260,7 +262,8 @@ Item {
                     entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "y")
                     wire: parent.wire
                     fill: Theme.ui_visual_bg
-                    lead_bg: x_section.shown ? x_section.fill : "transparent"
+                    hover_fill: Qt.tint(Theme.ui_visual_bg, Qt.alpha(Theme.theme_primary, 0.3))
+                    lead_bg: x_section.shown ? x_section.end_fill : "transparent"
                     separators: false
                 }
 
@@ -271,7 +274,7 @@ Item {
                     fill: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
                     accent: true
                     separators: false
-                    lead_bg: y_section.shown ? y_section.fill : x_section.shown ? x_section.fill : "transparent"
+                    lead_bg: y_section.shown ? y_section.end_fill : x_section.shown ? x_section.end_fill : "transparent"
                 }
             }
         }

@@ -32,7 +32,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         radius: Style.bar_radius(4)
-        color: Style.bar_hover_bg
+        color: root.on_accent ? Theme.ui_visual_bg : Style.bar_hover_bg
         opacity: hover_handler.hovered ? 0.5 : 0
     }
 

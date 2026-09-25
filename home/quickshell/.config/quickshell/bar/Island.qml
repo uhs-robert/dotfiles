@@ -44,6 +44,7 @@ Item {
     readonly property bool lualine: Style.bar_lualine
     // Fill for the right cap when the content's last segment runs into it.
     property color cap_right_fill: "transparent"
+    property color cap_left_fill: "transparent"
     readonly property bool center: root.cap_left && root.cap_right
     readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : height / 2
     readonly property real pad: root.capsule ? Style.bar_capsule_pad : root.lualine ? (root.center ? 10 : 0) : 8
@@ -226,7 +227,7 @@ Item {
 
         ShapePath {
             strokeWidth: -1
-            fillColor: root.shaded ? "transparent" : root.bg_color
+            fillColor: root.cap_left_fill.a > 0 ? root.cap_left_fill : root.shaded ? "transparent" : root.bg_color
             PathPolyline {
                 path: {
                     const c = root.cap_width, h = root.height;
