@@ -51,7 +51,7 @@ Item {
             color: Theme.bg_crust
             font.family: Style.bar_font_family
             font.pixelSize: Style.bar_font_size
-            font.bold: true
+            font.bold: false
             font.letterSpacing: 0.5
         }
     }
