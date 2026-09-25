@@ -464,6 +464,7 @@ PanelWindow {
 
             VisorGlass {
                 anchors.fill: parent
+                top_cut: root.top_radius > 0 ? 6 : 0
             }
 
             Shape {

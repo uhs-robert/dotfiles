@@ -38,7 +38,7 @@ Item {
     // Oasis: slanted ends at the bar islands' angle instead of round ones, sand at the level.
     readonly property bool slanted: Style.level_layout === "slant"
     readonly property real slant: root.slanted ? root.height / 2 : 0
-    // Metroid: a visor-glass bar with cut corners and scan ticks.
+    // Metroid: a visor-glass bar with cut bottom corners, like its frames, and energy-tank ticks.
     readonly property bool visor: Style.level_layout === "visor"
     readonly property real cut: root.visor ? Math.round(root.height * 0.32) : 0
     readonly property bool shaped: root.slanted || root.visor
@@ -47,7 +47,7 @@ Item {
 
     function outline() {
         const w = root.width, h = root.height, s = root.slant, c = root.cut;
-        if (root.visor) return [Qt.point(c, 0), Qt.point(w, 0), Qt.point(w, h - c), Qt.point(w - c, h), Qt.point(0, h), Qt.point(0, c), Qt.point(c, 0)];
+        if (root.visor) return [Qt.point(0, 0), Qt.point(w, 0), Qt.point(w, h - c), Qt.point(w - c, h), Qt.point(c, h), Qt.point(0, h - c), Qt.point(0, 0)];
         return [Qt.point(0, 0), Qt.point(w, 0), Qt.point(w - s, h), Qt.point(s, h), Qt.point(0, 0)];
     }
 
@@ -56,7 +56,7 @@ Item {
         const w = root.width, h = root.height, s = root.slant, c = root.cut;
         if (root.visor) {
             const f = Math.max(c, root.fill_width), yb = f > w - c ? h - (f - (w - c)) : h;
-            return [Qt.point(c, 0), Qt.point(f, 0), Qt.point(f, yb), Qt.point(Math.min(f, w - c), h), Qt.point(0, h), Qt.point(0, c), Qt.point(c, 0)];
+            return [Qt.point(0, 0), Qt.point(f, 0), Qt.point(f, yb), Qt.point(Math.min(f, w - c), h), Qt.point(c, h), Qt.point(0, h - c), Qt.point(0, 0)];
         }
         const f = Math.max(s, root.fill_width), d = s * 0.3;
         return [Qt.point(0, 0), Qt.point(f + d, 0), Qt.point(f - d, h), Qt.point(s, h), Qt.point(0, 0)];
@@ -126,17 +126,17 @@ Item {
         }
     }
 
-    // Scan ticks along the visor's foot, every tenth.
+    // Energy-tank squares along the visor's foot, every tenth.
     Repeater {
         model: root.visor ? 9 : 0
 
         Rectangle {
             required property int index
-            x: Math.round(root.width * (index + 1) / 10)
-            y: root.height - (index === 4 ? 6 : 4) - 1
-            width: 1
-            height: index === 4 ? 6 : 4
-            color: Qt.alpha(Theme.theme_primary, 0.4)
+            x: Math.round(root.width * (index + 1) / 10) - 1
+            y: root.height - 5
+            width: 3
+            height: 3
+            color: Qt.alpha(Theme.theme_primary, index === 4 ? 0.7 : 0.35)
         }
     }
 
