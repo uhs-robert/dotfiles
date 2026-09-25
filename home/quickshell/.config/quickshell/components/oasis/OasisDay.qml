@@ -21,10 +21,12 @@ Item {
 
     readonly property color sand: Theme.theme_secondary
     readonly property color hair: Qt.alpha(Theme.theme_primary, 0.3)
-    readonly property int icon_size: Math.max(18, Math.min(30, root.width - 12))
+    // The icon art fills about half its box, so the box runs large and gives back its empty margin.
+    readonly property int icon_size: Math.max(24, Math.min(48, root.width - 6))
+    readonly property int icon_margin: Math.round(root.icon_size * 0.18)
     readonly property int name_h: name.implicitHeight + 11
     readonly property int pop_h: pop.implicitHeight + 4
-    readonly property real track_top: icon.y + root.icon_size + 6 + hi.implicitHeight + 4
+    readonly property real track_top: icon.y + root.icon_size - root.icon_margin + 4 + hi.implicitHeight + 4
     readonly property real track_bottom: root.height - root.name_h - root.pop_h - lo.implicitHeight - 8
     readonly property real span: Math.max(1, root.scale_max - root.scale_min)
 
@@ -56,12 +58,12 @@ Item {
     Image {
         id: icon
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 6
+        y: 6 - root.icon_margin
         width: root.icon_size
         height: root.icon_size
         readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
-        sourceSize.width: Math.ceil(64 * dpr)
-        sourceSize.height: Math.ceil(64 * dpr)
+        sourceSize.width: Math.ceil(96 * dpr)
+        sourceSize.height: Math.ceil(96 * dpr)
         source: root.day ? WeatherState.icon_source(root.day.code, true) : ""
         smooth: true
         opacity: root.selected ? 1 : 0.85

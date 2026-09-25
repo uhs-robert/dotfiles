@@ -123,6 +123,15 @@ Item {
         return { min: lo - pad, max: hi + pad };
     }
 
+    // Oasis scales its floating bars to the days in view, so the warmest sits right under its icon.
+    readonly property var window_temp_range: {
+        const days = root.window_days;
+        if (!days || days.length === 0) return { min: 0, max: 1 };
+        const lo = Math.min(...days.map(d => d.min));
+        const hi = Math.max(...days.map(d => d.max));
+        return { min: lo, max: Math.max(hi, lo + 1) };
+    }
+
     function inner_top_y(day) {
         const r = root.week_temp_range;
         return root.headroom + (r.max - day.max) / (r.max - r.min) * root.band_range_h;
@@ -346,8 +355,8 @@ Item {
                         sourceComponent: Oasis.OasisDay {
                             day: day_col.modelData
                             selected: day_col.day_index === root.day_cursor
-                            scale_min: root.week_temp_range.min
-                            scale_max: root.week_temp_range.max
+                            scale_min: root.window_temp_range.min
+                            scale_max: root.window_temp_range.max
                             first: day_col.index === 0
                             last: day_col.index === root.window_days.length - 1
                             bleed: day_row.spacing / 2
