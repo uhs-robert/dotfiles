@@ -7,6 +7,7 @@ import Quickshell.Widgets
 import "../../theme"
 import "../../services"
 import "../../components"
+import "../../components/gameboy" as Gameboy
 import "../../components/nes" as Nes
 import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
@@ -22,8 +23,11 @@ Item {
     readonly property bool slots: Style.console_views === "ps1"
     // Super Mario World overworld: level dots on a dotted trail, app icons above them.
     readonly property bool map: Style.console_views === "snes"
-    readonly property int icon_size: slots ? (compact ? 15 : 17) : compact ? 16 : 19
-    readonly property int pill_height: map ? 34 : slots ? (compact ? 22 : 26) : compact ? 20 : 22
+    // Pokemon party rows: a double-bordered box per workspace, the focused one pointed at by a cursor.
+    readonly property bool party: Style.controller === "gameboy"
+    readonly property int party_gap: 8
+    readonly property int icon_size: party ? (compact ? 14 : 16) : slots ? (compact ? 15 : 17) : compact ? 16 : 19
+    readonly property int pill_height: map ? 34 : slots || party ? (compact ? 22 : 26) : compact ? 20 : 22
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -107,7 +111,7 @@ Item {
 
     Row {
         id: row
-        spacing: root.map ? 8 : root.slots ? 6 : root.compact ? 6 : 8
+        spacing: root.map ? 8 : root.slots || root.party ? 6 : root.compact ? 6 : 8
 
         Repeater {
             model: root.workspace_list
@@ -117,22 +121,23 @@ Item {
                 required property var modelData
 
                 readonly property bool is_empty: modelData.toplevels.values.length === 0
-                readonly property bool diamond: Style.bar_workspace_diamond && is_empty && !root.map
+                readonly property bool diamond: Style.bar_workspace_diamond && is_empty && !root.map && !root.party
                 readonly property bool map: root.map
                 readonly property int glyph: map ? (modelData.focused ? 17 : 14) : root.icon_size
                 // Mario ? blocks; the focused workspace is the one already hit.
                 readonly property bool qblock: Style.console_views === "nes"
                 readonly property bool ps2: Style.console_views === "ps2"
                 readonly property var toplevels: modelData.toplevels.values
+                readonly property int cursor_gap: root.party && modelData.focused ? root.party_gap : 0
 
                 height: root.pill_height
-                width: pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? height : Math.max(height, icons.implicitWidth + 8)) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
-                radius: pill.map ? 0 : root.slots ? 2 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
+                width: root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? height : Math.max(height, icons.implicitWidth + 8)) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
+                radius: pill.map || root.party ? 0 : root.slots ? 2 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
-                color: pill.qblock || pill.ps2 || root.slots || pill.map ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
-                border.width: !root.slots && !pill.map && Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
+                color: pill.qblock || pill.ps2 || root.slots || pill.map || root.party ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
+                border.width: !root.slots && !pill.map && !root.party && Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
                 border.color: Style.bar_workspace_ring
 
                 Behavior on width {
@@ -142,11 +147,28 @@ Item {
                     ColorAnimation { duration: 280; easing.type: Easing.InOutCubic }
                 }
 
-                // Console pill art: NES ? blocks, PS1 save cards, PS2 save cubes and lit blocks, SNES map dots.
+                // Console pill art: NES ? blocks, PS1 save cards, PS2 save cubes and lit blocks, SNES map dots, Game Boy party rows.
                 Loader {
                     anchors.fill: parent
                     z: pill.map ? 1 : 0
-                    sourceComponent: pill.qblock ? nes_qblock : root.slots ? ps1_card : pill.ps2 ? (pill.is_empty ? ps2_cube : ps2_block) : pill.map ? snes_dot : null
+                    sourceComponent: pill.qblock ? nes_qblock : root.slots ? ps1_card : pill.ps2 ? (pill.is_empty ? ps2_cube : ps2_block) : pill.map ? snes_dot : root.party ? gb_party : null
+
+                    Component {
+                        id: gb_party
+                        Item {
+                            Gameboy.PartyCursor {
+                                visible: pill.modelData.focused
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Gameboy.PartyBox {
+                                x: pill.cursor_gap
+                                width: parent.width - pill.cursor_gap
+                                height: parent.height
+                                selected: pill.modelData.focused
+                            }
+                        }
+                    }
 
                     Component {
                         id: snes_dot
@@ -215,8 +237,9 @@ Item {
 
                 Rectangle {
                     anchors.fill: parent
+                    anchors.leftMargin: pill.cursor_gap
                     radius: parent.radius
-                    color: Theme.fg_core
+                    color: root.party ? Style.shade_3 : Theme.fg_core
                     opacity: !pill.modelData.active && pill_hover.hovered ? 0.1 : 0
 
                     Behavior on opacity {
@@ -239,6 +262,7 @@ Item {
                     anchors.horizontalCenter: pill.map ? parent.horizontalCenter : undefined
                     anchors.top: pill.map ? parent.top : undefined
                     anchors.topMargin: pill.modelData.focused ? 1 : 3
+                    anchors.horizontalCenterOffset: pill.cursor_gap / 2
                     spacing: pill.map ? 1 : 2
 
                     Repeater {
@@ -248,7 +272,7 @@ Item {
                             id: icon_item
                             required property var modelData
 
-                            width: pill.glyph + (root.slots || pill.map ? 0 : 4)
+                            width: pill.glyph + (root.slots || pill.map || root.party ? 0 : 4)
                             height: width
 
                             IconImage {
