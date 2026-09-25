@@ -119,6 +119,17 @@ Popup {
         node.audio.volume = pct / 100;
     }
 
+    // The wheel steps a level row like h/l, one snap step per notch.
+    property var wheel_node: null
+    function wheel_adjust(node, wheel) {
+        if (node !== root.wheel_node) {
+            stepper.accumulated = 0;
+            root.wheel_node = node;
+        }
+        const notches = stepper.consume_event(wheel);
+        for (let i = 0; i < Math.abs(notches); i++) root.adjust_snap(node, notches > 0 ? 1 : -1);
+    }
+
     function toggle_mute(node) {
         if (!node || !node.audio) return;
         node.audio.muted = !node.audio.muted;
@@ -213,6 +224,16 @@ Popup {
 
                     width: rows_list.width
                     spacing: 2
+
+                    // Accepting the wheel here keeps it from scrolling the list.
+                    WheelHandler {
+                        enabled: root.is_slider_row(row_wrap.modelData.type)
+                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                        onWheel: event => {
+                            root.wheel_adjust(row_wrap.modelData.node, event);
+                            event.accepted = true;
+                        }
+                    }
 
                     MenuSection {
                         visible: row_wrap.index === 0 || root.section_of(root.rows[row_wrap.index - 1].type) !== root.section_of(row_wrap.modelData.type)
