@@ -79,7 +79,7 @@ Popup {
 
     // The PS1 CD Player: devices and streams as numbered tracks, levels as its VU meter.
     readonly property bool cd: root.st.console_views === "ps1"
-    readonly property bool capsules: root.st.level_layout === "capsule"
+    readonly property bool capsules: root.st.level_layout === "capsule" || root.st.level_layout === "slant"
     // Live peaks cost a PipeWire stream per row, so they only run while the popup is open on AC power.
     readonly property bool peaks_on: root.capsules && root.is_open && root.visible && Power.on_ac
 

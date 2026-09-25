@@ -1623,6 +1623,7 @@ Singleton {
                     bar_clock_layout: "horizon",
                     weather_header: "oasis",
                     osd_layout: "horizon",
+                    level_layout: "slant",
                     card_layout: "oasis",
                     text_muted: Theme.fg_dim,
                     text_dim: t2,
@@ -2192,7 +2193,7 @@ Singleton {
     readonly property bool status_strip: root.active.status_strip
     // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert", "glow", "horizon" or "tile", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status", "oasis", "hero" or "lsp", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog", "oasis", "tile" or "notify".
     readonly property string osd_layout: root.active.osd_layout
-    // Level rows: "capsule" draws them as tall capsule sliders with live peaks; "" keeps the shared slider.
+    // Level rows: "capsule" draws them as tall capsule sliders with live peaks, "slant" the same with slanted ends (Volume popup only); "" keeps the shared slider.
     readonly property string level_layout: root.active.level_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout

@@ -530,6 +530,9 @@ PanelWindow {
                 glyph: root.glyph
                 label: root.kind === "brightness" ? "Brightness" : root.muted ? "Muted" : "Volume"
                 detail: root.kind === "brightness" ? "Backlight" : root.sink ? root.sink.description || root.sink.name : ""
+                wave: root.kind === "volume"
+                node: root.sink
+                peaks_on: root.wanted && root.visible && Power.on_ac
             }
         }
 

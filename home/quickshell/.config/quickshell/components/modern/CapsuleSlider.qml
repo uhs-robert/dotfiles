@@ -34,7 +34,12 @@ Item {
 
     readonly property real level: Math.max(0, Math.min(1, root.value))
     readonly property real fill_width: root.width * root.level
-    readonly property real radius: height / 2
+    readonly property real radius: root.slanted ? 0 : height / 2
+    // Oasis: slanted ends at the bar islands' angle instead of round ones, sand at the level.
+    readonly property bool slanted: Style.level_layout === "slant"
+    readonly property real slant: root.slanted ? root.height / 2 : 0
+    readonly property real end_inset: root.slanted ? root.slant : root.radius * 0.5
+    readonly property color marker_color: root.slanted ? Theme.theme_secondary : Theme.theme_primary
     readonly property real pad: Math.round(height * 0.42)
 
     implicitHeight: Style.px(34)
@@ -61,6 +66,7 @@ Item {
     }
 
     Rectangle {
+        visible: !root.slanted
         anchors.fill: parent
         radius: root.radius
         gradient: Gradient {
@@ -69,6 +75,39 @@ Item {
         }
         border.width: root.selected ? 1.5 : 1
         border.color: root.selected ? Theme.theme_primary : Style.frame_border_color
+    }
+
+    // Slanted well and level wash: wide at the top like the bar islands.
+    Shape {
+        visible: root.slanted
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeWidth: root.selected ? 1.5 : 1
+            strokeColor: root.selected ? Theme.theme_secondary : Style.frame_border_color
+            fillGradient: LinearGradient {
+                y2: root.height
+                GradientStop { position: 0; color: Qt.darker(Style.tab_well, 1.25) }
+                GradientStop { position: 1; color: Style.tab_well }
+            }
+            PathPolyline { path: [Qt.point(0, 0), Qt.point(root.width, 0), Qt.point(root.width - root.slant, root.height), Qt.point(root.slant, root.height), Qt.point(0, 0)] }
+        }
+
+        ShapePath {
+            strokeWidth: -1
+            fillGradient: LinearGradient {
+                x2: Math.max(1, root.fill_width)
+                GradientStop { position: 0; color: Qt.alpha(Theme.theme_primary, 0.04) }
+                GradientStop { position: 1; color: Qt.alpha(Theme.theme_primary, root.glow ? 0.3 : 0.16) }
+            }
+            PathPolyline {
+                path: {
+                    const f = Math.max(root.slant, root.fill_width), d = root.slant * 0.3;
+                    return [Qt.point(0, 0), Qt.point(f + d, 0), Qt.point(f - d, root.height), Qt.point(root.slant, root.height), Qt.point(0, 0)];
+                }
+            }
+        }
     }
 
     Rectangle {
@@ -90,13 +129,14 @@ Item {
     Item {
         id: wave_region
         visible: !root.solid && !root.sparkline
-        x: root.radius * 0.5
+        x: root.end_inset
         width: Math.max(0, root.fill_width - x)
         height: root.height
         clip: true
         opacity: root.muted ? 0.4 : 1
 
         Rectangle {
+            visible: !root.slanted
             x: -wave_region.x
             width: root.fill_width
             height: parent.height
@@ -193,8 +233,27 @@ Item {
         }
     }
 
+    Shape {
+        visible: root.slanted && !root.solid && !root.sparkline && root.level > 0
+        anchors.fill: parent
+        opacity: root.muted ? 0.4 : 1
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            id: marker_path
+            readonly property real f: Math.max(root.slant, Math.min(root.width - root.slant, root.fill_width))
+            strokeColor: root.level > 0.9 ? Theme.theme_label : root.marker_color
+            strokeWidth: 2
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+            startX: f + root.slant * 0.18
+            startY: root.height * 0.2
+            PathLine { x: marker_path.f - root.slant * 0.18; y: root.height * 0.8 }
+        }
+    }
+
     Rectangle {
-        visible: !root.solid && !root.sparkline && root.level > 0
+        visible: !root.slanted && !root.solid && !root.sparkline && root.level > 0
         x: Math.max(root.radius * 0.5, Math.min(root.width - root.radius * 0.5, root.fill_width)) - 1
         y: root.height * 0.2
         width: 2

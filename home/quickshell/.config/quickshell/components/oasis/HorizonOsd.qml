@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../theme"
 import ".."
+import "../modern" as Modern
 
 // The oasis OSD: an icon in a well, the level in light numerals, and the 20-segment meter with a sand sun at the level.
 ColumnLayout {
@@ -14,6 +15,10 @@ ColumnLayout {
     property string glyph: ""
     property string label: ""
     property string detail: ""
+    // Volume shows the default sink's live wave in a slanted level row; off unless peaks_on.
+    property bool wave: false
+    property var node: null
+    property bool peaks_on: false
 
     readonly property color sand: Theme.theme_secondary
     readonly property int count: 20
@@ -99,8 +104,21 @@ ColumnLayout {
         Layout.preferredHeight: 20
         opacity: root.muted ? 0.4 : 1
 
+        Modern.CapsuleSlider {
+            visible: root.wave
+            width: parent.width
+            height: parent.height
+            value: root.level
+            muted: root.muted
+            interactive: false
+            show_readout: false
+            node: root.node
+            peaks_on: root.peaks_on && root.wave
+        }
+
         Meter {
             id: meter
+            visible: !root.wave
             width: parent.width
             anchors.verticalCenter: parent.verticalCenter
             art_key: "osd"
@@ -110,6 +128,7 @@ ColumnLayout {
         }
 
         Rectangle {
+            visible: !root.wave
             readonly property real at: root.lit > 0 ? root.lit * (meter.segment_width + meter.gap) - meter.gap : 0
             x: at - width / 2
             anchors.verticalCenter: parent.verticalCenter
