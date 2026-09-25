@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/components/neovim/BufferLine.qml
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 import Quickshell.Hyprland
 import "../../theme"
@@ -7,7 +8,7 @@ import "../../services"
 import ".."
 import "Modes.js" as Modes
 
-// Workspaces as lualine buffers: number and app icons, the focused one on Visual with an underline in the mode color.
+// Workspaces as lualine buffers: number and app icons, the focused one a full-height segment in the mode color with arrow edges.
 Item {
     id: root
 
@@ -18,6 +19,7 @@ Item {
     property int bar_height: 30
 
     readonly property int glyph: root.compact ? 14 : 16
+    readonly property int arrow: Math.round(root.bar_height * 0.4)
     readonly property color accent: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
 
     implicitWidth: row.implicitWidth + 8
@@ -38,11 +40,13 @@ Item {
                 readonly property var toplevels: slot.modelData.toplevels.values
                 readonly property bool empty: slot.toplevels.length === 0
                 readonly property bool focused: slot.modelData.focused
+                readonly property bool after_focused: slot.index > 0 && !!root.workspaces[slot.index - 1] && root.workspaces[slot.index - 1].focused
 
                 height: row.height
 
+                // The focused buffer's arrows stand in for the separators on both sides of it.
                 Item {
-                    visible: slot.index > 0
+                    visible: slot.index > 0 && !slot.focused && !slot.after_focused
                     width: 10
                     height: slot.height
 
@@ -64,19 +68,26 @@ Item {
                     }
                 }
 
+                Shape {
+                    visible: slot.focused
+                    width: root.arrow + 1
+                    height: slot.height
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        strokeWidth: -1
+                        fillColor: root.accent
+                        PathPolyline {
+                            path: [Qt.point(0, 0), Qt.point(root.arrow + 1, 0), Qt.point(root.arrow + 1, slot.height), Qt.point(0, slot.height), Qt.point(root.arrow, slot.height / 2), Qt.point(0, 0)]
+                        }
+                    }
+                }
+
                 Rectangle {
                     id: buffer
                     width: content.implicitWidth + 16
                     height: slot.height
-                    color: slot.focused ? Theme.ui_visual_bg : buffer_hover.hovered ? Qt.alpha(Theme.ui_visual_bg, 0.5) : "transparent"
-
-                    Rectangle {
-                        visible: slot.focused
-                        anchors.bottom: parent.bottom
-                        width: parent.width
-                        height: 2
-                        color: root.accent
-                    }
+                    color: slot.focused ? root.accent : buffer_hover.hovered ? Qt.alpha(Theme.ui_visual_bg, 0.5) : "transparent"
 
                     HoverHandler {
                         id: buffer_hover
@@ -91,12 +102,19 @@ Item {
                         id: content
                         anchors.centerIn: parent
                         spacing: 4
+                        // Icons in ink on the mode fill, like the chip's glyph.
+                        layer.enabled: slot.focused
+                        layer.effect: MultiEffect {
+                            colorization: 1
+                            colorizationColor: Theme.bg_crust
+                            brightness: -1
+                        }
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
                             rightPadding: slot.empty ? 0 : 2
                             text: String(slot.modelData.id)
-                            color: slot.focused ? Theme.theme_secondary : slot.modelData.active ? Theme.theme_primary : slot.empty ? Style.text_muted : Style.text_dim
+                            color: slot.focused ? Theme.bg_crust : slot.modelData.active ? Theme.theme_primary : slot.empty ? Style.text_muted : Style.text_dim
                             font.family: Style.bar_font_family
                             font.pixelSize: Style.bar_font_size
                             font.bold: true
@@ -114,6 +132,21 @@ Item {
                                 width: root.glyph + 2
                                 height: root.glyph + 2
                             }
+                        }
+                    }
+                }
+
+                Shape {
+                    visible: slot.focused
+                    width: root.arrow
+                    height: slot.height
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        strokeWidth: -1
+                        fillColor: root.accent
+                        PathPolyline {
+                            path: [Qt.point(-1, 0), Qt.point(0, 0), Qt.point(root.arrow, slot.height / 2), Qt.point(0, slot.height), Qt.point(-1, slot.height), Qt.point(-1, 0)]
                         }
                     }
                 }
