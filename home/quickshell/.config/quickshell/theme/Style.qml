@@ -217,7 +217,6 @@ Singleton {
             controller: "",
             meter_art: ({}),
             toast_enter: "",
-            bar_hud_box: "transparent",
             console_views: ""
         };
         return {
@@ -425,7 +424,6 @@ Singleton {
                 controller: "",
                     meter_art: ({}),
                     toast_enter: "",
-                bar_hud_box: "transparent",
                 console_views: ""
             },
             "terminal": Object.assign({}, terminal, {
@@ -544,7 +542,6 @@ Singleton {
                 osd_layout: "rpg",
                 card_layout: "dialogue",
                 toast_enter: "mode7",
-                bar_hud_box: Theme.theme_primary_light,
                 // Greys lifted toward primary_light so they read on the shaded window.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
@@ -1782,8 +1779,6 @@ Singleton {
     readonly property var meter_art: root.active.meter_art
     // Toast arrival: "" fades in; "type" slides and types, "mode7" zooms from a tilted plane, "wobble" settles, "bloom" glows, each once.
     readonly property string toast_enter: root.active.toast_enter
-    // Bar readouts sit in HUD boxes outlined in this color.
-    readonly property color bar_hud_box: root.bar.bar_hud_box
     // Popups, toasts and bar modules swap in this console's views ("nes", "snes", "ps1", "ps2"); "" keeps the shared ones.
     readonly property string console_views: root.active.console_views
 
