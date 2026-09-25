@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 import "Search.js" as Search
+import "oasis" as Oasis
 
 PanelWindow {
     id: root
@@ -473,6 +474,18 @@ PanelWindow {
                 bottom_radius: root.frame_radius
             }
 
+            Loader {
+                active: root.st.dune.a > 0
+                x: root.st.frame_border_width
+                width: parent.width - x * 2
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: root.st.frame_border_width
+                sourceComponent: Oasis.DuneFoot {
+                    color: root.st.dune
+                    bottom_radius: Math.max(0, root.frame_radius - root.st.frame_border_width)
+                }
+            }
+
             // The watch face: a shaded panel with static scan rows, and the engraving on the bezel below it.
             Rectangle {
                 id: lcd_panel
@@ -611,10 +624,10 @@ PanelWindow {
                         y: (parent.height - height) / 2
                         width: Math.min(title_metrics.width, parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
-                        text: root.st.title_prefix + root.title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
+                        text: root.st.title_prefix + Style.title_text(root.title, root.st) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
-                        font.pixelSize: root.st.font_size - 2
+                        font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
                         font.weight: root.st.title_weight > 0 ? root.st.title_weight : root.st.title_font_family === root.st.font_family ? Font.Bold : Font.Normal
                         font.letterSpacing: root.st.title_spacing
                     }

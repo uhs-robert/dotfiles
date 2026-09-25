@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Shapes
 import "../theme"
+import "oasis" as Oasis
 
 Text {
     id: root
@@ -44,8 +45,18 @@ Text {
         }
     }
 
+    Loader {
+        active: root.st.section_fade.a > 0 && root.st.wave_rules
+        x: root.leftPadding + root.contentWidth + 10
+        y: root.topPadding + Math.round(root.contentHeight / 2) - 4
+        width: Math.max(0, root.width - x)
+        sourceComponent: Oasis.DuneLine {
+            color: root.st.section_fade
+        }
+    }
+
     Rectangle {
-        visible: root.st.section_fade.a > 0
+        visible: root.st.section_fade.a > 0 && !root.st.wave_rules
         x: root.leftPadding + root.contentWidth + 8
         y: root.topPadding + Math.round(root.contentHeight / 2)
         width: Math.max(0, (root.width - x) * 0.7)

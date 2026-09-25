@@ -13,6 +13,8 @@ ColumnLayout {
     property var labels: []
     property int current: 0
     property bool chips: false
+    // Styles with a tab track draw sub-view chips as tabs too.
+    readonly property bool pills: root.chips && root.st.tab_track.a === 0
     property int font_size: root.chips ? root.st.font_size - 3 : root.st.font_size - 2
     property real tab_height: Style.px(24)
     // Other label sets this row switches between; the tallest reserves the height so switching never resizes.
@@ -48,7 +50,7 @@ ColumnLayout {
         // Reading .font re-runs dependent bindings when the style changes the font.
         const f = label_metrics.font;
         const hand = root.st.hand_cursor ? 20 : 0;
-        return list.map(l => root.chips ? label_metrics.advanceWidth(root.st.chip_brackets ? "[" + l + "]" : l) + 20 + hand : label_metrics.advanceWidth(l) + 12 + root.key_space + root.bracket_space + hand);
+        return list.map(l => root.pills ? label_metrics.advanceWidth(root.st.chip_brackets ? "[" + l + "]" : l) + 20 + hand : label_metrics.advanceWidth(l) + 12 + root.key_space + root.bracket_space + hand);
     }
 
     // Fewest balanced rows of consecutive indices whose widths fit `avail`.
@@ -84,7 +86,7 @@ ColumnLayout {
             id: tab_row
             required property var modelData
 
-            Layout.fillWidth: !root.chips
+            Layout.fillWidth: !root.pills
             Layout.alignment: Qt.AlignHCenter
             spacing: root.spacing
 
@@ -94,11 +96,15 @@ ColumnLayout {
                 MenuTab {
                     id: tab
                     required property int modelData
+                    required property int index
 
-                    Layout.fillWidth: !root.chips
-                    Layout.preferredWidth: root.chips ? -1 : root.label_needs[tab.modelData] || 0
+                    Layout.fillWidth: !root.pills
+                    Layout.preferredWidth: root.pills ? -1 : root.label_needs[tab.modelData] || 0
                     implicitHeight: root.tab_height
-                    base_radius: root.chips ? 12 : 4
+                    base_radius: root.pills ? 12 : 4
+                    track_left: tab.index === 0
+                    track_right: tab.index === tab_row.modelData.length - 1
+                    track_gap: root.spacing / 2
                     font_size: root.font_size
                     label: root.labels[tab.modelData] || ""
                     active: tab.modelData === root.current
