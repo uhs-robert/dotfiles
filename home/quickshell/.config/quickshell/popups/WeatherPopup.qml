@@ -6,6 +6,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "weather"
+import "../components/modern" as Modern
 
 Popup {
     id: root
@@ -27,7 +28,7 @@ Popup {
     readonly property bool hev: Style.weather_header === "hev"
     readonly property bool dex: Style.weather_header === "pokedex"
     // Headers that carry their own alert (HEV banner, Pokédex alert, FF7 status panel) replace the shared banner.
-    readonly property bool own_alert: root.hev || root.dex || Style.weather_header === "status"
+    readonly property bool own_alert: root.hev || root.dex || Style.weather_header === "status" || Style.weather_header === "hero"
 
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine", "Sun & Moon"]
     readonly property int sun_moon_sub: 4
@@ -206,7 +207,7 @@ Popup {
                 Layout.fillWidth: true
                 active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, hev: hev_header, pokedex: dex_header, status: status_header })[Style.weather_header] || ring_header
+                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, hev: hev_header, pokedex: dex_header, status: status_header, hero: hero_header })[Style.weather_header] || ring_header
 
                 Component {
                     id: spec_header
@@ -266,6 +267,13 @@ Popup {
                 Component {
                     id: status_header
                     StatusPanel {
+                        onAlert_clicked: root.set_tab(root.tabs.length - 1)
+                    }
+                }
+
+                Component {
+                    id: hero_header
+                    Modern.WeatherHero {
                         onAlert_clicked: root.set_tab(root.tabs.length - 1)
                     }
                 }
