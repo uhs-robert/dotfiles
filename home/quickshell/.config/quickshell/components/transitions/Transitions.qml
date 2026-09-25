@@ -6,28 +6,45 @@ import "../../theme"
 import "../../services"
 import "Kinds.js" as Kinds
 
-// Announces a one-shot transition when the saved style changes; previews never reach saved_name.
+// Plays a one-shot transition when the displayed style changes and rests; commits of the shown style never replay.
 Singleton {
     id: root
 
     signal play(string kind)
 
     property bool armed: false
-    property string last_style: ""
+    // The style the bars last transitioned to.
+    property string shown: ""
 
     function request(name, force) {
         if (!force && !Power.on_ac) return;
         root.play(Kinds.kind_for(name));
     }
 
+    // Plays the displayed style now if it differs from the one shown.
+    function settle() {
+        rest.stop();
+        if (!root.armed || Style.name === root.shown) return;
+        root.shown = Style.name;
+        root.request(Style.name, false);
+    }
+
     Connections {
         target: Style
-        function onSaved_nameChanged() {
-            const name = Style.saved_name;
-            const changed = name !== root.last_style;
-            root.last_style = name;
-            if (root.armed && changed) root.request(name, false);
+        function onNameChanged() {
+            if (!root.armed) return;
+            if (Style.name === root.shown) rest.stop();
+            else rest.restart();
         }
+        function onSaved_nameChanged() {
+            if (Style.name === Style.saved_name) root.settle();
+        }
+    }
+
+    Timer {
+        id: rest
+        interval: 250
+        onTriggered: root.settle()
     }
 
     // Skips the saved style loading at startup or on a config reload.
@@ -35,7 +52,7 @@ Singleton {
         running: true
         interval: 3000
         onTriggered: {
-            root.last_style = Style.saved_name;
+            root.shown = Style.name;
             root.armed = true;
         }
     }
