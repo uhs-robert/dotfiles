@@ -1898,12 +1898,9 @@ Singleton {
     }
 
     readonly property var active: root.styles[root.name] || root.styles["default"]
-    // Draft overrides from OasisDraftIpc; "" keeps the style's own oasis_frame and oasis_foot.
-    property string draft_frame: ""
-    property string draft_foot: ""
     // Oasis panel outline (SlantFrame: notch, taper, lean, keel or round) and foot art (none, horizon, stars, fade, moon or dune).
-    readonly property string oasis_frame: root.active.oasis_frame ? root.draft_frame || root.active.oasis_frame : ""
-    readonly property string oasis_foot: root.active.oasis_foot ? root.draft_foot || root.active.oasis_foot : ""
+    readonly property string oasis_frame: root.active.oasis_frame || ""
+    readonly property string oasis_foot: root.active.oasis_foot || ""
     readonly property bool slanted: root.oasis_frame !== "" && root.oasis_frame !== "round"
     // Extra room under a frame's content so deep cuts clear the footer.
     readonly property int slant_room: ({ taper: 8, lean: 8, keel: 6 })[root.oasis_frame] || 0

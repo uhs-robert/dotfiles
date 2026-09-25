@@ -81,13 +81,8 @@ ShellRoot {
     BrightnessIpc {}
     NotificationsIpc {}
     StyleIpc {}
-    OasisDraftIpc {
-        osd: osd
-    }
     TooltipShelf {}
     NotificationToasts {}
-    Osd {
-        id: osd
-    }
+    Osd {}
     WhichKey {}
 }
