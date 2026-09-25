@@ -39,10 +39,8 @@ Item {
 
     Loader {
         anchors.fill: parent
-        active: root.st.oasis_frame !== "" && !root.device
+        active: root.st.slant_frame && !root.device
         sourceComponent: Oasis.SlantFrame {
-            top_radius: root.top_radius
-            bottom_radius: root.bottom_radius
             edge_color: root.chamfer_edge
         }
     }

@@ -9,7 +9,6 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
-import "oasis" as Oasis
 import "neovim" as Neovim
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
@@ -173,7 +172,7 @@ PanelWindow {
         readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : root.float_title ? root.float_top : title_tab.height + frame.ring_pad
 
 
-        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
+        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0)) + Style.slant_room
         height: top_edge + header_height + body.implicitHeight + pad_y * 2 + Style.slant_room
         radius: Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
@@ -222,18 +221,6 @@ PanelWindow {
             top_radius: frame.radius
             bottom_radius: frame.radius
             top_offset: frame.top_edge - Style.frame_border_width
-        }
-
-        Loader {
-            active: Style.dune.a > 0
-            x: Style.frame_border_width
-            width: frame.width - x * 2
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: Style.frame_border_width
-            sourceComponent: Oasis.DuneFoot {
-                color: Style.dune
-                bottom_radius: Math.max(0, frame.radius - Style.frame_border_width)
-            }
         }
 
         Sheen {

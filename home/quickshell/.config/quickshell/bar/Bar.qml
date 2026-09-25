@@ -97,20 +97,6 @@ Item {
     Component { id: notifications_component; Notifications { compact: root.compact; screen_name: root.screen_name } }
     Component { id: media_component; Media { compact: root.compact; screen_name: root.screen_name } }
 
-    Rectangle {
-        visible: Style.bar_horizon.a > 0
-        y: Math.round((root.height - root.bar_height) / 2 + root.bar_height * 0.78)
-        width: root.width
-        height: 1
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: "transparent" }
-            GradientStop { position: 0.06; color: Style.bar_horizon }
-            GradientStop { position: 0.94; color: Style.bar_horizon }
-            GradientStop { position: 1; color: "transparent" }
-        }
-    }
-
     Island {
         height: root.bar_height
         id: left_island
@@ -128,7 +114,6 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
-        round_caps: Style.bar_round_caps
         capsule_inset: Style.bar_capsule
         sheen_color: Style.sheen
         cap_right: true
@@ -168,7 +153,6 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
-        round_caps: Style.bar_round_caps
         capsule_inset: Style.bar_capsule
         sheen_color: Style.sheen
         cap_left: true
@@ -228,7 +212,6 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
-        round_caps: Style.bar_round_caps
         capsule_inset: Style.bar_capsule
         sheen_color: Style.sheen
         cap_left: true

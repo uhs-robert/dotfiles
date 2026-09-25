@@ -7,7 +7,6 @@ import "../theme"
 import "../services"
 import "../popups/weather" as Weather
 import "ps1" as Ps1
-import "oasis" as Oasis
 import "modern" as Modern
 import "neovim" as Neovim
 
@@ -149,28 +148,6 @@ Rectangle {
         anchors.fill: parent
         sourceComponent: Weather.DqWindow {
             border.color: root.selected ? Style.caret_color : Theme.fg_strong
-        }
-    }
-
-    Loader {
-        active: root.oasis && Style.oasis_frame === ""
-        anchors.fill: parent
-        sourceComponent: Item {
-            Oasis.OasisCard {
-                anchors.fill: parent
-                panel: true
-                selected: root.selected
-                critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
-            }
-
-            Oasis.DuneFoot {
-                x: 1
-                width: parent.width - 2
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 1
-                color: Style.dune
-                bottom_radius: Style.radius(8) - 1
-            }
         }
     }
 
@@ -360,6 +337,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.margins: (root.tile ? 14 : 8) + Style.inset_pad
         anchors.leftMargin: (root.tile ? 14 : Style.row_cursor !== "" ? 16 : 12) + Style.inset_pad
+        anchors.rightMargin: (root.tile ? 14 : 8) + Style.inset_pad + Style.slant_room
         spacing: root.tile ? 12 : 8
 
         Loader {

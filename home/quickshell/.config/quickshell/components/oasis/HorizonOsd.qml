@@ -25,11 +25,11 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: Style.px(10)
 
-        Rectangle {
+        CutBox {
             Layout.preferredWidth: Style.px(34)
             Layout.preferredHeight: Style.px(34)
-            radius: 10
-            color: Qt.alpha(Theme.bg_crust, 0.55)
+            cut_br: 9
+            fill: Qt.alpha(Theme.bg_crust, 0.55)
 
             Text {
                 anchors.centerIn: parent

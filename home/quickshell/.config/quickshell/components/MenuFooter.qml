@@ -16,8 +16,7 @@ Item {
     property bool centered: false
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
-    readonly property bool art_rule: root.st.oasis_foot === "stars" || root.st.oasis_foot === "moon"
-    readonly property int rule_gap: root.st.footer_rule ? (root.st.wave_rules || root.art_rule ? 11 : 5) : 0
+    readonly property int rule_gap: root.st.footer_rule ? (root.st.footer_moon ? 11 : 5) : 0
     readonly property var groups: KeyHints.parse(root.filtered_text)
     // While the enclosing popup searches, its query line takes this footer's place at the same height.
     readonly property var popup: {
@@ -36,47 +35,28 @@ Item {
     clip: !root.wrap
 
     Loader {
-        active: root.st.footer_rule && root.st.wave_rules
+        active: root.st.footer_rule && root.st.footer_moon
         width: parent.width
-        sourceComponent: Oasis.DuneLine {
-            color: root.st.footer_rule_color
-            fade: "both"
-        }
-    }
-
-    Loader {
-        active: root.st.footer_rule && root.art_rule
-        width: parent.width
-        sourceComponent: root.st.oasis_foot === "stars" ? star_rule : moon_rule
-    }
-
-    Component {
-        id: star_rule
-        Oasis.StarRule {}
-    }
-
-    Component {
-        id: moon_rule
-        Oasis.MoonRule {
+        sourceComponent: Oasis.MoonRule {
             color: root.st.footer_rule_color
         }
     }
 
     Rectangle {
-        visible: root.st.footer_rule && root.st.footer_rule_solid && !root.st.wave_rules && !root.art_rule
+        visible: root.st.footer_rule && root.st.footer_rule_solid && !root.st.footer_moon
         width: parent.width
         height: 1
         color: root.st.footer_rule_color
     }
 
     Row {
-        visible: root.st.footer_rule && !root.st.footer_rule_solid && !root.st.wave_rules
+        visible: root.st.footer_rule && !root.st.footer_rule_solid
         width: parent.width
         spacing: 3
         clip: true
 
         Repeater {
-            model: root.st.footer_rule && !root.st.footer_rule_solid && !root.st.wave_rules ? Math.max(0, Math.ceil(root.width / 7)) : 0
+            model: root.st.footer_rule && !root.st.footer_rule_solid ? Math.max(0, Math.ceil(root.width / 7)) : 0
 
             Rectangle {
                 width: 4

@@ -324,18 +324,6 @@ PanelWindow {
             bottom_radius: frame.radius
         }
 
-        Loader {
-            active: Style.dune.a > 0
-            x: Style.frame_border_width
-            width: frame.width - x * 2
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: Style.frame_border_width
-            sourceComponent: Oasis.DuneFoot {
-                color: Style.dune
-                bottom_radius: Math.max(0, frame.radius - Style.frame_border_width)
-            }
-        }
-
         Sheen {
             color_top: Style.frame_float > 0 ? Style.sheen : "transparent"
             corner: frame.radius

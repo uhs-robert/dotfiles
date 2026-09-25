@@ -7,7 +7,6 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 import "Search.js" as Search
-import "oasis" as Oasis
 import "neovim" as Neovim
 
 PanelWindow {
@@ -518,18 +517,6 @@ PanelWindow {
 
             FrameInset {
                 bottom_radius: root.frame_radius
-            }
-
-            Loader {
-                active: root.st.dune.a > 0
-                x: root.st.frame_border_width
-                width: parent.width - x * 2
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: root.st.frame_border_width
-                sourceComponent: Oasis.DuneFoot {
-                    color: root.st.dune
-                    bottom_radius: Math.max(0, root.frame_radius - root.st.frame_border_width)
-                }
             }
 
             // The watch face: a shaded panel with static scan rows, and the engraving on the bezel below it.

@@ -226,12 +226,8 @@ Singleton {
             toast_enter: "",
             console_views: "",
             workspace_art: "",
-            bar_round_caps: false,
-            bar_horizon: "transparent",
-            dune: "transparent",
-            wave_rules: false,
-            oasis_frame: "",
-            oasis_foot: "",
+            slant_frame: false,
+            footer_moon: false,
             selection_edge: "transparent",
             chip_tabs: false,
             title_case: false,
@@ -466,12 +462,8 @@ Singleton {
                     toast_enter: "",
                 console_views: "",
                 workspace_art: "",
-                bar_round_caps: false,
-                bar_horizon: "transparent",
-                dune: "transparent",
-                wave_rules: false,
-                oasis_frame: "",
-                oasis_foot: "",
+                slant_frame: false,
+                footer_moon: false,
                 selection_edge: "transparent",
                 chip_tabs: false,
                 title_case: false,
@@ -1589,7 +1581,7 @@ Singleton {
                     bar_text_raised: true
                 });
             })(),
-            // A desert oasis at night: night-blue panels, sand for selection and focus, dune contours and a horizon.
+            // A desert oasis at night: night-blue panels, sand for selection and focus, slanted frames with a sand horizon and a crescent moon.
             "oasis": (() => {
                 const sand = Theme.theme_secondary;
                 const sky = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.ui_visual_bg, 0.72));
@@ -1620,13 +1612,12 @@ Singleton {
                     frame_color: Theme.bg_core,
                     frame_shade: sky,
                     shade_vertical: true,
-                    frame_radius: 16,
+                    frame_radius: 0,
                     frame_border_width: 1,
                     frame_border_color: edge,
                     accent_color: rim,
                     accent_height: 1,
                     accent_full_width: false,
-                    dune: Qt.alpha(sand, 0.07),
                     sheen: Qt.alpha(Theme.theme_primary_light, 0.34),
                     selection_bg: Qt.alpha(sand, 0.16),
                     selection_outline: "transparent",
@@ -1648,15 +1639,15 @@ Singleton {
                     section_fg: Theme.theme_primary,
                     section_rule: false,
                     section_fade: hair,
-                    wave_rules: true,
-                    oasis_frame: "taper",
-                    oasis_foot: "horizon",
+                    slant_frame: true,
+                    footer_moon: true,
                     label_caps: false,
                     caps_tracking: 0,
                     footer_fg: Theme.fg_dim,
                     footer_key_fg: sand,
                     footer_key_bg: Qt.alpha(sand, 0.1),
                     footer_rule: true,
+                    footer_rule_solid: true,
                     footer_rule_color: hair,
                     meter_on: Theme.theme_primary_light,
                     meter_off: Qt.alpha(Theme.theme_primary, 0.14),
@@ -1690,7 +1681,6 @@ Singleton {
                     bar_border_width: 1,
                     bar_border_color: edge,
                     bar_rounded: true,
-                    bar_round_caps: true,
                     bar_workspace_focused: sand,
                     bar_workspace_active: Theme.theme_primary_light,
                     bar_workspace_idle: Theme.bg_surface,
@@ -1898,12 +1888,12 @@ Singleton {
     }
 
     readonly property var active: root.styles[root.name] || root.styles["default"]
-    // Oasis panel outline (SlantFrame: notch, taper, lean, keel or round) and foot art (none, horizon, stars, fade, moon or dune).
-    readonly property string oasis_frame: root.active.oasis_frame || ""
-    readonly property string oasis_foot: root.active.oasis_foot || ""
-    readonly property bool slanted: root.oasis_frame !== "" && root.oasis_frame !== "round"
-    // Extra room under a frame's content so deep cuts clear the footer.
-    readonly property int slant_room: ({ taper: 8, lean: 8, keel: 6 })[root.oasis_frame] || 0
+    // Frames drawn by SlantFrame: flat top, bottom corners cut at the bar islands' slant, a sand horizon along the foot.
+    readonly property bool slant_frame: root.active.slant_frame
+    // Extra room under a frame's content so the long cut clears the footer.
+    readonly property int slant_room: root.slant_frame ? 8 : 0
+    // A small sand crescent at the right end of the footer rule.
+    readonly property bool footer_moon: root.active.footer_moon
     // Small popups read this token set; it is the singleton itself unless the style has a `small` block.
     readonly property var small: root.active.small ? root.resolve(Object.assign({}, root.active, root.active.small)) : root
 
@@ -1926,7 +1916,7 @@ Singleton {
         o.number_font = o.number_font || o.font_family;
         o.label_font_family = o.label_font_family || o.font_family;
         o.mono_font = o.mono_font || o.font_family;
-        o.custom_frame = o.frame_octagon > 0 || o.frame_cut > 0 || !!o.oasis_frame;
+        o.custom_frame = o.frame_octagon > 0 || o.frame_cut > 0 || o.slant_frame;
         o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
         return o;
     }
@@ -1946,7 +1936,7 @@ Singleton {
     readonly property bool rounded: root.active.rounded
     readonly property bool frame_follows_island: root.active.frame_follows_island
     readonly property color frame_color: root.active.frame_color
-    readonly property real frame_radius: root.slanted ? 0 : root.active.frame_radius
+    readonly property real frame_radius: root.active.frame_radius
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
     // A 1px rule along the bottom edge of every frame.
@@ -2080,7 +2070,7 @@ Singleton {
     readonly property real frame_cut: root.active.frame_cut
     readonly property real frame_notch: root.active.frame_notch
     // A frame component draws the fill and border, so the base rectangle and FrameShade stay empty.
-    readonly property bool custom_frame: root.frame_octagon > 0 || root.frame_cut > 0 || root.oasis_frame !== ""
+    readonly property bool custom_frame: root.frame_octagon > 0 || root.frame_cut > 0 || root.slant_frame
     // The middle of a frame_cut border's vertical fade; its ends are frame_border_color.
     readonly property color frame_line: root.active.frame_line
     readonly property color frame_marks: root.active.frame_marks
@@ -2135,7 +2125,7 @@ Singleton {
     // Footer keys drawn as filled caps in footer_key_fg on this color.
     readonly property color footer_key_bg: root.active.footer_key_bg
     readonly property string footer_separator: root.active.footer_separator
-    readonly property bool footer_rule_solid: root.active.footer_rule_solid || root.oasis_foot !== ""
+    readonly property bool footer_rule_solid: root.active.footer_rule_solid
     readonly property bool slider_readout: root.active.slider_readout
     // Hazard stripes on alert banners and critical cards.
     readonly property color hazard: root.active.hazard
@@ -2190,8 +2180,6 @@ Singleton {
     readonly property bool border_title: root.active.border_title
     // A 1px highlight (Sheen) along the top of raised surfaces: floating frames, capsule islands, shaded tabs and rows, keycaps, cards.
     readonly property color sheen: root.active.sheen
-    // A dune silhouette in this color along the foot of popups and toasts.
-    readonly property color dune: root.oasis_frame !== "" ? "transparent" : root.active.dune
     // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
     readonly property int title_size: root.active.title_size
@@ -2216,8 +2204,6 @@ Singleton {
     readonly property bool row_gutter: root.active.row_gutter
     // Sections as open folds: a fold marker, the label and a dotted fill.
     readonly property bool section_fold: root.active.section_fold
-    // Section fades and footer rules drawn as dune contour lines (DuneLine).
-    readonly property bool wave_rules: root.oasis_foot !== "" ? root.oasis_foot === "dune" : root.active.wave_rules
     // Drawn between each footer key and its description.
     readonly property string footer_arrow: root.active.footer_arrow
     readonly property real meter_gap: root.active.meter_gap
@@ -2258,10 +2244,6 @@ Singleton {
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color
-    // Islands with rounded bottom corners instead of slants.
-    readonly property bool bar_round_caps: root.bar.bar_round_caps && !root.slanted
-    // A horizon line across the bar, seen in the gaps between islands.
-    readonly property color bar_horizon: root.bar.bar_horizon
     // Islands as floating capsules this many px inside the bar; 0 keeps the slanted islands.
     readonly property int bar_capsule: root.bar.bar_capsule
     readonly property color bar_workspace_shade: root.bar.bar_workspace_shade
