@@ -227,7 +227,6 @@ Singleton {
             workspace_art: "",
             bar_round_caps: false,
             bar_horizon: "transparent",
-            clock_art: "",
             dune: "transparent",
             wave_rules: false,
             selection_edge: "transparent",
@@ -465,7 +464,6 @@ Singleton {
                 workspace_art: "",
                 bar_round_caps: false,
                 bar_horizon: "transparent",
-                clock_art: "",
                 dune: "transparent",
                 wave_rules: false,
                 selection_edge: "transparent",
@@ -1588,7 +1586,7 @@ Singleton {
                 const t2 = Qt.tint(Theme.fg_core, Qt.alpha(Theme.theme_primary_light, 0.28));
                 return Object.assign({}, terminal, {
                     workspace_art: "constellation",
-                    clock_art: "horizon",
+                    bar_clock_layout: "horizon",
                     weather_header: "oasis",
                     osd_layout: "horizon",
                     card_layout: "oasis",
@@ -2173,8 +2171,6 @@ Singleton {
     // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
     readonly property int title_size: root.active.title_size
-    // Bar clock art: "horizon" puts a horizon with the sun or moon in the clock's island.
-    readonly property string clock_art: root.active.clock_art
     // Popups float this many px below the bar with every corner rounded; frame_shadow fills frame_drop's room with a soft shadow.
     readonly property int frame_float: root.active.frame_float
     readonly property color frame_shadow: root.active.frame_shadow
@@ -2248,7 +2244,7 @@ Singleton {
     readonly property color bar_workspace_shade: root.bar.bar_workspace_shade
     // Empty workspaces as small dots of this color instead of pills.
     readonly property color bar_workspace_dot: root.bar.bar_workspace_dot
-    // "capsule": time with a small zone, a hairline and the date.
+    // Bar clock layout: "capsule" (time with a small zone, a hairline and the date) or "horizon" (a horizon with the sun or moon in the center island).
     readonly property string bar_clock_layout: root.bar.bar_clock_layout
     readonly property color bar_start_well: root.bar.bar_start_well
     // A lualine statusline: flat sections with arrow separators, the start button as the HyprVim mode chip.

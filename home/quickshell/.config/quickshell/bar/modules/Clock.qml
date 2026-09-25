@@ -106,10 +106,9 @@ Row {
             width: Math.max(implicitWidth, Math.ceil(time_metrics.advanceWidth))
             text: root.chip || root.lualine ? root.digits_text : root.time_text
             color: root.chip || root.lualine ? Style.bar_clock_fg : Style.bar_fg
-            font.bold: root.lualine
             font.family: root.chip ? Style.bar_clock_font : Style.bar_font_family
             font.features: { "tnum": 1 }
-            font.weight: root.horizon ? Font.DemiBold : Font.Normal
+            font.weight: root.lualine ? Font.Bold : root.horizon ? Font.DemiBold : Font.Normal
             style: root.chip ? Text.Normal : Style.bar_text_style
             styleColor: Style.bar_glow_color
             font.pixelSize: root.chip ? Style.bar_font_size + 2 : Style.bar_font_size

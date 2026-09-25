@@ -13,7 +13,7 @@ Item {
     required property Item host
     property var workspaces: []
     property bool compact: false
-    property int bar_height: 34
+    property int bar_height: 30
 
     readonly property int glyph: compact ? 15 : 17
     readonly property int gap: 4

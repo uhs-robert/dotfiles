@@ -65,11 +65,11 @@ Item {
     // The start button draws the HyprVim mode chip on a lualine bar.
     readonly property bool has_mode_chip: Style.bar_lualine && [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "start"))
 
-    // Sets island/screen/stat properties a module declares, after the Loader instantiates it.
     // The oasis horizon decorates the center island when it holds the clock; that clock makes room for it and lends it the time.
-    readonly property bool clock_horizon: Style.clock_art === "horizon" && root.center_entries.some(e => e.base === "clock")
+    readonly property bool clock_horizon: Style.bar_clock_layout === "horizon" && root.center_entries.some(e => e.base === "clock")
     property var horizon_clock: null
 
+    // Sets island/screen/stat properties a module declares, after the Loader instantiates it.
     function wire_module(item, entry, island) {
         if (entry.base === "clock" && island === center_island) {
             root.horizon_clock = item;
