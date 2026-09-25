@@ -44,7 +44,8 @@ Item {
     readonly property int tile_depth: compact ? 2 : 3
 
     implicitWidth: row.implicitWidth + (materia ? 12 : 0)
-    implicitHeight: row.implicitHeight
+    // Dots are shorter than pills; the row keeps the pill height so it stays centered.
+    implicitHeight: Style.bar_workspace_dot.a > 0 ? Math.max(row.implicitHeight, root.pill_height) : row.implicitHeight
 
     readonly property var workspace_list: {
         const list = Hyprland.workspaces.values.filter(w => w.id > 0 && w.monitor && w.monitor.name === root.screen_name);
@@ -163,7 +164,7 @@ Item {
                 readonly property int cursor_gap: root.party && modelData.focused ? root.party_gap : 0
                 // Plain pills: the style's own art is drawn by none of the branches above.
                 readonly property bool plain: !root.materia && !root.doors && !pill.qblock && !pill.ps2 && !root.slots && !pill.map && !root.party && !pill.diamond
-                readonly property bool dot: pill.plain && pill.is_empty && Style.bar_workspace_dot.a > 0
+                readonly property bool dot: pill.plain && pill.is_empty && !pill.modelData.active && Style.bar_workspace_dot.a > 0
 
                 height: pill.dot ? 7 : root.pill_height
                 y: (root.pill_height - height) / 2

@@ -84,11 +84,13 @@ PanelWindow {
     screen: Quickshell.screens.find(s => s.name === root.held_screen_name) || null
     visible: root.wanted || root.reveal > 0
     anchors.bottom: true
-    margins.bottom: Style.px(72)
+    margins.bottom: Style.px(72) - root.shadow_pad
+    // Room around the frame for a soft shadow, so the window never clips it.
+    readonly property int shadow_pad: Style.frame_shadow.a > 0 ? Style.frame_drop : 0
     exclusiveZone: 0
     color: "transparent"
-    implicitWidth: frame.width
-    implicitHeight: frame.height + root.slide
+    implicitWidth: frame.width + root.shadow_pad * 2
+    implicitHeight: frame.height + root.slide + root.shadow_pad
     mask: Region {}
     WlrLayershell.namespace: "quickshell-osd"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -231,6 +233,7 @@ PanelWindow {
     // Fits in the slide room under the frame, so the window keeps its size.
     Rectangle {
         visible: Style.frame_drop > 0 && Style.frame_shadow.a === 0
+        x: frame.x
         y: frame.y + Style.frame_drop
         width: frame.width
         height: frame.height
@@ -241,13 +244,13 @@ PanelWindow {
 
     Loader {
         active: Style.frame_shadow.a > 0
-        x: frame.radius
-        y: frame.y + root.slide / 2
-        width: frame.width - frame.radius * 2
+        x: frame.x + 4
+        y: frame.y + 4
+        width: frame.width - 8
         height: frame.height
         opacity: frame.opacity
         sourceComponent: RectangularShadow {
-            blur: root.slide
+            blur: root.shadow_pad
             radius: frame.radius
             color: Style.frame_shadow
         }
@@ -262,6 +265,7 @@ PanelWindow {
         readonly property real band_height: Math.max(26, title_tab.height + 4)
         readonly property real header_height: !title_tab.visible ? 0 : root.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.top_rule + Style.inset_pad
 
+        x: root.shadow_pad
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
@@ -384,7 +388,7 @@ PanelWindow {
                     anchors.horizontalCenterOffset: title_index.space / 2
                     x: 10 + title_index.space
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + (Style.title_mixed ? root.title.charAt(0) + root.title.slice(1).toLowerCase() : root.title) + Style.title_suffix
+                    text: Style.title_prefix + Style.shown_title(root.title) + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
                     font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2

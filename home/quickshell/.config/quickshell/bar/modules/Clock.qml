@@ -38,11 +38,12 @@ Row {
     // Proportional fonts would resize the island every tick; tabular digits and a width floor hold it still.
     TextMetrics {
         id: time_metrics
-        text: time_label.text.replace(/\d/g, "0")
-        font: time_label.font
+        text: (root.capsule ? root.digits_text : time_label.text).replace(/\d/g, "0")
+        font: root.capsule && capsule_loader.item ? capsule_loader.item.time_font : time_label.font
     }
 
     Loader {
+        id: capsule_loader
         active: root.capsule
         visible: active
         anchors.verticalCenter: parent.verticalCenter
@@ -51,6 +52,7 @@ Row {
             zone_text: root.zone_text
             date_text: root.date_text
             compact: root.compact
+            time_floor: time_metrics.advanceWidth
         }
     }
 

@@ -28,6 +28,7 @@ Item {
     property real capsule_inset: 0
     property color sheen_color: "transparent"
     readonly property bool capsule: root.capsule_inset > 0
+    readonly property real capsule_width: root.width - root.capsule_inset * 2
     readonly property bool shaded: root.shade_color.a > 0 || root.visor || root.capsule
     default property alias content: layout.children
 
@@ -156,9 +157,11 @@ Item {
             }
         }
 
-        // Declared before the layout so module MouseAreas stack above it.
+        // Declared before the layout so module MouseAreas stack above it; capsules take clicks across their round ends.
         MouseArea {
-            anchors.fill: parent
+            x: root.capsule ? root.capsule_inset - body.x : 0
+            width: root.capsule ? root.capsule_width : parent.width
+            height: parent.height
             onClicked: root.clicked()
         }
 

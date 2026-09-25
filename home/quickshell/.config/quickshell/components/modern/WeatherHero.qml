@@ -58,11 +58,15 @@ ColumnLayout {
 
                 Image {
                     visible: WeatherState.has_data
-                    Layout.preferredWidth: 22
-                    Layout.preferredHeight: 22
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 34
+                    Layout.topMargin: -6
+                    Layout.bottomMargin: -6
+                    Layout.leftMargin: -5
+                    Layout.rightMargin: -3
                     readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
-                    sourceSize.width: Math.ceil(44 * dpr)
-                    sourceSize.height: Math.ceil(44 * dpr)
+                    sourceSize.width: Math.ceil(68 * dpr)
+                    sourceSize.height: Math.ceil(68 * dpr)
                     source: WeatherState.has_data ? WeatherState.icon_source(WeatherState.current.code, WeatherState.current.is_day) : ""
                     smooth: true
                 }

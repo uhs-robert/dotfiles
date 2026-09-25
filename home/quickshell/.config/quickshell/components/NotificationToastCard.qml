@@ -350,7 +350,7 @@ Rectangle {
             sourceComponent: Modern.AccentTile {
                 tint: root.notification && root.notification.urgency === NotificationUrgency.Critical ? Theme.theme_label : Theme.info
                 glyph: "\u{f0f3}"
-                icon: root.notification ? (root.notification.image !== "" ? root.notification.image : root.notification.appIcon !== "" ? Quickshell.iconPath(root.notification.appIcon, true) : "") : ""
+                notification: root.notification
             }
         }
 

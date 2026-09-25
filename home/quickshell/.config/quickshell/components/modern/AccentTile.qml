@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/components/modern/AccentTile.qml
 import QtQuick
+import Quickshell
 import "../../theme"
 
 // A rounded square in the selection gradient holding a glyph or an icon.
@@ -7,7 +8,9 @@ Rectangle {
     id: root
 
     property string glyph: ""
-    property url icon: ""
+    // A notification whose image, else app icon, fills the tile.
+    property var notification: null
+    property url icon: !root.notification ? "" : root.notification.image !== "" ? root.notification.image : root.notification.appIcon !== "" ? Quickshell.iconPath(root.notification.appIcon, true) : ""
     property bool dimmed: false
     property int size: 36
     // Tints the tile from this color instead of the selection gradient.

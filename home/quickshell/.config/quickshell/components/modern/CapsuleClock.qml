@@ -10,15 +10,11 @@ Row {
     property string zone_text: ""
     property string date_text: ""
     property bool compact: false
+    // The Clock module measures zeroed digits in time_font; the floor keeps the island from resizing every second.
+    property real time_floor: 0
+    readonly property font time_font: time_label.font
 
     spacing: 10
-
-    // Tabular digits and a width floor keep the island from resizing every second.
-    TextMetrics {
-        id: time_metrics
-        text: root.time_text.replace(/\d/g, "0")
-        font: time_label.font
-    }
 
     Row {
         anchors.verticalCenter: parent.verticalCenter
@@ -27,7 +23,7 @@ Row {
         Text {
             id: time_label
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(implicitWidth, Math.ceil(time_metrics.advanceWidth))
+            width: Math.max(implicitWidth, Math.ceil(root.time_floor))
             text: root.time_text
             color: Style.bar_clock_fg
             font.family: Style.bar_clock_font

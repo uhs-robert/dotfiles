@@ -267,7 +267,7 @@ Item {
                     size: root.width < 320 ? 32 : 36
                     tint: root.critical ? Theme.theme_label : Theme.info
                     glyph: "\u{f0f3}"
-                    icon: root.notification ? (root.notification.image !== "" ? root.notification.image : root.notification.appIcon !== "" ? Quickshell.iconPath(root.notification.appIcon, true) : "") : ""
+                    notification: root.notification
                 }
             }
 

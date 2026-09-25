@@ -189,12 +189,6 @@ PanelWindow {
     readonly property real frame_radius: root.dock_bottom ? 0 : root.st.frame_radius
     readonly property bool floating: root.st.frame_float > 0 && !root.dock_bottom
     readonly property real top_radius: root.floating ? root.frame_radius : 0
-
-    // Styles with title_mixed show all-caps titles in sentence case.
-    function shown_title(t) {
-        const s = t || "";
-        return root.st.title_mixed && s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
-    }
     // Shortcuts fire before the focused item, so popups that bind h/l themselves still walk.
     function walk_allowed() {
         const f = content_scope.Window.activeFocusItem;
@@ -227,7 +221,9 @@ PanelWindow {
 
     // The anchor is the island's body; its parent is the Island, which knows which end caps it has.
     readonly property var island: held_anchor ? held_anchor.parent : null
-    readonly property real island_width: held_anchor ? held_anchor.width : 0
+    // Capsule islands measure by the capsule they draw, not the body between their caps.
+    readonly property bool island_capsule: !!island && island.capsule === true
+    readonly property real island_width: root.island_capsule ? root.island.capsule_width : held_anchor ? held_anchor.width : 0
     readonly property bool island_cap_left: !!island && island.cap_left === true
     readonly property bool island_cap_right: !!island && island.cap_right === true
     // cap_right-only = a left island, flush with the screen's left edge; cap_left-only = a right island.
@@ -240,15 +236,17 @@ PanelWindow {
     anchors.left: side === "left" || dock_bottom
     anchors.right: side === "right" || dock_bottom
     margins.top: root.floating ? root.st.frame_float : 0
-    margins.left: root.floating && root.side === "left" ? root.st.frame_float : 0
-    margins.right: root.floating && root.side === "right" ? root.st.frame_float : 0
+    margins.left: root.island_capsule && root.side === "left" ? root.island.capsule_inset : 0
+    margins.right: root.island_capsule && root.side === "right" ? root.island.capsule_inset : 0
     exclusiveZone: 0
     color: "transparent"
     visible: false
     WlrLayershell.namespace: "quickshell-popup"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: root.passive ? WlrKeyboardFocus.None : WlrKeyboardFocus.OnDemand
-    mask: root.passive ? no_input : root.reserving ? panel_input : null
+    mask: root.passive ? no_input : root.reserving || root.shadow_room > 0 ? panel_input : null
+    // The soft shadow's room under the frame; it passes clicks through to the scrim like the reserve does.
+    readonly property real shadow_room: !root.dock_bottom && root.st.frame_shadow.a > 0 ? root.st.frame_drop : 0
 
     Region {
         id: no_input
@@ -264,7 +262,7 @@ PanelWindow {
         id: panel_area
         y: root.height - root.panel_height
         width: root.width
-        height: root.panel_height
+        height: root.panel_height - root.shadow_room
     }
 
     readonly property int line_height: root.st.accent_height
@@ -375,7 +373,7 @@ PanelWindow {
         onPressed: mouse => {
             const px = mouse.x + outside_catch.x;
             const py = mouse.y + outside_catch.y;
-            if (px >= 0 && py >= root.height - root.panel_height && px < root.width && py < root.height) mouse.accepted = false;
+            if (px >= 0 && py >= root.height - root.panel_height && px < root.width && py < root.height - root.shadow_room) mouse.accepted = false;
             else if (root.wanted) Popups.close();
         }
     }
@@ -645,7 +643,7 @@ PanelWindow {
                         y: (parent.height - height) / 2
                         width: Math.min(title_metrics.width, parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
-                        text: root.st.title_prefix + root.shown_title(root.title) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
+                        text: root.st.title_prefix + Style.shown_title(root.title, root.st) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
                         font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
@@ -670,7 +668,7 @@ PanelWindow {
 
                 // Plain sentence-case titles carry the live title value at the right, like a status line.
                 Text {
-                    visible: root.has_title && !root.banded && root.st.title_mixed && root.st.title_readout === "" && root.title_value !== ""
+                    visible: root.has_title && !root.banded && root.st.title_mixed && root.st.title_readout === "" && root.title_value !== "" && title_tab.x + title_tab.width + 12 <= parent.width - anchors.rightMargin - implicitWidth
                     anchors.right: parent.right
                     anchors.rightMargin: title_readout.anchors.rightMargin + 4
                     y: title_tab.y + (title_tab.height - height) / 2

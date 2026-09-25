@@ -10,7 +10,7 @@ Singleton {
     property string name: "default"
     // The saved choice; `name` differs from it only while the style picker previews.
     property string saved_name: "default"
-    readonly property var order: ["default", "modern", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech"]
+    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech", "modern"]
     readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0))
     readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter", modern: "Modern" })
 
@@ -2007,6 +2007,12 @@ Singleton {
     readonly property string bar_clock_layout: root.bar.bar_clock_layout
     readonly property color bar_start_well: root.bar.bar_start_well
     readonly property int bar_text_style: root.bar.bar_text_raised ? Text.Raised : root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
+
+    // A title as the token set `set` (this singleton when omitted) shows it: all-caps titles in sentence case under title_mixed.
+    function shown_title(t, set) {
+        const s = t || "";
+        return (set || root).title_mixed && s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
+    }
 
     // Corner radius for a shape that is rounded by `r` in the default look.
     function radius(r) {

@@ -56,12 +56,14 @@ PanelWindow {
     anchors.bottom: root.position.startsWith("bottom")
     anchors.left: root.position.endsWith("left")
     anchors.right: root.position.endsWith("right")
-    margins.top: root.gap
-    margins.bottom: root.gap
-    margins.left: root.gap
-    margins.right: root.gap
-    implicitWidth: frame.width
-    implicitHeight: frame.height + Style.frame_drop
+    margins.top: root.gap - root.shadow_pad
+    margins.bottom: root.gap - root.shadow_pad
+    margins.left: root.gap - root.shadow_pad
+    margins.right: root.gap - root.shadow_pad
+    // Room on every side for a soft shadow, taken out of the gap so the frame stays put.
+    readonly property int shadow_pad: Style.frame_shadow.a > 0 ? Math.min(Style.frame_drop, root.gap) : 0
+    implicitWidth: frame.width + root.shadow_pad * 2
+    implicitHeight: frame.height + (root.shadow_pad > 0 ? root.shadow_pad * 2 : Style.frame_drop)
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -132,12 +134,12 @@ PanelWindow {
 
     Loader {
         active: Style.frame_shadow.a > 0
-        x: frame.radius
-        y: Style.frame_drop / 2
-        width: frame.width - frame.radius * 2
+        x: frame.x + 4
+        y: frame.y + 4
+        width: frame.width - 8
         height: frame.height
         sourceComponent: RectangularShadow {
-            blur: Style.frame_drop
+            blur: root.shadow_pad
             radius: frame.radius
             color: Style.frame_shadow
         }
@@ -145,6 +147,8 @@ PanelWindow {
 
     Rectangle {
         id: frame
+        x: root.shadow_pad
+        y: root.shadow_pad
 
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)

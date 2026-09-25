@@ -20,7 +20,6 @@ Item {
     CardSurface {
         visible: root.selected
         anchors.fill: parent
-        radius: Style.radius(8)
         selected: true
     }
 
@@ -57,13 +56,17 @@ Item {
             }
         }
 
+        // The icon art fills about half its box, so the box runs large and gives back its empty margin.
         Image {
+            readonly property real size: Math.max(24, Math.min(48, root.width - 6))
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: 26
-            Layout.preferredHeight: 26
+            Layout.preferredWidth: size
+            Layout.preferredHeight: size
+            Layout.topMargin: -Math.round(size * 0.18)
+            Layout.bottomMargin: -Math.round(size * 0.18)
             readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
-            sourceSize.width: Math.ceil(52 * dpr)
-            sourceSize.height: Math.ceil(52 * dpr)
+            sourceSize.width: Math.ceil(96 * dpr)
+            sourceSize.height: Math.ceil(96 * dpr)
             source: root.day ? WeatherState.icon_source(root.day.code, true) : ""
             smooth: true
         }
