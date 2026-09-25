@@ -16,6 +16,8 @@ Item {
     readonly property real cut: root.st.frame_cut
     readonly property color line: root.st.frame_line.a > 0 ? root.st.frame_line : root.st.frame_border_color
     readonly property real band_width: Math.min(band_row.implicitWidth + 42, root.width)
+    // The narrowest width that shows the whole title; mirrors title_text's width limit.
+    readonly property real min_width: band_row.x + 40 + (root.panel_id !== "" ? 30 : 0) + title_text.implicitWidth
 
     implicitHeight: Math.max(26, title_text.implicitHeight + 8)
 

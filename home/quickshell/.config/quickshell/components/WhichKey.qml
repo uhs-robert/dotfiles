@@ -180,7 +180,11 @@ PanelWindow {
         readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : root.float_title ? root.float_top : title_tab.height + frame.ring_pad
 
 
-        width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0)) + Style.slant_room
+        // Wide enough for the whole title in the header variant the style draws.
+        readonly property real header_min: frame.banded ? (band_loader.item ? band_loader.item.min_width : 0) + (Style.inset_pad + Style.frame_border_width) * 2
+            : root.float_title ? (border_loader.item ? border_loader.item.implicitWidth : 0) + 24
+            : title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0)
+        width: Math.max(body.implicitWidth + pad_x * 2, frame.header_min) + Style.slant_room
         height: top_edge + header_height + body.implicitHeight + pad_y * 2 + Style.slant_room
         radius: Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
@@ -253,6 +257,7 @@ PanelWindow {
 
 
             Loader {
+                id: band_loader
                 active: frame.banded
                 x: Style.inset_pad + Style.frame_border_width
                 y: x
@@ -309,6 +314,7 @@ PanelWindow {
             }
 
             Loader {
+                id: border_loader
                 active: root.float_title
                 x: 12
                 y: -root.float_top

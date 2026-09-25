@@ -15,6 +15,8 @@ Item {
     property color title_color: "transparent"
 
     implicitHeight: Math.max(24, title_text.implicitHeight + 10)
+    // The narrowest width that shows the whole title; mirrors title_text's width limit.
+    readonly property real min_width: title_text.x + title_text.implicitWidth + 8 + 22 + (value_text.visible ? value_text.implicitWidth + 8 : 0)
 
     Rectangle {
         anchors.fill: parent
