@@ -158,7 +158,33 @@ Item {
         sourceComponent: Neovim.WindowSegment {
             screen_name: root.screen_name
             bar_height: root.bar_height
-            max_width: Math.max(0, root.width - left_island.width - (right_island.visible ? right_island.width : 0) - 24)
+            max_width: Math.max(0, root.width - left_island.width - (right_island.visible ? right_island.width : 0) - 24 - (lualine_cava.shown ? lualine_cava.width + 12 : 0))
+        }
+    }
+
+    // Lualine has no center island: cava plays at the end of section c, left of the right island's cap.
+    Item {
+        id: lualine_cava
+        readonly property bool shown: Style.bar_lualine && right_island.visible && MediaState.playing && Power.on_ac
+        visible: Style.bar_lualine && right_island.visible
+        x: right_island.x - width - 8
+        width: 120
+        height: root.bar_height
+        anchors.verticalCenter: parent.verticalCenter
+
+        CavaBars {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 3
+            height: parent.height - 6
+            active: lualine_cava.shown
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: lualine_cava.shown
+            onClicked: Popups.toggle("media", right_island.body_item, right_island.bg_color, root.screen_name)
         }
     }
 
