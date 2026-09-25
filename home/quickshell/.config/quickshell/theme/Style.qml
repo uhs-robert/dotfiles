@@ -216,7 +216,10 @@ Singleton {
             meter_solid: false,
             controller: "",
             console_skin: "",
-            meter_art: ({})
+            meter_art: ({}),
+            console: "",
+            toast_enter: "",
+            bar_hud_box: "transparent"
         };
         return {
             "default": {
@@ -422,7 +425,10 @@ Singleton {
                 meter_solid: false,
                 controller: "",
                 console_skin: "",
-                meter_art: ({})
+                meter_art: ({}),
+                console: "",
+                toast_enter: "",
+                bar_hud_box: "transparent"
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -534,6 +540,12 @@ Singleton {
                 wait_anim: "hand",
                 done_anim: "pixel",
                 weather_header: "mode7",
+                controller: "snes",
+                console: "snes",
+                osd_layout: "rpg",
+                card_layout: "dialogue",
+                toast_enter: "mode7",
+                bar_hud_box: Theme.theme_primary_light,
                 // Greys lifted toward primary_light so they read on the shaded window.
                 text_muted: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.4)),
                 text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.65)),
@@ -1717,7 +1729,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel" or "dq".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud" or "rpg", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq" or "dialogue".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1754,6 +1766,12 @@ Singleton {
     readonly property string console_skin: root.active.console_skin
     // Meter art by popup name (or "osd"): a component path relative to components/ that replaces the segments.
     readonly property var meter_art: root.active.meter_art
+    // Console-specific popup views ("snes"); empty keeps the shared layouts.
+    readonly property string console: root.active.console
+    // Toast arrival: "" fades in, "mode7" also zooms in from a tilted distance once.
+    readonly property string toast_enter: root.active.toast_enter
+    // Bar readouts sit in HUD boxes outlined in this color.
+    readonly property color bar_hud_box: root.bar.bar_hud_box
 
     property bool cava_line: true
     readonly property var bar: root.active

@@ -92,6 +92,7 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
+        hud_box: Style.bar_hud_box
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -128,6 +129,7 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
+        hud_box: Style.bar_hud_box
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -174,6 +176,7 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
+        hud_box: Style.bar_hud_box
         cap_left: true
         visible: root.right_entries.length > 0
 

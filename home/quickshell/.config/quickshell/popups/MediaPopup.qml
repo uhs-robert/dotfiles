@@ -9,6 +9,7 @@ import "../theme"
 import "../services"
 import "media" as Media
 import "weather" as Weather
+import "snes" as Snes
 
 Popup {
     id: root
@@ -304,8 +305,9 @@ Popup {
                     Item {
                         id: progress_item
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 16
+                        Layout.preferredHeight: progress_item.sound_test ? 30 : 16
 
+                        readonly property bool sound_test: Style.console === "snes"
                         readonly property real track_length: MediaState.length_of(root.player)
                         readonly property bool has_length: track_length > 0
                         readonly property real ratio: progress_item.has_length
@@ -318,7 +320,7 @@ Popup {
                             height: 6
                             radius: Style.radius(3)
                             color: Theme.bg_surface
-                            visible: progress_item.has_length && !Style.segmented_levels
+                            visible: progress_item.has_length && !Style.segmented_levels && !progress_item.sound_test
                         }
 
                         Rectangle {
@@ -327,17 +329,26 @@ Popup {
                             height: 6
                             radius: Style.radius(3)
                             color: Theme.theme_primary
-                            visible: progress_item.has_length && !Style.segmented_levels
+                            visible: progress_item.has_length && !Style.segmented_levels && !progress_item.sound_test
                         }
 
                         Meter {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            visible: progress_item.has_length && Style.segmented_levels
+                            visible: progress_item.has_length && Style.segmented_levels && !progress_item.sound_test
                             segment_count: 40
                             implicitHeight: Style.console_skin === "nes" ? 16 : Style.px(8)
                             value: progress_item.ratio
+                        }
+
+                        Loader {
+                            anchors.fill: parent
+                            active: progress_item.sound_test
+                            sourceComponent: Snes.SnesSoundTest {
+                                ratio: progress_item.ratio
+                                track: root.player && root.player.metadata ? String(root.player.metadata["xesam:trackNumber"] || "") : ""
+                            }
                         }
 
                         Rectangle {
@@ -349,7 +360,7 @@ Popup {
                             anchors.verticalCenter: parent.verticalCenter
                             x: Math.max(0, Math.min(parent.width - width, parent.width * progress_item.ratio - width / 2))
                             color: Theme.theme_primary
-                            visible: progress_item.has_length && !Style.segmented_levels
+                            visible: progress_item.has_length && !Style.segmented_levels && !progress_item.sound_test
                             opacity: progress_item.knob_active ? 1 : 0
                             border.width: 2
                             border.color: Theme.bg_core

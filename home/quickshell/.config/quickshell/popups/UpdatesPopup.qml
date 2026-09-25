@@ -6,6 +6,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "updates" as Updates
+import "snes" as Snes
 
 Popup {
     id: root
@@ -145,10 +146,21 @@ Popup {
                     }
                 }
 
+                Loader {
+                    anchors.fill: parent
+                    active: root.st.console === "snes" && root.current_list.length > 0
+                    sourceComponent: Snes.SnesInventory {
+                        items: root.current_list
+                        selected: root.selected
+                        aur: root.current_sub === 1
+                        onClicked: index => root.selected = index
+                    }
+                }
+
                 ListView {
                     id: row_list
                     anchors.fill: parent
-                    visible: root.current_list.length > 0 && !root.nes
+                    visible: root.current_list.length > 0 && !root.nes && root.st.console !== "snes"
                     clip: true
                     spacing: 4
                     model: root.current_list

@@ -8,6 +8,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "../components/nes" as Nes
+import "../components/snes" as Snes
 
 Popup {
     id: root
@@ -573,7 +574,7 @@ Popup {
                             spacing: 6
 
                             Text {
-                                visible: !net_row.is_advanced && root.st.console_skin !== "nes"
+                                visible: !net_row.is_advanced && root.st.console_skin !== "nes" && root.st.console !== "snes"
                                 text: root.signal_glyph(net_row.modelData.signalStrength || 0)
                                 color: net_row.fg(net_row.modelData.connected ? root.st.text_primary : root.st.text_fg)
                                 font.family: root.st.font_family
@@ -612,6 +613,17 @@ Popup {
                                 color: net_row.fg(root.st.text_muted)
                                 font.family: root.st.font_family
                                 font.pixelSize: root.st.font_size - 2
+                            }
+
+                            Loader {
+                                active: !net_row.is_advanced && root.st.console === "snes"
+                                visible: active
+                                Layout.preferredWidth: Style.px(36)
+                                Layout.alignment: Qt.AlignVCenter
+                                sourceComponent: Snes.SnesGauge {
+                                    implicitHeight: 7
+                                    value: net_row.modelData.signalStrength || 0
+                                }
                             }
                         }
 

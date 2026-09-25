@@ -9,6 +9,7 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "../theme"
 import "../services"
+import "snes" as Snes
 
 PanelWindow {
     id: root
@@ -49,6 +50,7 @@ PanelWindow {
     readonly property bool ring_layout: Style.osd_layout === "ring" && !root.showing_vox
     readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
     readonly property bool hud_layout: Style.osd_layout === "hud" && !root.showing_vox
+    readonly property bool rpg_layout: Style.osd_layout === "rpg" && !root.showing_vox
 
     readonly property string title: root.showing_vox ? root.vox_phase.toUpperCase() : root.kind.toUpperCase()
 
@@ -377,6 +379,17 @@ PanelWindow {
                     }
                 }
 
+                Loader {
+                    Layout.alignment: Qt.AlignVCenter
+                    active: root.rpg_layout
+                    visible: active
+                    sourceComponent: Snes.SnesOsd {
+                        level: root.level
+                        percent: root.percent
+                        muted: root.muted
+                    }
+                }
+
                 OsdReadout {
                     visible: root.readout_layout
                     level: root.level
@@ -387,7 +400,7 @@ PanelWindow {
                 }
 
                 Text {
-                    visible: !root.readout_layout
+                    visible: !root.readout_layout && !root.rpg_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: Theme.glyph_size + 4
                     horizontalAlignment: Text.AlignHCenter
@@ -399,7 +412,7 @@ PanelWindow {
                 }
 
                 Item {
-                    visible: !root.readout_layout
+                    visible: !root.readout_layout && !root.rpg_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: root.showing_vox ? Style.px(260) : Style.px(180)
                     Layout.preferredHeight: root.showing_vox ? Style.px(44) : meter.implicitHeight
@@ -425,7 +438,7 @@ PanelWindow {
                 }
 
                 Text {
-                    visible: !root.readout_layout && !root.ring_layout
+                    visible: !root.readout_layout && !root.ring_layout && !root.rpg_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight

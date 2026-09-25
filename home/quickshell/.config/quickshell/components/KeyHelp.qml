@@ -3,6 +3,7 @@ import QtQuick
 import "../theme"
 import "../services"
 import "KeyHints.js" as KeyHints
+import "snes" as Snes
 
 // A popup's full key list, drawn over its content at the same size.
 Item {
@@ -33,6 +34,7 @@ Item {
     }
 
     readonly property real key_column: {
+        if (root.st.controller !== "") return Math.min(list.width * 0.5, Math.max(key_metrics.height + 2, measure.implicitWidth));
         const h = key_metrics.height + 2;
         let w = 0;
         for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)) + root.pad_width(g.key));
@@ -98,6 +100,52 @@ Item {
         onWheel: wheel => wheel.accepted = true
     }
 
+    // The key column with controller buttons: the button, then the keyboard key it stands for.
+    component HelpKeys: Row {
+        id: help_keys
+        property string key: ""
+        readonly property var st: Style.for_item(help_keys)
+        readonly property var pad: help_keys.st.controller !== "" ? KeyHints.pad_parts(help_keys.st.controller, help_keys.key) : []
+        spacing: 4
+
+        Loader {
+            active: help_keys.pad.length > 0
+            visible: active
+            anchors.verticalCenter: parent.verticalCenter
+            sourceComponent: ({ snes: snes_keys })[help_keys.st.controller] || null
+
+            Component {
+                id: snes_keys
+                Snes.SnesKey {
+                    parts: help_keys.pad
+                    text_color: help_keys.st.text_fg
+                    font_family: help_keys.st.font_family
+                    font_size: help_keys.st.font_size - 5
+                }
+            }
+        }
+
+        KeyBadge {
+            anchors.verticalCenter: parent.verticalCenter
+            key: KeyHints.with_glyphs(help_keys.key)
+        }
+    }
+
+    Column {
+        id: measure
+        visible: root.st.controller !== ""
+        opacity: 0
+
+        Repeater {
+            model: root.st.controller !== "" ? root.own_entries.concat(root.general_entries) : []
+
+            HelpKeys {
+                required property var modelData
+                key: modelData.key
+            }
+        }
+    }
+
     Component {
         id: help_row_component
 
@@ -114,10 +162,9 @@ Item {
                 height: badge.height
                 clip: badge.width > width
 
-                KeyBadge {
+                HelpKeys {
                     id: badge
-                    pair: true
-                    key: KeyHints.with_glyphs(help_row.modelData.key)
+                    key: help_row.modelData.key
                 }
             }
 
