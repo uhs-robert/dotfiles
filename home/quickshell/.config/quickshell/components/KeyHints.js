@@ -22,24 +22,29 @@ const glyph_names = Object.keys(key_glyphs).reduce((m, k) => {
 
 // Keyboard key -> controller button per console (Style.controller); a combined key maps whole or by its "/" halves.
 const controller_maps = {
-    nes: { Enter: "a", q: "b", Esc: "b", Backspace: "b", Tab: "start", "[ ]": "select", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v" },
-    snes: { Enter: "a", q: "b", Esc: "b", Backspace: "b", Tab: "start", "[ ]": "lr", t: "y", "?": "x", "j/k": "dpad_v", "h/l": "dpad_h" },
-    ps1: { Enter: "cross", q: "circle", Esc: "circle", Backspace: "circle", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
-    ps2: { Enter: "cross", q: "circle", Esc: "circle", Backspace: "circle", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "/": "r3", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
+    nes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "select", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
+    snes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "y", "[ ]": "lr", "[": "l", "]": "r", t: "x", "?": "x", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
+    ps1: { Enter: "circle", Backspace: "cross", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
+    ps2: { Enter: "cross", Backspace: "circle", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "/": "r3", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
 };
 
+// Esc takes START only where it closes the popup; as cancel/back (n/Esc, Tab/Esc list) it shows the back button.
+function button_for(map, key, desc) {
+    return map[key === "Esc" && desc && !/\bclose\b/.test(desc) ? "Backspace" : key];
+}
+
 // A key (glyphs allowed) as [{ button } | { text }] parts, "/" text between halves; [] when nothing maps.
-function controller_parts(controller, key) {
+function controller_parts(controller, key, desc) {
     const map = controller_maps[controller];
     if (!map || !key || key.indexOf("+") >= 0) return [];
     let k = key;
     for (const g in glyph_names) k = k.split(g).join(glyph_names[g]);
-    if (map[k] !== undefined) return [{ button: map[k] }];
+    if (button_for(map, k, desc) !== undefined) return [{ button: button_for(map, k, desc) }];
     const pieces = k === "/" ? ["/"] : k === "[ ]" ? ["[", "]"] : k.split("/");
     const parts = [];
     let hit = false;
     for (const p of pieces) {
-        const b = map[p];
+        const b = button_for(map, p, desc);
         if (b !== undefined) hit = true;
         if (b !== undefined && parts.length > 0 && parts[parts.length - 1].button === b) continue;
         if (parts.length > 0 && k !== "[ ]") parts.push({ text: "/" });

@@ -72,7 +72,7 @@ Item {
                 id: group
                 required property var modelData
                 required property int index
-                readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, group.modelData.key).length > 0
+                readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, group.modelData.key, group.modelData.desc).length > 0
                 spacing: 4
 
                 Loader {
@@ -82,6 +82,7 @@ Item {
                     sourceComponent: ControllerBadge {
                         controller: root.st.controller
                         key: group.modelData.key
+                        desc: group.modelData.desc
                         size: Math.round(desc_text.implicitHeight)
                         text_color: root.st.footer_key_fg
                         font_family: root.st.font_family

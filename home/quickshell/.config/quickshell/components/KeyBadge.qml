@@ -9,11 +9,12 @@ Rectangle {
     readonly property var st: Style.for_item(root)
 
     property string key: ""
+    property string desc: ""
     // Set on a filled active tab so an outline badge takes the tab's text color; keycap badges keep theirs.
     property bool on_fill: false
     // Keeps the keyboard key beside its controller buttons, as the ? help does.
     property bool with_key: false
-    readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, root.key).length > 0
+    readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, root.key, root.desc).length > 0
     readonly property bool tinted: root.on_fill && root.st.key_bg.a === 0 && !root.orb
 
     implicitWidth: root.pad ? pad_loader.implicitWidth : Math.max(implicitHeight, key_text.implicitWidth + 8)
@@ -54,6 +55,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 controller: root.st.controller
                 key: root.key
+                desc: root.desc
                 size: key_text.implicitHeight + 2
                 text_color: key_text.color
                 font_family: key_text.font.family

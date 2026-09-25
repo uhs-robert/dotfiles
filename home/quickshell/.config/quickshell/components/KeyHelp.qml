@@ -27,8 +27,7 @@ Item {
         if (root.has_views) e.push({ key: "Tab", desc: "views" });
         if (root.searchable) e.push({ key: "/", desc: "search" }, { key: "n/N", desc: "next/prev match" });
         e.push({ key: "Ctrl+h/l", desc: "prev/next module" });
-        if (Popups.back_name !== "") e.push({ key: "Backspace", desc: "back to " + Popups.back_name });
-        e.push({ key: "?", desc: "help" }, { key: "Esc/Backspace", desc: "back" }, { key: "q", desc: "close" });
+        e.push({ key: "?", desc: "help" }, { key: "Backspace", desc: Popups.back_name !== "" ? "back to " + Popups.back_name : "back" }, { key: "q/Esc", desc: "close" });
         return e.filter(g => root.own_keys.indexOf(g.key) < 0);
     }
 
@@ -56,9 +55,9 @@ Item {
     onVisibleChanged: if (visible) flick.contentY = 0
 
     Keys.onPressed: event => {
-        if (event.key === Qt.Key_Question || event.text === "?" || event.key === Qt.Key_Escape || event.key === Qt.Key_Backspace) {
+        if (event.key === Qt.Key_Question || event.text === "?" || event.key === Qt.Key_Backspace) {
             root.back();
-        } else if (event.key === Qt.Key_Q) {
+        } else if (event.key === Qt.Key_Q || event.key === Qt.Key_Escape) {
             Popups.close();
         } else if (event.key === Qt.Key_J || event.key === Qt.Key_Down) {
             root.scroll_to(flick.contentY + root.step);
@@ -112,6 +111,7 @@ Item {
                 required property var modelData
                 with_key: true
                 key: KeyHints.with_glyphs(modelData.key)
+                desc: modelData.desc
             }
         }
     }
@@ -136,6 +136,7 @@ Item {
                     id: badge
                     with_key: true
                     key: KeyHints.with_glyphs(help_row.modelData.key)
+                    desc: help_row.modelData.desc
                 }
             }
 

@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Shapes
 import "../../theme"
 
-// One DualShock 2 button as a glossy black badge: face symbols, shoulders, SELECT, R3 or the D-pad.
+// One DualShock 2 button as a glossy black badge: face symbols, shoulders, START/SELECT, R3 or the D-pad.
 Item {
     id: root
 
@@ -13,7 +13,8 @@ Item {
     readonly property bool face: ["cross", "circle", "triangle", "square"].indexOf(root.button) >= 0
     readonly property bool shoulder: ["l1", "r1", "l2", "r2"].indexOf(root.button) >= 0
     readonly property bool dpad: root.button === "dpad_v" || root.button === "dpad_h"
-    readonly property string label: root.shoulder ? root.button.toUpperCase() : root.button === "select" ? "SELECT" : root.button === "r3" ? "R3" : ""
+    readonly property bool pill: root.button === "select" || root.button === "start"
+    readonly property string label: root.shoulder ? root.button.toUpperCase() : root.pill ? root.button.toUpperCase() : root.button === "r3" ? "R3" : ""
     // Hardware symbol colours, pulled toward the palette.
     readonly property color symbol_color: {
         const hw = { cross: "#7BA7E8", circle: "#F0736B", triangle: "#5FD0A0", square: "#E891C8" }[root.button] || "#FFFFFF";
@@ -24,7 +25,7 @@ Item {
     readonly property color body_bottom: Theme.bg_shadow
 
     implicitHeight: root.size
-    implicitWidth: root.shoulder ? Math.round(root.size * 1.55) : root.button === "select" ? label_text.implicitWidth + root.size * 0.7 : root.size
+    implicitWidth: root.shoulder ? Math.round(root.size * 1.55) : root.pill ? label_text.implicitWidth + root.size * 0.7 : root.size
     width: implicitWidth
     height: implicitHeight
 
@@ -79,9 +80,9 @@ Item {
         text: root.label
         color: Theme.fg_core
         font.family: "Exo 2"
-        font.pixelSize: Math.max(7, Math.round(root.size * (root.button === "select" ? 0.42 : 0.5)))
+        font.pixelSize: Math.max(7, Math.round(root.size * (root.pill ? 0.42 : 0.5)))
         font.weight: Font.DemiBold
-        font.letterSpacing: root.button === "select" ? 0.6 : 0
+        font.letterSpacing: root.pill ? 0.6 : 0
     }
 
     Shape {

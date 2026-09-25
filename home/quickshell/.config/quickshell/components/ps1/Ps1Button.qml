@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Shapes
 import "../../theme"
 
-// One DualShock-era PS1 pad button: grey domes with coloured symbols, grey shoulder and SELECT pills, a D-pad with the used arms lit.
+// One DualShock-era PS1 pad button: grey domes with coloured symbols, grey shoulder and START/SELECT pills, a D-pad with the used arms lit.
 Item {
     id: root
 
@@ -12,7 +12,8 @@ Item {
 
     readonly property bool face: ["cross", "circle", "triangle", "square"].indexOf(root.button) >= 0
     readonly property bool pad: root.button.startsWith("dpad")
-    readonly property string label: ({ l1: "L1", r1: "R1", l2: "L2", r2: "R2", select: "SELECT" })[root.button] || ""
+    readonly property bool pill: root.button === "select" || root.button === "start"
+    readonly property string label: ({ l1: "L1", r1: "R1", l2: "L2", r2: "R2", select: "SELECT", start: "START" })[root.button] || ""
     readonly property real stroke: Math.max(1.4, root.size * 0.13)
     readonly property color dome_top: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2))
     readonly property color dome_bottom: Qt.tint(Theme.bg_surface, Qt.alpha(Theme.fg_muted, 0.5))
@@ -23,7 +24,7 @@ Item {
         : root.button === "triangle" ? Qt.tint("#4fd1a8", Qt.alpha(Theme.cyan, 0.5))
         : Qt.tint("#f0a0dc", Qt.alpha(Theme.magenta, 0.5))
 
-    implicitWidth: root.button === "select" ? Math.round(root.size * 2.9) : root.label !== "" ? Math.round(root.size * 1.5) : root.size
+    implicitWidth: root.pill ? Math.round(root.size * 2.9) : root.label !== "" ? Math.round(root.size * 1.5) : root.size
     implicitHeight: root.size
     width: implicitWidth
     height: implicitHeight
@@ -31,7 +32,7 @@ Item {
     Rectangle {
         visible: !root.pad
         anchors.fill: parent
-        radius: root.face ? width / 2 : root.button === "select" ? height / 2 : height * 0.3
+        radius: root.face ? width / 2 : root.pill ? height / 2 : height * 0.3
         border.width: 1
         border.color: root.rim
         gradient: Gradient {
@@ -56,7 +57,7 @@ Item {
         text: root.label
         color: Theme.fg_strong
         font.family: Style.mono_font
-        font.pixelSize: Math.max(7, Math.round(root.size * (root.button === "select" ? 0.5 : 0.62)))
+        font.pixelSize: Math.max(7, Math.round(root.size * (root.pill ? 0.5 : 0.62)))
         font.bold: true
         style: Text.Raised
         styleColor: root.rim

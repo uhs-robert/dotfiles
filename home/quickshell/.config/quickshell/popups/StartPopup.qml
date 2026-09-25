@@ -98,7 +98,7 @@ Popup {
                 if (event.key === Qt.Key_Y || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                     root.run(root.selected);
                     event.accepted = true;
-                } else if (event.key === Qt.Key_N || event.key === Qt.Key_Escape) {
+                } else if (event.key === Qt.Key_N || event.key === Qt.Key_Escape || event.key === Qt.Key_Backspace) {
                     root.confirm = false;
                     event.accepted = true;
                 }

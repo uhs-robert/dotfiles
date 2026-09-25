@@ -115,6 +115,7 @@ PanelWindow {
             KeyBadge {
                 required property var modelData
                 key: modelData.key
+                desc: modelData.desc || ""
             }
         }
     }
@@ -298,6 +299,7 @@ PanelWindow {
                             KeyBadge {
                                 anchors.verticalCenter: parent.verticalCenter
                                 key: row.modelData.key
+                                desc: row.modelData.desc || ""
                             }
 
                             Text {

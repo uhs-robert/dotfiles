@@ -408,7 +408,7 @@ Item {
                         entries: [
                             { button: "cross", text: root.focused_valid ? root.actions[root.focused_action].text : "Open", action: () => root.enter() },
                             { key: "d", text: "Dismiss", action: () => NotificationState.dismiss(root.entry) },
-                            { button: "circle", text: "Close", action: () => Popups.close() }
+                            { button: "start", text: "Close", action: () => Popups.close() }
                         ]
                     }
                 }
