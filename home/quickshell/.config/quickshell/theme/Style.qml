@@ -2258,6 +2258,7 @@ Singleton {
     readonly property int bar_clock_size: root.bar.bar_clock_size
     // Bar module glyphs; 0 in a style keeps Theme.glyph_size.
     readonly property int bar_glyph_size: root.bar.bar_glyph_size > 0 ? root.bar.bar_glyph_size : Theme.glyph_size
+    readonly property int bar_badge_size: root.bar.bar_glyph_size > 0 ? Math.round(root.bar.bar_glyph_size * 0.62) : Math.max(6, root.bar_font_size - 3)
     readonly property int bar_border_width: root.bar.bar_border_width
     readonly property color bar_border_color: root.bar.bar_border_color
     readonly property bool bar_rounded: root.bar.bar_rounded

@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../theme"
 import "../../services"
+import "../../components"
 
 Item {
     id: root
@@ -40,33 +41,12 @@ Item {
         id: row
         spacing: 4
 
-        Item {
+        BadgedGlyph {
             Layout.alignment: Qt.AlignVCenter
-            implicitWidth: glyph.implicitWidth + (count_text.visible ? count_text.implicitWidth * 0.6 : 0)
-            implicitHeight: glyph.implicitHeight
-
-            Text {
-                id: glyph
-                text: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
-                color: root.on_accent ? Theme.bg_crust : NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
-                opacity: root.on_accent && NotificationState.dnd ? 0.55 : 1
-                font.family: Style.bar_font_family
-                style: Style.bar_text_style
-                styleColor: Style.bar_glow_color
-                font.pixelSize: Style.bar_glyph_size
-            }
-
-            Text {
-                id: count_text
-                visible: root.unread > 0
-                x: glyph.implicitWidth - implicitWidth * 0.4
-                y: -3
-                text: root.unread > 99 ? "99+" : String(root.unread)
-                color: glyph.color
-                font.family: Style.bar_font_family
-                font.pixelSize: Style.bar_font_size - 3
-                font.bold: true
-            }
+            glyph: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
+            count: root.unread > 99 ? "99+" : root.unread > 0 ? String(root.unread) : ""
+            tint: root.on_accent ? Theme.bg_crust : NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
+            glyph_opacity: root.on_accent && NotificationState.dnd ? 0.55 : 1
         }
     }
 
