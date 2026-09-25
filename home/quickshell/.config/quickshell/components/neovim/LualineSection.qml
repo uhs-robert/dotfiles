@@ -40,8 +40,9 @@ Item {
     }
     readonly property bool shown: root.first_shown >= 0
     readonly property real arrow: root.lead_bg.a > 0 ? Math.round(root.height * 0.4) : 0
-    readonly property bool first_lit: root.shown && !!cells.itemAt(root.first_shown) && cells.itemAt(root.first_shown).lit
-    readonly property bool last_lit: root.shown && !!cells.itemAt(root.last_shown) && cells.itemAt(root.last_shown).lit
+    // Pushed by the end cells themselves, like the buffers do; bindings through itemAt() missed hover changes.
+    property bool first_lit: false
+    property bool last_lit: false
     // What the next section's arrow sits on.
     readonly property color end_fill: root.last_lit ? root.hover_fill : root.fill
 
@@ -110,6 +111,14 @@ Item {
 
                 visible: cell.wanted
                 height: root.height
+
+                onLitChanged: cell.sync()
+                onFirstChanged: cell.sync()
+                onLastChanged: cell.sync()
+                function sync() {
+                    if (cell.first) root.first_lit = cell.lit;
+                    if (cell.last) root.last_lit = cell.lit;
+                }
 
                 HoverHandler {
                     id: cell_hover

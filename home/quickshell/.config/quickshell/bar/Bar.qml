@@ -102,6 +102,15 @@ Item {
     Component { id: notifications_component; Notifications { compact: root.compact; screen_name: root.screen_name } }
     Component { id: media_component; Media { compact: root.compact; screen_name: root.screen_name } }
 
+    // Lualine is one full-width statusline: section c's fill runs behind the islands.
+    Rectangle {
+        visible: Style.bar_lualine
+        width: root.width
+        height: root.bar_height
+        anchors.verticalCenter: parent.verticalCenter
+        color: Theme.bg_mantle
+    }
+
     Island {
         height: root.bar_height
         id: left_island
