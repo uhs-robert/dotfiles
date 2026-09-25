@@ -196,8 +196,6 @@ Item {
                 Row {
                     id: icons
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: root.slots ? -3 : 0
-                    anchors.verticalCenterOffset: root.slots ? -3 : 0
                     spacing: 2
 
                     Repeater {
@@ -236,20 +234,6 @@ Item {
                             }
                         }
                     }
-                }
-
-                Text {
-                    visible: root.slots
-                    anchors.right: parent.right
-                    anchors.rightMargin: 2
-                    anchors.bottom: parent.bottom
-                    text: pill.modelData.id
-                    color: pill.modelData.focused ? Theme.fg_strong : Theme.fg_dim
-                    font.family: Style.bar_font_family
-                    font.pixelSize: 11
-                    lineHeight: 0.8
-                    style: Text.Raised
-                    styleColor: Theme.bg_shadow
                 }
             }
         }
