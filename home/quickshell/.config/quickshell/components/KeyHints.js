@@ -28,6 +28,8 @@ const controller_maps = {
     ps1: { Enter: "circle", Backspace: "cross", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
     ps2: { Enter: "cross", Backspace: "circle", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "/": "r3", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
 };
+// Game Boy pads use the NES buttons, drawn in its four shades (components/gameboy/GameboyButton.qml).
+controller_maps.gameboy = controller_maps.nes;
 
 // Esc takes START only where it closes the popup; as cancel/back (n/Esc, Tab/Esc list) it shows the back button.
 function button_for(map, key, desc) {
