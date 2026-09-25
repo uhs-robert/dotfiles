@@ -192,7 +192,8 @@ PanelWindow {
 
     // Styles with title_mixed show all-caps titles in sentence case.
     function shown_title(t) {
-        return root.st.title_mixed && t === t.toUpperCase() ? t.charAt(0) + t.slice(1).toLowerCase() : t;
+        const s = t || "";
+        return root.st.title_mixed && s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
     }
     // Shortcuts fire before the focused item, so popups that bind h/l themselves still walk.
     function walk_allowed() {
@@ -665,6 +666,18 @@ PanelWindow {
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 5
                     font.letterSpacing: 1
+                }
+
+                // Plain sentence-case titles carry the live title value at the right, like a status line.
+                Text {
+                    visible: root.has_title && !root.banded && root.st.title_mixed && root.st.title_readout === "" && root.title_value !== ""
+                    anchors.right: parent.right
+                    anchors.rightMargin: title_readout.anchors.rightMargin + 4
+                    y: title_tab.y + (title_tab.height - height) / 2
+                    text: root.title_value
+                    color: root.st.text_muted
+                    font.family: root.st.mono_font
+                    font.pixelSize: root.st.font_size - 3
                 }
 
                 Loader {
