@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -20,6 +21,7 @@ Popup {
     property int view_month: today.getMonth()
     jumps_enabled: true
 
+    readonly property bool bios: root.st.console_views === "ps1"
     readonly property bool is_open: Popups.open_name === "clock"
     // A Mario HUD title with today's date and time; the viewed month moves into the body.
     readonly property bool nes: root.st.console_skin === "nes"
@@ -159,6 +161,15 @@ Popup {
             anchors.top: parent.top
             spacing: 8
 
+            Loader {
+                active: root.bios
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Ps1.BiosClock {
+                    running: root.is_open
+                }
+            }
+
             Text {
                 visible: !root.has_title || root.nes
                 Layout.alignment: Qt.AlignHCenter
@@ -234,9 +245,19 @@ Popup {
 
                         Rectangle {
                             z: -1
-                            visible: cell.marked
+                            visible: cell.marked && !root.bios
                             anchors.fill: parent
                             color: root.st.title_bg
+                        }
+
+                        Loader {
+                            z: -1
+                            active: cell.marked && root.bios
+                            anchors.fill: parent
+                            sourceComponent: Ps1.BiosPanel {
+                                lit: true
+                                radius: 3
+                            }
                         }
                     }
                 }

@@ -10,6 +10,7 @@ import "../services"
 import "media" as Media
 import "weather" as Weather
 import "snes" as Snes
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -24,6 +25,8 @@ Popup {
     readonly property var players: MediaState.players
     readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
 
+    // The PS1 CD Player transport under the progress bar.
+    readonly property bool cd: root.st.console_views === "ps1"
     readonly property bool is_open: Popups.open_name === "media"
     onIs_openChanged: MediaState.tracking = root.is_open
 
@@ -379,7 +382,24 @@ Popup {
                         }
                     }
 
+                    Loader {
+                        active: root.cd
+                        visible: active
+                        Layout.fillWidth: true
+                        sourceComponent: Ps1.CdTransport {
+                            player: root.player
+                            time_text: root.player ? root.fmt_time(root.player.position) : "0:00"
+                            length_text: progress_item.has_length ? root.fmt_time(progress_item.track_length) : ""
+                            onPrevious: MediaState.previous()
+                            onNext: MediaState.next()
+                            onToggle: MediaState.toggle()
+                            onShuffle: root.toggle_shuffle()
+                            onLoop: root.cycle_loop()
+                        }
+                    }
+
                     RowLayout {
+                        visible: !root.cd
                         Layout.fillWidth: true
                         Layout.preferredHeight: 14
 
@@ -403,6 +423,7 @@ Popup {
 
                     // --- Transport controls: centered on the progress bar above ---
                     RowLayout {
+                        visible: !root.cd
                         Layout.alignment: Qt.AlignHCenter
                         Layout.topMargin: 2
                         spacing: 10

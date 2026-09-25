@@ -38,7 +38,7 @@ Rectangle {
     }
 
     MateriaOrb {
-        visible: root.orb
+        visible: root.orb && !root.pad
         anchors.fill: parent
         color: root.orb ? root.st.materia.key : "transparent"
     }

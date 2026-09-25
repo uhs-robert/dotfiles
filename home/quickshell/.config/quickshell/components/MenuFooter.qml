@@ -16,7 +16,6 @@ Item {
     property bool centered: false
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
-    readonly property string shown_text: KeyHints.with_glyphs(root.filtered_text)
     readonly property int rule_gap: root.st.footer_rule ? 5 : 0
     readonly property var groups: KeyHints.parse(root.shown_text)
     // Same order as groups, before glyphs, for controller button lookup.
@@ -112,13 +111,14 @@ Item {
 
                 Text {
                     id: key_text
+                    visible: !group_row.parts
                     readonly property bool capped: root.st.footer_key_bg.a > 0
                     visible: !pad_loader.visible && group.pad.length === 0
                     height: desc_text.implicitHeight
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: key_text.capped ? 4 : 0
                     rightPadding: key_text.capped ? 4 : 0
-                    text: parent.modelData.key
+                    text: KeyHints.with_glyphs(parent.modelData.key)
                     color: root.st.footer_key_fg
                     font.family: key_text.capped ? root.st.mono_font : root.st.font_family
                     font.pixelSize: root.st.font_size - 4
@@ -135,7 +135,7 @@ Item {
 
                 Text {
                     id: desc_text
-                    text: parent.modelData.desc + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
+                    text: KeyHints.with_glyphs(parent.modelData.desc) + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
                     color: root.st.footer_fg
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 4

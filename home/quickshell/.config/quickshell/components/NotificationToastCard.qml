@@ -6,6 +6,7 @@ import Quickshell.Services.Notifications
 import "../theme"
 import "../services"
 import "../popups/weather" as Weather
+import "ps1" as Ps1
 
 Rectangle {
     id: root
@@ -71,6 +72,8 @@ Rectangle {
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
+    readonly property string console_views: Style.console_views
+
     opacity: 0
     Component.onCompleted: {
         enter_anim.start();
@@ -79,6 +82,7 @@ Rectangle {
             root.typed = 0;
             dq_anim.start();
         }
+        if (root.console_views === "ps1") wobble_anim.start();
     }
 
     transform: [
@@ -95,6 +99,14 @@ Rectangle {
         },
         Translate {
             id: slide_shift
+        },
+        Rotation {
+            id: wobble_tilt
+            origin.x: root.width
+            origin.y: 0
+        },
+        Translate {
+            id: wobble_shift
         }
     ]
 
@@ -104,6 +116,19 @@ Rectangle {
         NumberAnimation { target: mode7_tilt; property: "angle"; from: 70; to: 0; duration: 420; easing.type: Easing.OutCubic }
         NumberAnimation { target: mode7_zoom; property: "xScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
         NumberAnimation { target: mode7_zoom; property: "yScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
+    }
+
+    // A PS1 affine wobble: slides in tilted and settles through a few overshoots.
+    ParallelAnimation {
+        id: wobble_anim
+
+        NumberAnimation { target: wobble_shift; property: "x"; from: 64; to: 0; duration: 260; easing.type: Easing.OutBack }
+
+        SequentialAnimation {
+            NumberAnimation { target: wobble_tilt; property: "angle"; from: 7; to: -3; duration: 140; easing.type: Easing.OutQuad }
+            NumberAnimation { target: wobble_tilt; property: "angle"; to: 1.5; duration: 90 }
+            NumberAnimation { target: wobble_tilt; property: "angle"; to: 0; duration: 80 }
+        }
     }
 
     SequentialAnimation {
@@ -288,11 +313,21 @@ Rectangle {
         anchors.leftMargin: (Style.row_cursor !== "" ? 16 : 12) + Style.inset_pad
         spacing: 8
 
+        Loader {
+            active: root.console_views === "ps1"
+            visible: active
+            Layout.alignment: Qt.AlignTop
+            sourceComponent: Ps1.CodecPortrait {
+                notification: root.notification
+                size: 38
+            }
+        }
+
         Image {
             Layout.alignment: Qt.AlignTop
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
-            visible: root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+            visible: root.console_views !== "ps1" && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
             source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
             fillMode: Image.PreserveAspectFit
         }

@@ -219,7 +219,8 @@ Singleton {
             meter_art: ({}),
             console: "",
             toast_enter: "",
-            bar_hud_box: "transparent"
+            bar_hud_box: "transparent",
+            console_views: ""
         };
         return {
             "default": {
@@ -428,7 +429,8 @@ Singleton {
                 meter_art: ({}),
                 console: "",
                 toast_enter: "",
-                bar_hud_box: "transparent"
+                bar_hud_box: "transparent",
+                console_views: ""
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -601,6 +603,9 @@ Singleton {
                 bar_text_raised: true
             }),
             "ps1": Object.assign({}, terminal, {
+                controller: "ps1",
+                console_views: "ps1",
+                osd_layout: "alert",
                 wait_anim: "alert",
                 done_anim: "pixel",
                 weather_header: "memcard",
@@ -1729,7 +1734,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud" or "rpg", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq" or "dialogue".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg" or "alert", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq" or "dialogue".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1772,6 +1777,8 @@ Singleton {
     readonly property string toast_enter: root.active.toast_enter
     // Bar readouts sit in HUD boxes outlined in this color.
     readonly property color bar_hud_box: root.bar.bar_hud_box
+    // Popups, toasts and bar pills swap in this console's module views (components/<console>/).
+    readonly property string console_views: root.active.console_views
 
     property bool cava_line: true
     readonly property var bar: root.active

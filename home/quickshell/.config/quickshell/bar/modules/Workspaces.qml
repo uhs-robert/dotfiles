@@ -17,6 +17,8 @@ Item {
 
     readonly property int icon_size: compact ? 16 : 19
     readonly property int pill_height: compact ? 20 : 22
+    // Memory card slots: square blocks numbered by workspace.
+    readonly property bool slots: Style.console_views === "ps1"
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -93,15 +95,17 @@ Item {
                 // Mario ? blocks; the focused workspace is the one already hit.
                 readonly property bool qblock: Style.console_skin === "nes"
 
+                readonly property real slot_space: root.slots ? slot_text.implicitWidth + 6 : 0
+
                 height: root.pill_height
-                width: is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
-                radius: Style.bar_pill_square || pill.qblock ? 0 : height / 2
+                width: is_empty ? Math.max(height, pill.slot_space + 6) : icons.implicitWidth + (modelData.active ? 22 : 12) + pill.slot_space
+                radius: root.slots ? 3 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
                 color: pill.qblock ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
-                border.width: Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
-                border.color: Style.bar_workspace_ring
+                border.width: root.slots ? 2 : Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
+                border.color: root.slots ? (modelData.focused ? Theme.theme_primary_light : Style.bar_border_color) : Style.bar_workspace_ring
 
                 Behavior on width {
                     NumberAnimation { duration: 280; easing.type: Easing.InOutCubic }
@@ -147,9 +151,24 @@ Item {
                     id: pill_hover
                 }
 
+                Text {
+                    id: slot_text
+                    visible: root.slots
+                    x: pill.is_empty ? (pill.width - implicitWidth) / 2 : 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: String(pill.modelData.id).padStart(2, "0")
+                    color: pill.modelData.focused ? Theme.bg_crust : Style.bar_fg
+                    font.family: Style.bar_font_family
+                    font.pixelSize: Style.bar_font_size - 3
+                    font.bold: pill.modelData.focused
+                    style: pill.modelData.focused ? Text.Normal : Style.bar_text_style
+                    styleColor: Style.bar_glow_color
+                }
+
                 Row {
                     id: icons
                     anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: pill.slot_space / 2
                     spacing: 2
 
                     Repeater {

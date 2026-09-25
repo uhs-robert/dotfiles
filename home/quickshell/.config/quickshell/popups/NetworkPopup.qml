@@ -9,6 +9,8 @@ import "../theme"
 import "../services"
 import "../components/nes" as Nes
 import "../components/snes" as Snes
+import "../components/ps1" as Ps1
+import "../components/ps1/Codec.js" as Codec
 
 Popup {
     id: root
@@ -45,6 +47,8 @@ Popup {
         return null;
     }
 
+    // The MGS codec: signal read out as a 140.xx frequency.
+    readonly property bool codec: root.st.console_views === "ps1"
     readonly property var wifi_glyphs: ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
 
     function signal_glyph(strength) {
@@ -512,8 +516,19 @@ Popup {
                     }
                 }
 
+                Loader {
+                    active: root.codec && !!root.active_wifi_network
+                    visible: active
+                    Layout.fillWidth: true
+                    sourceComponent: Ps1.CodecPanel {
+                        ssid: root.active_wifi_network ? root.active_wifi_network.name : ""
+                        strength: root.active_wifi_network ? root.active_wifi_network.signalStrength : 0
+                        detail: root.wifi_ipv4
+                    }
+                }
+
                 Text {
-                    visible: !!root.active_wifi_network
+                    visible: !root.codec && !!root.active_wifi_network
                     text: root.active_wifi_network
                         ? root.active_wifi_network.name + "  " + Math.round(root.active_wifi_network.signalStrength * 100) + "%"
                             + (root.wifi_ipv4 ? "  " + root.wifi_ipv4 : "")
@@ -573,8 +588,18 @@ Popup {
                             anchors.rightMargin: 6 + net_row.key_space
                             spacing: 6
 
+                            Loader {
+                                active: root.codec && !net_row.is_advanced
+                                visible: active
+                                sourceComponent: Ps1.Digits {
+                                    text: Codec.freq(net_row.modelData.signalStrength)
+                                    size: root.st.font_size - 7
+                                    color: net_row.modelData.connected ? Theme.green : Qt.tint(Theme.green, Qt.alpha(root.st.text_dim, 0.5))
+                                }
+                            }
+
                             Text {
-                                visible: !net_row.is_advanced && root.st.console_skin !== "nes" && root.st.console !== "snes"
+                                visible: !root.codec && !net_row.is_advanced && root.st.console_skin !== "nes" && root.st.console !== "snes"
                                 text: root.signal_glyph(net_row.modelData.signalStrength || 0)
                                 color: net_row.fg(net_row.modelData.connected ? root.st.text_primary : root.st.text_fg)
                                 font.family: root.st.font_family
@@ -597,6 +622,14 @@ Popup {
                                 color: net_row.fg(net_row.modelData.connected ? root.st.text_accent : root.st.text_fg)
                                 font.family: root.st.font_family
                                 font.pixelSize: root.st.font_size - 1
+                            }
+
+                            Text {
+                                visible: root.codec && !net_row.is_advanced
+                                text: Math.round((net_row.modelData.signalStrength || 0) * 100) + "%"
+                                color: net_row.fg(root.st.text_muted)
+                                font.family: root.st.font_family
+                                font.pixelSize: root.st.font_size - 3
                             }
 
                             Text {

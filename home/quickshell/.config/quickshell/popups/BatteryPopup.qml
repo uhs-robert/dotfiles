@@ -8,6 +8,7 @@ import "../theme"
 import "../services"
 import "../components/nes" as Nes
 import "snes" as Snes
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -47,6 +48,8 @@ Popup {
         return "";
     }
 
+    // An MGS LIFE-style gauge in place of the readout lines.
+    readonly property bool life_bar: root.st.console_views === "ps1"
     property bool ppd_available: false
     readonly property bool nes: root.st.console_skin === "nes"
     readonly property real status_indent: root.nes ? 22 : 0
@@ -167,8 +170,18 @@ Popup {
                 }
             }
 
+            Loader {
+                active: root.life_bar
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Ps1.LifeBar {
+                    value: root.percent / 100
+                    detail: [root.state_label.toUpperCase(), root.time_label, root.rate > 0 ? root.rate.toFixed(1) + " W" : ""].filter(t => t !== "").join("  ")
+                }
+            }
+
             Text {
-                visible: root.st.console !== "snes"
+                visible: root.st.console !== "snes" && !root.life_bar
                 Layout.leftMargin: root.status_indent
                 text: (root.nes ? "BAT " : "") + Math.round(root.percent) + "%"
                 color: root.st.text_strong
@@ -177,7 +190,7 @@ Popup {
             }
 
             Text {
-                visible: root.st.console !== "snes"
+                visible: root.st.console !== "snes" && !root.life_bar
                 Layout.leftMargin: root.status_indent
                 text: root.state_label
                 color: root.st.text_muted
@@ -186,7 +199,7 @@ Popup {
             }
 
             Text {
-                visible: root.time_label !== "" && root.st.console !== "snes"
+                visible: root.time_label !== "" && root.st.console !== "snes" && !root.life_bar
                 Layout.leftMargin: root.status_indent
                 text: root.time_label
                 color: root.st.text_muted
@@ -195,7 +208,7 @@ Popup {
             }
 
             Text {
-                visible: root.rate > 0 && root.st.console !== "snes"
+                visible: root.rate > 0 && root.st.console !== "snes" && !root.life_bar
                 Layout.leftMargin: root.status_indent
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted

@@ -8,6 +8,7 @@ import "../../theme"
 import "../../services"
 import "../weather" as Weather
 import "../../components/snes" as Snes
+import "../../components/ps1" as Ps1
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -22,6 +23,8 @@ Item {
     readonly property bool channels: Style.card_layout === "channel"
     // Chrono Trigger dialogue boxes: the app speaks its summary and body in a blue window.
     readonly property bool dialogue: Style.card_layout === "dialogue"
+    // MGS codec calls: the app icon as the caller's portrait.
+    readonly property bool codec: Style.console_views === "ps1"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
 
     signal invoke_requested()
@@ -249,11 +252,22 @@ Item {
             anchors.rightMargin: root.dialogue ? 16 : 10
             spacing: 10
 
+            Loader {
+                active: root.codec && !root.channels
+                visible: active
+                Layout.alignment: Qt.AlignTop
+                sourceComponent: Ps1.CodecPortrait {
+                    notification: root.notification
+                    size: root.width < 320 ? 34 : 44
+                    ringing: !!root.entry && Date.now() - root.entry.time < 5000
+                }
+            }
+
             Image {
                 Layout.alignment: Qt.AlignTop
                 Layout.preferredWidth: root.width < 320 ? 32 : 44
                 Layout.preferredHeight: Layout.preferredWidth
-                visible: !root.channels && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+                visible: !root.codec && !root.channels && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
                 source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
                 fillMode: Image.PreserveAspectFit
             }
