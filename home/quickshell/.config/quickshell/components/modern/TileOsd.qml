@@ -94,6 +94,7 @@ ColumnLayout {
         muted: root.muted
         interactive: false
         show_readout: false
+        solid: true
     }
 
     Shared.Meter {
