@@ -1849,7 +1849,9 @@ Singleton {
                     card_layout: "notify",
                     wait_anim: "cursor",
                     font_family: "Maple Mono NF",
-                    font_size: Theme.popup_font_size,
+                    // One 16px scale like the notification panel: -1/-2 text is primary, -3/-4 meta, -5 and smaller tags.
+                    font_size: Theme.popup_font_size + 1,
+                    type_scale: ({ "-1": 0, "-2": 0, "-3": -4, "-5": -6, "-7": -6, "-8": -6 }),
                     scale: 1.1,
                     rounded: false,
                     border_title: true,
