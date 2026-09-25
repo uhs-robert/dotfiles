@@ -7,6 +7,7 @@ import Quickshell.Widgets
 import "../../theme"
 import "../../services"
 import "../../components"
+import "../../components/ps2" as Ps2
 
 Item {
     id: root
@@ -89,6 +90,7 @@ Item {
 
                 readonly property bool is_empty: modelData.toplevels.values.length === 0
                 readonly property bool diamond: Style.bar_workspace_diamond && is_empty
+                readonly property bool ps2: Style.controller === "ps2"
 
                 height: root.pill_height
                 width: is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
@@ -96,7 +98,7 @@ Item {
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
-                color: modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
+                color: pill.ps2 ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
                 border.width: Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
                 border.color: Style.bar_workspace_ring
 
@@ -105,6 +107,34 @@ Item {
                 }
                 Behavior on color {
                     ColorAnimation { duration: 280; easing.type: Easing.InOutCubic }
+                }
+
+                Loader {
+                    active: pill.ps2
+                    anchors.fill: parent
+                    sourceComponent: pill.is_empty ? ps2_cube : ps2_block
+
+                    Component {
+                        id: ps2_cube
+                        Item {
+                            Ps2.SaveCube {
+                                anchors.centerIn: parent
+                                width: Math.round(pill.height * 0.72)
+                                color: pill.modelData.focused ? Theme.theme_primary_light : Theme.theme_primary
+                                selected: pill.modelData.focused
+                                opacity: pill.modelData.focused || pill.modelData.active ? 1 : 0.6
+                            }
+                        }
+                    }
+
+                    Component {
+                        id: ps2_block
+                        Ps2.Block {
+                            radius: pill.height / 2
+                            selected: pill.modelData.focused
+                            opacity: pill.modelData.focused || pill.modelData.active ? 1 : 0.7
+                        }
+                    }
                 }
 
                 MateriaOrb {
