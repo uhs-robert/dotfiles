@@ -16,6 +16,7 @@ Item {
     property bool centered: false
     // Text size override; 0 keeps the style's footer sizes.
     property int size: 0
+    property bool arrows: true
     readonly property int text_px: root.size > 0 ? root.size : root.text_px
     readonly property int small_px: root.size > 0 ? root.size : root.small_px
     // Tabs that show their number already teach "1-N select".
@@ -130,7 +131,7 @@ Item {
                 }
 
                 Text {
-                    visible: root.st.footer_arrow !== "" && !group.pad
+                    visible: root.arrows && root.st.footer_arrow !== "" && !group.pad
                     anchors.verticalCenter: parent.verticalCenter
                     text: root.st.footer_arrow
                     color: root.st.text_muted

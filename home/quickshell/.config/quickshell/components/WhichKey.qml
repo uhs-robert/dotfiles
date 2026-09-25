@@ -397,6 +397,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     centered: true
                     size: Style.whichkey_size
+                    arrows: false
                     text: root.footer_hint
                 }
             }
