@@ -2172,41 +2172,41 @@ Singleton {
     readonly property string console_views: root.active.console_views
     // Bar workspace indicator art for non-console styles ("dial", "materia", "doors", "constellation", "buffers"); "" keeps pills.
     readonly property string workspace_art: root.active.workspace_art
-    // A dune silhouette in this color along the foot of popups and toasts.
-    readonly property color dune: root.active.dune
-    // Section fades and footer rules drawn as dune contour lines (DuneLine).
-    readonly property bool wave_rules: root.active.wave_rules
-    // A lit edge down the left of the selected row.
-    readonly property color selection_edge: root.active.selection_edge
-    // Sub-view chips drawn as tabs that fill their row.
-    readonly property bool chip_tabs: root.active.chip_tabs
-    // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
-    readonly property bool title_case: root.active.title_case
-    readonly property int title_size: root.active.title_size
     // Popups float this many px below the bar with every corner rounded; frame_shadow fills frame_drop's room with a soft shadow.
     readonly property int frame_float: root.active.frame_float
     readonly property color frame_shadow: root.active.frame_shadow
-    // A 1px highlight (Sheen) along the top of raised surfaces: floating frames, capsule islands, shaded tabs and rows, keycaps, cards.
-    readonly property color sheen: root.active.sheen
-    // Top colors of vertical gradients into selection_bg (selected rows) and tab_active_bg (raised active tabs and chips).
-    readonly property color selection_shade: root.active.selection_shade
-    readonly property color tab_active_shade: root.active.tab_active_shade
-    // Tab and chip rows sit in a recessed well of this color; tab_marker then draws as a dash under the active label.
-    readonly property color tab_well: root.active.tab_well
-    // Tab jump keys as bare digits instead of badges.
-    readonly property bool tab_key_plain: root.active.tab_key_plain
-    // The popup's live title value at the right of its title (in the border under border_title).
-    readonly property bool title_status: root.active.title_status
-    // Action chip text; transparent keeps theme_secondary.
-    readonly property color chip_fg: root.active.chip_fg
     // Frames drawn as Neovim floating windows (FloatFrame): rounded all round, the title as a chip set into the top border.
     readonly property bool border_title: root.active.border_title
-    // Rows get a line-number gutter showing their key; the selected row's number takes text_accent.
-    readonly property bool row_gutter: root.active.row_gutter
+    // A 1px highlight (Sheen) along the top of raised surfaces: floating frames, capsule islands, shaded tabs and rows, keycaps, cards.
+    readonly property color sheen: root.active.sheen
+    // A dune silhouette in this color along the foot of popups and toasts.
+    readonly property color dune: root.active.dune
+    // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
+    readonly property bool title_case: root.active.title_case
+    readonly property int title_size: root.active.title_size
+    // The popup's live title value at the right of its title (in the border under border_title).
+    readonly property bool title_status: root.active.title_status
+    // Tab and chip rows sit in a recessed well of this color; tab_marker then draws as a dash under the active label.
+    readonly property color tab_well: root.active.tab_well
     // The active tab's marker: a 2px bar down its left edge, or a dash under its label in a tab_well.
     readonly property color tab_marker: root.active.tab_marker
+    // Top colors of vertical gradients into tab_active_bg (raised active tabs and chips) and selection_bg (selected rows).
+    readonly property color tab_active_shade: root.active.tab_active_shade
+    readonly property color selection_shade: root.active.selection_shade
+    // Tab jump keys as bare digits instead of badges.
+    readonly property bool tab_key_plain: root.active.tab_key_plain
+    // Sub-view chips drawn as tabs that fill their row.
+    readonly property bool chip_tabs: root.active.chip_tabs
+    // Action chip text; transparent keeps theme_secondary.
+    readonly property color chip_fg: root.active.chip_fg
+    // A lit edge down the left of the selected row.
+    readonly property color selection_edge: root.active.selection_edge
+    // Rows get a line-number gutter showing their key; the selected row's number takes text_accent.
+    readonly property bool row_gutter: root.active.row_gutter
     // Sections as open folds: a fold marker, the label and a dotted fill.
     readonly property bool section_fold: root.active.section_fold
+    // Section fades and footer rules drawn as dune contour lines (DuneLine).
+    readonly property bool wave_rules: root.active.wave_rules
     // Drawn between each footer key and its description.
     readonly property string footer_arrow: root.active.footer_arrow
     readonly property real meter_gap: root.active.meter_gap
