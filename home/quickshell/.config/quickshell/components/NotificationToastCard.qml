@@ -67,7 +67,32 @@ Rectangle {
     clip: true
 
     opacity: 0
-    Component.onCompleted: enter_anim.start()
+    Component.onCompleted: {
+        enter_anim.start();
+        if (Style.toast_enter === "mode7") mode7_enter.start();
+    }
+
+    transform: [
+        Rotation {
+            id: mode7_tilt
+            origin.x: root.width / 2
+            origin.y: root.height
+            axis { x: 1; y: 0; z: 0 }
+        },
+        Scale {
+            id: mode7_zoom
+            origin.x: root.width / 2
+            origin.y: root.height / 2
+        }
+    ]
+
+    // Flies in once from a small, tilted-back plane to flat, then stays still.
+    ParallelAnimation {
+        id: mode7_enter
+        NumberAnimation { target: mode7_tilt; property: "angle"; from: 70; to: 0; duration: 420; easing.type: Easing.OutCubic }
+        NumberAnimation { target: mode7_zoom; property: "xScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
+        NumberAnimation { target: mode7_zoom; property: "yScale"; from: 0.25; to: 1; duration: 420; easing.type: Easing.OutCubic }
+    }
 
     NumberAnimation {
         id: enter_anim
