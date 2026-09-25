@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import "../../theme"
 import ".." as Shared
 
-// The OSD as a card: an accent tile, the level's name and device, a large readout and the 20-segment meter.
+// The OSD as a card: an accent tile, the level's name and device, a large readout and the level as a capsule or 20-segment meter.
 ColumnLayout {
     id: root
 
@@ -86,7 +86,18 @@ ColumnLayout {
         }
     }
 
+    CapsuleSlider {
+        visible: Style.level_layout === "capsule"
+        Layout.fillWidth: true
+        implicitHeight: Style.px(12)
+        value: root.level
+        muted: root.muted
+        interactive: false
+        show_readout: false
+    }
+
     Shared.Meter {
+        visible: Style.level_layout !== "capsule"
         Layout.fillWidth: true
         art_key: root.kind === "volume" ? "volume" : "osd"
         value: root.level

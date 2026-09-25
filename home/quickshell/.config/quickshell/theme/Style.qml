@@ -155,6 +155,7 @@ Singleton {
             schematic: "transparent",
             status_strip: false,
             osd_layout: "",
+            level_layout: "",
             card_layout: "",
             weather_header: "",
             bar_pill_square: false,
@@ -397,6 +398,7 @@ Singleton {
                 schematic: "transparent",
                 status_strip: false,
                 osd_layout: "",
+                level_layout: "",
                 card_layout: "",
                 weather_header: "",
                 bar_pill_square: false,
@@ -1791,6 +1793,7 @@ Singleton {
                     toggle_off: t3,
                     marker_fill: false,
                     osd_layout: "tile",
+                    level_layout: "capsule",
                     card_layout: "tile",
                     weather_header: "hero",
                     bar_font_family: "Geist",
@@ -2152,6 +2155,8 @@ Singleton {
     readonly property bool status_strip: root.active.status_strip
     // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert", "glow", "horizon" or "tile", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status", "oasis", "hero" or "lsp", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog", "oasis", "tile" or "notify".
     readonly property string osd_layout: root.active.osd_layout
+    // Level rows: "capsule" draws them as tall capsule sliders with live peaks; "" keeps the shared slider.
+    readonly property string level_layout: root.active.level_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
     // The keeptabs done celebration: hearts, pixel (stepped), lcd (stepped, then blinks), hev_pickup, levelup (inverted flash, pixel sparkles) or fanfare.

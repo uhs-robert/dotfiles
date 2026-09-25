@@ -9,6 +9,7 @@ import "../services"
 import "snes" as Snes
 import "../components/ps1" as Ps1
 import "../components/ps2" as Ps2
+import "../components/modern" as Modern
 
 Popup {
     id: root
@@ -78,6 +79,9 @@ Popup {
 
     // The PS1 CD Player: devices and streams as numbered tracks, levels as its VU meter.
     readonly property bool cd: root.st.console_views === "ps1"
+    readonly property bool capsules: root.st.level_layout === "capsule"
+    // Live peaks cost a PipeWire stream per row, so they only run while the popup is open on AC power.
+    readonly property bool peaks_on: root.capsules && root.is_open && root.visible && Power.on_ac
 
     function track_number(index) {
         const row = root.rows[index];
@@ -241,9 +245,29 @@ Popup {
                         }
                     }
 
+                    Loader {
+                        active: root.capsules && root.is_slider_row(row_wrap.modelData.type)
+                        visible: active
+                        width: row_wrap.width
+                        sourceComponent: Modern.CapsuleSlider {
+                            readonly property bool is_source: row_wrap.modelData.type === "source_slider"
+                            value: node.audio ? node.audio.volume : 0
+                            muted: !!node.audio && node.audio.muted
+                            glyph: is_source ? (muted ? "󰍭" : "󰍬") : muted ? "󰖁" : "󰕾"
+                            label: root.row_label(row_wrap.modelData)
+                            selected: row_wrap.index === root.selected
+                            node: row_wrap.modelData.node
+                            peaks_on: root.peaks_on
+                            onMoved: v => {
+                                if (node.audio) node.audio.volume = v;
+                            }
+                            onMute_clicked: root.toggle_mute(node)
+                        }
+                    }
+
                     MenuRow {
                         id: vol_row
-                        visible: root.st.console_views !== "snes"
+                        visible: root.st.console_views !== "snes" && !(root.capsules && root.is_slider_row(row_wrap.modelData.type))
                         width: row_wrap.width
                         height: Style.px(22)
                         selected: row_wrap.index === root.selected
