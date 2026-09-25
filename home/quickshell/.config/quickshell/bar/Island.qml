@@ -24,10 +24,10 @@ Item {
     property real inset_gap: 0
     property real inset_width: 0
     property color inset_color: "transparent"
-    // Visor glass: curved bottom corners instead of slants, glass gradient into bg_color, border along sides and bottom.
+    // Metroid Prime visor glass cut into notched bracket ends (VisorIsland) instead of slants.
     property bool visor: false
-    // A Metroid Prime helmet-frame cut drawn by VisorIsland; empty keeps the visor glass above.
-    readonly property string metroid_variant: root.visor && ["frame", "combat", "scan"].indexOf(Style.metroid_bar) >= 0 ? Style.metroid_bar : ""
+    // Cava plays along the bottom edge; the visor's crosshair makes way for it.
+    property bool wave_shown: false
     // A capsule this many px inside the island's top and ends, resting on its bottom edge; sheen_color lights its top edge.
     property real capsule_inset: 0
     property color sheen_color: "transparent"
@@ -49,7 +49,7 @@ Item {
     property color cap_right_fill: "transparent"
     property color cap_left_fill: "transparent"
     readonly property bool center: root.cap_left && root.cap_right
-    readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : root.metroid_variant === "frame" ? Math.round(height * 1.6) : root.metroid_variant === "combat" ? Math.round(height * 0.8) : root.metroid_variant === "scan" ? Math.round(height * 0.75) : height / 2
+    readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : root.visor ? Math.round(height * 0.8) : height / 2
     readonly property real pad: root.capsule ? Style.bar_capsule_pad : root.lualine ? (root.center ? 10 : 0) : 8
 
     signal clicked
@@ -136,55 +136,17 @@ Item {
         }
     }
 
-    Shape {
-        id: visor_glass
-        readonly property real rx: root.cap_width
-        readonly property real ry: root.height / 2
-
-        function edge(i, closed) {
-            const w = root.width, h = root.height, x = Math.max(0, visor_glass.rx - i), y = Math.max(0, visor_glass.ry - i);
-            let d = root.cap_left ? "M " + i + " 0 L " + i + " " + (h - i - y) + " A " + x + " " + y + " 0 0 0 " + (i + x) + " " + (h - i) : "M 0 " + (h - i);
-            d += root.cap_right ? " L " + (w - i - x) + " " + (h - i) + " A " + x + " " + y + " 0 0 0 " + (w - i) + " " + (h - i - y) + " L " + (w - i) + " 0" : " L " + w + " " + (h - i);
-            return closed ? d + " L " + w + " 0 L 0 0 Z" : d;
-        }
-
-        visible: root.visor && root.metroid_variant === ""
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-
-        ShapePath {
-            strokeWidth: -1
-            fillGradient: LinearGradient {
-                x1: 0
-                y1: 0
-                x2: 0
-                y2: root.height
-                GradientStop { position: 0; color: Qt.alpha(Theme.ui_visual_bg, 0.75) }
-                GradientStop { position: 1; color: root.bg_color }
-            }
-            PathSvg { path: visor_glass.edge(0, true) }
-        }
-
-        ShapePath {
-            strokeWidth: root.border_width
-            strokeColor: root.border_width > 0 ? root.border_color : "transparent"
-            fillColor: "transparent"
-            capStyle: ShapePath.FlatCap
-            PathSvg { path: visor_glass.edge(root.border_width / 2, false) }
-        }
-    }
-
     Loader {
         anchors.fill: parent
-        active: root.metroid_variant !== ""
+        active: root.visor
         sourceComponent: Metroid.VisorIsland {
-            variant: root.metroid_variant
             cap_left: root.cap_left
             cap_right: root.cap_right
             cap: root.cap_width
             bg_color: root.bg_color
             border_width: root.border_width
             border_color: root.border_color
+            marks_shown: !root.wave_shown
         }
     }
 

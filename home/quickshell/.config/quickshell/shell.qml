@@ -81,7 +81,6 @@ ShellRoot {
     BrightnessIpc {}
     NotificationsIpc {}
     StyleIpc {}
-    MetroidDraftIpc {}
     TooltipShelf {}
     NotificationToasts {}
     Osd {}
