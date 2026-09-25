@@ -845,6 +845,9 @@ Singleton {
                 wait_anim: "rumble",
                 weather_header: "towers",
                 done_anim: "pixel",
+                // Muted text lifted so it still reads on the lit selection pill.
+                text_muted: Qt.tint(Theme.fg_muted, Qt.alpha(Theme.theme_primary_light, 0.35)),
+                text_dim: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.theme_primary_light, 0.3)),
                 font_family: "Exo 2",
                 font_size: Theme.popup_font_size + 1,
                 rounded: true,
