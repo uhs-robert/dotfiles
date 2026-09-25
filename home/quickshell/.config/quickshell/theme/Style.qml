@@ -7,11 +7,14 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property string name: "default"
+    property string name: "oasis"
     // The saved choice; `name` differs from it only while the style picker previews.
-    property string saved_name: "default"
-    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech", "oasis", "modern", "neovim"]
-    readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0))
+    property string saved_name: "oasis"
+    // Everyday styles, then consoles by release year, then sci-fi.
+    readonly property var order: ["oasis", "modern", "neovim", "terminal", "crt", "nes", "gameboy", "snes", "ps1", "ff7", "goldeneye", "ps2", "tie", "halflife", "metroid", "oblivion", "mech"]
+    // The base token set every style builds on; retired from the picker, old saves map to oasis.
+    readonly property var hidden: ["default"]
+    readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0 && root.hidden.indexOf(n) < 0))
     readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter", modern: "Modern" })
 
     function label(style_name) {
@@ -1950,7 +1953,7 @@ Singleton {
         };
     }
 
-    readonly property var active: root.styles[root.name] || root.styles["default"]
+    readonly property var active: root.styles[root.name] || root.styles["oasis"]
     // Frames drawn by SlantFrame: flat top, bottom corners cut at the bar islands' slant, a sand horizon along the foot.
     readonly property bool slant_frame: root.active.slant_frame
     // Extra room under a frame's content so the long cut clears the footer.
@@ -2371,6 +2374,7 @@ Singleton {
     }
 
     function set(style_name) {
+        if (root.hidden.indexOf(style_name) >= 0) style_name = "oasis";
         if (!(style_name in root.styles)) {
             console.warn("Style: unknown style " + style_name);
             return false;
@@ -2391,7 +2395,7 @@ Singleton {
     }
 
     function preview(style_name) {
-        if (style_name in root.styles) root.name = style_name;
+        if (style_name in root.styles && root.hidden.indexOf(style_name) < 0) root.name = style_name;
     }
 
     function cycle() {
@@ -2419,7 +2423,7 @@ Singleton {
                 const data = JSON.parse(text());
                 const saved = data.style;
                 root.cava_line = data.cava_line !== false;
-                if (typeof saved === "string" && saved in root.styles) {
+                if (typeof saved === "string" && saved in root.styles && root.hidden.indexOf(saved) < 0) {
                     root.name = saved;
                     root.saved_name = saved;
                 }
