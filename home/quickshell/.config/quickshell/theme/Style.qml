@@ -10,7 +10,7 @@ Singleton {
     property string name: "default"
     // The saved choice; `name` differs from it only while the style picker previews.
     property string saved_name: "default"
-    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech"]
+    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech", "neovim"]
     readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0))
     readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter" })
 
@@ -1530,6 +1530,83 @@ Singleton {
                     bar_glow_color: Theme.bg_crust,
                     bar_text_raised: true
                 });
+            })(),
+            // Modern Neovim: lualine bar, floating windows with border titles, telescope rows, which-key footers, nvim-notify cards.
+            "neovim": (() => {
+                const float_border = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.theme_primary, 0.6));
+                return Object.assign({}, terminal, {
+                    workspace_art: "buffers",
+                    weather_header: "lsp",
+                    card_layout: "notify",
+                    wait_anim: "cursor",
+                    font_family: "JetBrainsMono Nerd Font",
+                    font_size: Theme.popup_font_size,
+                    scale: 1.1,
+                    rounded: false,
+                    frame_float: true,
+                    frame_color: Theme.bg_mantle,
+                    frame_radius: 8,
+                    frame_border_width: 1,
+                    frame_border_color: float_border,
+                    accent_color: Theme.theme_primary,
+                    accent_height: 0,
+                    selection_bg: Theme.bg_surface,
+                    selection_outline: "transparent",
+                    selection_bar: true,
+                    caret_color: Theme.theme_primary,
+                    caret_blink: false,
+                    row_cursor: "",
+                    row_gutter: true,
+                    row_keys: false,
+                    tab_bg: Theme.bg_crust,
+                    tab_active_bg: Theme.bg_mantle,
+                    tab_active_fg: Theme.fg_strong,
+                    tab_fg: Theme.fg_dim,
+                    tab_marker: Theme.theme_primary,
+                    key_bg: "transparent",
+                    key_fg: Theme.theme_secondary,
+                    key_border: "transparent",
+                    section_fg: Theme.theme_primary,
+                    section_rule: false,
+                    section_fold: true,
+                    footer_fg: Theme.fg_dim,
+                    footer_key_fg: Theme.theme_secondary,
+                    footer_rule: true,
+                    footer_rule_solid: true,
+                    footer_rule_color: Theme.bg_surface,
+                    footer_separator: "",
+                    footer_arrow: "\u279c",
+                    meter_on: Theme.theme_primary,
+                    meter_off: Theme.bg_surface,
+                    meter_hot: Theme.theme_label,
+                    meter_radius: 0,
+                    meter_height: 4,
+                    meter_gap: 0,
+                    title_bg: Theme.theme_primary,
+                    title_fg: Theme.bg_crust,
+                    title_spacing: 0,
+                    chip_brackets: false,
+                    chip_active_bg: Theme.ui_visual_bg,
+                    chip_active_fg: Theme.fg_strong,
+                    chip_pick: Theme.theme_primary,
+                    chip_border: Theme.bg_surface,
+                    toggle_brackets: false,
+                    toggle_on: Theme.ok,
+                    toggle_off: Theme.fg_dim,
+                    bar_lualine: true,
+                    bar_font_family: "JetBrainsMono Nerd Font",
+                    bar_font_size: Theme.font_size,
+                    bar_side_bg: Theme.bg_surface,
+                    bar_center_bg: Theme.bg_surface,
+                    bar_fg: Theme.fg_core,
+                    bar_clock_fg: Theme.fg_strong,
+                    bar_border_width: 0,
+                    bar_border_color: "transparent",
+                    bar_workspace_focused: Theme.theme_primary,
+                    bar_workspace_active: Theme.theme_secondary,
+                    bar_workspace_idle: Theme.fg_muted,
+                    bar_hover_bg: Theme.ui_visual_bg
+                });
             })()
         };
     }
@@ -1771,7 +1848,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert" or "glow", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq", "dialogue" or "dialog".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert" or "glow", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status" or "lsp", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog" or "notify".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1810,7 +1887,7 @@ Singleton {
     readonly property string toast_enter: root.active.toast_enter
     // Popups, toasts and bar modules swap in this console's views ("nes", "snes", "ps1", "ps2"); "" keeps the shared ones.
     readonly property string console_views: root.active.console_views
-    // Bar workspace indicator art for non-console styles ("dial", "materia", "doors"); "" keeps pills.
+    // Bar workspace indicator art for non-console styles ("dial", "materia", "doors", "buffers"); "" keeps pills.
     readonly property string workspace_art: root.active.workspace_art
     // Frames float free of the bar with all corners rounded and the title as a chip set into the top border (FloatFrame).
     readonly property bool frame_float: root.active.frame_float
