@@ -86,7 +86,7 @@ Row {
     Text {
         visible: root.lualine
         anchors.verticalCenter: parent.verticalCenter
-        text: "\u{f017}"
+        text: "\u{f0954}"
         color: root.on_accent ? root.ink : Theme.theme_primary
         font.family: Style.bar_font_family
         font.pixelSize: Style.bar_font_size
