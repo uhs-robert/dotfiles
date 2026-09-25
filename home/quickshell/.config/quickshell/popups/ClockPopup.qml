@@ -7,6 +7,8 @@ import "../theme"
 import "../services"
 import "../components/ps1" as Ps1
 import "../components/ps2" as Ps2
+import "../components/snes" as SnesParts
+import "snes" as Snes
 
 Popup {
     id: root
@@ -25,7 +27,7 @@ Popup {
     readonly property bool bios: root.st.console_views === "ps1"
     readonly property bool is_open: Popups.open_name === "clock"
     // A Mario HUD title with today's date and time; the viewed month moves into the body.
-    readonly property bool nes: root.st.console_skin === "nes"
+    readonly property bool nes: root.st.console_views === "nes"
     readonly property string hud_title: {
         const d = Timezones.shift(hud_clock.date);
         return "WORLD " + (d.getMonth() + 1) + "-" + d.getDate() + "  TIME " + Qt.formatTime(d, "HH:mm");
@@ -155,6 +157,16 @@ Popup {
             }
         }
 
+        // SNES: the zones and calendar sit in their own RPG window.
+        Loader {
+            active: root.st.console_views === "snes"
+            x: main_column.x + grid.x - 10
+            y: main_column.y + zone_row.y - 8
+            width: grid.width + 20
+            height: grid.y + grid.height - zone_row.y + 19
+            sourceComponent: SnesParts.SnesWindow {}
+        }
+
         ColumnLayout {
             id: main_column
             anchors.left: parent.left
@@ -162,21 +174,32 @@ Popup {
             anchors.top: parent.top
             spacing: 8
 
+            // Console clock screens above the calendar.
             Loader {
-                active: root.bios
+                active: !!sourceComponent
                 visible: active
                 Layout.fillWidth: true
-                sourceComponent: Ps1.BiosClock {
-                    running: root.is_open
-                }
-            }
+                sourceComponent: ({ snes: snes_clock, ps1: ps1_clock, ps2: ps2_clock })[root.st.console_views] || null
 
-            Loader {
-                active: root.st.controller === "ps2"
-                visible: active
-                Layout.fillWidth: true
-                sourceComponent: Ps2.ClockScreen {
-                    running: root.visible
+                Component {
+                    id: snes_clock
+                    Snes.SnesClockStatus {
+                        running: root.is_open
+                    }
+                }
+
+                Component {
+                    id: ps1_clock
+                    Ps1.BiosClock {
+                        running: root.is_open
+                    }
+                }
+
+                Component {
+                    id: ps2_clock
+                    Ps2.ClockScreen {
+                        running: root.visible
+                    }
                 }
             }
 
@@ -191,7 +214,9 @@ Popup {
             }
 
             Row {
+                id: zone_row
                 Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: root.st.console_views === "snes" ? 6 : 0
                 spacing: 10
 
                 Repeater {
@@ -230,6 +255,7 @@ Popup {
             GridLayout {
                 id: grid
                 Layout.fillWidth: true
+                Layout.bottomMargin: root.st.console_views === "snes" ? 12 : 0
                 columns: 8
                 rowSpacing: 4
                 columnSpacing: root.grid_column_spacing

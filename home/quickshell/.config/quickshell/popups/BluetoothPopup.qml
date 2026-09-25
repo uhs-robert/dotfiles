@@ -7,6 +7,7 @@ import "../theme"
 import "../services"
 import "../components/nes" as Nes
 import "../components/ps1" as Ps1
+import "snes" as Snes
 
 Popup {
     id: root
@@ -23,6 +24,8 @@ Popup {
 
     // The memory card slot screen: each device a block, lit while connected.
     readonly property bool slots: root.st.console_views === "ps1"
+    // SNES: devices as party members, each in its own window.
+    readonly property bool party: root.st.console_views === "snes"
 
     // -1 is the power switch above the list.
     property int selected: 0
@@ -104,7 +107,26 @@ Popup {
             }
 
             Repeater {
-                model: root.devices
+                model: root.party ? root.devices : []
+
+                Snes.SnesDeviceRow {
+                    required property var modelData
+                    required property int index
+
+                    Layout.fillWidth: true
+                    Layout.topMargin: index === 0 ? 6 : 0
+                    device: modelData
+                    selected: index === root.selected
+                    onClicked: {
+                        root.selected = index;
+                        if (modelData.connected) modelData.disconnect();
+                        else modelData.connect();
+                    }
+                }
+            }
+
+            Repeater {
+                model: root.party ? [] : root.devices
 
                 MenuRow {
                     id: device_row
@@ -151,7 +173,7 @@ Popup {
                         }
 
                         Loader {
-                            active: root.st.console_skin === "nes" && device_row.modelData.batteryAvailable
+                            active: root.st.console_views === "nes" && device_row.modelData.batteryAvailable
                             visible: active
                             sourceComponent: Nes.BlockMeter {
                                 size: 12
