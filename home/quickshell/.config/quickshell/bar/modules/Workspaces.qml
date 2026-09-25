@@ -18,8 +18,8 @@ Item {
     property string screen_name: ""
     property bool compact: false
 
-    // Memory card save icons: one bevelled card per workspace holding its lead app.
-    readonly property bool slots: false
+    // Memory card save icons: one bevelled card per workspace, widening to hold every app.
+    readonly property bool slots: Style.console_views === "ps1"
     // Super Mario World overworld: level dots on a dotted trail, app icons above them.
     readonly property bool map: Style.console_views === "snes"
     readonly property int icon_size: slots ? (compact ? 15 : 17) : compact ? 16 : 19
@@ -123,15 +123,10 @@ Item {
                 // Mario ? blocks; the focused workspace is the one already hit.
                 readonly property bool qblock: Style.console_views === "nes"
                 readonly property bool ps2: Style.console_views === "ps2"
-                readonly property var toplevels: {
-                    const all = modelData.toplevels.values;
-                    if (!root.slots || all.length < 2) return all;
-                    const lead = all.find(t => t === Hyprland.activeToplevel);
-                    return [lead || all[0]];
-                }
+                readonly property var toplevels: modelData.toplevels.values
 
                 height: root.pill_height
-                width: pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? height : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
+                width: pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? height : Math.max(height, icons.implicitWidth + 8)) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
                 radius: pill.map ? 0 : root.slots ? 2 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
