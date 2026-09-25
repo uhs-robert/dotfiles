@@ -6,6 +6,7 @@ import Quickshell.Services.UPower
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -45,6 +46,7 @@ Popup {
         return "";
     }
 
+    readonly property bool ps2: root.st.controller === "ps2"
     property bool ppd_available: false
     property int selected: 0
 
@@ -140,7 +142,45 @@ Popup {
             anchors.top: parent.top
             spacing: 4
 
+            Loader {
+                active: root.ps2
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Column {
+                    spacing: 0
+
+                    Ps2.ConfigRow {
+                        width: parent.width
+                        label: "Battery"
+                        value: root.has_battery ? Math.round(root.percent) + "%" : "None"
+                        level: root.has_battery ? root.percent / 100 : -1
+                        level_color: root.percent <= 20 && root.state_label === "Discharging" ? Theme.warning : Theme.theme_primary_light
+                    }
+
+                    Ps2.ConfigRow {
+                        width: parent.width
+                        label: "Status"
+                        value: root.state_label
+                    }
+
+                    Ps2.ConfigRow {
+                        visible: root.time_label !== ""
+                        width: parent.width
+                        label: "Time"
+                        value: root.time_label
+                    }
+
+                    Ps2.ConfigRow {
+                        visible: root.rate > 0
+                        width: parent.width
+                        label: "Rate"
+                        value: root.rate.toFixed(1) + " W"
+                    }
+                }
+            }
+
             Text {
+                visible: !root.ps2
                 text: Math.round(root.percent) + "%"
                 color: root.st.text_strong
                 font.family: root.st.font_family
@@ -148,6 +188,7 @@ Popup {
             }
 
             Text {
+                visible: !root.ps2
                 text: root.state_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -155,7 +196,7 @@ Popup {
             }
 
             Text {
-                visible: root.time_label !== ""
+                visible: root.time_label !== "" && !root.ps2
                 text: root.time_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -163,7 +204,7 @@ Popup {
             }
 
             Text {
-                visible: root.rate > 0
+                visible: root.rate > 0 && !root.ps2
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted
                 font.family: root.st.font_family
