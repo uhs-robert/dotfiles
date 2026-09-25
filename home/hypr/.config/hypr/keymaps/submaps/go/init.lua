@@ -51,11 +51,7 @@ Submap.define({
       -- stylua: ignore end
     }
 
-    if Config.shell == "quickshell" then
-      table.insert(rows, { "A", popup("keeptabs"), "Agent Sessions" })
-    else
-      table.insert(rows, { "A", Menu.agents(), "Agent Sessions" })
-    end
+    table.insert(rows, { "A", popup("keeptabs"), "Agent Sessions" })
 
     for i, entry in ipairs(Config.monitors) do
       local sel = Workspaces.get_monitor_selector(entry)

@@ -43,25 +43,21 @@ Submap.define({
 
     local add_row = function(row) table.insert(rows, row) end
 
-    if Config.shell == "quickshell" then
-      local function popup(name) return Cmd.run(Scripts.qs_ipc .. " call popup open " .. name) end
-      add_row({ "SPACE", popup("start"), "Start Menu" })
-      add_row({ "A", popup("keeptabs"), "Agents" })
-      add_row({ "B", popup("bluetooth"), "Bluetooth" })
-      add_row({ "C", popup("clock"), "Calendar" })
-      add_row({ "I", popup("network"), "Network and Internet" })
-      add_row({ "M", popup("media"), "Media" })
-      add_row({ "N", popup("notifications"), "Notifications" })
-      add_row({ "P", popup("battery"), "Power and Brightness" })
-      add_row({ "Q", popup("system"), "System" })
-      add_row({ "S", popup("style"), "Style" })
-      add_row({ "T", popup("tray"), "Tray" })
-      add_row({ "U", popup("updates"), "Updates" })
-      add_row({ "V", popup("volume"), "Volume" })
-      add_row({ "W", popup("weather"), "Weather" })
-    else
-      add_row({ "SHIFT + N", Submap.switch("Notifications"), "+Notifications", KEEP })
-    end
+    local function popup(name) return Cmd.run(Scripts.qs_ipc .. " call popup open " .. name) end
+    add_row({ "SPACE", popup("start"), "Start Menu" })
+    add_row({ "A", popup("keeptabs"), "Agents" })
+    add_row({ "B", popup("bluetooth"), "Bluetooth" })
+    add_row({ "C", popup("clock"), "Calendar" })
+    add_row({ "I", popup("network"), "Network and Internet" })
+    add_row({ "M", popup("media"), "Media" })
+    add_row({ "N", popup("notifications"), "Notifications" })
+    add_row({ "P", popup("battery"), "Power and Brightness" })
+    add_row({ "Q", popup("system"), "System" })
+    add_row({ "S", popup("style"), "Style" })
+    add_row({ "T", popup("tray"), "Tray" })
+    add_row({ "U", popup("updates"), "Updates" })
+    add_row({ "V", popup("volume"), "Volume" })
+    add_row({ "W", popup("weather"), "Weather" })
 
     return rows
   end,
