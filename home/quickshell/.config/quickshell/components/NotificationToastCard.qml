@@ -72,7 +72,7 @@ Rectangle {
         onTriggered: root.time_tick += 1
     }
 
-    implicitHeight: layout.implicitHeight + (root.tile ? 28 : 16) + Style.inset_pad * 2
+    implicitHeight: layout.implicitHeight + (root.tile ? 28 : 16) + Style.inset_pad * 2 + Style.slant_room
     radius: root.tile ? Style.frame_radius : root.notify ? 6 : Style.radius(8)
     color: Style.frame_visor || Style.custom_frame || root.own_surface ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
@@ -153,7 +153,7 @@ Rectangle {
     }
 
     Loader {
-        active: root.oasis
+        active: root.oasis && Style.oasis_frame === ""
         anchors.fill: parent
         sourceComponent: Item {
             Oasis.OasisCard {

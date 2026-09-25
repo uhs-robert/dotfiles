@@ -230,6 +230,8 @@ Singleton {
             bar_horizon: "transparent",
             dune: "transparent",
             wave_rules: false,
+            oasis_frame: "",
+            oasis_foot: "",
             selection_edge: "transparent",
             chip_tabs: false,
             title_case: false,
@@ -468,6 +470,8 @@ Singleton {
                 bar_horizon: "transparent",
                 dune: "transparent",
                 wave_rules: false,
+                oasis_frame: "",
+                oasis_foot: "",
                 selection_edge: "transparent",
                 chip_tabs: false,
                 title_case: false,
@@ -1645,6 +1649,8 @@ Singleton {
                     section_rule: false,
                     section_fade: hair,
                     wave_rules: true,
+                    oasis_frame: "taper",
+                    oasis_foot: "horizon",
                     label_caps: false,
                     caps_tracking: 0,
                     footer_fg: Theme.fg_dim,
@@ -1893,6 +1899,12 @@ Singleton {
     }
 
     readonly property var active: root.styles[root.name] || root.styles["default"]
+    // Oasis panel outline (SlantFrame: notch, taper, lean, keel or round) and foot art (none, horizon, stars, fade, moon or dune).
+    readonly property string oasis_frame: root.active.oasis_frame || ""
+    readonly property string oasis_foot: root.active.oasis_foot || ""
+    readonly property bool slanted: root.oasis_frame !== "" && root.oasis_frame !== "round"
+    // Extra room under a frame's content so deep cuts clear the footer.
+    readonly property int slant_room: ({ taper: 8, lean: 8, keel: 6 })[root.oasis_frame] || 0
     // Small popups read this token set; it is the singleton itself unless the style has a `small` block.
     readonly property var small: root.active.small ? root.resolve(Object.assign({}, root.active, root.active.small)) : root
 
@@ -1915,7 +1927,7 @@ Singleton {
         o.number_font = o.number_font || o.font_family;
         o.label_font_family = o.label_font_family || o.font_family;
         o.mono_font = o.mono_font || o.font_family;
-        o.custom_frame = o.frame_octagon > 0 || o.frame_cut > 0;
+        o.custom_frame = o.frame_octagon > 0 || o.frame_cut > 0 || !!o.oasis_frame;
         o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
         return o;
     }
@@ -1935,7 +1947,7 @@ Singleton {
     readonly property bool rounded: root.active.rounded
     readonly property bool frame_follows_island: root.active.frame_follows_island
     readonly property color frame_color: root.active.frame_color
-    readonly property real frame_radius: root.active.frame_radius
+    readonly property real frame_radius: root.slanted ? 0 : root.active.frame_radius
     readonly property int frame_border_width: root.active.frame_border_width
     readonly property color frame_border_color: root.active.frame_border_color
     // A 1px rule along the bottom edge of every frame.
@@ -2069,7 +2081,7 @@ Singleton {
     readonly property real frame_cut: root.active.frame_cut
     readonly property real frame_notch: root.active.frame_notch
     // A frame component draws the fill and border, so the base rectangle and FrameShade stay empty.
-    readonly property bool custom_frame: root.frame_octagon > 0 || root.frame_cut > 0
+    readonly property bool custom_frame: root.frame_octagon > 0 || root.frame_cut > 0 || root.oasis_frame !== ""
     // The middle of a frame_cut border's vertical fade; its ends are frame_border_color.
     readonly property color frame_line: root.active.frame_line
     readonly property color frame_marks: root.active.frame_marks
@@ -2124,7 +2136,7 @@ Singleton {
     // Footer keys drawn as filled caps in footer_key_fg on this color.
     readonly property color footer_key_bg: root.active.footer_key_bg
     readonly property string footer_separator: root.active.footer_separator
-    readonly property bool footer_rule_solid: root.active.footer_rule_solid
+    readonly property bool footer_rule_solid: root.active.footer_rule_solid || root.oasis_foot !== ""
     readonly property bool slider_readout: root.active.slider_readout
     // Hazard stripes on alert banners and critical cards.
     readonly property color hazard: root.active.hazard
@@ -2180,7 +2192,7 @@ Singleton {
     // A 1px highlight (Sheen) along the top of raised surfaces: floating frames, capsule islands, shaded tabs and rows, keycaps, cards.
     readonly property color sheen: root.active.sheen
     // A dune silhouette in this color along the foot of popups and toasts.
-    readonly property color dune: root.active.dune
+    readonly property color dune: root.oasis_frame !== "" ? "transparent" : root.active.dune
     // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
     readonly property int title_size: root.active.title_size
@@ -2206,7 +2218,7 @@ Singleton {
     // Sections as open folds: a fold marker, the label and a dotted fill.
     readonly property bool section_fold: root.active.section_fold
     // Section fades and footer rules drawn as dune contour lines (DuneLine).
-    readonly property bool wave_rules: root.active.wave_rules
+    readonly property bool wave_rules: root.oasis_foot !== "" ? root.oasis_foot === "dune" : root.active.wave_rules
     // Drawn between each footer key and its description.
     readonly property string footer_arrow: root.active.footer_arrow
     readonly property real meter_gap: root.active.meter_gap
@@ -2248,7 +2260,7 @@ Singleton {
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color
     // Islands with rounded bottom corners instead of slants.
-    readonly property bool bar_round_caps: root.bar.bar_round_caps
+    readonly property bool bar_round_caps: root.bar.bar_round_caps && !root.slanted
     // A horizon line across the bar, seen in the gaps between islands.
     readonly property color bar_horizon: root.bar.bar_horizon
     // Islands as floating capsules this many px inside the bar; 0 keeps the slanted islands.

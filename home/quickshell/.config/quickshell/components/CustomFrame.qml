@@ -2,8 +2,9 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import "../theme"
+import "oasis" as Oasis
 
-// The style's own frame shape (OctagonFrame, ChamferFrame, PixelFrame, WindowGradient) and FrameTicks, each loaded only when its token is set.
+// The style's own frame shape (OctagonFrame, ChamferFrame, PixelFrame, WindowGradient, SlantFrame) and FrameTicks, each loaded only when its token is set.
 Item {
     id: root
 
@@ -33,6 +34,16 @@ Item {
         active: root.st.frame_cut > 0
         sourceComponent: ChamferFrame {
             border_color: root.chamfer_edge
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.st.oasis_frame !== "" && !root.device
+        sourceComponent: Oasis.SlantFrame {
+            top_radius: root.top_radius
+            bottom_radius: root.bottom_radius
+            edge_color: root.chamfer_edge
         }
     }
 

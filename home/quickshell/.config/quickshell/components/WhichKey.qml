@@ -174,7 +174,7 @@ PanelWindow {
 
 
         width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
-        height: top_edge + header_height + body.implicitHeight + pad_y * 2
+        height: top_edge + header_height + body.implicitHeight + pad_y * 2 + Style.slant_room
         radius: Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_mantle : Style.frame_color
         border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
