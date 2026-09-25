@@ -624,7 +624,7 @@ PanelWindow {
                         y: (parent.height - height) / 2
                         width: Math.min(title_metrics.width, parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
-                        text: root.st.title_prefix + Style.title_text(root.title, root.st) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
+                        text: root.st.title_prefix + (root.passive ? root.title : Style.title_text(root.title, root.st)) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
                         font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
