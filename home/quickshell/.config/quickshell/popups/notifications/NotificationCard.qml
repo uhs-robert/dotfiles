@@ -24,6 +24,7 @@ Item {
     readonly property bool channels: Style.card_layout === "channel"
     // Chrono Trigger dialogue boxes: the app speaks its summary and body in a blue window.
     readonly property bool dialogue: Style.card_layout === "dialogue"
+    readonly property bool dq: Style.card_layout === "dq"
     // MGS codec calls: the app icon as the caller's portrait.
     readonly property bool codec: Style.console_views === "ps1"
     readonly property bool dialog: Style.card_layout === "dialog"
@@ -193,7 +194,7 @@ Item {
 
         Text {
             visible: Style.boxed_cards && root.selected && Style.row_cursor !== "" && Style.caret_phase && Style.card_layout !== "pixel" && !root.dialogue
-            x: 4
+            x: root.dq ? 9 : 4
             y: layout.y + 1
             text: Style.row_cursor
             color: Style.caret_color
@@ -238,7 +239,7 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 10
-            anchors.leftMargin: root.channels ? 58 : root.dialogue ? 28 : 16
+            anchors.leftMargin: root.channels ? 58 : root.dialogue ? 28 : root.dq ? 24 : 16
             anchors.rightMargin: root.dialogue ? 16 : 10
             spacing: 10
 
@@ -332,6 +333,7 @@ Item {
                     textFormat: Text.StyledText
                     Layout.leftMargin: root.dialogue ? 12 : 0
                     text: root.notification ? NotificationState.clean_body(root.notification.body) : ""
+                    lineHeight: root.dq ? 1.2 : 1
                     color: root.dialogue ? Theme.fg_core : Style.text_muted
                     style: root.dialogue ? Text.Raised : Text.Normal
                     styleColor: Style.text_shadow
