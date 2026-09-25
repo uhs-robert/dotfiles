@@ -79,7 +79,7 @@ Item {
         text: root.day ? Math.round(root.day.max) + "°" : ""
         color: root.selected ? Theme.fg_strong : Theme.fg_core
         font.family: Style.number_font
-        font.pixelSize: Style.font_size - 2
+        font.pixelSize: Style.fs(-2)
         font.weight: root.selected ? Font.Medium : Font.Normal
         font.features: { "tnum": 1 }
     }
@@ -116,7 +116,7 @@ Item {
         text: root.day ? Math.round(root.day.min) + "°" : ""
         color: Theme.fg_dim
         font.family: Style.number_font
-        font.pixelSize: Style.font_size - 3
+        font.pixelSize: Style.fs(-3)
         font.features: { "tnum": 1 }
     }
 
@@ -140,7 +140,7 @@ Item {
             text: root.day ? root.day.pop + "%" : ""
             color: Qt.tint(Theme.fg_core, Qt.alpha(Theme.info, 0.75))
             font.family: Style.number_font
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
             font.features: { "tnum": 1 }
         }
     }
@@ -183,7 +183,7 @@ Item {
         text: root.day ? root.day.weekday : ""
         color: root.selected ? root.sand : Theme.fg_dim
         font.family: Style.font_family
-        font.pixelSize: Style.font_size - 3
+        font.pixelSize: Style.fs(-3)
         font.weight: root.selected ? Font.DemiBold : Font.Medium
     }
 }

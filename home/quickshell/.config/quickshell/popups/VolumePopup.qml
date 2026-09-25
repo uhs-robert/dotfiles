@@ -317,7 +317,7 @@ Popup {
                                 label: root.row_label(row_wrap.modelData)
                                 color: vol_row.fg((row_wrap.modelData.node === Pipewire.defaultAudioSink || row_wrap.modelData.node === Pipewire.defaultAudioSource) ? root.st.text_accent : root.st.text_fg)
                                 font.family: root.st.font_family
-                                font.pixelSize: root.st.font_size - 1
+                                font.pixelSize: root.st.fs(-1)
                             }
                         }
 
@@ -354,7 +354,7 @@ Popup {
                                 searchable: row_wrap.modelData.type === "stream"
                                 color: vol_row.fg(root.st.text_fg)
                                 font.family: root.st.font_family
-                                font.pixelSize: root.st.font_size - 1
+                                font.pixelSize: root.st.fs(-1)
                             }
 
                             Loader {
@@ -386,14 +386,14 @@ Popup {
                                 text: Math.round((row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0) * 100) + "%"
                                 color: vol_row.fg(root.st.text_fg)
                                 font.family: root.st.font_family
-                                font.pixelSize: root.st.font_size - 4
+                                font.pixelSize: root.st.fs(-4)
                             }
 
                             Text {
                                 text: row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted ? "" : ""
                                 color: vol_row.fg(root.st.text_primary)
                                 font.family: root.st.font_family
-                                font.pixelSize: root.st.font_size - 1
+                                font.pixelSize: root.st.fs(-1)
 
                                 MouseArea {
                                     anchors.fill: parent
@@ -411,7 +411,7 @@ Popup {
                 text: "No apps playing"
                 color: root.st.text_dim
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size - 2
+                font.pixelSize: root.st.fs(-2)
             }
         }
     }

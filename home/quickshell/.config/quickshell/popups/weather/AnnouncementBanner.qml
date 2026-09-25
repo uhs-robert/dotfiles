@@ -38,7 +38,7 @@ Rectangle {
                 text: "BLACK MESA ANNOUNCEMENT SYSTEM"
                 color: Theme.bg_crust
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 6
+                font.pixelSize: Style.fs(-6)
                 font.bold: true
                 font.letterSpacing: root.width >= 300 ? 2.8 : 1
             }
@@ -58,7 +58,7 @@ Rectangle {
                 text: root.alert ? root.alert.event + (WeatherState.alerts.length > 1 ? "  +" + (WeatherState.alerts.length - 1) : "") : ""
                 color: root.red
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
                 font.weight: Font.DemiBold
             }
 
@@ -67,7 +67,7 @@ Rectangle {
                 text: root.alert ? WeatherState.fmt_until(root.alert.ends).toUpperCase() : ""
                 color: root.red
                 font.family: Style.number_font
-                font.pixelSize: Style.font_size - 4
+                font.pixelSize: Style.fs(-4)
                 font.bold: true
                 font.letterSpacing: 0.7
             }

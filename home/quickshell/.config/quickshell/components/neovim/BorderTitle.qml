@@ -36,7 +36,7 @@ Item {
             text: root.title
             color: root.ink
             font.family: root.st.title_font_family
-            font.pixelSize: root.st.font_size - 2
+            font.pixelSize: root.st.fs(-2)
             font.bold: true
         }
     }

@@ -230,7 +230,7 @@ PanelWindow {
     TextMetrics {
         id: percent_metrics
         font.family: Style.number_font
-        font.pixelSize: root.hud_layout ? Style.font_size + 5 : Style.font_size
+        font.pixelSize: root.hud_layout ? Style.fs(5) : Style.font_size
         font.bold: Style.number_font !== Style.font_family
         text: "100%"
     }
@@ -396,7 +396,7 @@ PanelWindow {
                     text: Style.title_prefix + Style.title_text(root.title) + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
-                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
+                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.fs(-2)
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
                 }

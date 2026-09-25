@@ -51,7 +51,7 @@ Item {
                 text: root.label
                 color: root.selected ? Style.selection_fg : Style.text_dim
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
                 font.weight: Font.DemiBold
             }
         }
@@ -76,7 +76,7 @@ Item {
             text: root.day ? Math.round(root.day.max) + "°" : ""
             color: Style.text_strong
             font.family: Style.font_family
-            font.pixelSize: Style.font_size + 1
+            font.pixelSize: Style.fs(1)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
         }
@@ -115,7 +115,7 @@ Item {
             text: root.day ? Math.round(root.day.min) + "°" : ""
             color: root.selected ? Style.text_dim : Style.text_muted
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 1
+            font.pixelSize: Style.fs(-1)
             font.weight: Font.Medium
             font.features: { "tnum": 1 }
         }
@@ -125,7 +125,7 @@ Item {
             text: root.day ? "\u{f058c} " + root.day.pop + "%" : ""
             color: Qt.tint(Style.text_dim, Qt.alpha(Theme.info, 0.7))
             font.family: Style.mono_font
-            font.pixelSize: Style.font_size - 4
+            font.pixelSize: Style.fs(-4)
         }
     }
 }

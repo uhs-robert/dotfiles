@@ -213,7 +213,7 @@ Item {
         style: Text.Outline
         styleColor: Qt.alpha(Style.tab_well, 0.9)
         font.family: Theme.font_family
-        font.pixelSize: Style.font_size + 1
+        font.pixelSize: Style.fs(1)
     }
 
     Text {
@@ -228,7 +228,7 @@ Item {
         style: Text.Outline
         styleColor: Qt.alpha(Style.tab_well, 0.9)
         font.family: Style.font_family
-        font.pixelSize: Style.font_size - 1
+        font.pixelSize: Style.fs(-1)
         font.weight: Font.Medium
     }
 
@@ -243,7 +243,7 @@ Item {
         style: Text.Outline
         styleColor: Qt.alpha(Style.tab_well, 0.9)
         font.family: Style.number_font
-        font.pixelSize: Style.font_size - 2
+        font.pixelSize: Style.fs(-2)
         font.features: { "tnum": 1 }
     }
 

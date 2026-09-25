@@ -20,7 +20,7 @@ Popup {
     FontMetrics {
         id: label_metrics
         font.family: root.st.font_family
-        font.pixelSize: root.st.font_size - 1
+        font.pixelSize: root.st.fs(-1)
     }
 
     readonly property var stat_rows: {
@@ -145,7 +145,7 @@ Popup {
                             text: stat_row.modelData.label
                             color: stat_row.fg(root.st.text_fg)
                             font.family: root.st.font_family
-                            font.pixelSize: root.st.font_size - 1
+                            font.pixelSize: root.st.fs(-1)
                         }
 
                         Meter {
@@ -162,7 +162,7 @@ Popup {
                                 + (stat_row.modelData.kind === "memory" ? " (" + SysStats.mem_used_gb.toFixed(1) + "/" + SysStats.mem_total_gb.toFixed(1) + "GB)" : "")
                             color: stat_row.fg(root.st.text_muted)
                             font.family: root.st.font_family
-                            font.pixelSize: root.st.font_size - 2
+                            font.pixelSize: root.st.fs(-2)
                         }
                     }
 

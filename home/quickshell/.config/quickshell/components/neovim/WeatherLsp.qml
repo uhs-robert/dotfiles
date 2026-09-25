@@ -30,7 +30,7 @@ ColumnLayout {
             text: "\u{f0c2}"
             color: Style.text_primary
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
         }
 
         Repeater {
@@ -48,14 +48,14 @@ ColumnLayout {
                     text: "›"
                     color: Style.text_muted
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 3
+                    font.pixelSize: Style.fs(-3)
                 }
 
                 Text {
                     text: crumb.modelData
                     color: crumb.last ? Style.text_fg : Style.text_dim
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 3
+                    font.pixelSize: Style.fs(-3)
                     font.bold: crumb.last
                 }
             }
@@ -89,7 +89,7 @@ ColumnLayout {
                     text: WeatherState.has_data ? root.fmt_temp(WeatherState.current.temp) : "--°"
                     color: Style.text_strong
                     font.family: Style.number_font
-                    font.pixelSize: Style.font_size + 15
+                    font.pixelSize: Style.fs(15)
                     font.bold: true
                 }
 
@@ -98,7 +98,7 @@ ColumnLayout {
                     text: WeatherState.has_data ? WeatherState.current.cond : WeatherState.loading ? "Loading…" : "Unavailable"
                     color: WeatherState.has_data || WeatherState.loading ? Style.text_fg : Theme.warning
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 1
+                    font.pixelSize: Style.fs(-1)
                 }
             }
 
@@ -107,7 +107,7 @@ ColumnLayout {
                 text: "Feels like " + (WeatherState.has_data ? root.fmt_temp(WeatherState.current.feels) : "") + (WeatherState.stale ? "  ·  stale" : "")
                 color: Style.text_dim
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
             }
         }
     }
@@ -125,7 +125,7 @@ ColumnLayout {
             text: "\u{f071}"
             color: root.diag
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
         }
 
         Text {
@@ -136,7 +136,7 @@ ColumnLayout {
             text: WeatherState.location_name
             color: Style.text_fg
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 2
+            font.pixelSize: Style.fs(-2)
         }
 
         // Undercurl, drawn once.
@@ -173,7 +173,7 @@ ColumnLayout {
             text: "└──"
             color: Qt.tint(Style.frame_color, Qt.alpha(root.diag, 0.55))
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
         }
 
         Rectangle {
@@ -191,7 +191,7 @@ ColumnLayout {
                 text: root.alert ? "■ " + root.alert.event + (WeatherState.alerts.length > 1 ? "  +" + (WeatherState.alerts.length - 1) : "") : ""
                 color: root.diag
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
             }
         }
 
@@ -200,7 +200,7 @@ ColumnLayout {
             text: root.alert ? WeatherState.fmt_until(root.alert.ends) : ""
             color: Qt.tint(Style.text_dim, Qt.alpha(root.diag, 0.6))
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 4
+            font.pixelSize: Style.fs(-4)
         }
 
         TapHandler {

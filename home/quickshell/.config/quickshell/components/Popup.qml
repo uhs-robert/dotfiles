@@ -679,7 +679,7 @@ PanelWindow {
                         text: root.st.title_prefix + root.shown_title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
-                        font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
+                        font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.fs(-2)
                         font.weight: root.st.title_weight > 0 ? root.st.title_weight : root.st.title_font_family === root.st.font_family ? Font.Bold : Font.Normal
                         font.letterSpacing: root.st.title_spacing
                     }
@@ -695,7 +695,7 @@ PanelWindow {
                     text: root.st.title_readout.replace("{code}", root.title.slice(0, 3))
                     color: root.st.title_readout_fg.a > 0 ? root.st.title_readout_fg : root.st.text_muted
                     font.family: root.st.font_family
-                    font.pixelSize: root.st.font_size - 5
+                    font.pixelSize: root.st.fs(-5)
                     font.letterSpacing: 1
                 }
 
@@ -708,7 +708,7 @@ PanelWindow {
                     text: root.title_value
                     color: root.st.text_muted
                     font.family: root.st.mono_font
-                    font.pixelSize: root.st.font_size - 3
+                    font.pixelSize: root.st.fs(-3)
                 }
 
                 Loader {

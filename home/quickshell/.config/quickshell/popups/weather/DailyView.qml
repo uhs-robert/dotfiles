@@ -72,19 +72,19 @@ Item {
     FontMetrics {
         id: label_metrics
         font.family: Style.font_family
-        font.pixelSize: Style.font_size - 2
+        font.pixelSize: Style.fs(-2)
     }
 
     FontMetrics {
         id: table_metrics
         font.family: Style.font_family
-        font.pixelSize: Style.font_size - 4
+        font.pixelSize: Style.fs(-4)
     }
 
     FontMetrics {
         id: small_metrics
         font.family: Style.font_family
-        font.pixelSize: Style.font_size - 5
+        font.pixelSize: Style.fs(-5)
     }
 
     // Columns that fit without clipping their widest label, capped at five.
@@ -193,7 +193,7 @@ Item {
             text: "Extended Forecast"
             color: Theme.theme_secondary
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
             style: Text.Outline
             styleColor: Theme.bg_shadow
         }
@@ -462,7 +462,7 @@ Item {
                                 text: Math.round(day_col.modelData.max) + "°"
                                 color: root.thin_range ? Style.text_strong : Theme.yellow
                                 font.family: Style.font_family
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
 
                             Text {
@@ -471,7 +471,7 @@ Item {
                                 text: Math.round(day_col.modelData.min) + "°"
                                 color: root.thin_range ? Style.text_muted : Theme.yellow
                                 font.family: Style.font_family
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
                         }
 
@@ -487,7 +487,7 @@ Item {
                                 text: "▲"
                                 rotation: day_col.modelData.wind_dir
                                 color: Theme.cyan
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
 
                             Rectangle {
@@ -514,7 +514,7 @@ Item {
                                 text: Math.round(day_col.modelData.wind_speed_max)
                                 color: Theme.cyan
                                 font.family: Style.font_family
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
                         }
 
@@ -540,7 +540,7 @@ Item {
                                 text: day_col.modelData.uv_max.toFixed(1)
                                 color: WeatherState.uv_color(day_col.modelData.uv_max)
                                 font.family: Style.font_family
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
                         }
 
@@ -566,7 +566,7 @@ Item {
                                 text: day_col.modelData.sunshine_hours.toFixed(1) + "h"
                                 color: Theme.yellow
                                 font.family: Style.font_family
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
                         }
 
@@ -577,7 +577,7 @@ Item {
                             text: day_col.modelData.pop + "%"
                             color: Theme.blue
                             font.family: Style.font_family
-                            font.pixelSize: Style.font_size - 2
+                            font.pixelSize: Style.fs(-2)
                         }
 
                         Item {
@@ -608,7 +608,7 @@ Item {
                             text: root.day_label(day_col.modelData, day_col.day_index)
                             color: root.dq ? Theme.fg_strong : day_col.day_index === root.day_cursor ? Theme.theme_secondary : Theme.fg_core
                             font.family: Style.font_family
-                            font.pixelSize: Style.font_size - 2
+                            font.pixelSize: Style.fs(-2)
 
                             Text {
                                 visible: root.dq && day_col.day_index === root.day_cursor && Style.caret_phase
@@ -618,7 +618,7 @@ Item {
                                 text: Style.row_cursor
                                 color: Style.caret_color
                                 font.family: Style.font_family
-                                font.pixelSize: Style.font_size - 5
+                                font.pixelSize: Style.fs(-5)
                             }
                         }
 
@@ -631,7 +631,7 @@ Item {
                             text: "IN PROGRESS"
                             color: Style.accent_color
                             font.family: Style.font_family
-                            font.pixelSize: Style.font_size - 5
+                            font.pixelSize: Style.fs(-5)
                             font.letterSpacing: 1
                         }
                     }
@@ -648,14 +648,14 @@ Item {
                 text: "HI LO °" + WeatherState.unit_symbol() + " · RAIN %"
                 color: Style.shade_2
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 5
+                font.pixelSize: Style.fs(-5)
             }
 
             Text {
                 text: Math.round(root.week_low) + "–" + Math.round(root.week_high) + "°" + WeatherState.unit_symbol()
                 color: Style.shade_2
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 5
+                font.pixelSize: Style.fs(-5)
             }
         }
 
@@ -683,7 +683,7 @@ Item {
                 text: selected ? selected.cond + " · " + selected.precip.toFixed(2) + (WeatherState.settings.unit === "celsius" ? " mm" : " in") + " · " + (selected.sunrise || "—") + "–" + (selected.sunset || "—") : ""
                 color: Style.text_muted
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
             }
 
             Text {

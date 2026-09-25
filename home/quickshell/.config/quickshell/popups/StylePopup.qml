@@ -107,7 +107,7 @@ Popup {
                             text: row.modelData === Style.saved_name ? "active" : ""
                             color: row.fg(Theme.ok)
                             font.family: root.st.font_family
-                            font.pixelSize: root.st.font_size - 3
+                            font.pixelSize: root.st.fs(-3)
                         }
                     }
 

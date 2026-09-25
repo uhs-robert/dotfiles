@@ -176,7 +176,7 @@ Item {
                         text: "CH-" + String(root.channel).padStart(2, "0")
                         color: root.selected ? Style.caret_color : Style.text_primary
                         font.family: Style.mono_font
-                        font.pixelSize: Style.font_size - 3
+                        font.pixelSize: Style.fs(-3)
                     }
 
                     Text {
@@ -184,7 +184,7 @@ Item {
                         text: "T-" + (root.entry ? root.relative_time(root.entry.time).toUpperCase() : "")
                         color: Style.text_muted
                         font.family: Style.mono_font
-                        font.pixelSize: Style.font_size - 5
+                        font.pixelSize: Style.fs(-5)
                     }
 
                     Hazard {
@@ -207,7 +207,7 @@ Item {
             text: Style.row_cursor
             color: Style.caret_color
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 1
+            font.pixelSize: Style.fs(-1)
             font.bold: true
         }
 
@@ -328,7 +328,7 @@ Item {
                         text: root.entry ? root.relative_time(root.entry.time) + root.urgency_tag : ""
                         color: Style.text_muted
                         font.family: Style.font_family
-                        font.pixelSize: Style.font_size - 5
+                        font.pixelSize: Style.fs(-5)
                     }
 
                     Text {
@@ -339,7 +339,7 @@ Item {
                         text: "PRI " + (root.critical ? "CRITICAL" : root.notification && root.notification.urgency === NotificationUrgency.Low ? "LOW" : "NORMAL")
                         color: root.critical ? Theme.theme_label : Style.text_muted
                         font.family: Style.mono_font
-                        font.pixelSize: Style.font_size - 4
+                        font.pixelSize: Style.fs(-4)
                     }
                 }
 
@@ -412,7 +412,7 @@ Item {
                                 color: action_chip.hand ? Theme.fg_strong : action_chip.focused ? Theme.bg_crust : Style.chip_fg.a > 0 ? Style.chip_fg : Theme.theme_secondary
                                 font.bold: action_chip.focused
                                 font.family: Style.label_font_family
-                                font.pixelSize: Style.font_size - 3
+                                font.pixelSize: Style.fs(-3)
                             }
 
                             HandCursor {

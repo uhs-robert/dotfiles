@@ -30,7 +30,7 @@ ColumnLayout {
                 text: WeatherState.has_data ? Math.round(WeatherState.current.temp) : "--"
                 color: Style.text_strong
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size + 42
+                font.pixelSize: Style.fs(42)
                 font.weight: Font.Medium
                 font.letterSpacing: -3
                 font.features: { "tnum": 1 }
@@ -42,7 +42,7 @@ ColumnLayout {
                 text: "°" + WeatherState.unit_symbol()
                 color: Style.text_dim
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size + 3
+                font.pixelSize: Style.fs(3)
                 font.weight: Font.Medium
             }
         }
@@ -79,7 +79,7 @@ ColumnLayout {
                     text: WeatherState.has_data ? WeatherState.current.cond : WeatherState.loading ? "Loading…" : "Unavailable"
                     color: WeatherState.has_data || WeatherState.loading ? Style.text_strong : Theme.warning
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size + 2
+                    font.pixelSize: Style.fs(2)
                     font.weight: Font.DemiBold
                 }
             }
@@ -91,7 +91,7 @@ ColumnLayout {
                 text: WeatherState.has_data ? "Feels like " + Math.round(WeatherState.current.feels) + "°" + WeatherState.unit_symbol() : ""
                 color: Style.text_dim
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 1
+                font.pixelSize: Style.fs(-1)
             }
 
             Text {
@@ -101,7 +101,7 @@ ColumnLayout {
                 text: WeatherState.stale ? "Stale data" + (WeatherState.error ? ": " + WeatherState.error : "") : WeatherState.location_name
                 color: WeatherState.stale ? Theme.warning : Style.text_muted
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 2
+                font.pixelSize: Style.fs(-2)
             }
         }
     }
@@ -159,7 +159,7 @@ ColumnLayout {
                     text: root.alert ? root.alert.event + (WeatherState.alerts.length > 1 ? "  +" + (WeatherState.alerts.length - 1) : "") : ""
                     color: Style.text_strong
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 1
+                    font.pixelSize: Style.fs(-1)
                     font.weight: Font.DemiBold
                 }
 
@@ -169,7 +169,7 @@ ColumnLayout {
                     text: root.alert ? WeatherState.fmt_until(root.alert.ends) : ""
                     color: Style.text_dim
                     font.family: Style.mono_font
-                    font.pixelSize: Style.font_size - 4
+                    font.pixelSize: Style.fs(-4)
                 }
             }
 

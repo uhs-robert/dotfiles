@@ -15,7 +15,7 @@ Text {
     text: root.st.section_rule ? "── " + root.label + " " + "─".repeat(160) : root.st.section_fold ? "\u25be " + root.label : root.label
     color: root.st.section_fg
     font.family: root.st.label_font_family
-    font.pixelSize: root.st.font_size - 3
+    font.pixelSize: root.st.fs(-3)
     font.capitalization: root.st.label_caps || root.st.caps_tracking > 0 ? Font.AllUppercase : Font.MixedCase
     font.letterSpacing: root.st.caps_tracking > 0 ? root.st.caps_tracking : root.st.label_spacing
     font.bold: root.st.caps_tracking > 0

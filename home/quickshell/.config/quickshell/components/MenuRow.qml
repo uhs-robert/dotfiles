@@ -123,7 +123,7 @@ Rectangle {
         text: String(root.slot).padStart(2, "0")
         color: root.selected ? root.st.caret_color : root.st.text_muted
         font.family: root.st.mono_font
-        font.pixelSize: root.st.font_size - 4
+        font.pixelSize: root.st.fs(-4)
     }
 
     Text {
@@ -135,7 +135,7 @@ Rectangle {
         text: root.key !== "" ? root.key : root.slot >= 0 ? String(root.slot) : ""
         color: root.selected ? root.st.text_accent : root.st.text_muted
         font.family: root.st.mono_font
-        font.pixelSize: root.st.font_size - 3
+        font.pixelSize: root.st.fs(-3)
         font.bold: root.selected
     }
 
@@ -147,7 +147,7 @@ Rectangle {
         text: root.st.row_cursor
         color: root.st.caret_color
         font.family: root.st.mono_font
-        font.pixelSize: root.st.font_size - 1
+        font.pixelSize: root.st.fs(-1)
         font.bold: true
     }
 

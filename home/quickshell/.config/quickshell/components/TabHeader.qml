@@ -63,7 +63,7 @@ Item {
             text: root.panel_id
             color: root.st.text_accent
             font.family: root.st.mono_font
-            font.pixelSize: root.st.font_size - 4
+            font.pixelSize: root.st.fs(-4)
         }
 
         Text {
@@ -73,7 +73,7 @@ Item {
             text: root.title
             color: root.accent.a > 0 ? root.accent : root.st.title_fg
             font.family: root.st.title_font_family
-            font.pixelSize: root.st.font_size - 1
+            font.pixelSize: root.st.fs(-1)
             font.bold: true
             font.letterSpacing: root.st.title_spacing
         }
@@ -101,7 +101,7 @@ Item {
         text: root.readout + (root.readout_value !== "" ? " <font color='" + root.st.text_strong + "'>" + root.readout_value + "</font>" : "")
         color: root.st.title_readout_fg.a > 0 ? root.st.title_readout_fg : root.st.text_muted
         font.family: root.st.mono_font
-        font.pixelSize: root.st.font_size - 5
+        font.pixelSize: root.st.fs(-5)
         font.letterSpacing: 1.4
     }
 }

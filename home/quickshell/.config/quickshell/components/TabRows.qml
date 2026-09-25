@@ -14,7 +14,7 @@ ColumnLayout {
     property int current: 0
     property bool chips: false
     readonly property bool pills: root.chips && !root.st.chip_tabs
-    property int font_size: root.chips ? root.st.font_size - 3 : root.st.font_size - 2
+    property int font_size: root.chips ? root.st.fs(-3) : root.st.fs(-2)
     property real tab_height: Style.px(24)
     // Other label sets this row switches between; the tallest reserves the height so switching never resizes.
     property var reserve_labels: []
@@ -40,7 +40,7 @@ ColumnLayout {
     FontMetrics {
         id: key_metrics
         font.family: root.st.mono_font
-        font.pixelSize: root.st.font_size - 5
+        font.pixelSize: root.st.fs(-5)
         font.bold: root.st.mono_font === root.st.font_family
     }
 

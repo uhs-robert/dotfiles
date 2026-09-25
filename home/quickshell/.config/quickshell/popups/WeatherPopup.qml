@@ -334,7 +334,7 @@ Popup {
                         text: WeatherState.has_data ? root.fmt_temp(WeatherState.current.temp) : "--°"
                         color: WeatherState.has_data ? WeatherState.temp_color(WeatherState.current.temp) : Style.text_dim
                         font.family: Style.number_font
-                        font.pixelSize: Style.font_size + 12
+                        font.pixelSize: Style.fs(12)
                         font.bold: true
                     }
 
@@ -344,7 +344,7 @@ Popup {
                         text: WeatherState.has_data ? WeatherState.current.cond : WeatherState.loading ? "Loading…" : "Unavailable: " + WeatherState.error
                         color: WeatherState.has_data || WeatherState.loading ? Theme.fg_core : Theme.warning
                         font.family: Style.font_family
-                        font.pixelSize: Style.font_size + 1
+                        font.pixelSize: Style.fs(1)
                     }
 
                     Text {
@@ -354,7 +354,7 @@ Popup {
                         text: "Feels like " + (WeatherState.has_data ? root.fmt_temp(WeatherState.current.feels) : "")
                         color: Style.text_muted
                         font.family: Style.font_family
-                        font.pixelSize: Style.font_size - 2
+                        font.pixelSize: Style.fs(-2)
                     }
 
                     Text {
@@ -364,7 +364,7 @@ Popup {
                         text: WeatherState.location_name
                         color: Style.text_dim
                         font.family: Style.font_family
-                        font.pixelSize: Style.font_size - 2
+                        font.pixelSize: Style.fs(-2)
                     }
                 }
 
@@ -379,7 +379,7 @@ Popup {
                     text: "Stale data" + (WeatherState.error ? ": " + WeatherState.error : "")
                     color: Theme.warning
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size - 3
+                    font.pixelSize: Style.fs(-3)
                 }
             }
 
@@ -424,7 +424,7 @@ Popup {
                         text: root.mission ? "MISSION CRITICAL" : "THREAT DETECTED"
                         color: Theme.theme_label
                         font.family: root.mission ? Style.title_font_family : Style.font_family
-                        font.pixelSize: Style.font_size - 6
+                        font.pixelSize: Style.fs(-6)
                         font.letterSpacing: 1
                     }
 
@@ -436,7 +436,7 @@ Popup {
                             : WeatherState.alerts[0].event + " · until " + root.fmt_alert_time(WeatherState.alerts[0].ends) + (WeatherState.alerts.length > 1 ? "  +" + (WeatherState.alerts.length - 1) + " more" : "")
                         color: root.mission || root.threat ? Theme.theme_label : WeatherState.alerts.length > 0 ? WeatherState.alert_color(WeatherState.alerts[0].severity) : Theme.fg_core
                         font.family: Style.font_family
-                        font.pixelSize: Style.font_size - 2
+                        font.pixelSize: Style.fs(-2)
                         font.bold: true
                     }
                 }
@@ -534,7 +534,7 @@ Popup {
                 text: WeatherState.updated > 0 ? "Updated " + WeatherState.format_hour(new Date(WeatherState.updated)) : "Never updated"
                 color: Style.text_dim
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 4
+                font.pixelSize: Style.fs(-4)
             }
 
             MenuFooter {

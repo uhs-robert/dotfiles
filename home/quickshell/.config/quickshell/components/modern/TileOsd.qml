@@ -39,7 +39,7 @@ ColumnLayout {
                 text: root.kind === "brightness" ? "Brightness" : root.muted ? "Muted" : "Volume"
                 color: Style.text_strong
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 1
+                font.pixelSize: Style.fs(-1)
                 font.weight: Font.DemiBold
             }
 
@@ -51,7 +51,7 @@ ColumnLayout {
                 text: root.device
                 color: Style.text_muted
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
             }
         }
 
@@ -71,7 +71,7 @@ ColumnLayout {
                 text: root.percent
                 color: root.muted ? Style.text_muted : Style.text_strong
                 font.family: Style.number_font
-                font.pixelSize: Style.font_size + 20
+                font.pixelSize: Style.fs(20)
                 font.weight: Font.Medium
                 font.letterSpacing: -1.5
                 font.features: { "tnum": 1 }

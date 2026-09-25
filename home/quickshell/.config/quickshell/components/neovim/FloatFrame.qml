@@ -47,7 +47,7 @@ Item {
             text: root.status
             color: root.st.text_dim
             font.family: root.st.font_family
-            font.pixelSize: root.st.font_size - 3
+            font.pixelSize: root.st.fs(-3)
         }
     }
 }

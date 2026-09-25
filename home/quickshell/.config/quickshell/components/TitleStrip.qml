@@ -39,7 +39,7 @@ Item {
         text: root.title
         color: root.title_color.a > 0 ? root.title_color : root.st.title_fg
         font.family: root.st.title_font_family
-        font.pixelSize: root.st.font_size - 3
+        font.pixelSize: root.st.fs(-3)
         font.bold: true
         font.capitalization: Font.AllUppercase
         font.letterSpacing: root.st.title_spacing
@@ -54,7 +54,7 @@ Item {
         text: root.readout_value
         color: root.st.text_muted
         font.family: root.st.number_font
-        font.pixelSize: root.st.font_size - 4
+        font.pixelSize: root.st.fs(-4)
         font.bold: true
     }
 

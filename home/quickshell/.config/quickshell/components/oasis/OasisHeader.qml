@@ -43,7 +43,7 @@ RowLayout {
             text: "°" + WeatherState.unit_symbol()
             color: Style.text_dim
             font.family: Style.font_family
-            font.pixelSize: Style.font_size + 1
+            font.pixelSize: Style.fs(1)
         }
     }
 
@@ -60,7 +60,7 @@ RowLayout {
             text: WeatherState.has_data ? root.cur.cond : WeatherState.loading ? "Loading…" : "Unavailable"
             color: WeatherState.has_data || WeatherState.loading ? Theme.fg_strong : Theme.warning
             font.family: Style.font_family
-            font.pixelSize: Style.font_size + 1
+            font.pixelSize: Style.fs(1)
             font.weight: Font.DemiBold
         }
 
@@ -72,7 +72,7 @@ RowLayout {
             text: "Feels like <font color=\"" + Style.text_dim + "\">" + (WeatherState.has_data ? root.fmt_temp(root.cur.feels) : "") + "</font>"
             color: Theme.fg_dim
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
         }
 
         Text {
@@ -82,7 +82,7 @@ RowLayout {
             text: "\u{f041}  " + WeatherState.location_name
             color: Theme.fg_dim
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
         }
 
         Text {
@@ -92,7 +92,7 @@ RowLayout {
             text: (WeatherState.stale ? "Stale data" : "Error") + (WeatherState.error ? ": " + WeatherState.error : "")
             color: Theme.warning
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 4
+            font.pixelSize: Style.fs(-4)
         }
     }
 

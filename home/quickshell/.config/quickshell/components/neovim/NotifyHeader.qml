@@ -24,7 +24,7 @@ Item {
             text: root.level === "critical" ? "\u{f057}" : root.level === "low" ? "\u{f0a2}" : "\u{f05a}"
             color: root.accent
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 2
+            font.pixelSize: Style.fs(-2)
         }
 
         Text {
@@ -34,7 +34,7 @@ Item {
             text: root.app
             color: root.accent
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
             font.bold: true
         }
 
@@ -52,7 +52,7 @@ Item {
                 text: root.level
                 color: root.accent
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 5
+                font.pixelSize: Style.fs(-5)
             }
         }
 
@@ -65,7 +65,7 @@ Item {
             text: root.age
             color: Style.text_muted
             font.family: Style.font_family
-            font.pixelSize: Style.font_size - 3
+            font.pixelSize: Style.fs(-3)
         }
     }
 

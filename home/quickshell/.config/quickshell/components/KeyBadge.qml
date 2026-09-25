@@ -89,7 +89,7 @@ Rectangle {
         text: root.key
         color: root.tinted ? root.st.tab_active_fg : root.st.key_fg
         font.family: root.st.mono_font
-        font.pixelSize: root.font_px > 0 ? root.font_px : root.st.font_size - 5
+        font.pixelSize: root.font_px > 0 ? root.font_px : root.st.fs(-5)
         font.bold: root.orb || root.st.mono_font === root.st.font_family
     }
 }

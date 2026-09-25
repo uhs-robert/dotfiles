@@ -11,7 +11,7 @@ Rectangle {
 
     property string label: ""
     property bool active: false
-    property int font_size: root.st.font_size - 2
+    property int font_size: root.st.fs(-2)
     property real base_radius: 4
     // The tab's 1-9 jump key, drawn as a badge by styles that show keys.
     property string key: ""

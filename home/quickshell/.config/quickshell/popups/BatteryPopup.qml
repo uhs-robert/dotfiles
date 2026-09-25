@@ -241,7 +241,7 @@ Popup {
                 text: (root.nes ? "BAT " : "") + Math.round(root.percent) + "%"
                 color: root.st.text_strong
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size + 4
+                font.pixelSize: root.st.fs(4)
             }
 
             Text {
@@ -250,7 +250,7 @@ Popup {
                 text: root.state_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size - 2
+                font.pixelSize: root.st.fs(-2)
             }
 
             Text {
@@ -259,7 +259,7 @@ Popup {
                 text: root.time_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size - 2
+                font.pixelSize: root.st.fs(-2)
             }
 
             Text {
@@ -268,13 +268,13 @@ Popup {
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size - 2
+                font.pixelSize: root.st.fs(-2)
             }
 
             FontMetrics {
                 id: percent_metrics
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size - 1
+                font.pixelSize: root.st.fs(-1)
             }
 
             Loader {
@@ -364,7 +364,7 @@ Popup {
                         text: Backlight.percent + "%"
                         color: brightness_row.fg(root.st.text_fg)
                         font.family: root.st.font_family
-                        font.pixelSize: root.st.font_size - 1
+                        font.pixelSize: root.st.fs(-1)
                     }
                 }
             }
@@ -409,7 +409,7 @@ Popup {
                         text: Backlight.kbd_percent + "%"
                         color: kbd_row.fg(root.st.text_fg)
                         font.family: root.st.font_family
-                        font.pixelSize: root.st.font_size - 1
+                        font.pixelSize: root.st.fs(-1)
                     }
                 }
             }
@@ -420,7 +420,7 @@ Popup {
                 text: "power-profiles-daemon not running"
                 color: root.st.text_dim
                 font.family: root.st.font_family
-                font.pixelSize: root.st.font_size - 3
+                font.pixelSize: root.st.fs(-3)
             }
 
             Repeater {
@@ -450,7 +450,7 @@ Popup {
                             label: profile_row.modelData.label
                             color: profile_row.fg(PowerProfiles.profile === profile_row.modelData.value ? root.st.text_accent : root.st.text_fg)
                             font.family: root.st.font_family
-                            font.pixelSize: root.st.font_size - 1
+                            font.pixelSize: root.st.fs(-1)
                         }
                     }
 

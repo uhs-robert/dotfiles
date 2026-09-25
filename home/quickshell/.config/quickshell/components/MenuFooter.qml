@@ -14,8 +14,8 @@ Item {
     property string text: ""
     property bool wrap: root.st.footer_wrap
     property bool centered: false
-    readonly property int text_px: root.st.footer_size > 0 ? root.st.footer_size : root.st.font_size - 4
-    readonly property int small_px: root.st.footer_size > 0 ? root.st.footer_size : root.st.font_size - 5
+    readonly property int text_px: root.st.footer_size > 0 ? root.st.footer_size : root.st.fs(-4)
+    readonly property int small_px: root.st.footer_size > 0 ? root.st.footer_size : root.st.fs(-5)
     readonly property bool arrows: root.st.footer_arrow !== ""
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text

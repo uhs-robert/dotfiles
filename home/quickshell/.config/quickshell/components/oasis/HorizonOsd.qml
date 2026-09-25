@@ -50,7 +50,7 @@ ColumnLayout {
                 text: root.label
                 color: Theme.fg_strong
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size + 1
+                font.pixelSize: Style.fs(1)
                 font.weight: Font.DemiBold
             }
 
@@ -62,7 +62,7 @@ ColumnLayout {
                 text: root.detail
                 color: Theme.fg_dim
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 3
+                font.pixelSize: Style.fs(-3)
             }
         }
 
@@ -143,7 +143,7 @@ ColumnLayout {
             text: "0"
             color: Theme.fg_muted
             font.family: Style.number_font
-            font.pixelSize: Style.font_size - 5
+            font.pixelSize: Style.fs(-5)
         }
 
         Text {

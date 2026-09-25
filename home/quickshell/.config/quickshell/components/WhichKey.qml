@@ -29,8 +29,8 @@ PanelWindow {
     readonly property bool has_footer: Style.show_footer && root.footer_hint !== ""
 
     readonly property int gap: Style.px(18)
-    readonly property int text_size: Style.whichkey_size > 0 ? Style.whichkey_size : Style.font_size - 2
-    readonly property int key_size: Style.whichkey_size > 0 ? Style.whichkey_size : Style.font_size - 5
+    readonly property int text_size: Style.whichkey_size > 0 ? Style.whichkey_size : Style.fs(-2)
+    readonly property int key_size: Style.whichkey_size > 0 ? Style.whichkey_size : Style.fs(-5)
     readonly property int row_height: Math.max(Style.px(22), root.text_size + Style.px(8))
     readonly property real screen_width: root.screen ? root.screen.width : 1920
     readonly property real screen_height: root.screen ? root.screen.height : 1080
@@ -307,7 +307,7 @@ PanelWindow {
                     text: Style.title_prefix + Style.title_text(root.title) + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
                     color: !root.tinted ? (Style.show_title ? Style.title_fg : Style.accent_color) : !Style.show_title || !root.filled_title ? root.header_color : Style.fade_fills ? Style.title_fg : Theme.bg_crust
                     font.family: Style.title_font_family
-                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
+                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.fs(-2)
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
                 }
@@ -334,7 +334,7 @@ PanelWindow {
                 text: Style.title_readout.replace("{code}", root.title.slice(0, 3))
                 color: Style.title_readout_fg.a > 0 ? Style.title_readout_fg : Style.text_muted
                 font.family: Style.font_family
-                font.pixelSize: Style.font_size - 5
+                font.pixelSize: Style.fs(-5)
                 font.letterSpacing: 1
             }
 

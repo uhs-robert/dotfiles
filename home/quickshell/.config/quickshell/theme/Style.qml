@@ -264,6 +264,7 @@ Singleton {
             footer_size: 0,
             whichkey_arrow: "",
             whichkey_size: 0,
+            type_scale: ({}),
             meter_gap: 2,
             bar_lualine: false
         };
@@ -513,6 +514,7 @@ Singleton {
                 footer_size: 0,
                 whichkey_arrow: "",
                 whichkey_size: 0,
+                type_scale: ({}),
                 meter_gap: 2,
                 bar_lualine: false
             },
@@ -1960,11 +1962,20 @@ Singleton {
         o.mono_font = o.mono_font || o.font_family;
         o.custom_frame = o.frame_octagon > 0 || o.frame_cut > 0 || o.slant_frame;
         o.inset_pad = o.frame_inset_width > 0 ? o.frame_border_width + o.frame_inset_gap + o.frame_inset_width : o.frame_pad;
+        o.fs = k => o.font_size + (o.type_scale && o.type_scale[k] !== undefined ? o.type_scale[k] : k);
         return o;
     }
 
     readonly property string font_family: root.active.font_family
     readonly property int font_size: root.active.font_size
+    // Maps a text role's offset from font_size to the style's own (e.g. {"-2": 0} lifts -2 text to full size); unlisted offsets pass through.
+    readonly property var type_scale: root.active.type_scale || ({})
+
+    // A text size as font_size plus an offset, through the style's type_scale.
+    function fs(k) {
+        const v = root.type_scale[k];
+        return root.font_size + (v !== undefined ? v : k);
+    }
     // Big readouts (weather temperature, OSD percentage); empty uses font_family.
     readonly property string number_font: root.active.number_font !== "" ? root.active.number_font : root.font_family
     readonly property color text_muted: root.active.text_muted

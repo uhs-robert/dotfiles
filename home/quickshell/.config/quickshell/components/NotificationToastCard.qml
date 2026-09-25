@@ -287,7 +287,7 @@ Rectangle {
         text: Style.row_cursor
         color: Style.caret_color
         font.family: Style.font_family
-        font.pixelSize: Style.font_size - 3
+        font.pixelSize: Style.fs(-3)
         font.bold: true
     }
 
@@ -414,7 +414,7 @@ Rectangle {
                     text: "×"
                     color: Style.text_dim
                     font.family: Style.font_family
-                    font.pixelSize: Style.font_size + 2
+                    font.pixelSize: Style.fs(2)
 
                     MouseArea {
                         anchors.fill: parent
