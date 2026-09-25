@@ -77,7 +77,7 @@ Item {
         x: root.centered ? Math.max(0, (root.width - childrenRect.width) / 2) : 0
         y: root.rule_gap
         width: root.wrap && !root.centered ? parent.width : 100000
-        spacing: root.st.footer_separator === "" ? 10 : 0
+        spacing: root.st.footer_separator === "" ? (root.arrows ? 10 : Math.round(root.text_px * 1.2)) : 0
 
         Repeater {
             model: root.groups
@@ -87,7 +87,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, group.modelData.key, group.modelData.desc).length > 0
-                spacing: 4
+                spacing: root.arrows ? 4 : Math.round(root.text_px * 0.5)
 
                 Loader {
                     active: group.pad
