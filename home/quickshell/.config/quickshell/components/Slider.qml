@@ -15,11 +15,11 @@ Item {
     implicitHeight: Style.px(14)
 
     function set_from_x(x) {
-        const span = root.st.segmented_levels && root.st.slider_readout && !root.glow_bar ? root.width - readout.width - 6 : track.width;
+        const span = root.st.segmented_levels && !root.glow_bar ? meter.art_width : track.width;
         root.moved(Math.max(0, Math.min(1, x / Math.max(1, span))));
     }
 
-    readonly property bool glow_bar: root.st.controller === "ps2"
+    readonly property bool glow_bar: root.st.console_views === "ps2"
 
     Loader {
         active: root.glow_bar
@@ -50,6 +50,7 @@ Item {
     }
 
     Meter {
+        id: meter
         visible: root.st.segmented_levels && !root.glow_bar
         anchors.left: parent.left
         anchors.right: parent.right

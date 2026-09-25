@@ -25,7 +25,7 @@ Popup {
     readonly property var player: MediaState.active
     readonly property var players: MediaState.players
     readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
-    readonly property bool ps2: Style.controller === "ps2"
+    readonly property bool ps2: Style.console_views === "ps2"
 
     // The PS1 CD Player transport under the progress bar.
     readonly property bool cd: root.st.console_views === "ps1"
@@ -249,7 +249,7 @@ Popup {
                     }
 
                     Text {
-                        visible: Style.console_skin !== "nes"
+                        visible: Style.console_views !== "nes"
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                         elide: Text.ElideRight
@@ -261,7 +261,7 @@ Popup {
                     }
 
                     Loader {
-                        active: Style.console_skin === "nes"
+                        active: Style.console_views === "nes"
                         visible: active
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -314,7 +314,7 @@ Popup {
                         Layout.fillWidth: true
                         Layout.preferredHeight: progress_item.sound_test ? 30 : 16
 
-                        readonly property bool sound_test: Style.console === "snes"
+                        readonly property bool sound_test: Style.console_views === "snes"
                         readonly property real track_length: MediaState.length_of(root.player)
                         readonly property bool has_length: track_length > 0
                         readonly property real ratio: progress_item.has_length
@@ -339,34 +339,40 @@ Popup {
                             visible: progress_item.has_length && !Style.segmented_levels && !progress_item.sound_test
                         }
 
-                        Loader {
-                            active: root.ps2
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            visible: progress_item.has_length
-                            sourceComponent: Ps2.SphereTrack {
-                                sphere: Style.px(8)
-                                value: progress_item.ratio
-                            }
-                        }
-
                         Meter {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            visible: progress_item.has_length && Style.segmented_levels && !progress_item.sound_test && !root.ps2
+                            visible: progress_item.has_length && Style.segmented_levels && !progress_art.active
                             segment_count: 40
-                            implicitHeight: Style.console_skin === "nes" ? 16 : Style.px(8)
+                            implicitHeight: Style.console_views === "nes" ? 16 : Style.px(8)
                             value: progress_item.ratio
                         }
 
+                        // Console progress art; its track_x/track_width, when set, bound the seek area.
                         Loader {
-                            anchors.fill: parent
-                            active: progress_item.sound_test
-                            sourceComponent: Snes.SnesSoundTest {
+                            id: progress_art
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: progress_item.sound_test ? parent.height : implicitHeight
+                            visible: progress_item.has_length || progress_item.sound_test
+                            sourceComponent: ({ snes: snes_progress, ps2: ps2_progress })[Style.console_views] || null
+                        }
+
+                        Component {
+                            id: snes_progress
+                            Snes.SnesSoundTest {
                                 ratio: progress_item.ratio
                                 track: root.player && root.player.metadata ? String(root.player.metadata["xesam:trackNumber"] || "") : ""
+                            }
+                        }
+
+                        Component {
+                            id: ps2_progress
+                            Ps2.SphereTrack {
+                                sphere: Style.px(8)
+                                value: progress_item.ratio
                             }
                         }
 
@@ -390,7 +396,10 @@ Popup {
 
                         MouseArea {
                             id: seek_area
-                            anchors.fill: parent
+                            readonly property var art: progress_art.item
+                            x: art && art.track_x !== undefined ? art.track_x : 0
+                            width: art && art.track_width !== undefined ? art.track_width : parent.width
+                            height: parent.height
                             hoverEnabled: true
                             enabled: !!root.player && root.player.canSeek && root.player.positionSupported
                             onPressed: mouse => root.seek_ratio(mouse.x / width)

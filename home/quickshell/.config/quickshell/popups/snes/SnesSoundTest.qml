@@ -11,6 +11,8 @@ Item {
     property int column_count: 32
     readonly property real slant: 0.35
     readonly property int gap: 2
+    readonly property real track_x: columns.x
+    readonly property real track_width: columns.width
 
     implicitHeight: 30
 

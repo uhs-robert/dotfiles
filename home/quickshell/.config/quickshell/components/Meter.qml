@@ -34,6 +34,8 @@ Item {
         return "";
     }
     readonly property string art: root.st.meter_art[root.art_key] || ""
+    // The width the art actually draws across; Slider maps clicks onto it.
+    readonly property real art_width: art_loader.item && art_loader.item.art_width !== undefined ? art_loader.item.art_width : root.width
 
     implicitWidth: segment_count * 3 + gap * (segment_count - 1)
     implicitHeight: root.st.meter_height > 0 ? root.st.meter_height : Style.px(10)
@@ -93,6 +95,7 @@ Item {
     }
 
     Loader {
+        id: art_loader
         width: root.width
         height: root.implicitHeight
         source: root.art
