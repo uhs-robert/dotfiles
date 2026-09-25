@@ -17,6 +17,8 @@ Item {
     property bool show_readout: true
     // A solid gradient fill instead of the wave, for small capsules like the OSD's.
     property bool solid: false
+    // A static glow rising toward the level instead of the wave, for levels without audio.
+    property bool glow: false
     // Live wave from this node; the monitor and the wave only run while peaks_on.
     property var node: null
     property bool peaks_on: false
@@ -96,18 +98,35 @@ Item {
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0; color: Qt.alpha(Theme.theme_primary, 0.04) }
-                GradientStop { position: 1; color: Qt.alpha(Theme.theme_primary, 0.14) }
+                GradientStop { position: root.glow ? 0.7 : 1; color: Qt.alpha(Theme.theme_primary, root.glow ? 0.2 : 0.14) }
+                GradientStop { position: 1; color: root.glow ? Qt.alpha(Theme.theme_primary_light, 0.42) : Qt.alpha(Theme.theme_primary, 0.14) }
+            }
+        }
+
+        // A soft light band along the middle, brightest at the level.
+        Rectangle {
+            visible: root.glow
+            x: -wave_region.x
+            y: root.height * 0.3
+            width: root.fill_width
+            height: root.height * 0.4
+            radius: height / 2
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: Qt.alpha(Theme.theme_primary_light, 0) }
+                GradientStop { position: 1; color: Qt.alpha(Theme.theme_primary_light, 0.28) }
             }
         }
 
         Shared.Waveform {
+            visible: !root.glow
             y: root.height * 0.12
             width: parent.width
             height: root.height * 0.76
             sample: n => root.sample(n)
             gain: 1
             tint: Theme.theme_primary_light
-            running: root.peaks_on && !root.solid
+            running: root.peaks_on && !root.solid && !root.glow
         }
 
         Rectangle {

@@ -92,12 +92,12 @@ ColumnLayout {
     CapsuleSlider {
         visible: Style.level_layout === "capsule"
         Layout.fillWidth: true
-        implicitHeight: root.kind === "volume" ? Style.px(26) : Style.px(12)
+        implicitHeight: Style.px(26)
         value: root.level
         muted: root.muted
         interactive: false
         show_readout: false
-        solid: root.kind !== "volume"
+        glow: root.kind !== "volume"
         node: root.node
         peaks_on: root.peaks_on && root.kind === "volume"
     }

@@ -6,6 +6,7 @@ import Quickshell.Services.UPower
 import "../components"
 import "../theme"
 import "../services"
+import "../components/modern" as Modern
 import "../components/nes" as Nes
 import "snes" as Snes
 import "../components/ps1" as Ps1
@@ -276,8 +277,55 @@ Popup {
                 font.pixelSize: root.st.font_size - 1
             }
 
+            Loader {
+                active: root.st.level_layout === "capsule"
+                visible: active
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                sourceComponent: Modern.CapsuleSlider {
+                    glow: true
+                    glyph: "󰃠"
+                    label: "Brightness"
+                    value: Backlight.percent / 100
+                    selected: !!root.nav_rows[root.selected] && root.nav_rows[root.selected].kind === "brightness"
+                    onMoved: v => Backlight.set_percent(Math.max(1, Math.round(v * 100)))
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                        onWheel: event => {
+                            root.wheel_adjust("brightness", event);
+                            event.accepted = true;
+                        }
+                    }
+                }
+            }
+
+            Loader {
+                active: root.st.level_layout === "capsule" && Backlight.has_kbd
+                visible: active
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                sourceComponent: Modern.CapsuleSlider {
+                    glow: true
+                    glyph: "󰌌"
+                    label: "Keyboard"
+                    value: Backlight.kbd_percent / 100
+                    selected: !!root.nav_rows[root.selected] && root.nav_rows[root.selected].kind === "kbd"
+                    onMoved: v => Backlight.kbd_set_percent(Math.round(v * 100))
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                        onWheel: event => {
+                            root.wheel_adjust("kbd", event);
+                            event.accepted = true;
+                        }
+                    }
+                }
+            }
+
             MenuRow {
                 id: brightness_row
+                visible: root.st.level_layout !== "capsule"
                 Layout.fillWidth: true
                 Layout.topMargin: 6
                 height: Style.px(22)
@@ -323,7 +371,7 @@ Popup {
 
             MenuRow {
                 id: kbd_row
-                visible: Backlight.has_kbd
+                visible: Backlight.has_kbd && root.st.level_layout !== "capsule"
                 Layout.fillWidth: true
                 height: Style.px(22)
                 selected: !!root.nav_rows[root.selected] && root.nav_rows[root.selected].kind === "kbd"
