@@ -11,6 +11,7 @@ import "../../components/ff7" as Ff7
 import "../../components/gameboy" as Gameboy
 import "../../components/goldeneye" as Goldeneye
 import "../../components/metroid" as Metroid
+import "../../components/modern" as Modern
 import "../../components/nes" as Nes
 import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
@@ -160,14 +161,18 @@ Item {
                 readonly property bool ps2: Style.console_views === "ps2"
                 readonly property var toplevels: modelData.toplevels.values
                 readonly property int cursor_gap: root.party && modelData.focused ? root.party_gap : 0
+                // Plain pills: the style's own art is drawn by none of the branches above.
+                readonly property bool plain: !root.materia && !root.doors && !pill.qblock && !pill.ps2 && !root.slots && !pill.map && !root.party && !pill.diamond
+                readonly property bool dot: pill.plain && pill.is_empty && Style.bar_workspace_dot.a > 0
 
-                height: root.pill_height
+                height: pill.dot ? 7 : root.pill_height
+                y: (root.pill_height - height) / 2
                 width: root.materia ? (is_empty ? root.slot_size : icons.implicitWidth) : root.doors ? (modelData.active && !is_empty ? icons.implicitWidth + height - 4 : height) : root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? root.tile_face * 2 + 4 : icons.implicitWidth + root.tile_face + 6) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
                 radius: pill.map || root.party || root.slots ? 0 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
-                color: root.materia || root.doors || pill.qblock || pill.ps2 || root.slots || pill.map || root.party ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
+                color: root.materia || root.doors || pill.qblock || pill.ps2 || root.slots || pill.map || root.party ? "transparent" : pill.dot ? Style.bar_workspace_dot : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
                 border.width: !root.materia && !root.slots && !pill.map && !root.party && Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
                 border.color: Style.bar_workspace_ring
 
@@ -292,6 +297,21 @@ Item {
                             opacity: pill.modelData.focused || pill.modelData.active ? 1 : 0.7
                         }
                     }
+                }
+
+                Rectangle {
+                    visible: pill.plain && pill.modelData.focused && Style.bar_workspace_shade.a > 0
+                    anchors.fill: parent
+                    radius: pill.radius
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: Style.bar_workspace_shade }
+                        GradientStop { position: 1; color: Style.bar_workspace_focused }
+                    }
+                }
+
+                Modern.Sheen {
+                    color_top: pill.plain && !pill.dot ? Style.sheen : "transparent"
+                    corner: pill.radius
                 }
 
                 MateriaOrb {

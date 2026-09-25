@@ -12,8 +12,23 @@ Item {
     property Item island: null
     property color island_color: "transparent"
 
-    implicitWidth: icon.implicitSize
-    implicitHeight: icon.implicitSize
+    // Styles with a start well seat a smaller logo in a recessed circle.
+    readonly property bool well: Style.bar_start_well.a > 0
+    readonly property int well_size: root.compact ? 22 : 26
+
+    implicitWidth: root.well ? root.well_size : icon.implicitSize
+    implicitHeight: root.well ? root.well_size : icon.implicitSize
+
+    Rectangle {
+        visible: root.well
+        anchors.centerIn: parent
+        width: root.well_size
+        height: root.well_size
+        radius: width / 2
+        color: Style.bar_start_well
+        border.width: 1
+        border.color: Qt.alpha(Theme.bg_shadow, 0.3)
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -30,7 +45,7 @@ Item {
     // Load the SVG file directly: the icon provider returns a small raster that blurs when scaled.
     Image {
         id: icon
-        readonly property int implicitSize: root.compact ? 26 : 30
+        readonly property int implicitSize: root.well ? root.well_size - 8 : root.compact ? 26 : 30
         readonly property real dpr: QsWindow.window ? QsWindow.window.devicePixelRatio : 1
 
         anchors.centerIn: parent

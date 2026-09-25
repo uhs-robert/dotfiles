@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
+import "../components/modern" as Modern
 import "../theme"
 
 Item {
@@ -23,7 +24,11 @@ Item {
     property color inset_color: "transparent"
     // Visor glass: curved bottom corners instead of slants, glass gradient into bg_color, border along sides and bottom.
     property bool visor: false
-    readonly property bool shaded: root.shade_color.a > 0 || root.visor
+    // A floating capsule this many px inside the island's box, in place of the slants; sheen_color lights its top edge.
+    property real capsule_inset: 0
+    property color sheen_color: "transparent"
+    readonly property bool capsule: root.capsule_inset > 0
+    readonly property bool shaded: root.shade_color.a > 0 || root.visor || root.capsule
     default property alias content: layout.children
 
     readonly property alias body_item: body
@@ -34,9 +39,30 @@ Item {
     height: 30
     width: body.width + (cap_left ? cap_width : 0) + (cap_right ? cap_width : 0)
 
+    Rectangle {
+        visible: root.capsule
+        x: root.capsule_inset
+        y: root.capsule_inset
+        width: root.width - root.capsule_inset * 2
+        height: root.height - root.capsule_inset * 2
+        radius: height / 2
+        border.width: root.border_width
+        border.color: root.border_color
+        gradient: Gradient {
+            GradientStop { position: 0; color: root.shade_color.a > 0 ? root.shade_color : root.bg_color }
+            GradientStop { position: 1; color: root.bg_color }
+        }
+
+        Modern.Sheen {
+            color_top: root.sheen_color
+            corner: parent.radius
+            edge: root.border_width
+        }
+    }
+
     // The popup style's shade and dither, behind the modules and clipped to the slants.
     Shape {
-        visible: root.shaded && !root.visor
+        visible: root.shaded && !root.visor && !root.capsule
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -146,7 +172,7 @@ Item {
 
     // Caps overlap the body by 1px so fractional scaling (1.6 on the laptop) leaves no seam.
     Shape {
-        visible: root.cap_left
+        visible: root.cap_left && !root.capsule
         width: root.cap_width + 1
         height: root.height
         preferredRendererType: Shape.CurveRenderer
@@ -164,7 +190,7 @@ Item {
     }
 
     Shape {
-        visible: root.cap_right
+        visible: root.cap_right && !root.capsule
         x: root.width - root.cap_width - 1
         width: root.cap_width + 1
         height: root.height
@@ -205,7 +231,7 @@ Item {
 
     // Traces the slants and bottom edge; the sides on the screen edge stay open.
     Shape {
-        visible: root.border_width > 0 && !root.visor
+        visible: root.border_width > 0 && !root.visor && !root.capsule
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -231,7 +257,7 @@ Item {
     }
 
     Shape {
-        visible: root.inset_width > 0 && root.inset_color.a > 0
+        visible: root.inset_width > 0 && root.inset_color.a > 0 && !root.capsule
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
