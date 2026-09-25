@@ -231,9 +231,7 @@ Singleton {
             dune: "transparent",
             wave_rules: false,
             selection_edge: "transparent",
-            tab_track: "transparent",
-            tab_mark: "transparent",
-            rim: "transparent",
+            chip_tabs: false,
             title_case: false,
             title_size: 0,
             footer_key_round: false,
@@ -472,9 +470,7 @@ Singleton {
                 dune: "transparent",
                 wave_rules: false,
                 selection_edge: "transparent",
-                tab_track: "transparent",
-                tab_mark: "transparent",
-                rim: "transparent",
+                chip_tabs: false,
                 title_case: false,
                 title_size: 0,
                 footer_key_round: false,
@@ -1621,7 +1617,7 @@ Singleton {
                     accent_height: 1,
                     accent_full_width: false,
                     dune: Qt.alpha(sand, 0.07),
-                    rim: Qt.alpha(Theme.theme_primary_light, 0.34),
+                    sheen: Qt.alpha(Theme.theme_primary_light, 0.34),
                     selection_bg: Qt.alpha(sand, 0.16),
                     selection_outline: "transparent",
                     selection_edge: sand,
@@ -1629,9 +1625,11 @@ Singleton {
                     caret_color: sand,
                     caret_blink: false,
                     row_cursor: "",
-                    tab_track: well,
-                    tab_mark: sand,
-                    tab_active_bg: Theme.bg_surface,
+                    tab_well: well,
+                    chip_tabs: true,
+                    tab_marker: sand,
+                    tab_active_shade: Theme.bg_surface,
+                    tab_active_bg: Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.bg_surface, 0.55)),
                     tab_active_fg: Theme.fg_strong,
                     tab_fg: Theme.fg_dim,
                     key_bg: Qt.alpha(sand, 0.1),
@@ -2173,11 +2171,8 @@ Singleton {
     readonly property bool wave_rules: root.active.wave_rules
     // A lit edge down the left of the selected row.
     readonly property color selection_edge: root.active.selection_edge
-    // Tab rows sit in a recessed track of this color, the active tab raised with a tab_mark on its lower edge; chips become tabs.
-    readonly property color tab_track: root.active.tab_track
-    readonly property color tab_mark: root.active.tab_mark
-    // A 1px highlight along the top of raised tabs and cards.
-    readonly property color rim: root.active.rim
+    // Sub-view chips drawn as tabs that fill their row.
+    readonly property bool chip_tabs: root.active.chip_tabs
     // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
     // Footer keycaps with rounded corners and a key_border outline.
@@ -2188,12 +2183,12 @@ Singleton {
     // Popups float this many px below the bar with every corner rounded; frame_shadow fills frame_drop's room with a soft shadow.
     readonly property int frame_float: root.active.frame_float
     readonly property color frame_shadow: root.active.frame_shadow
-    // A 1px highlight along the top edge of raised surfaces: frames, islands, the active tab, the selected row, keycaps.
+    // A 1px highlight (Sheen) along the top of raised surfaces: floating frames, capsule islands, shaded tabs and rows, keycaps, cards.
     readonly property color sheen: root.active.sheen
-    // Top colors of vertical gradients into selection_bg (selected rows) and tab_active_bg (active tabs and chips).
+    // Top colors of vertical gradients into selection_bg (selected rows) and tab_active_bg (raised active tabs and chips).
     readonly property color selection_shade: root.active.selection_shade
     readonly property color tab_active_shade: root.active.tab_active_shade
-    // Tab and chip rows sit in a recessed well of this color.
+    // Tab and chip rows sit in a recessed well of this color; tab_marker then draws as a dash under the active label.
     readonly property color tab_well: root.active.tab_well
     // Tab jump keys as bare digits instead of badges.
     readonly property bool tab_key_plain: root.active.tab_key_plain
@@ -2205,7 +2200,7 @@ Singleton {
     readonly property bool border_title: root.active.border_title
     // Rows get a line-number gutter showing their key; the selected row's number takes text_accent.
     readonly property bool row_gutter: root.active.row_gutter
-    // A 2px bar down the active tab's left edge.
+    // The active tab's marker: a 2px bar down its left edge, or a dash under its label in a tab_well.
     readonly property color tab_marker: root.active.tab_marker
     // Sections as open folds: a fold marker, the label and a dotted fill.
     readonly property bool section_fold: root.active.section_fold

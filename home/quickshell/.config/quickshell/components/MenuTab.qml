@@ -2,7 +2,6 @@
 import QtQuick
 import QtQuick.Layouts
 import "../theme"
-import "modern" as Modern
 
 // A tab or sub-view chip; tabs fill their row, chips size to the label.
 Rectangle {
@@ -23,12 +22,6 @@ Rectangle {
     readonly property bool bracketed: root.active && !root.is_chip && root.st.tab_brackets.a > 0
     readonly property real bracket_space: root.bracketed ? open_bracket.implicitWidth * 2 + 4 : 0
     readonly property real hand_space: root.active && root.st.hand_cursor ? 20 : 0
-    // Tabs in a style's tab_track; the row's end tabs round the track's ends, inner edges meet their neighbours halfway across the gap.
-    readonly property bool tracked: !root.is_chip && root.st.tab_track.a > 0
-    property bool track_left: true
-    property bool track_right: true
-    property real track_gap: 2
-
     signal clicked()
 
     // Filling tabs share their row evenly, so they must not ask for the label's width.
@@ -41,49 +34,6 @@ Rectangle {
     readonly property color fill: !root.active ? (root.is_chip ? root.st.chip_bg : root.st.tab_bg) : root.is_chip ? root.st.chip_active_bg : root.st.tab_active_bg
     readonly property real cut: root.is_chip ? root.st.key_cut : root.st.tab_cut
     color: root.cut > 0 ? "transparent" : root.fill
-
-    Rectangle {
-        visible: root.tracked
-        z: -1
-        readonly property real pad: 2
-        x: -(root.track_left ? pad : root.track_gap)
-        y: -pad
-        width: root.width - x + (root.track_right ? pad : root.track_gap)
-        height: root.height + pad * 2
-        topLeftRadius: root.track_left ? root.radius + pad : 0
-        bottomLeftRadius: root.track_left ? root.radius + pad : 0
-        topRightRadius: root.track_right ? root.radius + pad : 0
-        bottomRightRadius: root.track_right ? root.radius + pad : 0
-        color: root.st.tab_track
-    }
-
-    Rectangle {
-        visible: root.tracked && root.active
-        anchors.fill: parent
-        radius: root.radius
-        gradient: Gradient {
-            GradientStop { position: 0; color: root.st.tab_active_bg }
-            GradientStop { position: 1; color: Qt.tint(Theme.bg_mantle, Qt.alpha(root.st.tab_active_bg, 0.55)) }
-        }
-
-        Rectangle {
-            visible: root.st.rim.a > 0
-            x: parent.radius
-            width: parent.width - x * 2
-            height: 1
-            color: root.st.rim
-        }
-
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 2
-            width: 16
-            height: 2
-            radius: 1
-            color: root.st.tab_mark
-        }
-    }
 
     CutBox {
         visible: root.cut > 0
@@ -105,7 +55,7 @@ Rectangle {
             GradientStop { position: 1; color: root.fill }
         }
 
-        Modern.Sheen {
+        Sheen {
             color_top: root.st.sheen
             corner: parent.radius
         }
@@ -184,10 +134,16 @@ Rectangle {
         color: root.st.tab_underline
     }
 
+    // A dash under the label in a tab well, else a bar down the left edge.
     Rectangle {
+        readonly property bool dash: root.st.tab_well.a > 0
         visible: root.active && !root.is_chip && root.st.tab_marker.a > 0
-        width: 2
-        height: parent.height
+        anchors.horizontalCenter: dash ? parent.horizontalCenter : undefined
+        anchors.bottom: dash ? parent.bottom : undefined
+        anchors.bottomMargin: 2
+        width: dash ? 16 : 2
+        height: dash ? 2 : parent.height
+        radius: dash ? 1 : 0
         color: root.st.tab_marker
     }
 

@@ -10,7 +10,6 @@ import "../../components/ff7" as Ff7
 import "../../components/gameboy" as Gameboy
 import "../../components/goldeneye" as Goldeneye
 import "../../components/metroid" as Metroid
-import "../../components/modern" as Modern
 import "../../components/neovim" as Neovim
 import "../../components/nes" as Nes
 import "../../components/oasis" as Oasis
@@ -338,7 +337,7 @@ Item {
                     }
                 }
 
-                Modern.Sheen {
+                Sheen {
                     color_top: pill.plain && !pill.dot ? Style.sheen : "transparent"
                     corner: pill.radius
                 }

@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../../theme"
+import ".."
 import "../../services"
 
 // Current conditions as a large temperature beside the condition, then the first alert as a tinted card.

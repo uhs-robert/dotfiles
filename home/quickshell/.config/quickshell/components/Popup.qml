@@ -6,7 +6,6 @@ import Quickshell
 import Quickshell.Wayland
 import "../theme"
 import "../services"
-import "modern" as Modern
 import "Search.js" as Search
 import "oasis" as Oasis
 import "neovim" as Neovim
@@ -494,7 +493,7 @@ PanelWindow {
                 chamfer: root.st.frame_chamfer
             }
 
-            Modern.Sheen {
+            Sheen {
                 color_top: root.floating ? root.st.sheen : "transparent"
                 corner: root.top_radius
                 edge: root.st.frame_border_width

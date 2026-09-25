@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/components/oasis/OasisCard.qml
 import QtQuick
 import "../../theme"
+import ".."
 
 // A raised night-blue card with a light top edge; sand marks the selected one, a red edge a critical one.
 Rectangle {
@@ -28,13 +29,10 @@ Rectangle {
         color: Qt.alpha(root.sand, 0.07)
     }
 
-    Rectangle {
-        visible: Style.rim.a > 0
-        x: root.radius
-        y: root.border.width
-        width: Math.max(0, root.width - root.radius * 2)
-        height: 1
-        color: Style.rim
+    Sheen {
+        color_top: Style.sheen
+        corner: root.radius
+        edge: root.border.width
     }
 
     Rectangle {

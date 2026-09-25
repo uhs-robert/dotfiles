@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/components/modern/CardSurface.qml
 import QtQuick
 import "../../theme"
+import ".."
 
 // A card on a layered popup: a faint plate, raised with a highlight and the tab gradient when selected.
 Rectangle {

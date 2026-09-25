@@ -2,6 +2,7 @@
 import QtQuick
 import Quickshell
 import "../../theme"
+import ".."
 
 // A rounded square in the selection gradient holding a glyph or an icon.
 Rectangle {

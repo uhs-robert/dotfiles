@@ -13,8 +13,7 @@ ColumnLayout {
     property var labels: []
     property int current: 0
     property bool chips: false
-    // Styles with a tab track draw sub-view chips as tabs too.
-    readonly property bool pills: root.chips && root.st.tab_track.a === 0
+    readonly property bool pills: root.chips && !root.st.chip_tabs
     property int font_size: root.chips ? root.st.font_size - 3 : root.st.font_size - 2
     property real tab_height: Style.px(24)
     // Other label sets this row switches between; the tallest reserves the height so switching never resizes.
@@ -95,7 +94,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignHCenter
             implicitWidth: tab_row.implicitWidth + root.well_pad * 2
             implicitHeight: root.row_height
-            radius: Style.radius(root.chips ? 5 : 6)
+            radius: Style.radius(4) + root.well_pad
             color: root.st.tab_well
 
             // The inner shadow along the well's top edge.
@@ -123,15 +122,11 @@ ColumnLayout {
                     MenuTab {
                         id: tab
                         required property int modelData
-                        required property int index
 
                         Layout.fillWidth: !root.pills
                         Layout.preferredWidth: root.pills ? -1 : root.label_needs[tab.modelData] || 0
                         implicitHeight: root.tab_height
                         base_radius: root.pills && root.well_pad <= 0 ? 12 : 4
-                        track_left: tab.index === 0
-                        track_right: tab.index === tab_row.modelData.length - 1
-                        track_gap: root.spacing / 2
                         font_size: root.font_size
                         label: root.labels[tab.modelData] || ""
                         active: tab.modelData === root.current

@@ -159,28 +159,12 @@ Popup {
             spacing: 6
 
             // --- Tab row ---
-            RowLayout {
+            TabRows {
                 Layout.fillWidth: true
-                spacing: 4
-
-                Repeater {
-                    model: root.tabs
-
-                    MenuTab {
-                        id: tab_chip
-                        required property string modelData
-                        required property int index
-
-                        Layout.fillWidth: true
-                        implicitHeight: Style.px(26)
-                        label: tab_chip.modelData
-                        active: tab_chip.index === root.current_tab
-                        key: tab_chip.index < 9 ? String(tab_chip.index + 1) : ""
-                        track_left: tab_chip.index === 0
-                        track_right: tab_chip.index === root.tabs.length - 1
-                        onClicked: root.set_tab(tab_chip.index)
-                    }
-                }
+                labels: root.tabs
+                current: root.current_tab
+                tab_height: Style.px(26)
+                onPicked: index => root.set_tab(index)
             }
 
             // --- Content: fixed height so the popup never resizes between tabs ---

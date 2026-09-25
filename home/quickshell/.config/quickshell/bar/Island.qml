@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
-import "../components/modern" as Modern
 import "../theme"
 
 Item {
@@ -61,7 +60,7 @@ Item {
             GradientStop { position: 1; color: root.bg_color }
         }
 
-        Modern.Sheen {
+        Sheen {
             color_top: root.sheen_color
             corner: parent.radius
             edge: root.border_width

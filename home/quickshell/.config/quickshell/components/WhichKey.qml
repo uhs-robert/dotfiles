@@ -10,7 +10,6 @@ import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
 import "oasis" as Oasis
-import "modern" as Modern
 import "neovim" as Neovim
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
@@ -237,8 +236,8 @@ PanelWindow {
             }
         }
 
-        Modern.Sheen {
-            color_top: Style.sheen
+        Sheen {
+            color_top: Style.frame_float > 0 ? Style.sheen : "transparent"
             corner: frame.radius
             edge: Style.frame_border_width
         }

@@ -1,7 +1,6 @@
 // home/quickshell/.config/quickshell/components/MenuRow.qml
 import QtQuick
 import "../theme"
-import "modern" as Modern
 
 Rectangle {
     id: root
@@ -59,7 +58,7 @@ Rectangle {
             GradientStop { position: 1; color: root.st.selection_bg }
         }
 
-        Modern.Sheen {
+        Sheen {
             color_top: root.st.sheen
             corner: parent.radius
         }

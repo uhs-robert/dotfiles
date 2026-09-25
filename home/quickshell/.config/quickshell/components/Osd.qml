@@ -336,8 +336,8 @@ PanelWindow {
             }
         }
 
-        Modern.Sheen {
-            color_top: Style.sheen
+        Sheen {
+            color_top: Style.frame_float > 0 ? Style.sheen : "transparent"
             corner: frame.radius
             edge: Style.frame_border_width
         }

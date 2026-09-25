@@ -1,7 +1,6 @@
 // home/quickshell/.config/quickshell/components/KeyBadge.qml
 import QtQuick
 import "../theme"
-import "modern" as Modern
 import "KeyHints.js" as KeyHints
 
 Rectangle {
@@ -31,7 +30,7 @@ Rectangle {
     border.width: root.cut || root.orb || root.pad || root.plain ? 0 : root.st.pixel_border.a > 0 ? 2 : 1
     border.color: root.tinted ? root.st.tab_active_fg : root.st.key_border
 
-    Modern.Sheen {
+    Sheen {
         color_top: !root.plain && !root.pad && root.st.key_bg.a > 0 ? root.st.sheen : "transparent"
         corner: root.radius
         edge: 1
