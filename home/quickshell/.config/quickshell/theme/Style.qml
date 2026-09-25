@@ -213,7 +213,8 @@ Singleton {
             window_gradient: [],
             materia: ({}),
             hand_cursor: false,
-            meter_solid: false
+            meter_solid: false,
+            controller: ""
         };
         return {
             "default": {
@@ -416,7 +417,8 @@ Singleton {
                 window_gradient: [],
                 materia: ({}),
                 hand_cursor: false,
-                meter_solid: false
+                meter_solid: false,
+                controller: ""
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -867,7 +869,15 @@ Singleton {
                 bar_border_color: "transparent",
                 bar_rounded: true,
                 bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.12),
-                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.2)
+                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.2),
+                frame_shade: Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.theme_primary, 0.14)),
+                shade_vertical: true,
+                bar_inset_gap: 2,
+                bar_inset_width: 1,
+                bar_inset_color: Qt.alpha(Theme.theme_primary_light, 0.22),
+                card_layout: "dialog",
+                osd_layout: "glow",
+                controller: "ps2"
             }),
             // TIE Fighter cockpit: large popups in the octagonal viewport, `small` ones the targeting computer.
             "tie": (() => {
@@ -1707,7 +1717,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel" or "pixel".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud" or "glow", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel" or "dialog".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1738,6 +1748,8 @@ Singleton {
     readonly property bool hand_cursor: root.active.hand_cursor
     // Meters as one continuous gauge (AtbBar) instead of segments.
     readonly property bool meter_solid: root.active.meter_solid
+    // The console whose controller buttons key badges and footers show, and whose module views load; "" for none.
+    readonly property string controller: root.active.controller
 
     property bool cava_line: true
     readonly property var bar: root.active

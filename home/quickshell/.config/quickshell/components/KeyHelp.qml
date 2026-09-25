@@ -36,7 +36,13 @@ Item {
         const h = key_metrics.height + 2;
         let w = 0;
         for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)));
-        return Math.min(list.width * 0.45, Math.max(h, w + 8));
+        return Math.min(list.width * (root.pad_width > 0 ? 0.6 : 0.45), Math.max(h, w + 8) + root.pad_width);
+    }
+    // Controller buttons drawn before the keys they stand for.
+    readonly property real pad_width: {
+        let w = 0;
+        for (const c of list.children) if (c.pad_width) w = Math.max(w, c.pad_width);
+        return w;
     }
     readonly property real step: desc_metrics.height * 2
     readonly property real max_y: Math.max(0, flick.contentHeight - flick.height)
@@ -98,13 +104,25 @@ Item {
         Item {
             id: help_row
             required property var modelData
+            readonly property real pad_width: pad_loader.active ? pad_loader.width + 5 : 0
             width: list.width
-            height: Math.max(badge_clip.height, desc_text.implicitHeight)
+            height: Math.max(badge_clip.height, desc_text.implicitHeight, pad_loader.height)
+
+            Loader {
+                id: pad_loader
+                visible: active
+                active: KeyHints.controller_parts(help_row.modelData.key, root.st.controller).length > 0
+                x: root.pad_width - help_row.pad_width
+                y: Math.max(0, (desc_metrics.height - height) / 2)
+                source: active ? Qt.resolvedUrl(root.st.controller + "/ControllerKeys.qml") : ""
+                onLoaded: item.key = Qt.binding(() => help_row.modelData.key)
+            }
 
             Item {
                 id: badge_clip
+                x: root.pad_width
                 y: Math.max(0, (desc_metrics.height - height) / 2)
-                width: root.key_column
+                width: root.key_column - x
                 height: badge.height
                 clip: badge.width > width
 

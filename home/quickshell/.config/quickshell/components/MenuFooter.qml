@@ -74,9 +74,20 @@ Item {
                 required property int index
                 spacing: 4
 
+                Loader {
+                    id: pad_loader
+                    readonly property string key: parent.modelData.key
+                    visible: active
+                    active: KeyHints.controller_parts(pad_loader.key, root.st.controller).length > 0
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: active ? Qt.resolvedUrl(root.st.controller + "/ControllerKeys.qml") : ""
+                    onLoaded: item.key = Qt.binding(() => pad_loader.key)
+                }
+
                 Text {
                     id: key_text
                     readonly property bool capped: root.st.footer_key_bg.a > 0
+                    visible: !pad_loader.active
                     height: desc_text.implicitHeight
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: key_text.capped ? 4 : 0
@@ -98,6 +109,7 @@ Item {
 
                 Text {
                     id: desc_text
+                    anchors.verticalCenter: parent.verticalCenter
                     text: parent.modelData.desc + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
                     color: root.st.footer_fg
                     font.family: root.st.font_family
