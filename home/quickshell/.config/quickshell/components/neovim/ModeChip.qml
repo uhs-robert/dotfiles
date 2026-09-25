@@ -11,8 +11,7 @@ Item {
 
     property color next_bg: Style.bar_side_bg
     property bool hovered: false
-    readonly property string kind: Modes.kind(SubmapState.submap_name)
-    readonly property color mode_color: root.kind === "normal" ? Theme.theme_primary : root.kind === "insert" ? Theme.theme_secondary : root.kind === "visual" ? Theme.magenta : root.kind === "replace" ? Theme.theme_label : SubmapState.submap_color
+    readonly property color mode_color: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
     readonly property color fill: root.hovered ? Qt.tint(root.mode_color, Qt.alpha(Theme.fg_strong, 0.15)) : root.mode_color
     readonly property real arrow: Math.round(root.height * 0.4)
 

@@ -18,7 +18,7 @@ Item {
     property int bar_height: 30
 
     readonly property int glyph: root.compact ? 14 : 16
-    readonly property color accent: Modes.kind(SubmapState.submap_name) === "insert" ? Theme.theme_secondary : Theme.theme_primary
+    readonly property color accent: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
 
     implicitWidth: row.implicitWidth + 8
     implicitHeight: root.bar_height

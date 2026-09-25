@@ -14,3 +14,8 @@ function kind(name) {
 function label(name) {
     return name === "" ? "HYPR" : name.toUpperCase();
 }
+
+function color(name, theme, submap_color) {
+    const k = kind(name);
+    return k === "normal" ? theme.theme_primary : k === "insert" ? theme.theme_secondary : k === "visual" ? theme.magenta : k === "replace" ? theme.theme_label : submap_color;
+}

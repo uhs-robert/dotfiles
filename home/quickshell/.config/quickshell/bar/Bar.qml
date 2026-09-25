@@ -262,7 +262,7 @@ Item {
                     height: right_island.height
                     entries: root.right_entries.filter(e => root.lualine_section(e.base) === "z")
                     wire: parent.wire
-                    fill: Modes.kind(SubmapState.submap_name) === "insert" ? Theme.theme_secondary : Theme.theme_primary
+                    fill: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
                     accent: true
                     lead_bg: y_section.shown ? y_section.fill : x_section.shown ? x_section.fill : "transparent"
                 }
