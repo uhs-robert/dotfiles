@@ -44,7 +44,7 @@ Item {
     // Lualine buffers: numbered tabs with their apps, full bar height.
     readonly property bool buffers: Style.workspace_art === "buffers"
     readonly property int icon_size: materia ? (compact ? 10 : 12) : doors ? (compact ? 12 : 14) : party ? (compact ? 14 : 16) : slots ? (compact ? 15 : 17) : compact ? 16 : 19
-    readonly property int pill_height: materia ? slot_size : doors ? (compact ? 26 : 30) : map ? 34 : slots ? (compact ? 26 : 30) : party ? (compact ? 22 : 26) : compact ? 20 : 22
+    readonly property int pill_height: materia ? slot_size : doors ? (compact ? 26 : 30) : map ? 34 : slots ? (compact ? 26 : 30) : party ? (compact ? 22 : 26) : Style.bar_pill_height > 0 ? Style.bar_pill_height - (compact ? 4 : 0) : compact ? 20 : 22
     readonly property int tile_face: compact ? 8 : 10
     readonly property int tile_depth: compact ? 2 : 3
 
@@ -139,7 +139,7 @@ Item {
     Row {
         id: row
         x: root.materia ? 6 : 0
-        spacing: root.materia ? (root.compact ? 10 : 12) : root.doors ? 2 : root.map ? 8 : root.slots || root.party ? 6 : root.compact ? 6 : 8
+        spacing: root.materia ? (root.compact ? 10 : 12) : root.doors ? 2 : root.map ? 8 : root.slots || root.party ? 6 : Style.bar_workspace_gap > 0 ? Style.bar_workspace_gap - (root.compact ? 2 : 0) : root.compact ? 6 : 8
 
         Loader {
             active: root.dial
@@ -195,7 +195,7 @@ Item {
 
                 height: pill.dot ? 7 : root.pill_height
                 y: (root.pill_height - height) / 2
-                width: root.materia ? (is_empty ? root.slot_size : icons.implicitWidth) : root.doors ? (modelData.active && !is_empty ? icons.implicitWidth + height - 4 : height) : root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? root.tile_face * 2 + 4 : icons.implicitWidth + root.tile_face + 6) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
+                width: root.materia ? (is_empty ? root.slot_size : icons.implicitWidth) : root.doors ? (modelData.active && !is_empty ? icons.implicitWidth + height - 4 : height) : root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? root.tile_face * 2 + 4 : icons.implicitWidth + root.tile_face + 6) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12) + Style.bar_pill_pad * 2
                 radius: pill.map || root.party || root.slots ? 0 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
