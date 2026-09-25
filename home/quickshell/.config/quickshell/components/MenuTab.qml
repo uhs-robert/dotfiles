@@ -138,9 +138,8 @@ Rectangle {
     Rectangle {
         readonly property bool dash: root.st.tab_well.a > 0
         visible: root.active && !root.is_chip && root.st.tab_marker.a > 0
-        anchors.horizontalCenter: dash ? parent.horizontalCenter : undefined
-        anchors.bottom: dash ? parent.bottom : undefined
-        anchors.bottomMargin: 2
+        x: dash ? (parent.width - width) / 2 : 0
+        y: dash ? parent.height - height - 2 : 0
         width: dash ? 16 : 2
         height: dash ? 2 : parent.height
         radius: dash ? 1 : 0
