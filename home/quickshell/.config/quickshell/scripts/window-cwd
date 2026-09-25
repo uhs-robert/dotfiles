@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Prints a terminal window's working directory: its tmux client's pane, else kitty remote control, else the deepest child's cwd.
+# Usage: window-cwd <window pid> <window title>
+pid=$1
+title=$2
+[ -n "$pid" ] || exit 0
+
+descends() {
+  local p=$1
+  while [ -n "$p" ] && [ "$p" -gt 1 ]; do
+    [ "$p" = "$pid" ] && return 0
+    p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')
+  done
+  return 1
+}
+
+if command -v tmux >/dev/null 2>&1; then
+  pick="" only="" count=0
+  while IFS=$'\t' read -r cpid session path; do
+    descends "$cpid" || continue
+    count=$((count + 1))
+    only=$path
+    case "$title" in
+      "$session" | *" $session" | "$session "*) pick=$path ;;
+    esac
+  done < <(tmux list-clients -F $'#{client_pid}\t#{client_session}\t#{pane_current_path}' 2>/dev/null)
+  [ -z "$pick" ] && [ "$count" -eq 1 ] && pick=$only
+  if [ -n "$pick" ]; then
+    printf '%s\n' "$pick"
+    exit 0
+  fi
+fi
+
+sock="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/kitty-$pid"
+if [ -S "$sock" ] && command -v kitty >/dev/null 2>&1; then
+  cwd=$(kitty @ --to "unix:$sock" ls 2>/dev/null | python3 -c '
+import json, sys
+title = sys.argv[1]
+for osw in json.load(sys.stdin):
+    for tab in osw.get("tabs", []):
+        for w in tab.get("windows", []):
+            if w.get("is_focused") and tab.get("is_focused") and w.get("title") == title:
+                procs = w.get("foreground_processes") or []
+                print(procs[-1].get("cwd") if procs and procs[-1].get("cwd") else w.get("cwd", ""))
+                sys.exit()
+' "$title")
+  if [ -n "$cwd" ]; then
+    printf '%s\n' "$cwd"
+    exit 0
+  fi
+fi
+
+leaf=$pid
+while child=$(pgrep -P "$leaf" | tail -n 1) && [ -n "$child" ]; do leaf=$child; done
+readlink "/proc/$leaf/cwd" 2>/dev/null

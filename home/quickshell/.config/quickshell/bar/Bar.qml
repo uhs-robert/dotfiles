@@ -150,6 +150,18 @@ Item {
         }
     }
 
+    // Lualine section c after the buffers: the focused app and a terminal's directory.
+    Loader {
+        active: Style.bar_lualine && root.left_entries.length > 0
+        x: left_island.width
+        anchors.verticalCenter: parent.verticalCenter
+        sourceComponent: Neovim.WindowSegment {
+            screen_name: root.screen_name
+            bar_height: root.bar_height
+            max_width: Math.max(0, root.width - left_island.width - (right_island.visible ? right_island.width : 0) - 24)
+        }
+    }
+
     Island {
         height: root.bar_height
         id: center_island
