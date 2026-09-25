@@ -11,6 +11,8 @@ Item {
     property string title: ""
     property string readout_value: ""
     property bool closable: true
+    // Overrides the title colour when set, e.g. with the active submap's.
+    property color title_color: "transparent"
 
     implicitHeight: Math.max(24, title_text.implicitHeight + 10)
 
@@ -33,7 +35,7 @@ Item {
         width: Math.max(0, Math.min(implicitWidth, (value_text.visible ? value_text.x : close_box.x) - x - 8))
         elide: Text.ElideRight
         text: root.title
-        color: root.st.title_fg
+        color: root.title_color.a > 0 ? root.title_color : root.st.title_fg
         font.family: root.st.title_font_family
         font.pixelSize: root.st.font_size - 3
         font.bold: true

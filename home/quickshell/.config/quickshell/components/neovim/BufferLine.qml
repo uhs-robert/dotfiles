@@ -5,7 +5,6 @@ import Quickshell.Hyprland
 import "../../theme"
 import "../../services"
 import ".."
-import "Modes.js" as Modes
 
 // Workspaces as lualine buffers: number and app icons, the focused one a full-height visual-bg segment with arrow edges.
 Item {
@@ -19,7 +18,7 @@ Item {
 
     readonly property int glyph: root.compact ? 14 : 16
     readonly property int arrow: Math.round(root.bar_height * 0.4)
-    readonly property color accent: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
+    readonly property color accent: SubmapState.bar_color
 
     implicitWidth: row.implicitWidth
     implicitHeight: root.bar_height

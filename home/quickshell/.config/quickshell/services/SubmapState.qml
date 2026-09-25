@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import "../theme"
+import "../components/neovim/Modes.js" as Modes
 
 Singleton {
     id: root
@@ -40,6 +41,8 @@ Singleton {
     })
 
     readonly property color submap_color: color_map[submap_name] || Theme.theme_secondary
+    // The colour the bar shows for the current submap: the lualine mode colour (chip, z, buffers), else the submap tab's.
+    readonly property color bar_color: Style.bar_lualine ? Modes.color(root.submap_name, Theme, root.submap_color) : root.submap_color
 
     Connections {
         target: Hyprland

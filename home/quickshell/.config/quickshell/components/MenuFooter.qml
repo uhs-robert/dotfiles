@@ -14,6 +14,10 @@ Item {
     property string text: ""
     property bool wrap: root.st.footer_wrap
     property bool centered: false
+    // Text size override; 0 keeps the style's footer sizes.
+    property int size: 0
+    readonly property int text_px: root.size > 0 ? root.size : root.text_px
+    readonly property int small_px: root.size > 0 ? root.size : root.small_px
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
     readonly property int rule_gap: root.st.footer_rule ? (root.st.footer_moon ? 11 : 5) : 0
@@ -95,7 +99,7 @@ Item {
                         size: Math.round(desc_text.implicitHeight)
                         text_color: root.st.footer_key_fg
                         font_family: root.st.font_family
-                        font_size: root.st.font_size - 4
+                        font_size: root.text_px
                     }
                 }
 
@@ -110,7 +114,7 @@ Item {
                     text: KeyHints.with_glyphs(parent.modelData.key)
                     color: root.st.footer_key_fg
                     font.family: key_text.capped ? root.st.mono_font : root.st.font_family
-                    font.pixelSize: root.st.font_size - 4
+                    font.pixelSize: root.text_px
 
                     Rectangle {
                         visible: key_text.capped
@@ -131,7 +135,7 @@ Item {
                     text: root.st.footer_arrow
                     color: root.st.text_muted
                     font.family: root.st.font_family
-                    font.pixelSize: root.st.font_size - 5
+                    font.pixelSize: root.small_px
                 }
 
                 Text {
@@ -140,7 +144,7 @@ Item {
                     text: KeyHints.with_glyphs(parent.modelData.desc) + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
                     color: root.st.footer_fg
                     font.family: root.st.font_family
-                    font.pixelSize: root.st.font_size - 4
+                    font.pixelSize: root.text_px
                     font.italic: root.st.footer_italic
                     font.capitalization: root.st.label_caps ? Font.AllUppercase : Font.MixedCase
                     font.letterSpacing: root.st.label_spacing
@@ -160,7 +164,7 @@ Item {
             text: "/"
             color: root.st.footer_key_bg.a > 0 ? root.st.footer_key_bg : root.st.footer_key_fg
             font.family: root.st.font_family
-            font.pixelSize: root.st.font_size - 4
+            font.pixelSize: root.text_px
         }
 
         Text {
@@ -171,7 +175,7 @@ Item {
             text: root.searching ? root.popup.search_query : ""
             color: root.st.text_fg
             font.family: root.st.font_family
-            font.pixelSize: root.st.font_size - 4
+            font.pixelSize: root.text_px
         }
 
         Rectangle {
@@ -190,7 +194,7 @@ Item {
             text: !root.searching || root.popup.search_query === "" ? "" : root.match_count === 0 ? "no match" : (root.match_position >= 0 ? root.match_position + 1 : "-") + "/" + root.match_count
             color: root.match_count === 0 ? Theme.warning : root.st.footer_fg
             font.family: root.st.font_family
-            font.pixelSize: root.st.font_size - 4
+            font.pixelSize: root.text_px
             font.capitalization: root.st.label_caps ? Font.AllUppercase : Font.MixedCase
             font.letterSpacing: root.st.label_spacing
         }

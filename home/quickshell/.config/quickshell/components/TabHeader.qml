@@ -11,6 +11,8 @@ Item {
     property string panel_id: ""
     property string readout: ""
     property string readout_value: ""
+    // Overrides the title and band underline colour when set, e.g. with the active submap's.
+    property color accent: "transparent"
     readonly property real cut: root.st.frame_cut
     readonly property color line: root.st.frame_line.a > 0 ? root.st.frame_line : root.st.frame_border_color
     readonly property real band_width: Math.min(band_row.implicitWidth + 42, root.width)
@@ -44,7 +46,7 @@ Item {
         anchors.bottom: parent.bottom
         width: Math.max(0, root.band_width - 2)
         height: 2
-        color: root.st.tab_underline.a > 0 ? root.st.tab_underline : root.st.caret_color
+        color: root.accent.a > 0 ? root.accent : root.st.tab_underline.a > 0 ? root.st.tab_underline : root.st.caret_color
     }
 
     Row {
@@ -67,7 +69,7 @@ Item {
             width: Math.max(0, Math.min(implicitWidth, root.width - band_row.x - 40 - (root.panel_id !== "" ? 30 : 0)))
             elide: Text.ElideRight
             text: root.title
-            color: root.st.title_fg
+            color: root.accent.a > 0 ? root.accent : root.st.title_fg
             font.family: root.st.title_font_family
             font.pixelSize: root.st.font_size - 1
             font.bold: true

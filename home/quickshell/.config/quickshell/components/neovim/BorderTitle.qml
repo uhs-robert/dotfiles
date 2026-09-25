@@ -8,6 +8,8 @@ Item {
 
     property var st: Style
     property string title: ""
+    property color fill: root.st.title_bg
+    property color ink: root.st.title_fg
 
     implicitWidth: chip.width
     implicitHeight: chip.height
@@ -26,13 +28,13 @@ Item {
         width: label.implicitWidth + 14
         height: label.implicitHeight + 4
         radius: 3
-        color: root.st.title_bg
+        color: root.fill
 
         Text {
             id: label
             anchors.centerIn: parent
             text: root.title
-            color: root.st.title_fg
+            color: root.ink
             font.family: root.st.title_font_family
             font.pixelSize: root.st.font_size - 2
             font.bold: true

@@ -11,7 +11,7 @@ Item {
 
     property color next_bg: Style.bar_side_bg
     property bool hovered: false
-    readonly property color mode_color: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
+    readonly property color mode_color: SubmapState.bar_color
     readonly property color fill: root.hovered ? Qt.tint(root.mode_color, Qt.alpha(Theme.fg_strong, 0.15)) : root.mode_color
     readonly property real arrow: Math.round(root.height * 0.4)
 

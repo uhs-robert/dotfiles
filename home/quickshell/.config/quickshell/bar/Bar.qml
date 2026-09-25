@@ -6,7 +6,6 @@ import "../services"
 import "modules"
 import "../components/oasis" as Oasis
 import "../components/neovim" as Neovim
-import "../components/neovim/Modes.js" as Modes
 
 Item {
     id: root
@@ -281,7 +280,7 @@ Item {
                     height: right_island.height
                     entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "z")
                     wire: parent.wire
-                    fill: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
+                    fill: SubmapState.bar_color
                     accent: true
                     // The mode chip's hover tint.
                     hover_fill: Qt.tint(fill, Qt.alpha(Theme.fg_strong, 0.15))

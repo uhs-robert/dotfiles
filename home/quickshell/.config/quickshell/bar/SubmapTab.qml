@@ -35,7 +35,7 @@ PanelWindow {
         if (!root.bar_present) return;
         if (SubmapState.active && !root.chip_shown) {
             root.shown_name = SubmapState.submap_name;
-            root.shown_color = SubmapState.submap_color;
+            root.shown_color = SubmapState.bar_color;
             hide_anim.stop();
             if (!root.visible || root.line_progress < 1) {
                 root.visible = true;

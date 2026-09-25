@@ -9,6 +9,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
+import "../services"
 import "neovim" as Neovim
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
@@ -65,6 +66,11 @@ PanelWindow {
     // Room on every side for a soft shadow, taken out of the gap so the frame stays put.
     readonly property int shadow_pad: Style.frame_shadow.a > 0 ? Math.min(Style.frame_drop, root.gap) : 0
     implicitWidth: frame.width + root.shadow_pad * 2
+    // The header takes the bar's submap colour: fills get it under dark ink, plain titles take it as text.
+    readonly property bool tinted: SubmapState.active || Style.bar_lualine
+    readonly property color header_color: SubmapState.bar_color
+    readonly property bool filled_title: Style.show_title && Style.title_bg.a > 0
+
     // Floating frames set the title chip into the top border, half of it above the frame.
     readonly property bool float_title: Style.border_title && Style.show_title
     readonly property real float_top: root.float_title ? Math.round(title_tab.height / 2) : 0
@@ -258,6 +264,7 @@ PanelWindow {
                     id: key_header
                     TabHeader {
                         readonly property var ids: Style.title_ids.whichkey || []
+                        accent: root.tinted ? root.header_color : "transparent"
                         title: root.title
                         panel_id: ids[0] || ""
                         readout: ids[1] || ""
@@ -268,6 +275,7 @@ PanelWindow {
                     id: key_strip
                     TitleStrip {
                         title: root.title
+                        title_color: root.tinted ? root.header_color : "transparent"
                         closable: false
                     }
                 }
@@ -280,11 +288,11 @@ PanelWindow {
                 y: frame.top_edge + frame.ring_pad
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
-                color: Style.show_title && !Style.fade_fills ? Style.title_bg : "transparent"
+                color: !Style.show_title || Style.fade_fills ? "transparent" : root.tinted && root.filled_title ? root.header_color : Style.title_bg
 
                 FadeFill {
                     visible: Style.show_title && Style.fade_fills
-                    fill: Style.title_bg
+                    fill: root.tinted && root.filled_title ? Qt.alpha(root.header_color, Style.title_bg.a) : Style.title_bg
                 }
 
                 Text {
@@ -292,7 +300,7 @@ PanelWindow {
                     x: 10
                     y: (parent.height - height) / 2
                     text: Style.title_prefix + Style.title_text(root.title) + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
-                    color: Style.show_title ? Style.title_fg : Style.accent_color
+                    color: !root.tinted ? (Style.show_title ? Style.title_fg : Style.accent_color) : !Style.show_title || !root.filled_title ? root.header_color : Style.fade_fills ? Style.title_fg : Theme.bg_crust
                     font.family: Style.title_font_family
                     font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
@@ -306,6 +314,8 @@ PanelWindow {
                 y: -root.float_top
                 sourceComponent: Neovim.BorderTitle {
                     title: Style.title_text(root.title)
+                    fill: root.tinted ? root.header_color : Style.title_bg
+                    ink: root.tinted ? Theme.bg_crust : Style.title_fg
                 }
             }
 
@@ -380,6 +390,7 @@ PanelWindow {
                     visible: root.has_footer
                     Layout.fillWidth: true
                     centered: true
+                    size: Style.whichkey_size
                     text: root.footer_hint
                 }
             }
