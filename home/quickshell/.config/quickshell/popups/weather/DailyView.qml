@@ -330,6 +330,7 @@ Item {
                             selected: day_col.day_index === root.day_cursor
                             scale_min: root.week_low
                             scale_max: root.week_high
+                            slot_w: Math.floor((day_row.width - day_row.spacing * (root.window_days.length - 1)) / Math.max(1, root.window_days.length))
                         }
                     }
 

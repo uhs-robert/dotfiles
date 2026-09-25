@@ -14,10 +14,12 @@ Item {
     property bool selected: false
     property real scale_min: 0
     property real scale_max: 1
+    // Narrowest column width in the strip, so every photo picks the same scale.
+    property real slot_w: root.width
 
-    // Space reserved on every side for the selection box, kept constant so sizing never jumps when selection changes.
-    readonly property int box_pad: 6
-    readonly property real avail_w: root.width - 2 * root.box_pad
+    // Three 2px selection rings plus 4px inner padding, reserved even unselected so sizing never jumps.
+    readonly property int box_pad: 10
+    readonly property real avail_w: root.slot_w - 2 * root.box_pad
     readonly property real avail_h: root.height - 2 * root.box_pad
 
     // Silkscreen sits on an 8px grid, so step up by whole grid units while the widest label and temp pair still fit.
@@ -52,16 +54,16 @@ Item {
 
     SequentialAnimation {
         id: hop_anim
-        PropertyAction { target: root; property: "hop_offset"; value: -3 }
+        PropertyAction { target: root; property: "hop_offset"; value: -4 }
         PauseAnimation { duration: 100 }
-        PropertyAction { target: root; property: "hop_offset"; value: -1 }
+        PropertyAction { target: root; property: "hop_offset"; value: -2 }
         PauseAnimation { duration: 100 }
         PropertyAction { target: root; property: "hop_offset"; value: 0 }
     }
 
     // Space left over after the photo, dot bar and labels take their natural size, spread across the gaps between them.
     readonly property real content_h: label_row.height + photo_box.height + dot_bar.height + temp_row.height + pop_text.height
-    readonly property real fill_spacing: Math.max(3, (root.height - root.content_h) / 4)
+    readonly property real fill_spacing: Math.max(3, (root.avail_h - root.content_h) / 4)
 
     function label_w(size: int): real {
         return arrow_metrics.advanceWidth + 2 + (size === 32 ? label_32.advanceWidth : label_24.advanceWidth);
@@ -82,18 +84,17 @@ Item {
     TextMetrics { id: temp_24; font.family: Style.font_family; font.pixelSize: 24; text: root.widest_temp }
     TextMetrics { id: temp_32; font.family: Style.font_family; font.pixelSize: 32; text: root.widest_temp }
 
-    // Pokémon-menu selection box around the whole column, sized to the padding reserved above.
+    // Pokémon-menu double border around the whole column, sized to the padding reserved above.
     PixelBox {
         visible: root.selected
         anchors.fill: parent
-        anchors.margins: root.box_pad - 4
         fill: "transparent"
-        rings: [Style.shade_0, Style.shade_3]
+        rings: [Style.shade_3, "transparent", Style.shade_3]
     }
 
     Column {
         x: Math.round((root.width - width) / 2)
-        y: Math.round((root.height - height) / 2)
+        y: root.box_pad + Math.round((root.avail_h - height) / 2)
         spacing: root.fill_spacing
 
         Row {
