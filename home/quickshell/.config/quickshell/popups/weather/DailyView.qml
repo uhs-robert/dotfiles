@@ -94,7 +94,9 @@ Item {
             // Room for a 3x-scale 24x18 photo (72x54) plus its frame.
             : root.camera ? 24 * 3 + 18 + 8
             : Math.max(label_metrics.advanceWidth("Today"), label_metrics.advanceWidth("100%"), mission_w) + 8;
-        const room = Style.weather_header === "status" ? root.width - 40 : root.width + 4;
+        // Reserve room for the row-label column ("RAIN" is the widest), matching MateriaSlots' own label_w.
+        const status_label_w = Math.max(40, small_metrics.advanceWidth("RAIN") + 12);
+        const room = Style.weather_header === "status" ? root.width - status_label_w : root.width + 4;
         return Math.max(1, Math.min(5, Math.floor(room / (col + 4))));
     }
     readonly property var window_days: WeatherState.days.slice(root.first_day, root.first_day + root.fit_days)

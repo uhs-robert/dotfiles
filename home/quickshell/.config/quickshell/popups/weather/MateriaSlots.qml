@@ -16,16 +16,15 @@ Item {
     property int day_cursor: 0
     property var on_select: function (i) {}
 
-    readonly property real label_w: 40
-    readonly property int n: Math.max(1, root.days.length)
-    readonly property real col_w: (root.width - root.label_w) / root.n
     // Band and rows share out the full available height instead of centering at a fixed size.
     readonly property real band_h: Math.max(34, Math.min(70, root.height * 0.16))
-    readonly property real row_h: Math.max(20, (root.height - root.band_h - 8) / root.rows.length)
+    readonly property real row_h0: Math.max(20, (root.height - root.band_h - 8) / root.rows.length)
+    readonly property real row_scale: Math.min(1.6, Math.max(1, root.row_h0 / 34))
+    // Floor row_h on the row's own tallest text so row_scale never outgrows its row.
+    readonly property real row_h: Math.max(root.row_h0, row_metrics.height * 1.15 + 10)
     readonly property real table_h: root.band_h + 4 + root.row_h * root.rows.length
     readonly property real top_y: Math.max(0, (root.height - root.table_h) / 2)
     readonly property real socket_size: Math.max(24, Math.min(56, root.band_h * 0.75))
-    readonly property real row_scale: Math.min(1.6, Math.max(1, root.row_h / 34))
     readonly property int sel: root.day_cursor - root.first_day
     readonly property var rows: [
         ["", d => d.weekday],
@@ -37,8 +36,65 @@ Item {
 
     readonly property var orb_colors: Materia.day_colors(root.days.map(d => d.date))
 
+    // Widest row label ("RAIN"), plus a pad for its letter-spacing.
+    readonly property real label_w: Math.max(40, label_metrics.tightBoundingRect.width + root.rows.reduce((m, r) => Math.max(m, r[0].length), 0) + 12)
+    readonly property int n: Math.max(1, root.days.length)
+    readonly property real col_w: (root.width - root.label_w) / root.n
+    readonly property real cell_pad: 8
+
+    // Per-row shrink so the widest string actually rendered in a column always fits it.
+    readonly property real weekday_scale: Math.min(1, (root.col_w - root.cell_pad) / Math.max(1, weekday_metrics.tightBoundingRect.width))
+    readonly property real hilo_scale: Math.min(1, (root.col_w - root.cell_pad) / Math.max(1, temp_metrics.tightBoundingRect.width))
+    readonly property real rain_scale: Math.min(1, (root.col_w - root.cell_pad) / Math.max(1, rain_metrics.tightBoundingRect.width))
+
     function col_x(i) {
         return root.label_w + i * root.col_w;
+    }
+
+    function widest(strings) {
+        return strings.reduce((best, s) => s.length > best.length ? s : best, "");
+    }
+
+    // Unscaled metrics for the tallest/widest row content; row_scale is applied to the pixel size, not here.
+    FontMetrics {
+        id: row_metrics
+        font.family: Style.font_family
+        font.pixelSize: Math.round((Style.font_size - 3) * root.row_scale)
+        font.weight: Font.ExtraBold
+    }
+
+    TextMetrics {
+        id: label_metrics
+        font.family: Style.font_family
+        font.pixelSize: Math.round((Style.font_size - 5) * root.row_scale)
+        font.weight: Font.ExtraBold
+        text: root.widest(root.rows.map(r => r[0]))
+    }
+
+    TextMetrics {
+        id: weekday_metrics
+        font.family: Style.font_family
+        font.pixelSize: Math.round((Style.font_size - 3) * root.row_scale)
+        font.weight: Font.Bold
+        text: root.widest(root.days.concat([{
+            weekday: "Today"
+        }]).map(d => d.weekday || ""))
+    }
+
+    TextMetrics {
+        id: temp_metrics
+        font.family: Style.font_family
+        font.pixelSize: Math.round((Style.font_size - 3) * root.row_scale)
+        font.weight: Font.ExtraBold
+        text: root.widest(root.days.flatMap(d => [Math.round(d.max) + "°", Math.round(d.min) + "°"]).concat(["-9°"]))
+    }
+
+    TextMetrics {
+        id: rain_metrics
+        font.family: Style.font_family
+        font.pixelSize: Math.round((Style.font_size - 4) * root.row_scale)
+        font.weight: Font.Bold
+        text: "100%"
     }
 
     Rectangle {
@@ -159,6 +215,8 @@ Item {
                         smooth: true
                     }
 
+                    readonly property real col_scale: cell.index === 0 ? root.weekday_scale : cell.index === 4 ? root.rain_scale : root.hilo_scale
+
                     Text {
                         visible: cell.index !== 1
                         anchors.centerIn: parent
@@ -168,7 +226,7 @@ Item {
                         text: cell.modelData[1](slot.modelData)
                         color: cell.index === 2 || slot.selected && cell.index === 0 ? Theme.fg_strong : cell.index === 4 ? Style.text_fg : Theme.theme_primary_light
                         font.family: Style.font_family
-                        font.pixelSize: Math.round((cell.index === 0 ? Style.font_size - 3 : Style.font_size - (cell.index === 4 ? 4 : 3)) * root.row_scale)
+                        font.pixelSize: Math.round((cell.index === 0 ? Style.font_size - 3 : Style.font_size - (cell.index === 4 ? 4 : 3)) * root.row_scale * cell.col_scale)
                         font.weight: cell.index === 2 ? Font.ExtraBold : Font.Bold
                     }
 
@@ -177,7 +235,7 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 2 * root.row_scale
-                        width: Math.min(36 * root.row_scale, cell.width - 12)
+                        width: Math.min(36 * root.row_scale, cell.width - root.cell_pad)
                         height: 4 * root.row_scale
                         value: slot.modelData.pop / 100
                         fill_color: Theme.info

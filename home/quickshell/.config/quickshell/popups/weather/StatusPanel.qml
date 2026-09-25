@@ -35,6 +35,26 @@ ColumnLayout {
         ["AQI", root.aqi >= 0 ? root.aqi : "--", root.aqi >= 0 ? WeatherState.aqi_band(root.aqi).label.toLowerCase() : ""]
     ] : []
 
+    // Sized from the widest label/value actually shown, so a bigger style font never clips the fixed-width columns below.
+    TextMetrics {
+        id: label_metrics
+        font.family: Style.font_family
+        font.pixelSize: Style.font_size - 4
+        font.weight: Font.ExtraBold
+        text: "FEELS"
+    }
+
+    TextMetrics {
+        id: pct_metrics
+        font.family: Style.font_family
+        font.pixelSize: Style.font_size - 2
+        font.weight: Font.ExtraBold
+        text: "100%"
+    }
+
+    readonly property real label_col_w: Math.max(44, label_metrics.tightBoundingRect.width + 6)
+    readonly property real pct_col_w: Math.max(40, pct_metrics.tightBoundingRect.width + 4)
+
     component Label: Text {
         color: Theme.theme_primary_light
         font.family: Style.font_family
@@ -80,7 +100,7 @@ ColumnLayout {
                 spacing: 6
 
                 Label {
-                    Layout.preferredWidth: 44
+                    Layout.preferredWidth: root.label_col_w
                     text: stat.label
                 }
 
@@ -285,7 +305,7 @@ ColumnLayout {
             spacing: 6
 
             Label {
-                Layout.preferredWidth: 44
+                Layout.preferredWidth: root.label_col_w
                 text: "RAIN"
             }
 
@@ -299,7 +319,7 @@ ColumnLayout {
             }
 
             Value {
-                Layout.preferredWidth: 40
+                Layout.preferredWidth: root.pct_col_w
                 horizontalAlignment: Text.AlignRight
                 text: root.today ? root.today.pop + "%" : ""
                 font.pixelSize: Style.font_size - 2
