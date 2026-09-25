@@ -9,6 +9,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
+import "modern" as Modern
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
 PanelWindow {
@@ -21,7 +22,7 @@ PanelWindow {
     readonly property string position: root.payload.position || "bottom-right"
     readonly property string title: {
         const t = root.payload.title || "";
-        return Style.show_title ? t.toUpperCase() : t;
+        return Style.show_title && !Style.title_mixed ? t.toUpperCase() : t;
     }
     readonly property string footer_hint: (root.payload.footer || []).map(f => ({ ESC: "Esc", BS: "Backspace", RET: "Enter", TAB: "Tab", SPACE: "space" }[f.key] || f.key) + " " + f.desc).join(" · ")
     readonly property bool has_footer: Style.show_footer && root.footer_hint !== ""
@@ -121,12 +122,25 @@ PanelWindow {
     }
 
     Rectangle {
-        visible: Style.frame_drop > 0
+        visible: Style.frame_drop > 0 && Style.frame_shadow.a === 0
         y: Style.frame_drop
         width: frame.width
         height: frame.height
         radius: frame.radius
         color: Theme.bg_shadow
+    }
+
+    Loader {
+        active: Style.frame_shadow.a > 0
+        x: frame.radius
+        y: Style.frame_drop / 2
+        width: frame.width - frame.radius * 2
+        height: frame.height
+        sourceComponent: RectangularShadow {
+            blur: Style.frame_drop
+            radius: frame.radius
+            color: Style.frame_shadow
+        }
     }
 
     Rectangle {
@@ -135,7 +149,7 @@ PanelWindow {
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
-        readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : 0
+        readonly property real title_x: (Style.fade_fills || Style.rounded) && !Style.title_mixed ? frame.radius : 0
         // The inner ring's room below the accent line, which already covers the border.
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
@@ -191,6 +205,12 @@ PanelWindow {
             top_radius: frame.radius
             bottom_radius: frame.radius
             top_offset: frame.top_edge - Style.frame_border_width
+        }
+
+        Modern.Sheen {
+            color_top: Style.sheen
+            corner: frame.radius
+            edge: Style.frame_border_width
         }
 
         Rectangle {
@@ -256,7 +276,7 @@ PanelWindow {
                     text: Style.title_prefix + root.title + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
                     color: Style.show_title ? Style.title_fg : Style.accent_color
                     font.family: Style.title_font_family
-                    font.pixelSize: Style.font_size - 2
+                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
                 }

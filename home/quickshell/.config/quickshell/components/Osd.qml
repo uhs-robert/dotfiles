@@ -12,6 +12,7 @@ import "../services"
 import "snes" as Snes
 import "ps1" as Ps1
 import "ps2" as Ps2
+import "modern" as Modern
 
 PanelWindow {
     id: root
@@ -56,7 +57,8 @@ PanelWindow {
     readonly property var console_osd: root.showing_vox ? null : ({
             rpg: { art: rpg_osd, hides: ["glyph", "meter", "percent"] },
             alert: { art: alert_osd, hides: ["glyph"] },
-            glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) }
+            glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) },
+            tile: { art: tile_osd, hides: ["glyph", "meter", "percent"], framed: true, untitled: true }
         })[Style.osd_layout] || null
 
     function replaced(part) {
@@ -228,13 +230,27 @@ PanelWindow {
 
     // Fits in the slide room under the frame, so the window keeps its size.
     Rectangle {
-        visible: Style.frame_drop > 0
+        visible: Style.frame_drop > 0 && Style.frame_shadow.a === 0
         y: frame.y + Style.frame_drop
         width: frame.width
         height: frame.height
         radius: frame.radius
         color: Theme.bg_shadow
         opacity: frame.opacity
+    }
+
+    Loader {
+        active: Style.frame_shadow.a > 0
+        x: frame.radius
+        y: frame.y + root.slide / 2
+        width: frame.width - frame.radius * 2
+        height: frame.height
+        opacity: frame.opacity
+        sourceComponent: RectangularShadow {
+            blur: root.slide
+            radius: frame.radius
+            color: Style.frame_shadow
+        }
     }
 
     Rectangle {
@@ -250,8 +266,8 @@ PanelWindow {
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
-        // Sized console art makes the frame near square, where a pill radius would round it into a circle.
-        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && root.console_osd.size) ? height / 2 : Style.frame_radius
+        // Sized console art makes the frame near square, where a pill radius would round it into a circle; framed art keeps the frame radius.
+        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && (root.console_osd.size || root.console_osd.framed)) ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
         border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
@@ -299,6 +315,12 @@ PanelWindow {
             bottom_radius: frame.radius
         }
 
+        Modern.Sheen {
+            color_top: Style.sheen
+            corner: frame.radius
+            edge: Style.frame_border_width
+        }
+
         Item {
             id: glow_layer
             readonly property bool layered: Style.glow || Style.text_shadow.a > 0
@@ -336,7 +358,7 @@ PanelWindow {
 
             Rectangle {
                 id: title_tab
-                visible: Style.show_title
+                visible: Style.show_title && !(root.console_osd && root.console_osd.untitled)
                 opacity: root.banded ? 0 : 1
                 x: (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
                 y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + Style.inset_pad
@@ -362,10 +384,10 @@ PanelWindow {
                     anchors.horizontalCenterOffset: title_index.space / 2
                     x: 10 + title_index.space
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + root.title + Style.title_suffix
+                    text: Style.title_prefix + (Style.title_mixed ? root.title.charAt(0) + root.title.slice(1).toLowerCase() : root.title) + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
-                    font.pixelSize: Style.font_size - 2
+                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
                 }
@@ -478,6 +500,18 @@ PanelWindow {
             Ps1.AlertMark {
                 size: Theme.glyph_size + 10
                 opacity: root.muted ? 0.5 : 1
+            }
+        }
+
+        Component {
+            id: tile_osd
+            Modern.TileOsd {
+                kind: root.kind
+                level: root.level
+                percent: root.percent
+                muted: root.muted
+                glyph: root.glyph
+                device: root.kind === "volume" && root.sink ? root.sink.description || root.sink.name : ""
             }
         }
 
