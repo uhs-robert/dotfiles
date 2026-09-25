@@ -8,6 +8,7 @@ import "../theme"
 import "../services"
 import "snes" as Snes
 import "../components/ps1" as Ps1
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -170,6 +171,27 @@ Popup {
             anchors.right: parent.right
             anchors.top: parent.top
             spacing: 2
+
+            Loader {
+                id: sink_ring
+                readonly property var sink_audio: Pipewire.defaultAudioSink ? Pipewire.defaultAudioSink.audio : null
+                active: root.st.controller === "ps2" && !!sink_audio
+                visible: active
+                Layout.fillWidth: true
+                Layout.preferredHeight: active ? Style.px(112) : 0
+                Layout.bottomMargin: 6
+                sourceComponent: Item {
+                    Ps2.SphereRing {
+                        readonly property var audio: sink_ring.sink_audio
+                        anchors.centerIn: parent
+                        width: parent.height
+                        value: audio ? audio.volume : 0
+                        dimmed: !!audio && audio.muted
+                        label: audio ? String(Math.round(audio.volume * 100)) : ""
+                        caption: audio && audio.muted ? "Muted" : "Volume"
+                    }
+                }
+            }
 
             ListView {
                 id: rows_list

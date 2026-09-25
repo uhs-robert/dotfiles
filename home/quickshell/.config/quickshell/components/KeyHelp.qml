@@ -152,13 +152,25 @@ Item {
         Item {
             id: help_row
             required property var modelData
+            readonly property real pad_width: pad_loader.active ? pad_loader.width + 5 : 0
             width: list.width
-            height: Math.max(badge_clip.height, desc_text.implicitHeight)
+            height: Math.max(badge_clip.height, desc_text.implicitHeight, pad_loader.height)
+
+            Loader {
+                id: pad_loader
+                visible: active
+                active: KeyHints.controller_parts(help_row.modelData.key, root.st.controller).length > 0
+                x: root.pad_width - help_row.pad_width
+                y: Math.max(0, (desc_metrics.height - height) / 2)
+                source: active ? Qt.resolvedUrl(root.st.controller + "/ControllerKeys.qml") : ""
+                onLoaded: item.key = Qt.binding(() => help_row.modelData.key)
+            }
 
             Item {
                 id: badge_clip
+                x: root.pad_width
                 y: Math.max(0, (desc_metrics.height - height) / 2)
-                width: root.key_column
+                width: root.key_column - x
                 height: badge.height
                 clip: badge.width > width
 

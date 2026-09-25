@@ -6,6 +6,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "../components/ps1" as Ps1
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -167,6 +168,15 @@ Popup {
                 Layout.fillWidth: true
                 sourceComponent: Ps1.BiosClock {
                     running: root.is_open
+                }
+            }
+
+            Loader {
+                active: root.st.controller === "ps2"
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Ps2.ClockScreen {
+                    running: root.visible
                 }
             }
 

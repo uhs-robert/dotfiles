@@ -8,6 +8,7 @@ import "../services"
 import "start" as Start
 import "snes" as Snes
 import "../components/ps1" as Ps1
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -70,6 +71,14 @@ Popup {
         anchors.margins: 12
         implicitHeight: root.confirm ? confirm_row.implicitHeight : (nes_menu.active ? nes_menu.implicitHeight : snes_menu.active ? snes_menu.implicitHeight : actions_col.implicitHeight) + (strip_loader.active ? strip_loader.height + 10 : 0)
         focus: true
+
+        Loader {
+            active: root.st.controller === "ps2"
+            anchors.fill: parent
+            anchors.margins: -12
+            z: -2
+            sourceComponent: Ps2.Haze {}
+        }
 
         Loader {
             active: root.st.schematic.a > 0
@@ -140,6 +149,15 @@ Popup {
                         z: -1
                         sourceComponent: Ps1.BiosPanel {
                             lit: row.selected
+                        }
+                    }
+
+                    Loader {
+                        active: root.st.controller === "ps2"
+                        anchors.fill: parent
+                        z: -1
+                        sourceComponent: Ps2.Block {
+                            selected: row.selected
                         }
                     }
 

@@ -11,6 +11,7 @@ import "media" as Media
 import "weather" as Weather
 import "snes" as Snes
 import "../components/ps1" as Ps1
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -24,6 +25,7 @@ Popup {
     readonly property var player: MediaState.active
     readonly property var players: MediaState.players
     readonly property bool has_art: !!root.player && root.player.trackArtUrl !== ""
+    readonly property bool ps2: Style.controller === "ps2"
 
     // The PS1 CD Player transport under the progress bar.
     readonly property bool cd: root.st.console_views === "ps1"
@@ -255,7 +257,7 @@ Popup {
                         color: Theme.fg_core
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size + 5
-                        font.bold: true
+                        font.weight: root.ps2 ? Font.ExtraLight : Font.Bold
                     }
 
                     Loader {
@@ -289,6 +291,7 @@ Popup {
                         color: Theme.theme_primary
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size
+                        font.weight: root.ps2 ? Font.Light : Font.Normal
                     }
 
                     Text {
@@ -300,6 +303,7 @@ Popup {
                         color: Style.text_dim
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size - 2
+                        font.weight: root.ps2 ? Font.Light : Font.Normal
                     }
 
                     Item { Layout.fillHeight: true }
@@ -335,11 +339,23 @@ Popup {
                             visible: progress_item.has_length && !Style.segmented_levels && !progress_item.sound_test
                         }
 
+                        Loader {
+                            active: root.ps2
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: progress_item.has_length
+                            sourceComponent: Ps2.SphereTrack {
+                                sphere: Style.px(8)
+                                value: progress_item.ratio
+                            }
+                        }
+
                         Meter {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            visible: progress_item.has_length && Style.segmented_levels && !progress_item.sound_test
+                            visible: progress_item.has_length && Style.segmented_levels && !progress_item.sound_test && !root.ps2
                             segment_count: 40
                             implicitHeight: Style.console_skin === "nes" ? 16 : Style.px(8)
                             value: progress_item.ratio

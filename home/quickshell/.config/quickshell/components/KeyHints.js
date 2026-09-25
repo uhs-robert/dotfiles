@@ -56,7 +56,8 @@ function pad_parts(controller, key) {
 
 // Keyboard keys (or "a/b" halves) to controller button ids, per the style's controller token.
 const controller_maps = {
-    ps1: { Enter: "cross", q: "circle", Esc: "circle", Backspace: "circle", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" }
+    ps1: { Enter: "cross", q: "circle", Esc: "circle", Backspace: "circle", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
+    ps2: { Enter: "cross", q: "circle", Esc: "circle", Backspace: "circle", Tab: "triangle", t: "square", "?": "select", gg: "l2", G: "r2", "/": "r3", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h", "[": "l1", "]": "r1" }
 };
 
 // A key as [{button}] and [{text}] parts, or null when the controller maps none of it.

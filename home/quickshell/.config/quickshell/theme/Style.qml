@@ -894,7 +894,15 @@ Singleton {
                 bar_border_color: "transparent",
                 bar_rounded: true,
                 bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.12),
-                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.2)
+                bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.2),
+                frame_shade: Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.theme_primary, 0.14)),
+                shade_vertical: true,
+                bar_inset_gap: 2,
+                bar_inset_width: 1,
+                bar_inset_color: Qt.alpha(Theme.theme_primary_light, 0.22),
+                card_layout: "dialog",
+                osd_layout: "glow",
+                controller: "ps2"
             }),
             // TIE Fighter cockpit: large popups in the octagonal viewport, `small` ones the targeting computer.
             "tie": (() => {
@@ -1734,7 +1742,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg" or "alert", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq" or "dialogue".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert" or "glow", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq", "dialogue" or "dialog".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout

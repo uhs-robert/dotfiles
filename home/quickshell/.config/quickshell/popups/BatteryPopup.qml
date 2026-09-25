@@ -9,6 +9,7 @@ import "../services"
 import "../components/nes" as Nes
 import "snes" as Snes
 import "../components/ps1" as Ps1
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -50,6 +51,7 @@ Popup {
 
     // An MGS LIFE-style gauge in place of the readout lines.
     readonly property bool life_bar: root.st.console_views === "ps1"
+    readonly property bool ps2: root.st.controller === "ps2"
     property bool ppd_available: false
     readonly property bool nes: root.st.console_skin === "nes"
     readonly property real status_indent: root.nes ? 22 : 0
@@ -180,8 +182,45 @@ Popup {
                 }
             }
 
+            Loader {
+                active: root.ps2
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Column {
+                    spacing: 0
+
+                    Ps2.ConfigRow {
+                        width: parent.width
+                        label: "Battery"
+                        value: root.has_battery ? Math.round(root.percent) + "%" : "None"
+                        level: root.has_battery ? root.percent / 100 : -1
+                        level_color: root.percent <= 20 && root.state_label === "Discharging" ? Theme.warning : Theme.theme_primary_light
+                    }
+
+                    Ps2.ConfigRow {
+                        width: parent.width
+                        label: "Status"
+                        value: root.state_label
+                    }
+
+                    Ps2.ConfigRow {
+                        visible: root.time_label !== ""
+                        width: parent.width
+                        label: "Time"
+                        value: root.time_label
+                    }
+
+                    Ps2.ConfigRow {
+                        visible: root.rate > 0
+                        width: parent.width
+                        label: "Rate"
+                        value: root.rate.toFixed(1) + " W"
+                    }
+                }
+            }
+
             Text {
-                visible: root.st.console !== "snes" && !root.life_bar
+                visible: root.st.console !== "snes" && !root.life_bar && !root.ps2
                 Layout.leftMargin: root.status_indent
                 text: (root.nes ? "BAT " : "") + Math.round(root.percent) + "%"
                 color: root.st.text_strong
@@ -190,7 +229,7 @@ Popup {
             }
 
             Text {
-                visible: root.st.console !== "snes" && !root.life_bar
+                visible: root.st.console !== "snes" && !root.life_bar && !root.ps2
                 Layout.leftMargin: root.status_indent
                 text: root.state_label
                 color: root.st.text_muted
@@ -199,7 +238,7 @@ Popup {
             }
 
             Text {
-                visible: root.time_label !== "" && root.st.console !== "snes" && !root.life_bar
+                visible: root.time_label !== "" && root.st.console !== "snes" && !root.life_bar && !root.ps2
                 Layout.leftMargin: root.status_indent
                 text: root.time_label
                 color: root.st.text_muted
@@ -208,7 +247,7 @@ Popup {
             }
 
             Text {
-                visible: root.rate > 0 && root.st.console !== "snes" && !root.life_bar
+                visible: root.rate > 0 && root.st.console !== "snes" && !root.life_bar && !root.ps2
                 Layout.leftMargin: root.status_indent
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted

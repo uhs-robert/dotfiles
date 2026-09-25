@@ -627,6 +627,16 @@ PanelWindow {
                     font.letterSpacing: 1
                 }
 
+                Loader {
+                    active: root.has_title && !root.banded && !root.passive && root.st.controller === "ps2"
+                    visible: title_tab.x + title_tab.width + 10 <= x
+                    anchors.right: parent.right
+                    anchors.rightMargin: title_readout.anchors.rightMargin
+                    y: title_tab.y + (title_tab.height - height) / 2
+                    source: active ? "ps2/AnalogLed.qml" : ""
+                    onLoaded: item.lit = Qt.binding(() => root.wanted && glow_layer.Window.active)
+                }
+
                 Rectangle {
                     visible: root.has_title && root.st.title_trail.a > 0 && width > 8
                     x: title_tab.x + (root.st.fade_fills ? 10 + title_tab.lead_space + title_text.implicitWidth + 12 : title_tab.width)

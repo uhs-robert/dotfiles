@@ -8,6 +8,7 @@ import "../../theme"
 import "../../services"
 import "../../components"
 import "../../components/nes" as Nes
+import "../../components/ps2" as Ps2
 
 Item {
     id: root
@@ -96,6 +97,7 @@ Item {
                 readonly property bool qblock: Style.console_skin === "nes"
 
                 readonly property real slot_space: root.slots ? slot_text.implicitWidth + 6 : 0
+                readonly property bool ps2: Style.controller === "ps2"
 
                 height: root.pill_height
                 width: is_empty ? Math.max(height, pill.slot_space + 6) : icons.implicitWidth + (modelData.active ? 22 : 12) + pill.slot_space
@@ -103,7 +105,7 @@ Item {
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
-                color: pill.qblock ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
+                color: pill.qblock || pill.ps2 ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
                 border.width: root.slots ? 2 : Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
                 border.color: root.slots ? (modelData.focused ? Theme.theme_primary_light : Style.bar_border_color) : Style.bar_workspace_ring
 
@@ -120,6 +122,34 @@ Item {
                     sourceComponent: Nes.QBlock {
                         kind: pill.modelData.focused ? "hit" : "q"
                         mark: pill.is_empty
+                    }
+                }
+
+                Loader {
+                    active: pill.ps2
+                    anchors.fill: parent
+                    sourceComponent: pill.is_empty ? ps2_cube : ps2_block
+
+                    Component {
+                        id: ps2_cube
+                        Item {
+                            Ps2.SaveCube {
+                                anchors.centerIn: parent
+                                width: Math.round(pill.height * 0.72)
+                                color: pill.modelData.focused ? Theme.theme_primary_light : Theme.theme_primary
+                                selected: pill.modelData.focused
+                                opacity: pill.modelData.focused || pill.modelData.active ? 1 : 0.6
+                            }
+                        }
+                    }
+
+                    Component {
+                        id: ps2_block
+                        Ps2.Block {
+                            radius: pill.height / 2
+                            selected: pill.modelData.focused
+                            opacity: pill.modelData.focused || pill.modelData.active ? 1 : 0.7
+                        }
                     }
                 }
 

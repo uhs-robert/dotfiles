@@ -151,8 +151,28 @@ Rectangle {
         property: "opacity"
         from: 0
         to: 1
-        duration: 180
+        duration: Style.controller === "ps2" ? 420 : 180
         easing.type: Easing.OutCubic
+    }
+
+    // The PS2 bloom: a soft light that swells in with the card and fades once.
+    Loader {
+        active: Style.controller === "ps2"
+        anchors.fill: parent
+        z: 2
+        sourceComponent: Rectangle {
+            radius: root.radius
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.alpha(Theme.theme_primary_light, 0.4) }
+                GradientStop { position: 0.6; color: Qt.alpha(Theme.theme_primary, 0.12) }
+                GradientStop { position: 1; color: "transparent" }
+            }
+
+            SequentialAnimation on opacity {
+                NumberAnimation { from: 0; to: 1; duration: 220; easing.type: Easing.OutCubic }
+                NumberAnimation { to: 0; duration: 650; easing.type: Easing.InOutQuad }
+            }
+        }
     }
 
     // Closes with a short fade, then tells the state to actually drop the entry.

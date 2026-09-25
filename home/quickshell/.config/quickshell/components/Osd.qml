@@ -11,6 +11,7 @@ import "../theme"
 import "../services"
 import "snes" as Snes
 import "ps1" as Ps1
+import "ps2" as Ps2
 
 PanelWindow {
     id: root
@@ -53,6 +54,7 @@ PanelWindow {
     readonly property bool hud_layout: Style.osd_layout === "hud" && !root.showing_vox
     readonly property bool rpg_layout: Style.osd_layout === "rpg" && !root.showing_vox
     readonly property bool alert_layout: Style.osd_layout === "alert" && !root.showing_vox
+    readonly property bool glow_layout: Style.osd_layout === "glow" && !root.showing_vox
 
     readonly property string title: root.showing_vox ? root.vox_phase.toUpperCase() : root.kind.toUpperCase()
 
@@ -393,6 +395,20 @@ PanelWindow {
                     }
                 }
 
+                Loader {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Style.px(84)
+                    Layout.preferredHeight: Style.px(84)
+                    active: root.glow_layout
+                    visible: root.glow_layout
+                    sourceComponent: Ps2.GlowRing {
+                        value: root.level
+                        label: String(root.percent)
+                        caption: root.muted ? "Muted" : ""
+                        dimmed: root.muted
+                    }
+                }
+
                 OsdReadout {
                     visible: root.readout_layout
                     level: root.level
@@ -426,7 +442,7 @@ PanelWindow {
                 }
 
                 Item {
-                    visible: !root.readout_layout && !root.rpg_layout
+                    visible: !root.readout_layout && !root.rpg_layout && !root.glow_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: root.showing_vox ? Style.px(260) : Style.px(180)
                     Layout.preferredHeight: root.showing_vox ? Style.px(44) : meter.implicitHeight
@@ -452,7 +468,7 @@ PanelWindow {
                 }
 
                 Text {
-                    visible: !root.readout_layout && !root.ring_layout && !root.rpg_layout
+                    visible: !root.readout_layout && !root.ring_layout && !root.rpg_layout && !root.glow_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight

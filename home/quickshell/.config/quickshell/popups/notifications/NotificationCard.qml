@@ -9,6 +9,7 @@ import "../../services"
 import "../weather" as Weather
 import "../../components/snes" as Snes
 import "../../components/ps1" as Ps1
+import "../../components/ps2" as Ps2
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -25,7 +26,17 @@ Item {
     readonly property bool dialogue: Style.card_layout === "dialogue"
     // MGS codec calls: the app icon as the caller's portrait.
     readonly property bool codec: Style.console_views === "ps1"
+    readonly property bool dialog: Style.card_layout === "dialog"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
+
+    readonly property bool focused_valid: root.focused_action >= 0 && root.focused_action < root.actions.length
+
+    // What Enter does in the popup: the focused action, else the default.
+    function enter() {
+        if (!root.focused_valid) return root.invoke_requested();
+        NotificationState.invoke_action(root.entry, root.actions[root.focused_action]);
+        Popups.close();
+    }
 
     signal invoke_requested()
     signal select_requested()
@@ -84,6 +95,16 @@ Item {
 
         LockBrackets {
             shown: root.selected
+        }
+
+        Loader {
+            active: root.dialog
+            anchors.fill: parent
+            z: -1
+            sourceComponent: Ps2.DialogPanel {
+                selected: root.selected
+                accent: root.critical ? Theme.error : Theme.theme_primary_light
+            }
         }
 
         CardRule {
@@ -281,7 +302,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight
-                    label: root.dialogue ? (root.notification ? root.notification.appName : "") + ":" : root.channels ? (root.notification ? root.notification.appName : "") : Style.boxed_cards
+                    label: root.dialogue ? (root.notification ? root.notification.appName : "") + ":" : root.channels || root.dialog ? (root.notification ? root.notification.appName : "") + (root.dialog && root.entry ? "  ·  " + root.relative_time(root.entry.time) + root.urgency_tag : "") : Style.boxed_cards
                         ? "[" + (root.notification ? root.notification.appName : "") + "] " + (root.entry ? root.relative_time(root.entry.time) : "") + root.urgency_tag
                         : (root.notification ? root.notification.appName : "") + "  ·  " + (root.entry ? root.relative_time(root.entry.time) : "")
                     rightPadding: root.dialogue ? speaker_time.implicitWidth + 8 : root.channels ? priority_text.implicitWidth + 8 : 0
@@ -405,6 +426,19 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+
+                Loader {
+                    active: root.dialog && root.selected
+                    visible: active
+                    Layout.topMargin: 4
+                    sourceComponent: Ps2.DialogPrompt {
+                        entries: [
+                            { button: "cross", text: root.focused_valid ? root.actions[root.focused_action].text : "Open", action: () => root.enter() },
+                            { key: "d", text: "Dismiss", action: () => NotificationState.dismiss(root.entry) },
+                            { button: "circle", text: "Close", action: () => Popups.close() }
+                        ]
                     }
                 }
             }
