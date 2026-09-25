@@ -193,7 +193,13 @@ Item {
                 readonly property bool plain: !root.materia && !root.doors && !pill.qblock && !pill.ps2 && !root.slots && !pill.map && !root.party && !pill.diamond
                 readonly property bool dot: pill.plain && pill.is_empty && !pill.modelData.active && Style.bar_workspace_dot.a > 0
 
-                height: pill.dot ? 7 : root.pill_height
+                // Hovered dots grow and light a core, the only hint they can be clicked.
+                property real dot_size: pill_hover.hovered ? 11 : 7
+                Behavior on dot_size {
+                    NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+                }
+
+                height: pill.dot ? pill.dot_size : root.pill_height
                 y: (root.pill_height - height) / 2
                 width: root.materia ? (is_empty ? root.slot_size : icons.implicitWidth) : root.doors ? (modelData.active && !is_empty ? icons.implicitWidth + height - 4 : height) : root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? root.tile_face * 2 + 4 : icons.implicitWidth + root.tile_face + 6) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12) + Style.bar_pill_pad * 2
                 radius: pill.map || root.party || root.slots ? 0 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
@@ -340,6 +346,20 @@ Item {
                 Sheen {
                     color_top: pill.plain && !pill.dot ? Style.sheen : "transparent"
                     corner: pill.radius
+                }
+
+                Rectangle {
+                    visible: pill.dot && opacity > 0
+                    anchors.centerIn: parent
+                    width: 5
+                    height: 5
+                    radius: 2.5
+                    color: Style.bar_workspace_focused
+                    opacity: pill_hover.hovered ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+                    }
                 }
 
                 MateriaOrb {

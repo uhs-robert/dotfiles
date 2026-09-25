@@ -56,7 +56,7 @@ PanelWindow {
     readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
     readonly property bool hud_layout: Style.osd_layout === "hud" && !root.showing_vox
     // Console OSD art picked by osd_layout, with the default parts it replaces.
-    readonly property var console_osd: root.showing_vox ? null : ({
+    readonly property var console_osd: root.showing_vox ? (Style.osd_layout === "tile" ? { art: tile_vox_osd, hides: ["glyph", "meter", "percent"], framed: true, untitled: true } : null) : ({
             rpg: { art: rpg_osd, hides: ["glyph", "meter", "percent"] },
             alert: { art: alert_osd, hides: ["glyph"] },
             glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) },
@@ -486,7 +486,7 @@ PanelWindow {
                         visible: root.showing_vox
                         anchors.fill: parent
                         frozen: !root.vox_recording
-                        running: root.showing_vox && root.visible
+                        running: root.showing_vox && root.visible && !root.replaced("meter")
                     }
                 }
 
@@ -542,6 +542,16 @@ PanelWindow {
                 muted: root.muted
                 glyph: root.glyph
                 device: root.kind === "volume" && root.sink ? root.sink.description || root.sink.name : ""
+            }
+        }
+
+        Component {
+            id: tile_vox_osd
+            Modern.VoxTileOsd {
+                recording: root.vox_recording
+                elapsed: root.elapsed
+                glyph: "󰍬"
+                running: root.showing_vox && root.visible
             }
         }
 

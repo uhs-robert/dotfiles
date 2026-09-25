@@ -38,13 +38,34 @@ Item {
         width: root.well_size
         height: root.well_size
         radius: width / 2
-        color: Style.bar_start_well
+        color: hover_handler.hovered ? Qt.tint(Style.bar_start_well, Qt.alpha(Theme.theme_primary, 0.22)) : Style.bar_start_well
         border.width: 1
         border.color: Qt.alpha(Theme.bg_shadow, 0.3)
+
+        Behavior on color {
+            ColorAnimation { duration: 140 }
+        }
+    }
+
+    // A round focus ring around the well in place of the square hover.
+    Rectangle {
+        visible: root.well && !root.lualine && opacity > 0
+        anchors.centerIn: parent
+        width: root.well_size + 5
+        height: width
+        radius: width / 2
+        color: "transparent"
+        border.width: 1.5
+        border.color: Theme.theme_primary
+        opacity: hover_handler.hovered ? 0.9 : 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+        }
     }
 
     Rectangle {
-        visible: !root.lualine
+        visible: !root.lualine && !root.well
         anchors.fill: parent
         anchors.margins: -6
         radius: Style.bar_radius(4)
