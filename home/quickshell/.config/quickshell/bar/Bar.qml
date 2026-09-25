@@ -216,7 +216,8 @@ Item {
         id: right_island
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        bg_color: Style.bar_side_bg
+        // Lualine x shares section c's mantle, so the idle cap melts into the bar like lualine's c|x boundary.
+        bg_color: Style.bar_lualine ? Theme.bg_mantle : Style.bar_side_bg
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
@@ -261,7 +262,7 @@ Item {
                     height: right_island.height
                     entries: root.lualine_entries.filter(e => root.lualine_section(e.base) === "x")
                     wire: parent.wire
-                    fill: Style.bar_side_bg
+                    fill: Theme.bg_mantle
                     screen_name: root.screen_name
                 }
 

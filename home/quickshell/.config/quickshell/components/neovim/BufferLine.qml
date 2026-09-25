@@ -77,24 +77,6 @@ Item {
                     }
 
                     Shape {
-                        visible: !slot.lit && !slot.prev_lit
-                        anchors.centerIn: parent
-                        width: 6
-                        height: 16
-                        preferredRendererType: Shape.CurveRenderer
-
-                        ShapePath {
-                            strokeWidth: 1.2
-                            strokeColor: Style.text_muted
-                            fillColor: "transparent"
-                            startX: 1
-                            startY: 1
-                            PathLine { x: 5; y: 8 }
-                            PathLine { x: 1; y: 15 }
-                        }
-                    }
-
-                    Shape {
                         visible: slot.lit && !slot.prev_lit
                         anchors.fill: parent
                         preferredRendererType: Shape.CurveRenderer
