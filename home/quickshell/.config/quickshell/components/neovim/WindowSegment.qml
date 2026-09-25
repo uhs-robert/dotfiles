@@ -12,7 +12,7 @@ Item {
 
     property string screen_name: ""
     property int bar_height: 24
-    // The room the directory may take before it elides from the left.
+    // The room the path may take before it elides from the left.
     property real max_width: 400
 
     property string app_name: ""
@@ -64,8 +64,18 @@ Item {
         if (!cwd_proc.running) cwd_proc.start_pending();
     }
 
-    function shorten(path) {
-        return root.home && (path === root.home || path.startsWith(root.home + "/")) ? "~" + path.slice(root.home.length) : path;
+    // Lualine-style path: ~ for $HOME, the last dir and its two parents whole (plus the file name), higher dirs to one
+    // letter except dot-folders, then 48 chars at most, cut from the left.
+    function shorten(path, is_file) {
+        if (path === "") return "";
+        const p = root.home && (path === root.home || path.startsWith(root.home + "/")) ? "~" + path.slice(root.home.length) : path;
+        const parts = p.split("/");
+        const keep = parts.length - (is_file ? 4 : 3);
+        const short = parts.map((d, i) => i >= keep || d === "" || d === "~" || d.startsWith(".") ? d : d.charAt(0)).join("/");
+        if (short.length <= 48) return short;
+        const tail = short.slice(short.length - 46);
+        const cut = tail.indexOf("/");
+        return "\u2026/" + (cut >= 0 ? tail.slice(cut + 1) : tail);
     }
 
     // Runs once per event; a change while it runs queues one more pass.
@@ -81,7 +91,11 @@ Item {
         }
 
         stdout: StdioCollector {
-            onStreamFinished: root.cwd = root.shorten(text.trim())
+            // window-cwd marks an open Neovim file with "file:".
+            onStreamFinished: {
+                const out = text.trim();
+                root.cwd = out.startsWith("file:") ? root.shorten(out.slice(5), true) : root.shorten(out, false);
+            }
         }
         onExited: cwd_proc.start_pending()
     }
