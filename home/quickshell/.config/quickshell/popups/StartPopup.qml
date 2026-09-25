@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -68,6 +69,14 @@ Popup {
         focus: true
 
         Loader {
+            active: root.st.controller === "ps2"
+            anchors.fill: parent
+            anchors.margins: -12
+            z: -2
+            sourceComponent: Ps2.Haze {}
+        }
+
+        Loader {
             active: root.st.schematic.a > 0
             visible: !root.confirm
             anchors.right: parent.right
@@ -128,6 +137,15 @@ Popup {
                     selected: index === root.selected
                     key: root.keys[row.index]
                     slot: row.index + 1
+
+                    Loader {
+                        active: root.st.controller === "ps2"
+                        anchors.fill: parent
+                        z: -1
+                        sourceComponent: Ps2.Block {
+                            selected: row.selected
+                        }
+                    }
 
                     RowLayout {
                         anchors.left: parent.left
