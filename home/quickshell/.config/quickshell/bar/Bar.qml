@@ -120,6 +120,7 @@ Item {
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
+        scanline_period: Style.scanline_period
         shade_color: Style.frame_shade
         shade_vertical: Style.shade_vertical
         dither_color: Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2))
@@ -159,6 +160,7 @@ Item {
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
+        scanline_period: Style.scanline_period
         shade_color: Style.frame_shade
         shade_vertical: Style.shade_vertical
         dither_color: Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2))
@@ -218,6 +220,7 @@ Item {
         border_width: Style.bar_border_width
         border_color: Style.bar_border_color
         scanline_color: Style.bar_scanline_color
+        scanline_period: Style.scanline_period
         shade_color: Style.frame_shade
         shade_vertical: Style.shade_vertical
         dither_color: Qt.alpha(Style.dither, Math.min(1, Style.dither.a * 2.2))

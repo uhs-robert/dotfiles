@@ -276,7 +276,7 @@ PanelWindow {
     readonly property bool stripped: root.st.title_strip.a > 0
     readonly property bool banded: root.st.title_band.a > 0 || root.stripped
     readonly property real band_height: Math.max(26, title_tab.height + 4)
-    readonly property real engraving_height: root.st.frame_engraving !== "" ? engraving.implicitHeight + 4 : 0
+    readonly property real engraving_height: root.st.frame_engraving !== "" ? Math.ceil(engraving_metrics.height) + 4 : 0
     readonly property real header_height: (has_title ? (root.banded ? root.band_height + 8 : title_tab.height + title_gap) + root.st.inset_pad : 0) + root.st.lcd_margin * 2 + root.device_top
     // Console inset rings also clear a content-drawn footer.
     readonly property real footer_height: (has_footer ? base_footer.implicitHeight + 10 + root.st.inset_pad : root.st.console_views !== "" && root.st.frame_inset_width > 0 ? root.st.inset_pad : 0) + root.st.lcd_margin * 2 + engraving_height + root.device_bottom
@@ -584,6 +584,11 @@ PanelWindow {
                 font.letterSpacing: 2.5
             }
 
+            FontMetrics {
+                id: engraving_metrics
+                font: engraving.font
+            }
+
             // Everything drawn on the frame; styles with a glow or text shadow render it as one layer.
             Item {
                 id: glow_layer
@@ -868,13 +873,14 @@ PanelWindow {
             Item {
                 visible: root.st.scanlines && root.st.frame_octagon <= 0
                 anchors.fill: parent
+                anchors.margins: root.frame_radius > 0 ? root.st.frame_border_width : 0
 
                 Repeater {
-                    model: root.st.scanlines && root.st.frame_octagon <= 0 ? Math.max(0, Math.ceil(parent.height / 3)) : 0
+                    model: root.st.scanlines && root.st.frame_octagon <= 0 ? Math.max(0, Math.ceil(parent.height / root.st.scanline_period)) : 0
 
                     Rectangle {
                         required property int index
-                        y: index * 3
+                        y: index * root.st.scanline_period
                         width: parent.width
                         height: 1
                         color: root.st.scanline_color
