@@ -115,7 +115,7 @@ Row {
             x: parent.pad
             anchors.verticalCenter: parent.verticalCenter
             width: Math.max(implicitWidth, Math.ceil(time_metrics.advanceWidth))
-            text: root.chip || root.lualine ? root.digits_text : root.time_text
+            text: root.on_accent ? root.digits_text + " " + (Timezones.shift(clock.date).getHours() < 12 ? "AM" : "PM") : root.chip || root.lualine ? root.digits_text : root.time_text
             color: root.on_accent ? root.ink : root.chip || root.lualine ? Style.bar_clock_fg : Style.bar_fg
             font.family: root.chip ? Style.bar_clock_font : Style.bar_font_family
             font.features: { "tnum": 1 }
@@ -142,7 +142,7 @@ Row {
     }
 
     Text {
-        visible: !root.compact && !root.horizon && !root.capsule
+        visible: !root.compact && !root.horizon && !root.capsule && !root.on_accent
         anchors.verticalCenter: parent.verticalCenter
         text: root.hud ? " WORLD" : root.lualine ? "\u00b7" : "|"
         color: root.on_accent ? Qt.alpha(root.ink, 0.6) : root.lualine ? Style.text_dim : Theme.theme_primary
@@ -155,7 +155,7 @@ Row {
     }
 
     Text {
-        visible: !root.compact && !root.capsule
+        visible: !root.compact && !root.capsule && !root.on_accent
         anchors.verticalCenter: parent.verticalCenter
         text: root.date_text
         color: root.on_accent ? Qt.alpha(root.ink, 0.75) : root.lualine ? Style.text_dim : Style.bar_fg

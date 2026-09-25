@@ -55,14 +55,14 @@ Item {
     readonly property var left_entries: root.build_entries(root.rule ? root.rule.left : [])
     readonly property var center_entries: root.build_entries(root.rule ? root.rule.center : [])
     readonly property var right_entries: root.build_entries(root.rule ? root.rule.right : [])
-    // Lualine's right-island section for a module; bars.json order is kept inside each, center modules after right ones.
+    // Lualine's right-island section for a module; bars.json order is kept inside each, center modules first.
     function lualine_section(base) {
         return base === "notifications" || base === "clock" ? "z" : ["network", "bluetooth", "voxtype"].indexOf(base) >= 0 ? "y" : "x";
     }
 
     readonly property bool lists_media: [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "media"))
-    // Everything the lualine right island holds: right and center modules, plus media in x when no island lists it.
-    readonly property var lualine_entries: root.right_entries.concat(root.center_entries, root.lists_media ? [] : [{ base: "media", arg: "", component: media_component }])
+    // Everything the lualine right island holds: center modules, then right ones.
+    readonly property var lualine_entries: root.center_entries.concat(root.right_entries)
     readonly property var right_side: Style.bar_lualine ? root.lualine_entries : root.right_entries
     // Right-island entries in drawn order.
     readonly property var right_drawn: Style.bar_lualine ? ["x", "y", "z"].reduce((out, k) => out.concat(root.lualine_entries.filter(e => root.lualine_section(e.base) === k)), []) : root.right_entries
@@ -283,7 +283,10 @@ Item {
         if (island) Popups.register_default("clock", island.body_item, island.bg_color, root.screen_name);
         // Without a media module in bars.json, the media popup drops from the center island.
         Popups.unregister("media", root.screen_name, center_island.body_item);
+        Popups.unregister("media", root.screen_name, right_island.body_item);
         if (root.has_center && !root.lists_media) Popups.register_default("media", center_island.body_item, center_island.bg_color, root.screen_name);
+        // Lualine has no center island, so the media popup drops from the right one.
+        else if (Style.bar_lualine && !root.lists_media) Popups.register_default("media", right_island.body_item, right_island.bg_color, root.screen_name);
     }
 
     // Popup names in bar order for Ctrl+H/L walking; workspaces and voxtype have no popup.
@@ -293,7 +296,7 @@ Item {
 
     function sync_popup_order() {
         const center_names = root.has_center ? root.popup_names(root.center_entries) : [];
-        if (root.has_center && !root.lists_media) center_names.push("media");
+        if ((root.has_center || Style.bar_lualine) && !root.lists_media) center_names.push("media");
         Popups.register_order(root.screen_name, root.popup_names(root.left_entries).concat(center_names, root.popup_names(root.right_drawn)));
     }
 
