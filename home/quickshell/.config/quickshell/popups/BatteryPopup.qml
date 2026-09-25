@@ -52,6 +52,7 @@ Popup {
     property bool ppd_available: false
     readonly property bool nes: root.st.console_views === "nes"
     readonly property real status_indent: root.nes ? 22 : 0
+    readonly property real percent_width: percent_metrics.height > 0 ? Math.max(32, Math.ceil(percent_metrics.advanceWidth("100%"))) : 32
     property int selected: 0
 
     readonly property var profiles: {
@@ -256,6 +257,12 @@ Popup {
                 font.pixelSize: root.st.font_size - 2
             }
 
+            FontMetrics {
+                id: percent_metrics
+                font.family: root.st.font_family
+                font.pixelSize: root.st.font_size - 1
+            }
+
             MenuRow {
                 id: brightness_row
                 Layout.fillWidth: true
@@ -284,7 +291,7 @@ Popup {
                     }
 
                     Text {
-                        Layout.preferredWidth: 32
+                        Layout.preferredWidth: root.percent_width
                         text: Backlight.percent + "%"
                         color: brightness_row.fg(root.st.text_fg)
                         font.family: root.st.font_family
@@ -321,7 +328,7 @@ Popup {
                     }
 
                     Text {
-                        Layout.preferredWidth: 32
+                        Layout.preferredWidth: root.percent_width
                         text: Backlight.kbd_percent + "%"
                         color: kbd_row.fg(root.st.text_fg)
                         font.family: root.st.font_family
