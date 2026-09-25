@@ -8,6 +8,7 @@ import "../../theme"
 import "../../services"
 import "../../components"
 import "../../components/nes" as Nes
+import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
 
 Item {
@@ -16,10 +17,10 @@ Item {
     property string screen_name: ""
     property bool compact: false
 
-    readonly property int icon_size: compact ? 16 : 19
-    readonly property int pill_height: compact ? 20 : 22
-    // Memory card slots: square blocks numbered by workspace.
+    // Memory card save icons: one bevelled card per workspace holding its lead app.
     readonly property bool slots: Style.console_views === "ps1"
+    readonly property int icon_size: slots ? (compact ? 15 : 17) : compact ? 16 : 19
+    readonly property int pill_height: slots ? (compact ? 22 : 26) : compact ? 20 : 22
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -82,7 +83,7 @@ Item {
 
     Row {
         id: row
-        spacing: root.compact ? 6 : 8
+        spacing: root.slots ? 6 : root.compact ? 6 : 8
 
         Repeater {
             model: root.workspace_list
@@ -96,17 +97,22 @@ Item {
                 // Mario ? blocks; the focused workspace is the one already hit.
                 readonly property bool qblock: Style.console_views === "nes"
                 readonly property bool ps2: Style.console_views === "ps2"
-                readonly property real slot_space: root.slots ? slot_text.implicitWidth + 6 : 0
+                readonly property var toplevels: {
+                    const all = modelData.toplevels.values;
+                    if (!root.slots || all.length < 2) return all;
+                    const lead = all.find(t => t === Hyprland.activeToplevel);
+                    return [lead || all[0]];
+                }
 
                 height: root.pill_height
-                width: is_empty ? Math.max(height, pill.slot_space + 6) : icons.implicitWidth + (modelData.active ? 22 : 12) + pill.slot_space
-                radius: root.slots ? 3 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
+                width: root.slots ? height : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
+                radius: root.slots ? 2 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
-                color: pill.qblock || pill.ps2 ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
-                border.width: root.slots ? 2 : Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
-                border.color: root.slots ? (modelData.focused ? Theme.theme_primary_light : Style.bar_border_color) : Style.bar_workspace_ring
+                color: pill.qblock || pill.ps2 || root.slots ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
+                border.width: !root.slots && Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
+                border.color: Style.bar_workspace_ring
 
                 Behavior on width {
                     NumberAnimation { duration: 280; easing.type: Easing.InOutCubic }
@@ -115,10 +121,18 @@ Item {
                     ColorAnimation { duration: 280; easing.type: Easing.InOutCubic }
                 }
 
-                // Console pill art: NES ? blocks, PS2 save cubes and lit blocks.
+                // Console pill art: NES ? blocks, PS1 save cards, PS2 save cubes and lit blocks.
                 Loader {
                     anchors.fill: parent
-                    sourceComponent: pill.qblock ? nes_qblock : pill.ps2 ? (pill.is_empty ? ps2_cube : ps2_block) : null
+                    sourceComponent: pill.qblock ? nes_qblock : root.slots ? ps1_card : pill.ps2 ? (pill.is_empty ? ps2_cube : ps2_block) : null
+
+                    Component {
+                        id: ps1_card
+                        Ps1.SaveCard {
+                            selected: pill.modelData.focused
+                            empty: pill.is_empty
+                        }
+                    }
 
                     Component {
                         id: nes_qblock
@@ -179,35 +193,22 @@ Item {
                     id: pill_hover
                 }
 
-                Text {
-                    id: slot_text
-                    visible: root.slots
-                    x: pill.is_empty ? (pill.width - implicitWidth) / 2 : 5
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: String(pill.modelData.id).padStart(2, "0")
-                    color: pill.modelData.focused ? Theme.bg_crust : Style.bar_fg
-                    font.family: Style.bar_font_family
-                    font.pixelSize: Style.bar_font_size - 3
-                    font.bold: pill.modelData.focused
-                    style: pill.modelData.focused ? Text.Normal : Style.bar_text_style
-                    styleColor: Style.bar_glow_color
-                }
-
                 Row {
                     id: icons
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: pill.slot_space / 2
+                    anchors.horizontalCenterOffset: root.slots ? -3 : 0
+                    anchors.verticalCenterOffset: root.slots ? -3 : 0
                     spacing: 2
 
                     Repeater {
-                        model: pill.modelData.toplevels.values
+                        model: pill.toplevels
 
                         Item {
                             id: icon_item
                             required property var modelData
 
-                            width: root.icon_size + 4
-                            height: root.icon_size + 4
+                            width: root.icon_size + (root.slots ? 0 : 4)
+                            height: width
 
                             IconImage {
                                 anchors.centerIn: parent
@@ -235,6 +236,20 @@ Item {
                             }
                         }
                     }
+                }
+
+                Text {
+                    visible: root.slots
+                    anchors.right: parent.right
+                    anchors.rightMargin: 2
+                    anchors.bottom: parent.bottom
+                    text: pill.modelData.id
+                    color: pill.modelData.focused ? Theme.fg_strong : Theme.fg_dim
+                    font.family: Style.bar_font_family
+                    font.pixelSize: 11
+                    lineHeight: 0.8
+                    style: Text.Raised
+                    styleColor: Theme.bg_shadow
                 }
             }
         }
