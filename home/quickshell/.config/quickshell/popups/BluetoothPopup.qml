@@ -5,6 +5,7 @@ import Quickshell.Bluetooth as QsBt
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -18,6 +19,9 @@ Popup {
     readonly property var adapter: QsBt.Bluetooth.defaultAdapter
     readonly property bool has_adapter: !!adapter
     readonly property var devices: has_adapter ? adapter.devices.values.filter(d => d.paired) : []
+
+    // The memory card slot screen: each device a block, lit while connected.
+    readonly property bool slots: root.st.console_views === "ps1"
 
     // -1 is the power switch above the list.
     property int selected: 0
@@ -108,16 +112,28 @@ Popup {
 
                     Layout.fillWidth: true
                     Layout.topMargin: device_row.index === 0 ? 6 : 0
-                    height: Style.px(22)
+                    height: root.slots ? Style.px(30) : Style.px(22)
                     selected: device_row.index === root.selected
 
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 6 + device_row.inset
                         anchors.rightMargin: 6 + device_row.key_space
-                        spacing: 6
+                        spacing: root.slots ? 8 : 6
+
+                        Loader {
+                            active: root.slots
+                            visible: active
+                            sourceComponent: Ps1.MemBlock {
+                                size: device_row.height - 4
+                                glyph: device_row.modelData.connected ? "󰂱" : "󰂯"
+                                glyph_color: device_row.modelData.connected ? Theme.theme_primary_light : root.st.text_dim
+                                lit: device_row.modelData.connected
+                            }
+                        }
 
                         Text {
+                            visible: !root.slots
                             text: device_row.modelData.connected ? "󰂱" : "󰂯"
                             color: device_row.fg(device_row.modelData.connected ? root.st.text_primary : root.st.text_dim)
                             font.family: root.st.font_family

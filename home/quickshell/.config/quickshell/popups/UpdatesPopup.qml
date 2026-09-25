@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -21,6 +22,13 @@ Popup {
     readonly property var current_list: root.current_sub === 0 ? UpdatesState.official : UpdatesState.aur
 
     property int selected: 0
+    // A memory card block grid in place of the list.
+    readonly property bool blocks: root.st.console_views === "ps1"
+
+    function reveal(index) {
+        if (root.blocks && block_loader.item) block_loader.item.reveal(index);
+        else row_list.positionViewAtIndex(index, ListView.Contain);
+    }
 
     readonly property bool is_open: Popups.open_name === "updates"
     onIs_openChanged: if (is_open) {
@@ -35,7 +43,7 @@ Popup {
     search_cursor: root.selected
     onSearch_select: index => {
         root.selected = index;
-        row_list.positionViewAtIndex(index, ListView.Contain);
+        root.reveal(index);
     }
     onJump_first: root.go_first()
     onJump_last: root.go_last()
@@ -43,17 +51,17 @@ Popup {
     function move_selected(delta) {
         if (root.current_list.length === 0) return;
         root.selected = root.wrap_index(root.selected, delta, 0, root.current_list.length);
-        row_list.positionViewAtIndex(root.selected, ListView.Contain);
+        root.reveal(root.selected);
     }
 
     function go_first() {
         root.selected = 0;
-        row_list.positionViewAtIndex(root.selected, ListView.Contain);
+        root.reveal(root.selected);
     }
 
     function go_last() {
         root.selected = Math.max(0, root.current_list.length - 1);
-        row_list.positionViewAtIndex(root.selected, ListView.Contain);
+        root.reveal(root.selected);
     }
 
     function run_selected_upgrade() {
@@ -135,10 +143,22 @@ Popup {
                     font.pixelSize: root.st.font_size - 1
                 }
 
+                Loader {
+                    id: block_loader
+                    anchors.fill: parent
+                    active: root.blocks && root.current_list.length > 0
+                    visible: active
+                    sourceComponent: Ps1.UpdateBlocks {
+                        packages: root.current_list
+                        selected: root.selected
+                        onPicked: index => root.selected = index
+                    }
+                }
+
                 ListView {
                     id: row_list
                     anchors.fill: parent
-                    visible: root.current_list.length > 0
+                    visible: !root.blocks && root.current_list.length > 0
                     clip: true
                     spacing: 4
                     model: root.current_list
