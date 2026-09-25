@@ -5,6 +5,7 @@ import Quickshell.Bluetooth as QsBt
 import "../components"
 import "../theme"
 import "../services"
+import "../components/nes" as Nes
 
 Popup {
     id: root
@@ -131,6 +132,15 @@ Popup {
                             color: device_row.fg(device_row.modelData.connected ? root.st.text_accent : root.st.text_fg)
                             font.family: root.st.font_family
                             font.pixelSize: root.st.font_size - 1
+                        }
+
+                        Loader {
+                            active: root.st.console_skin === "nes" && device_row.modelData.batteryAvailable
+                            visible: active
+                            sourceComponent: Nes.BlockMeter {
+                                size: 12
+                                value: device_row.modelData.battery
+                            }
                         }
 
                         Text {
