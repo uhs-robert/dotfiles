@@ -1691,7 +1691,6 @@ Singleton {
                     bar_border_color: edge,
                     bar_rounded: true,
                     bar_round_caps: true,
-                    bar_horizon: hair,
                     bar_workspace_focused: sand,
                     bar_workspace_active: Theme.theme_primary_light,
                     bar_workspace_idle: Theme.bg_surface,
