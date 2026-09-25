@@ -12,11 +12,12 @@ Item {
     property string screen_name: ""
     property Item island: null
     property color island_color: "transparent"
+    property int bar_height: 30
 
     // Lualine: the button is the HyprVim mode chip, full bar height.
     readonly property bool lualine: Style.bar_lualine
     implicitWidth: root.lualine && chip_loader.item ? chip_loader.item.implicitWidth : icon.implicitSize
-    implicitHeight: root.lualine ? (root.island ? root.island.height : 30) : icon.implicitSize
+    implicitHeight: root.lualine ? root.bar_height : icon.implicitSize
 
     Loader {
         id: chip_loader

@@ -15,7 +15,7 @@ Item {
     required property Item host
     property var workspaces: []
     property bool compact: false
-    property real bar_height: 30
+    property int bar_height: 30
 
     readonly property int glyph: root.compact ? 14 : 16
     readonly property color accent: Modes.kind(SubmapState.submap_name) === "insert" ? Theme.theme_secondary : Theme.theme_primary

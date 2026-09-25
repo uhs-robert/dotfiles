@@ -15,21 +15,17 @@ Item {
     // The previous section's fill behind the lead arrow; transparent draws none.
     property color lead_bg: "transparent"
     property bool separators: true
-    property int first_shown: -1
-    readonly property bool shown: root.first_shown >= 0
-    readonly property real arrow: root.lead_bg.a > 0 ? Math.round(root.height * 0.4) : 0
-
-    function recount() {
-        let first = -1;
+    // A strong fill: modules with an `on_accent` property draw in ink colors on it.
+    property bool accent: false
+    readonly property int first_shown: {
         for (let i = 0; i < cells.count; i++) {
             const cell = cells.itemAt(i);
-            if (cell && cell.wanted) {
-                first = i;
-                break;
-            }
+            if (cell && cell.wanted) return i;
         }
-        root.first_shown = first;
+        return -1;
     }
+    readonly property bool shown: root.first_shown >= 0
+    readonly property real arrow: root.lead_bg.a > 0 ? Math.round(root.height * 0.4) : 0
 
     visible: root.shown
     implicitWidth: root.arrow + Math.ceil(row.implicitWidth) + 20
@@ -71,8 +67,6 @@ Item {
         Repeater {
             id: cells
             model: root.entries
-            onItemAdded: Qt.callLater(root.recount)
-            onItemRemoved: Qt.callLater(root.recount)
 
             RowLayout {
                 id: cell
@@ -83,7 +77,6 @@ Item {
 
                 visible: cell.wanted
                 spacing: 9
-                onWantedChanged: Qt.callLater(root.recount)
 
                 Shape {
                     visible: root.separators && cell.index > root.first_shown
@@ -107,7 +100,10 @@ Item {
                     id: loader
                     Layout.alignment: Qt.AlignVCenter
                     sourceComponent: cell.modelData.component
-                    onLoaded: if (root.wire) root.wire(item, cell.modelData)
+                    onLoaded: {
+                        if (item.hasOwnProperty("on_accent")) item.on_accent = Qt.binding(() => root.accent);
+                        if (root.wire) root.wire(item, cell.modelData);
+                    }
                 }
             }
         }

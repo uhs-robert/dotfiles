@@ -13,6 +13,7 @@ Item {
     property bool hovered: false
     readonly property string kind: Modes.kind(SubmapState.submap_name)
     readonly property color mode_color: root.kind === "normal" ? Theme.theme_primary : root.kind === "insert" ? Theme.theme_secondary : root.kind === "visual" ? Theme.magenta : root.kind === "replace" ? Theme.theme_label : SubmapState.submap_color
+    readonly property color fill: root.hovered ? Qt.tint(root.mode_color, Qt.alpha(Theme.fg_strong, 0.15)) : root.mode_color
     readonly property real arrow: Math.round(root.height * 0.4)
 
     implicitWidth: Math.ceil(content.width) + 20 + root.arrow
@@ -26,7 +27,7 @@ Item {
     Rectangle {
         width: root.width - root.arrow
         height: root.height
-        color: root.hovered ? Qt.tint(root.mode_color, Qt.alpha(Theme.fg_strong, 0.15)) : root.mode_color
+        color: root.fill
     }
 
     Row {
@@ -70,7 +71,7 @@ Item {
 
         ShapePath {
             strokeWidth: -1
-            fillColor: root.hovered ? Qt.tint(root.mode_color, Qt.alpha(Theme.fg_strong, 0.15)) : root.mode_color
+            fillColor: root.fill
             startX: 0
             startY: 0
             PathLine { x: root.arrow; y: root.height / 2 }
