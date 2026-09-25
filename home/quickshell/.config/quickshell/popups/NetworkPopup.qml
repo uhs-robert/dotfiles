@@ -7,6 +7,7 @@ import Quickshell.Networking
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -43,6 +44,7 @@ Popup {
         return null;
     }
 
+    readonly property bool ps2: root.st.controller === "ps2"
     readonly property var wifi_glyphs: ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
 
     function signal_glyph(strength) {
@@ -499,6 +501,40 @@ Popup {
                 spacing: 6
                 visible: !root.on_details
 
+                Loader {
+                    active: root.ps2
+                    visible: active
+                    Layout.fillWidth: true
+                    sourceComponent: Column {
+                        readonly property var wifi: root.active_wifi_network
+                        readonly property bool wired: !!root.wired_device && root.wired_device.connected
+                        spacing: 0
+
+                        Ps2.ConfigRow {
+                            width: parent.width
+                            label: "Connection"
+                            value: parent.wifi ? parent.wifi.name : parent.wired ? "Wired: " + root.wired_device.name : "Not connected"
+                            value_color: parent.wifi || parent.wired ? Theme.fg_strong : root.st.text_muted
+                        }
+
+                        Ps2.ConfigRow {
+                            visible: !!parent.wifi
+                            width: parent.width
+                            label: "Signal"
+                            value: parent.wifi ? Math.round(parent.wifi.signalStrength * 100) + "%" : ""
+                            level: parent.wifi ? parent.wifi.signalStrength : -1
+                        }
+
+                        Ps2.ConfigRow {
+                            visible: text_ip !== ""
+                            readonly property string text_ip: parent.wifi ? root.wifi_ipv4 : parent.wired ? root.wired_ipv4 : ""
+                            width: parent.width
+                            label: "IP Address"
+                            value: text_ip
+                        }
+                    }
+                }
+
                 ToggleRow {
                     label: "Wi-Fi"
                     checked: Networking.wifiEnabled
@@ -511,7 +547,7 @@ Popup {
                 }
 
                 Text {
-                    visible: !!root.active_wifi_network
+                    visible: !!root.active_wifi_network && !root.ps2
                     text: root.active_wifi_network
                         ? root.active_wifi_network.name + "  " + Math.round(root.active_wifi_network.signalStrength * 100) + "%"
                             + (root.wifi_ipv4 ? "  " + root.wifi_ipv4 : "")
@@ -522,7 +558,7 @@ Popup {
                 }
 
                 Text {
-                    visible: !!root.wired_device && root.wired_device.connected
+                    visible: !!root.wired_device && root.wired_device.connected && !root.ps2
                     text: root.wired_device ? "Wired: " + root.wired_device.name + (root.wired_ipv4 ? "  " + root.wired_ipv4 : "") : ""
                     color: root.st.text_accent
                     font.family: root.st.font_family
@@ -564,6 +600,16 @@ Popup {
                         width: network_list.width
                         height: Style.px(24)
                         selected: net_row.index === root.selected
+
+                        Loader {
+                            active: root.ps2
+                            anchors.fill: parent
+                            z: -1
+                            sourceComponent: Ps2.Block {
+                                selected: net_row.selected
+                                radius: 4
+                            }
+                        }
 
                         RowLayout {
                             anchors.fill: parent
