@@ -200,14 +200,14 @@ Item {
                     NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
                 }
 
-                height: pill.dot ? pill.dot_size : root.pill_height
+                height: pill.dot ? 11 : root.pill_height
                 y: (root.pill_height - height) / 2
                 width: root.materia ? (is_empty ? root.slot_size : icons.implicitWidth) : root.doors ? (modelData.active && !is_empty ? icons.implicitWidth + height - 4 : height) : root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? root.tile_face * 2 + 4 : icons.implicitWidth + root.tile_face + 6) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12) + Style.bar_pill_pad * 2
                 radius: pill.map || root.party || root.slots ? 0 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
-                color: root.materia || root.doors || pill.qblock || pill.ps2 || root.slots || pill.map || root.party ? "transparent" : pill.dot ? Style.bar_workspace_dot : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
+                color: root.materia || root.doors || pill.qblock || pill.ps2 || root.slots || pill.map || root.party ? "transparent" : pill.dot ? "transparent" : modelData.focused ? Style.bar_workspace_focused : modelData.active ? Style.bar_workspace_active : Style.bar_workspace_idle
                 border.width: !root.materia && !root.slots && !pill.map && !root.party && Style.bar_workspace_ring.a > 0 && !(Style.bar_workspace_diamond && !is_empty && modelData.focused) ? 1 : 0
                 border.color: Style.bar_workspace_ring
 
@@ -349,6 +349,16 @@ Item {
                     corner: pill.radius
                 }
 
+                // The dot is drawn inside a fixed 11px slot, so growing it moves nothing else.
+                Rectangle {
+                    visible: pill.dot
+                    anchors.centerIn: parent
+                    width: pill.dot_size
+                    height: width
+                    radius: width / 2
+                    color: Style.bar_workspace_dot
+                }
+
                 Rectangle {
                     visible: pill.dot && opacity > 0
                     anchors.centerIn: parent
@@ -376,7 +386,7 @@ Item {
                     anchors.leftMargin: pill.cursor_gap
                     radius: parent.radius
                     color: root.party ? Style.shade_3 : Theme.fg_core
-                    opacity: !root.slots && !root.materia && !pill.modelData.active && pill_hover.hovered ? 0.1 : 0
+                    opacity: !root.slots && !root.materia && !pill.dot && !pill.modelData.active && pill_hover.hovered ? 0.1 : 0
 
                     Behavior on opacity {
                         NumberAnimation { duration: 150 }
