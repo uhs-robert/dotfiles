@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -145,6 +146,15 @@ Popup {
             anchors.right: parent.right
             anchors.top: parent.top
             spacing: 8
+
+            Loader {
+                active: root.st.controller === "ps2"
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Ps2.ClockScreen {
+                    running: root.visible
+                }
+            }
 
             Text {
                 visible: !root.has_title
