@@ -12,6 +12,7 @@ import "../../components/gameboy" as Gameboy
 import "../../components/goldeneye" as Goldeneye
 import "../../components/metroid" as Metroid
 import "../../components/nes" as Nes
+import "../../components/oasis" as Oasis
 import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
 import "../../components/snes" as Snes
@@ -31,6 +32,8 @@ Item {
     readonly property bool party: Style.controller === "gameboy"
     // GoldenEye watch dial: workspace ticks on one arc replace the pills.
     readonly property bool dial: Style.workspace_art === "dial"
+    // Oasis night sky: a star per workspace on a low constellation, apps under their star.
+    readonly property bool stars: Style.workspace_art === "constellation"
     readonly property int party_gap: 8
     // FF7 weapon slot bar: apps are materia orbs in sockets linked in pairs.
     readonly property bool materia: Style.workspace_art === "materia"
@@ -144,8 +147,18 @@ Item {
             }
         }
 
+        Loader {
+            active: root.stars
+            visible: active
+            sourceComponent: Oasis.Constellation {
+                host: root
+                workspaces: root.workspace_list
+                compact: root.compact
+            }
+        }
+
         Repeater {
-            model: root.dial ? [] : root.workspace_list
+            model: root.dial || root.stars ? [] : root.workspace_list
 
             Rectangle {
                 id: pill

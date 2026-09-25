@@ -23,7 +23,10 @@ Item {
     property color inset_color: "transparent"
     // Visor glass: curved bottom corners instead of slants, glass gradient into bg_color, border along sides and bottom.
     property bool visor: false
-    readonly property bool shaded: root.shade_color.a > 0 || root.visor
+    // The visor's rounded bottom corners, filled with the shade instead of glass.
+    property bool round_caps: false
+    readonly property bool curved: root.visor || root.round_caps
+    readonly property bool shaded: root.shade_color.a > 0 || root.curved
     default property alias content: layout.children
 
     readonly property alias body_item: body
@@ -36,7 +39,7 @@ Item {
 
     // The popup style's shade and dither, behind the modules and clipped to the slants.
     Shape {
-        visible: root.shaded && !root.visor
+        visible: root.shaded && !root.curved
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -72,7 +75,7 @@ Item {
             return closed ? d + " L " + w + " 0 L 0 0 Z" : d;
         }
 
-        visible: root.visor
+        visible: root.curved
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -83,7 +86,7 @@ Item {
                 y1: 0
                 x2: 0
                 y2: root.height
-                GradientStop { position: 0; color: Qt.alpha(Theme.ui_visual_bg, 0.75) }
+                GradientStop { position: 0; color: root.visor ? Qt.alpha(Theme.ui_visual_bg, 0.75) : root.shade_color.a > 0 ? root.shade_color : root.bg_color }
                 GradientStop { position: 1; color: root.bg_color }
             }
             PathSvg { path: visor_glass.edge(0, true) }
@@ -205,7 +208,7 @@ Item {
 
     // Traces the slants and bottom edge; the sides on the screen edge stay open.
     Shape {
-        visible: root.border_width > 0 && !root.visor
+        visible: root.border_width > 0 && !root.curved
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
