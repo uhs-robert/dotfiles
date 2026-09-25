@@ -14,8 +14,11 @@ Item {
     readonly property int pixel: Math.max(1, Math.min(Math.floor(root.width / (root.count * 8)), Math.floor(root.height / 6)))
     readonly property var shape: [".11.11.", "1211111", "1111111", ".11111.", "..111..", "...1..."]
     readonly property color red: Qt.tint(Theme.red, Qt.alpha(Theme.theme_label, 0.4))
+    // The hearts sit left-aligned, so clicks map across this width only.
+    readonly property real art_width: hearts.width
 
     Row {
+        id: hearts
         anchors.verticalCenter: parent.verticalCenter
         spacing: root.pixel
 

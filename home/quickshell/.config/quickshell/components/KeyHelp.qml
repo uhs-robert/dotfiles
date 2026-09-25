@@ -3,7 +3,6 @@ import QtQuick
 import "../theme"
 import "../services"
 import "KeyHints.js" as KeyHints
-import "snes" as Snes
 
 // A popup's full key list, drawn over its content at the same size.
 Item {
@@ -37,18 +36,12 @@ Item {
         if (root.st.controller !== "") return Math.min(list.width * 0.5, Math.max(key_metrics.height + 2, measure.implicitWidth));
         const h = key_metrics.height + 2;
         let w = 0;
-        for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)) + root.pad_width(g.key));
+        for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)));
         return Math.min(list.width * 0.45, Math.max(h, w + 8));
     }
     readonly property real step: desc_metrics.height * 2
     readonly property real max_y: Math.max(0, flick.contentHeight - flick.height)
     property double last_g_ms: 0
-
-    // Room for a controller button drawn before its key; roughly its sprite plus label.
-    function pad_width(key) {
-        const b = KeyHints.button(key, root.st.controller);
-        return b === "" ? 0 : b.startsWith("dpad") ? 18 : 28 + b.length * 8;
-    }
 
     function scroll_to(y) {
         flick.contentY = Math.max(0, Math.min(root.max_y, y));
@@ -100,48 +93,19 @@ Item {
         onWheel: wheel => wheel.accepted = true
     }
 
-    // The key column with controller buttons: the button, then the keyboard key it stands for.
-    component HelpKeys: Row {
-        id: help_keys
-        property string key: ""
-        readonly property var st: Style.for_item(help_keys)
-        readonly property var pad: help_keys.st.controller !== "" ? KeyHints.pad_parts(help_keys.st.controller, help_keys.key) : []
-        spacing: 4
-
-        Loader {
-            active: help_keys.pad.length > 0
-            visible: active
-            anchors.verticalCenter: parent.verticalCenter
-            sourceComponent: ({ snes: snes_keys })[help_keys.st.controller] || null
-
-            Component {
-                id: snes_keys
-                Snes.SnesKey {
-                    parts: help_keys.pad
-                    text_color: help_keys.st.text_fg
-                    font_family: help_keys.st.font_family
-                    font_size: help_keys.st.font_size - 5
-                }
-            }
-        }
-
-        KeyBadge {
-            anchors.verticalCenter: parent.verticalCenter
-            key: KeyHints.with_glyphs(help_keys.key)
-        }
-    }
-
+    // Sizes the key column from the badges as drawn, controller buttons included.
     Column {
         id: measure
-        visible: root.st.controller !== ""
         opacity: 0
+        enabled: false
 
         Repeater {
             model: root.st.controller !== "" ? root.own_entries.concat(root.general_entries) : []
 
-            HelpKeys {
+            KeyBadge {
                 required property var modelData
-                key: modelData.key
+                with_key: true
+                key: KeyHints.with_glyphs(modelData.key)
             }
         }
     }
@@ -152,31 +116,20 @@ Item {
         Item {
             id: help_row
             required property var modelData
-            readonly property real pad_width: pad_loader.active ? pad_loader.width + 5 : 0
             width: list.width
-            height: Math.max(badge_clip.height, desc_text.implicitHeight, pad_loader.height)
-
-            Loader {
-                id: pad_loader
-                visible: active
-                active: KeyHints.controller_parts(help_row.modelData.key, root.st.controller).length > 0
-                x: root.pad_width - help_row.pad_width
-                y: Math.max(0, (desc_metrics.height - height) / 2)
-                source: active ? Qt.resolvedUrl(root.st.controller + "/ControllerKeys.qml") : ""
-                onLoaded: item.key = Qt.binding(() => help_row.modelData.key)
-            }
+            height: Math.max(badge_clip.height, desc_text.implicitHeight)
 
             Item {
                 id: badge_clip
-                x: root.pad_width
                 y: Math.max(0, (desc_metrics.height - height) / 2)
-                width: root.key_column - x
+                width: root.key_column
                 height: badge.height
                 clip: badge.width > width
 
-                HelpKeys {
+                KeyBadge {
                     id: badge
-                    key: help_row.modelData.key
+                    with_key: true
+                    key: KeyHints.with_glyphs(help_row.modelData.key)
                 }
             }
 

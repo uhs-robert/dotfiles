@@ -66,7 +66,7 @@ Column {
             font.pixelSize: 8
         }
 
-        Nes.ControllerButton {
+        Nes.NesButton {
             anchors.verticalCenter: parent.verticalCenter
             button: "a"
         }

@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import "../theme"
 import "KeyHints.js" as KeyHints
-import "snes" as Snes
 
 // The key hint line under a popup; some styles rule it off with a dashed line.
 Item {
@@ -17,9 +16,7 @@ Item {
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
     readonly property int rule_gap: root.st.footer_rule ? 5 : 0
-    readonly property var groups: KeyHints.parse(root.shown_text)
-    // Same order as groups, before glyphs, for controller button lookup.
-    readonly property var raw_groups: KeyHints.parse(root.filtered_text)
+    readonly property var groups: KeyHints.parse(root.filtered_text)
     // While the enclosing popup searches, its query line takes this footer's place at the same height.
     readonly property var popup: {
         for (let p = root.parent; p; p = p.parent) {
@@ -75,45 +72,27 @@ Item {
                 id: group
                 required property var modelData
                 required property int index
-                readonly property var pad: root.st.controller !== "" && root.raw_groups[group.index] ? KeyHints.pad_parts(root.st.controller, root.raw_groups[group.index].key) : []
+                readonly property bool pad: root.st.controller !== "" && KeyHints.controller_parts(root.st.controller, group.modelData.key).length > 0
                 spacing: 4
 
                 Loader {
-                    id: pad_loader
-                    readonly property string pad: KeyHints.button(parent.modelData.key, root.st.controller)
-                    visible: pad_loader.pad !== ""
-                    anchors.verticalCenter: parent.verticalCenter
-                    source: pad_loader.pad !== "" ? root.st.controller + "/ControllerButton.qml" : ""
-                    onLoaded: item.button = Qt.binding(() => pad_loader.pad)
-                }
-
-                Loader {
-                    active: group.pad.length > 0
+                    active: group.pad
                     visible: active
-                    height: desc_text.implicitHeight
-                    sourceComponent: ({ snes: snes_key })[root.st.controller] || null
-
-                    Component {
-                        id: snes_key
-                        Item {
-                            implicitWidth: snes_parts.implicitWidth
-                            Snes.SnesKey {
-                                id: snes_parts
-                                anchors.verticalCenter: parent.verticalCenter
-                                parts: group.pad
-                                text_color: root.st.footer_key_fg
-                                font_family: root.st.font_family
-                                font_size: root.st.font_size - 4
-                            }
-                        }
+                    anchors.verticalCenter: parent.verticalCenter
+                    sourceComponent: ControllerBadge {
+                        controller: root.st.controller
+                        key: group.modelData.key
+                        size: Math.round(desc_text.implicitHeight)
+                        text_color: root.st.footer_key_fg
+                        font_family: root.st.font_family
+                        font_size: root.st.font_size - 4
                     }
                 }
 
                 Text {
                     id: key_text
-                    visible: !group_row.parts
                     readonly property bool capped: root.st.footer_key_bg.a > 0
-                    visible: !pad_loader.visible && group.pad.length === 0
+                    visible: !group.pad
                     height: desc_text.implicitHeight
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: key_text.capped ? 4 : 0
@@ -135,6 +114,7 @@ Item {
 
                 Text {
                     id: desc_text
+                    anchors.verticalCenter: parent.verticalCenter
                     text: KeyHints.with_glyphs(parent.modelData.desc) + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
                     color: root.st.footer_fg
                     font.family: root.st.font_family

@@ -2,7 +2,6 @@
 import QtQuick
 import QtQuick.Shapes
 import "../../theme"
-import "../KeyHints.js" as KeyHints
 
 // One DualShock-era PS1 pad button: grey domes with coloured symbols, grey shoulder and SELECT pills, a D-pad with the used arms lit.
 Item {
@@ -13,7 +12,7 @@ Item {
 
     readonly property bool face: ["cross", "circle", "triangle", "square"].indexOf(root.button) >= 0
     readonly property bool pad: root.button.startsWith("dpad")
-    readonly property string label: KeyHints.button_label(root.button)
+    readonly property string label: ({ l1: "L1", r1: "R1", l2: "L2", r2: "R2", select: "SELECT" })[root.button] || ""
     readonly property real stroke: Math.max(1.4, root.size * 0.13)
     readonly property color dome_top: Qt.tint(Theme.fg_dim, Qt.alpha(Theme.fg_core, 0.2))
     readonly property color dome_bottom: Qt.tint(Theme.bg_surface, Qt.alpha(Theme.fg_muted, 0.5))
@@ -24,7 +23,7 @@ Item {
         : root.button === "triangle" ? Qt.tint("#4fd1a8", Qt.alpha(Theme.cyan, 0.5))
         : Qt.tint("#f0a0dc", Qt.alpha(Theme.magenta, 0.5))
 
-    implicitWidth: KeyHints.button_width(root.button, root.size)
+    implicitWidth: root.button === "select" ? Math.round(root.size * 2.9) : root.label !== "" ? Math.round(root.size * 1.5) : root.size
     implicitHeight: root.size
     width: implicitWidth
     height: implicitHeight

@@ -6,12 +6,12 @@ import "../../theme"
 Item {
     id: root
 
-    property string kind: "a"
+    property string button: "a"
     property int size: 13
 
-    readonly property bool face: ["a", "b", "x", "y"].indexOf(root.kind) >= 0
-    readonly property bool shoulder: root.kind === "l" || root.kind === "r" || root.kind === "lr"
-    readonly property bool dpad: root.kind === "dpad_v" || root.kind === "dpad_h"
+    readonly property bool face: ["a", "b", "x", "y"].indexOf(root.button) >= 0
+    readonly property bool shoulder: root.button === "l" || root.button === "r" || root.button === "lr"
+    readonly property bool dpad: root.button === "dpad_v" || root.button === "dpad_h"
 
     // Super Famicom hardware colors pulled halfway into the theme's own hues.
     readonly property var face_colors: ({
@@ -20,7 +20,7 @@ Item {
         x: Qt.tint(Theme.blue, Qt.alpha("#3e5cc0", 0.55)),
         y: Qt.tint(Theme.green, Qt.alpha("#27a04a", 0.5))
     })
-    readonly property color face_color: root.face ? root.face_colors[root.kind] : "transparent"
+    readonly property color face_color: root.face ? root.face_colors[root.button] : "transparent"
     readonly property color plastic: Qt.tint(Theme.fg_dim, Qt.alpha("#a4a4b4", 0.45))
     readonly property color dark_plastic: Qt.tint(Theme.bg_surface, Qt.alpha("#3a3a44", 0.5))
 
@@ -39,8 +39,8 @@ Item {
         Text {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: 0.5
-            text: root.kind.toUpperCase()
-            color: root.kind === "b" || root.kind === "y" ? Theme.bg_crust : Theme.fg_strong
+            text: root.button.toUpperCase()
+            color: root.button === "b" || root.button === "y" ? Theme.bg_crust : Theme.fg_strong
             font.family: "Silkscreen"
             font.pixelSize: 8
         }
@@ -52,7 +52,7 @@ Item {
         spacing: 2
 
         Repeater {
-            model: root.kind === "lr" ? ["l", "r"] : [root.kind]
+            model: root.button === "lr" ? ["l", "r"] : [root.button]
 
             Rectangle {
                 id: shoulder_cap
@@ -83,7 +83,7 @@ Item {
     }
 
     Rectangle {
-        visible: root.kind === "start"
+        visible: root.button === "start"
         anchors.fill: parent
         anchors.topMargin: 1
         anchors.bottomMargin: 1
@@ -132,7 +132,7 @@ Item {
         }
 
         Repeater {
-            model: root.kind === "dpad_v" ? [[1, 0], [1, 2]] : [[0, 1], [2, 1]]
+            model: root.button === "dpad_v" ? [[1, 0], [1, 2]] : [[0, 1], [2, 1]]
 
             Rectangle {
                 required property var modelData

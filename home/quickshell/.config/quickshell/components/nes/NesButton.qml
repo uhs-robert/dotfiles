@@ -1,4 +1,4 @@
-// home/quickshell/.config/quickshell/components/nes/ControllerButton.qml
+// home/quickshell/.config/quickshell/components/nes/NesButton.qml
 import QtQuick
 import "../../theme"
 import ".."
@@ -8,7 +8,8 @@ Row {
     id: root
 
     property string button: ""
-    property int pixel: 2
+    property real size: 14
+    readonly property int pixel: root.size < 12 ? 1 : 2
     readonly property bool round: root.button === "a" || root.button === "b"
     readonly property bool pill: root.button === "start" || root.button === "select"
     readonly property color red: Qt.tint("#c8102e", Qt.alpha(Theme.red, 0.45))
