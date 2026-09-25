@@ -12,7 +12,7 @@ function kind(name) {
 }
 
 function label(name) {
-    return name === "" ? "HYPR" : name.toUpperCase();
+    return name === "" ? "HyprVim" : name.toUpperCase();
 }
 
 // The idle (global) submap takes tmux-oasis's normal-mode colour.
