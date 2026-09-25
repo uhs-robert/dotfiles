@@ -184,6 +184,13 @@ Rectangle {
         color: root.st.tab_underline
     }
 
+    Rectangle {
+        visible: root.active && !root.is_chip && root.st.tab_marker.a > 0
+        width: 2
+        height: parent.height
+        color: root.st.tab_marker
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: root.clicked()

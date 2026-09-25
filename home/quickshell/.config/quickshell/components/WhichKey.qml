@@ -11,6 +11,7 @@ import Quickshell.Wayland
 import "../theme"
 import "oasis" as Oasis
 import "modern" as Modern
+import "neovim" as Neovim
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
 PanelWindow {
@@ -42,7 +43,8 @@ PanelWindow {
     }
     readonly property string longest_key: root.items.reduce((a, item) => item.key.length > a.length ? item.key : a, "")
     readonly property real key_width: Style.controller !== "" ? Math.max(key_metrics.height + 2, key_measure.implicitWidth) : Math.max(key_metrics.height + 2, key_metrics.advanceWidth + 8)
-    readonly property real desc_max_width: Math.max(Style.px(80), (root.screen_width * 0.9 - frame.pad_x * 2) / root.columns - root.key_width - Style.px(24))
+    readonly property real arrow_space: Style.footer_arrow !== "" ? arrow_metrics.advanceWidth + Style.px(6) : 0
+    readonly property real desc_max_width: Math.max(Style.px(80), (root.screen_width * 0.9 - frame.pad_x * 2) / root.columns - root.key_width - root.arrow_space - Style.px(24))
 
     screen: {
         const by_payload = Quickshell.screens.find(s => s.name === root.payload.screen);
@@ -64,7 +66,10 @@ PanelWindow {
     // Room on every side for a soft shadow, taken out of the gap so the frame stays put.
     readonly property int shadow_pad: Style.frame_shadow.a > 0 ? Math.min(Style.frame_drop, root.gap) : 0
     implicitWidth: frame.width + root.shadow_pad * 2
-    implicitHeight: frame.height + (root.shadow_pad > 0 ? root.shadow_pad * 2 : Style.frame_drop)
+    // Floating frames set the title chip into the top border, half of it above the frame.
+    readonly property bool float_title: Style.border_title && Style.show_title
+    readonly property real float_top: root.float_title ? Math.round(title_tab.height / 2) : 0
+    implicitHeight: frame.height + (root.shadow_pad > 0 ? root.shadow_pad * 2 : Style.frame_drop) + root.float_top
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -100,6 +105,13 @@ PanelWindow {
     }
 
     TextMetrics {
+        id: arrow_metrics
+        font.family: Style.font_family
+        font.pixelSize: root.text_size
+        text: Style.footer_arrow
+    }
+
+    TextMetrics {
         id: key_metrics
         font.family: Style.mono_font
         font.pixelSize: Style.font_size - 5
@@ -126,7 +138,7 @@ PanelWindow {
 
     Rectangle {
         visible: Style.frame_drop > 0 && Style.frame_shadow.a === 0
-        y: Style.frame_drop
+        y: frame.y + Style.frame_drop
         width: frame.width
         height: frame.height
         radius: frame.radius
@@ -149,7 +161,7 @@ PanelWindow {
     Rectangle {
         id: frame
         x: root.shadow_pad
-        y: root.shadow_pad
+        y: root.shadow_pad + root.float_top
 
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)
@@ -159,7 +171,8 @@ PanelWindow {
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
         readonly property real band_height: Math.max(26, title_tab.height + 4)
-        readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.ring_pad
+        readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : root.float_title ? root.float_top : title_tab.height + frame.ring_pad
+
 
         width: Math.max(body.implicitWidth + pad_x * 2, title_text.implicitWidth + 20 + title_x * 2 + Style.inset_pad * 2 + (readout.visible ? readout.implicitWidth + 16 : 0))
         height: top_edge + header_height + body.implicitHeight + pad_y * 2
@@ -274,7 +287,7 @@ PanelWindow {
 
             Rectangle {
                 id: title_tab
-                opacity: frame.banded ? 0 : 1
+                opacity: frame.banded || root.float_title ? 0 : 1
                 x: frame.title_x + Style.inset_pad
                 y: frame.top_edge + frame.ring_pad
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
@@ -296,6 +309,15 @@ PanelWindow {
                     font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
+                }
+            }
+
+            Loader {
+                active: root.float_title
+                x: 12
+                y: -root.float_top
+                sourceComponent: Neovim.BorderTitle {
+                    title: root.title
                 }
             }
 
@@ -330,7 +352,7 @@ PanelWindow {
                             id: row
                             required property var modelData
 
-                            Layout.preferredWidth: root.key_width + Style.px(8) + desc_text.width
+                            Layout.preferredWidth: root.key_width + Style.px(8) + root.arrow_space + desc_text.width
                             Layout.preferredHeight: root.row_height
 
                             KeyBadge {
@@ -340,8 +362,18 @@ PanelWindow {
                             }
 
                             Text {
+                                visible: root.arrow_space > 0
+                                x: root.key_width + Style.px(5)
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Style.footer_arrow
+                                color: Style.text_muted
+                                font.family: Style.font_family
+                                font.pixelSize: root.text_size
+                            }
+
+                            Text {
                                 id: desc_text
-                                x: root.key_width + Style.px(8)
+                                x: root.key_width + Style.px(8) + root.arrow_space
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: Math.min(implicitWidth, root.desc_max_width)
                                 elide: Text.ElideRight

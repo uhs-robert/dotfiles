@@ -10,7 +10,7 @@ Singleton {
     property string name: "default"
     // The saved choice; `name` differs from it only while the style picker previews.
     property string saved_name: "default"
-    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech", "oasis", "modern"]
+    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech", "oasis", "modern", "neovim"]
     readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0))
     readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter", modern: "Modern" })
 
@@ -250,7 +250,14 @@ Singleton {
             bar_workspace_shade: "transparent",
             bar_workspace_dot: "transparent",
             bar_clock_layout: "",
-            bar_start_well: "transparent"
+            bar_start_well: "transparent",
+            border_title: false,
+            row_gutter: false,
+            tab_marker: "transparent",
+            section_fold: false,
+            footer_arrow: "",
+            meter_gap: 2,
+            bar_lualine: false
         };
         return {
             "default": {
@@ -484,7 +491,14 @@ Singleton {
                 bar_workspace_shade: "transparent",
                 bar_workspace_dot: "transparent",
                 bar_clock_layout: "",
-                bar_start_well: "transparent"
+                bar_start_well: "transparent",
+                border_title: false,
+                row_gutter: false,
+                tab_marker: "transparent",
+                section_fold: false,
+                footer_arrow: "",
+                meter_gap: 2,
+                bar_lualine: false
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1791,6 +1805,83 @@ Singleton {
                         frame_radius: 18
                     }
                 });
+            })(),
+            // Modern Neovim: lualine bar, floating windows with border titles, telescope rows, which-key footers, nvim-notify cards.
+            "neovim": (() => {
+                const float_border = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.theme_primary, 0.6));
+                return Object.assign({}, terminal, {
+                    workspace_art: "buffers",
+                    weather_header: "lsp",
+                    card_layout: "notify",
+                    wait_anim: "cursor",
+                    font_family: "JetBrainsMono Nerd Font",
+                    font_size: Theme.popup_font_size,
+                    scale: 1.1,
+                    rounded: false,
+                    border_title: true,
+                    frame_color: Theme.bg_mantle,
+                    frame_radius: 8,
+                    frame_border_width: 1,
+                    frame_border_color: float_border,
+                    accent_color: Theme.theme_primary,
+                    accent_height: 0,
+                    selection_bg: Theme.bg_surface,
+                    selection_outline: "transparent",
+                    selection_bar: true,
+                    caret_color: Theme.theme_primary,
+                    caret_blink: false,
+                    row_cursor: "",
+                    row_gutter: true,
+                    row_keys: false,
+                    tab_bg: Theme.bg_crust,
+                    tab_active_bg: Theme.bg_mantle,
+                    tab_active_fg: Theme.fg_strong,
+                    tab_fg: Theme.fg_dim,
+                    tab_marker: Theme.theme_primary,
+                    key_bg: "transparent",
+                    key_fg: Theme.theme_secondary,
+                    key_border: "transparent",
+                    section_fg: Theme.theme_primary,
+                    section_rule: false,
+                    section_fold: true,
+                    footer_fg: Theme.fg_dim,
+                    footer_key_fg: Theme.theme_secondary,
+                    footer_rule: true,
+                    footer_rule_solid: true,
+                    footer_rule_color: Theme.bg_surface,
+                    footer_separator: "",
+                    footer_arrow: "\u279c",
+                    meter_on: Theme.theme_primary,
+                    meter_off: Theme.bg_surface,
+                    meter_hot: Theme.theme_label,
+                    meter_radius: 0,
+                    meter_height: 4,
+                    meter_gap: 1,
+                    title_bg: Theme.theme_primary,
+                    title_fg: Theme.bg_crust,
+                    title_spacing: 0,
+                    chip_brackets: false,
+                    chip_active_bg: Theme.ui_visual_bg,
+                    chip_active_fg: Theme.fg_strong,
+                    chip_pick: Theme.theme_primary,
+                    chip_border: Theme.bg_surface,
+                    toggle_brackets: false,
+                    toggle_on: Theme.ok,
+                    toggle_off: Theme.fg_dim,
+                    bar_lualine: true,
+                    bar_font_family: "JetBrainsMono Nerd Font",
+                    bar_font_size: Theme.font_size,
+                    bar_side_bg: Theme.bg_surface,
+                    bar_center_bg: Theme.bg_surface,
+                    bar_fg: Theme.fg_core,
+                    bar_clock_fg: Theme.fg_strong,
+                    bar_border_width: 0,
+                    bar_border_color: "transparent",
+                    bar_workspace_focused: Theme.theme_primary,
+                    bar_workspace_active: Theme.theme_secondary,
+                    bar_workspace_idle: Theme.fg_muted,
+                    bar_hover_bg: Theme.ui_visual_bg
+                });
             })()
         };
     }
@@ -2032,7 +2123,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert", "glow", "horizon" or "tile", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status", "oasis" or "hero", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog", "oasis" or "tile".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert", "glow", "horizon" or "tile", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status", "oasis", "hero" or "lsp", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog", "oasis", "tile" or "notify".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -2071,7 +2162,7 @@ Singleton {
     readonly property string toast_enter: root.active.toast_enter
     // Popups, toasts and bar modules swap in this console's views ("nes", "snes", "ps1", "ps2"); "" keeps the shared ones.
     readonly property string console_views: root.active.console_views
-    // Bar workspace indicator art for non-console styles ("dial", "materia", "doors", "constellation"); "" keeps pills.
+    // Bar workspace indicator art for non-console styles ("dial", "materia", "doors", "constellation", "buffers"); "" keeps pills.
     readonly property string workspace_art: root.active.workspace_art
     // A dune silhouette in this color along the foot of popups and toasts.
     readonly property color dune: root.active.dune
@@ -2106,6 +2197,17 @@ Singleton {
     readonly property bool title_mixed: root.active.title_mixed
     // Action chip text; transparent keeps theme_secondary.
     readonly property color chip_fg: root.active.chip_fg
+    // Frames float free of the bar with all corners rounded and the title as a chip set into the top border (FloatFrame).
+    readonly property bool border_title: root.active.border_title
+    // Rows get a line-number gutter showing their key; the selected row's number takes text_accent.
+    readonly property bool row_gutter: root.active.row_gutter
+    // A 2px bar down the active tab's left edge.
+    readonly property color tab_marker: root.active.tab_marker
+    // Sections as open folds: a fold marker, the label and a dotted fill.
+    readonly property bool section_fold: root.active.section_fold
+    // Drawn between each footer key and its description.
+    readonly property string footer_arrow: root.active.footer_arrow
+    readonly property real meter_gap: root.active.meter_gap
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -2155,6 +2257,8 @@ Singleton {
     // "capsule": time with a small zone, a hairline and the date.
     readonly property string bar_clock_layout: root.bar.bar_clock_layout
     readonly property color bar_start_well: root.bar.bar_start_well
+    // A lualine statusline: flat sections with arrow separators, the start button as the HyprVim mode chip.
+    readonly property bool bar_lualine: root.bar.bar_lualine
     readonly property int bar_text_style: root.bar.bar_text_raised ? Text.Raised : root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
 
     // A popup or OSD title as the style shows it.

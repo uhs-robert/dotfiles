@@ -14,6 +14,7 @@ import "ps1" as Ps1
 import "ps2" as Ps2
 import "oasis" as Oasis
 import "modern" as Modern
+import "neovim" as Neovim
 
 PanelWindow {
     id: root
@@ -92,7 +93,9 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
     implicitWidth: frame.width + root.shadow_pad * 2
-    implicitHeight: frame.height + root.slide + root.shadow_pad
+    // Floating frames set the title chip into the top border, half of it above the frame.
+    readonly property real float_top: Style.border_title && Style.show_title ? Math.round(title_tab.height / 2) : 0
+    implicitHeight: frame.height + root.slide + root.shadow_pad + root.float_top
     mask: Region {}
     WlrLayershell.namespace: "quickshell-osd"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -265,10 +268,10 @@ PanelWindow {
         readonly property int pad_y: Style.px(10)
         readonly property real top_rule: Style.frame_top_rule ? Style.accent_height : 0
         readonly property real band_height: Math.max(26, title_tab.height + 4)
-        readonly property real header_height: !title_tab.visible ? 0 : root.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.top_rule + Style.inset_pad
+        readonly property real header_height: !title_tab.visible ? 0 : root.banded ? frame.band_height + 4 + Style.inset_pad : Style.border_title ? root.float_top : title_tab.height + frame.top_rule + Style.inset_pad
 
         x: root.shadow_pad
-        y: root.slide * (1 - root.reveal)
+        y: root.float_top + root.slide * (1 - root.reveal)
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
@@ -377,7 +380,7 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 visible: Style.show_title && !(root.console_osd && root.console_osd.untitled)
-                opacity: root.banded ? 0 : 1
+                opacity: root.banded || Style.border_title ? 0 : 1
                 x: (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
                 y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + Style.inset_pad
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20 + title_index.space, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20 + title_index.space
@@ -408,6 +411,15 @@ PanelWindow {
                     font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
+                }
+            }
+
+            Loader {
+                active: Style.border_title && Style.show_title
+                x: 12
+                y: -root.float_top
+                sourceComponent: Neovim.BorderTitle {
+                    title: root.title
                 }
             }
 

@@ -9,6 +9,7 @@ import "../services"
 import "modern" as Modern
 import "Search.js" as Search
 import "oasis" as Oasis
+import "neovim" as Neovim
 
 PanelWindow {
     id: root
@@ -436,13 +437,25 @@ PanelWindow {
             // Reads as the island unfolding downward: its color, joined flush under the accent line.
             Rectangle {
                 anchors.fill: parent
-                color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.custom_frame || root.device ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
+                color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.custom_frame || root.device || root.st.border_title ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
                 topLeftRadius: root.top_radius
                 topRightRadius: root.top_radius
                 bottomLeftRadius: root.frame_radius
                 bottomRightRadius: root.frame_radius
-                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.custom_frame ? 0 : root.st.frame_border_width
+                border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.custom_frame || root.st.border_title ? 0 : root.st.frame_border_width
                 border.color: root.st.frame_border_color
+            }
+
+            Loader {
+                anchors.fill: parent
+                active: root.st.border_title
+                sourceComponent: Neovim.FloatFrame {
+                    st: root.st
+                    title: root.has_title ? root.title : ""
+                    status: root.title_value
+                    chip_height: root.has_title ? title_tab.height : 0
+                    radius: root.frame_radius
+                }
             }
 
             VisorGlass {
@@ -610,7 +623,7 @@ PanelWindow {
 
                 Rectangle {
                     id: title_tab
-                    visible: root.has_title && !root.banded
+                    visible: root.has_title && !root.banded && !root.st.border_title
                     x: (root.st.fade_fills ? root.st.frame_border_width : 0) + root.st.inset_pad + root.st.lcd_margin * 2 + root.device_side
                     y: (root.st.fade_fills ? root.st.frame_border_width : 0) + root.st.inset_pad + root.st.lcd_margin * 2 + root.device_top
                     readonly property real reticle_space: root.st.title_reticle.a > 0 ? title_text.implicitHeight + 4 : 0

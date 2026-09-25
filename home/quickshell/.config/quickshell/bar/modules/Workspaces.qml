@@ -12,6 +12,7 @@ import "../../components/gameboy" as Gameboy
 import "../../components/goldeneye" as Goldeneye
 import "../../components/metroid" as Metroid
 import "../../components/modern" as Modern
+import "../../components/neovim" as Neovim
 import "../../components/nes" as Nes
 import "../../components/oasis" as Oasis
 import "../../components/ps1" as Ps1
@@ -24,7 +25,7 @@ Item {
 
     property string screen_name: ""
     property bool compact: false
-    property int bar_height: 34
+    property int bar_height: 30
 
     // Final Fantasy Tactics map: an isometric tile per workspace, stretching so every app stands on it.
     readonly property bool slots: Style.console_views === "ps1"
@@ -42,6 +43,8 @@ Item {
     readonly property int slot_size: compact ? 22 : 24
     // Metroid door hatches: closed doors show their app count, the active one opens onto its apps.
     readonly property bool doors: Style.workspace_art === "doors"
+    // Lualine buffers: numbered tabs with their apps, full bar height.
+    readonly property bool buffers: Style.workspace_art === "buffers"
     readonly property int icon_size: materia ? (compact ? 10 : 12) : doors ? (compact ? 12 : 14) : party ? (compact ? 14 : 16) : slots ? (compact ? 15 : 17) : compact ? 16 : 19
     readonly property int pill_height: materia ? slot_size : doors ? (compact ? 26 : 30) : map ? 34 : slots ? (compact ? 26 : 30) : party ? (compact ? 22 : 26) : compact ? 20 : 22
     readonly property int tile_face: compact ? 8 : 10
@@ -161,8 +164,19 @@ Item {
             }
         }
 
+        Loader {
+            active: root.buffers
+            visible: active
+            sourceComponent: Neovim.BufferLine {
+                host: root
+                workspaces: root.workspace_list
+                compact: root.compact
+                bar_height: root.bar_height
+            }
+        }
+
         Repeater {
-            model: root.dial || root.stars ? [] : root.workspace_list
+            model: root.dial || root.stars || root.buffers ? [] : root.workspace_list
 
             Rectangle {
                 id: pill

@@ -36,7 +36,11 @@ Item {
     default property alias content: layout.children
 
     readonly property alias body_item: body
-    readonly property int cap_width: height / 2
+    // Lualine: side islands end in arrows, the center one leans; content brings its own padding.
+    readonly property bool lualine: Style.bar_lualine
+    readonly property bool center: root.cap_left && root.cap_right
+    readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : height / 2
+    readonly property real pad: root.lualine ? (root.center ? 10 : 0) : 8
 
     signal clicked
 
@@ -140,7 +144,7 @@ Item {
 
         x: cap_left ? root.cap_width : 0
         height: root.height
-        width: Math.ceil(layout.implicitWidth) + 16
+        width: Math.ceil(layout.implicitWidth) + root.pad * 2
         color: root.shaded ? "transparent" : root.bg_color
 
         // A tick scale rising from the bottom edge.
@@ -170,9 +174,9 @@ Item {
 
         RowLayout {
             id: layout
-            x: 8
+            x: root.pad
             height: parent.height
-            spacing: 16
+            spacing: root.lualine && !root.center ? 0 : 16
         }
     }
 
@@ -186,12 +190,14 @@ Item {
         ShapePath {
             strokeWidth: -1
             fillColor: root.shaded ? "transparent" : root.bg_color
-            startX: 0
-            startY: 0
-            PathLine { x: root.cap_width + 1; y: 0 }
-            PathLine { x: root.cap_width + 1; y: root.height }
-            PathLine { x: root.cap_width; y: root.height }
-            PathLine { x: 0; y: 0 }
+            PathPolyline {
+                path: {
+                    const c = root.cap_width, h = root.height;
+                    if (!root.lualine) return [Qt.point(0, 0), Qt.point(c + 1, 0), Qt.point(c + 1, h), Qt.point(c, h), Qt.point(0, 0)];
+                    if (root.center) return [Qt.point(c, 0), Qt.point(c + 1, 0), Qt.point(c + 1, h), Qt.point(0, h), Qt.point(c, 0)];
+                    return [Qt.point(c, 0), Qt.point(c + 1, 0), Qt.point(c + 1, h), Qt.point(c, h), Qt.point(0, h / 2), Qt.point(c, 0)];
+                }
+            }
         }
     }
 
@@ -205,12 +211,13 @@ Item {
         ShapePath {
             strokeWidth: -1
             fillColor: root.shaded ? "transparent" : root.bg_color
-            startX: 0
-            startY: 0
-            PathLine { x: root.cap_width + 1; y: 0 }
-            PathLine { x: 1; y: root.height }
-            PathLine { x: 0; y: root.height }
-            PathLine { x: 0; y: 0 }
+            PathPolyline {
+                path: {
+                    const c = root.cap_width, h = root.height;
+                    if (!root.lualine || root.center) return [Qt.point(0, 0), Qt.point(c + 1, 0), Qt.point(1, h), Qt.point(0, h), Qt.point(0, 0)];
+                    return [Qt.point(0, 0), Qt.point(1, 0), Qt.point(c + 1, h / 2), Qt.point(1, h), Qt.point(0, h), Qt.point(0, 0)];
+                }
+            }
         }
     }
 

@@ -5,6 +5,8 @@ import "../theme"
 import "../services"
 import "modules"
 import "../components/oasis" as Oasis
+import "../components/neovim" as Neovim
+import "../components/neovim/Modes.js" as Modes
 
 Item {
     id: root
@@ -52,6 +54,16 @@ Item {
     readonly property var left_entries: root.build_entries(root.rule ? root.rule.left : [])
     readonly property var center_entries: root.build_entries(root.rule ? root.rule.center : [])
     readonly property var right_entries: root.build_entries(root.rule ? root.rule.right : [])
+    // Lualine's right-island section for a module; bars.json order is kept inside each.
+    function lualine_section(base) {
+        return base === "notifications" ? "z" : ["network", "bluetooth", "voxtype"].indexOf(base) >= 0 ? "y" : "x";
+    }
+
+    // Right-island entries in drawn order.
+    readonly property var right_drawn: Style.bar_lualine ? ["x", "y", "z"].reduce((out, k) => out.concat(root.right_entries.filter(e => root.lualine_section(e.base) === k)), []) : root.right_entries
+
+    // The start button draws the HyprVim mode chip on a lualine bar.
+    readonly property bool has_mode_chip: Style.bar_lualine && [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "start"))
 
     // Sets island/screen/stat properties a module declares, after the Loader instantiates it.
     // The oasis horizon decorates the center island when it holds the clock; that clock makes room for it and lends it the time.
@@ -69,7 +81,7 @@ Item {
         if (entry.arg && item.hasOwnProperty("stat")) item.stat = entry.arg;
     }
 
-    Component { id: start_component; StartButton { compact: root.compact; screen_name: root.screen_name } }
+    Component { id: start_component; StartButton { compact: root.compact; screen_name: root.screen_name; bar_height: root.bar_height } }
     Component { id: workspaces_component; Workspaces { compact: root.compact; screen_name: root.screen_name; bar_height: root.bar_height } }
     Component { id: clock_component; Clock { compact: root.compact } }
     Component { id: tray_component; Tray { compact: root.compact; screen_name: root.screen_name } }
@@ -132,7 +144,7 @@ Item {
                 // Reads the module's own `shown`, not `visible`: a hidden Loader would report its child hidden too.
                 visible: !item || item.shown === undefined || item.shown
                 // Keeps the start button close to the workspace pills it launches into.
-                Layout.rightMargin: modelData.base === "start" ? -8 : 0
+                Layout.rightMargin: modelData.base === "start" && !Style.bar_lualine ? -8 : 0
                 onLoaded: root.wire_module(item, modelData, left_island)
             }
         }
@@ -222,7 +234,7 @@ Item {
         onClicked: if (root.right_entries.some(e => e.base === "clock")) Popups.toggle("clock", right_island.body_item, right_island.bg_color, root.screen_name)
 
         Repeater {
-            model: root.right_entries
+            model: Style.bar_lualine ? [] : root.right_entries
 
             Loader {
                 required property var modelData
@@ -230,6 +242,43 @@ Item {
                 // Reads the module's own `shown`, not `visible`: a hidden Loader would report its child hidden too.
                 visible: !item || item.shown === undefined || item.shown
                 onLoaded: root.wire_module(item, modelData, right_island)
+            }
+        }
+
+        // Lualine x, y and z sections (lualine_section).
+        Loader {
+            active: Style.bar_lualine
+            visible: active
+            Layout.fillHeight: true
+            sourceComponent: Row {
+                readonly property var wire: (item, entry) => root.wire_module(item, entry, right_island)
+
+                Neovim.LualineSection {
+                    id: x_section
+                    height: right_island.height
+                    entries: root.right_entries.filter(e => root.lualine_section(e.base) === "x")
+                    wire: parent.wire
+                    fill: Style.bar_side_bg
+                }
+
+                Neovim.LualineSection {
+                    id: y_section
+                    height: right_island.height
+                    entries: root.right_entries.filter(e => root.lualine_section(e.base) === "y")
+                    wire: parent.wire
+                    fill: Theme.ui_visual_bg
+                    lead_bg: x_section.shown ? x_section.fill : "transparent"
+                    separators: false
+                }
+
+                Neovim.LualineSection {
+                    height: right_island.height
+                    entries: root.right_entries.filter(e => root.lualine_section(e.base) === "z")
+                    wire: parent.wire
+                    fill: Modes.kind(SubmapState.submap_name) === "insert" ? Theme.theme_secondary : Theme.theme_primary
+                    accent: true
+                    lead_bg: y_section.shown ? y_section.fill : x_section.shown ? x_section.fill : "transparent"
+                }
             }
         }
     }
@@ -255,7 +304,7 @@ Item {
         const has_media = [root.left_entries, root.center_entries, root.right_entries].some(l => l.some(e => e.base === "media"));
         const center_names = root.popup_names(root.center_entries);
         if (root.has_center && !has_media) center_names.push("media");
-        Popups.register_order(root.screen_name, root.popup_names(root.left_entries).concat(center_names, root.popup_names(root.right_entries)));
+        Popups.register_order(root.screen_name, root.popup_names(root.left_entries).concat(center_names, root.popup_names(root.right_drawn)));
     }
 
     function sync_popups() {
@@ -265,7 +314,7 @@ Item {
 
     onLeft_entriesChanged: sync_popups()
     onCenter_entriesChanged: sync_popups()
-    onRight_entriesChanged: sync_popups()
+    onRight_drawnChanged: sync_popups()
     Component.onCompleted: sync_popups()
     Component.onDestruction: Popups.unregister_screen(root.screen_name)
 }

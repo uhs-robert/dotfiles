@@ -11,6 +11,8 @@ Item {
     property string screen_name: ""
     property Item island: null
     property color island_color: Theme.bg_core
+    // Set by a lualine section with a strong fill.
+    property bool on_accent: false
 
     readonly property int unread: NotificationState.unread
     readonly property bool shown: true
@@ -46,7 +48,8 @@ Item {
             Text {
                 id: glyph
                 text: NotificationState.dnd ? "\u{f009b}" : "\u{f009a}"
-                color: NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
+                color: root.on_accent ? Theme.bg_crust : NotificationState.dnd ? Theme.fg_dim : Theme.theme_primary
+                opacity: root.on_accent && NotificationState.dnd ? 0.55 : 1
                 font.family: Style.bar_font_family
                 style: Style.bar_text_style
                 styleColor: Style.bar_glow_color
