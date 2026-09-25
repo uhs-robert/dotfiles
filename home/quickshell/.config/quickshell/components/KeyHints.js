@@ -14,3 +14,21 @@ function parse(text) {
         return { key: key, desc: g.slice(key.length).trim() };
     });
 }
+
+const glyph_keys = Object.keys(key_glyphs).reduce((m, k) => {
+    m[key_glyphs[k]] = k;
+    return m;
+}, {});
+
+// Keyboard key -> controller button id, per Style.controller; unmapped keys keep their badge.
+const controller_buttons = {
+    nes: { "Enter": "a", "q": "b", "Esc": "b", "q/Esc": "b", "Esc/q": "b", "Esc/Backspace": "b", "Backspace": "b", "Tab": "start", "[ ]": "select", "j/k": "dpad_v", "Up/Down": "dpad_v", "h/l": "dpad_h" }
+};
+
+function button(key, controller) {
+    const map = controller_buttons[controller];
+    if (!map) return "";
+    let raw = key;
+    for (const g in glyph_keys) raw = raw.split(g).join(glyph_keys[g]);
+    return map[raw] || "";
+}

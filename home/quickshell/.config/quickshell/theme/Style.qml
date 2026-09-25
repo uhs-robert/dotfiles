@@ -213,7 +213,10 @@ Singleton {
             window_gradient: [],
             materia: ({}),
             hand_cursor: false,
-            meter_solid: false
+            meter_solid: false,
+            controller: "",
+            console_skin: "",
+            meter_art: ({})
         };
         return {
             "default": {
@@ -416,7 +419,10 @@ Singleton {
                 window_gradient: [],
                 materia: ({}),
                 hand_cursor: false,
-                meter_solid: false
+                meter_solid: false,
+                controller: "",
+                console_skin: "",
+                meter_art: ({})
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -518,7 +524,11 @@ Singleton {
                 bar_border_color: "transparent",
                 bar_inset_gap: 2,
                 bar_inset_width: 2,
-                bar_inset_color: Theme.fg_strong
+                bar_inset_color: Theme.fg_strong,
+                card_layout: "dq",
+                controller: "nes",
+                console_skin: "nes",
+                meter_art: ({ volume: "nes/HeartMeter.qml", battery: "nes/EnergyBar.qml", osd: "nes/EnergyBar.qml", media: "nes/PianoRoll.qml" })
             }),
             "snes": Object.assign({}, terminal, {
                 wait_anim: "hand",
@@ -1707,7 +1717,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel" or "pixel".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel" or "dq".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1738,6 +1748,12 @@ Singleton {
     readonly property bool hand_cursor: root.active.hand_cursor
     // Meters as one continuous gauge (AtbBar) instead of segments.
     readonly property bool meter_solid: root.active.meter_solid
+    // Key badges and footer keys drawn as this console's buttons (components/<controller>/ControllerButton.qml).
+    readonly property string controller: root.active.controller
+    // Per-module console views, e.g. the NES title menu, inventory grid and ? block workspaces.
+    readonly property string console_skin: root.active.console_skin
+    // Meter art by popup name (or "osd"): a component path relative to components/ that replaces the segments.
+    readonly property var meter_art: root.active.meter_art
 
     property bool cava_line: true
     readonly property var bar: root.active

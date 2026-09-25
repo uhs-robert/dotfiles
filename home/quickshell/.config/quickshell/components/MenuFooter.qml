@@ -74,8 +74,18 @@ Item {
                 required property int index
                 spacing: 4
 
+                Loader {
+                    id: pad_loader
+                    readonly property string pad: KeyHints.button(parent.modelData.key, root.st.controller)
+                    visible: pad_loader.pad !== ""
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: pad_loader.pad !== "" ? root.st.controller + "/ControllerButton.qml" : ""
+                    onLoaded: item.button = Qt.binding(() => pad_loader.pad)
+                }
+
                 Text {
                     id: key_text
+                    visible: !pad_loader.visible
                     readonly property bool capped: root.st.footer_key_bg.a > 0
                     height: desc_text.implicitHeight
                     verticalAlignment: Text.AlignVCenter
