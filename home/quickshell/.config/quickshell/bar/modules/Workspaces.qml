@@ -19,7 +19,7 @@ Item {
     property string screen_name: ""
     property bool compact: false
 
-    // Memory card save icons: one bevelled card per workspace, widening to hold every app.
+    // Final Fantasy Tactics map: an isometric tile per workspace, stretching so every app stands on it.
     readonly property bool slots: Style.console_views === "ps1"
     // Super Mario World overworld: level dots on a dotted trail, app icons above them.
     readonly property bool map: Style.console_views === "snes"
@@ -27,7 +27,9 @@ Item {
     readonly property bool party: Style.controller === "gameboy"
     readonly property int party_gap: 8
     readonly property int icon_size: party ? (compact ? 14 : 16) : slots ? (compact ? 15 : 17) : compact ? 16 : 19
-    readonly property int pill_height: map ? 34 : slots || party ? (compact ? 22 : 26) : compact ? 20 : 22
+    readonly property int pill_height: map ? 34 : slots ? (compact ? 26 : 30) : party ? (compact ? 22 : 26) : compact ? 20 : 22
+    readonly property int tile_face: compact ? 8 : 10
+    readonly property int tile_depth: compact ? 2 : 3
 
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
@@ -121,7 +123,7 @@ Item {
                 required property var modelData
 
                 readonly property bool is_empty: modelData.toplevels.values.length === 0
-                readonly property bool diamond: Style.bar_workspace_diamond && is_empty && !root.map && !root.party
+                readonly property bool diamond: Style.bar_workspace_diamond && is_empty && !root.map && !root.party && !root.slots
                 readonly property bool map: root.map
                 readonly property int glyph: map ? (modelData.focused ? 17 : 14) : root.icon_size
                 // Mario ? blocks; the focused workspace is the one already hit.
@@ -131,8 +133,8 @@ Item {
                 readonly property int cursor_gap: root.party && modelData.focused ? root.party_gap : 0
 
                 height: root.pill_height
-                width: root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? height : Math.max(height, icons.implicitWidth + 8)) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
-                radius: pill.map || root.party ? 0 : root.slots ? 2 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
+                width: root.party ? cursor_gap + (is_empty ? height : icons.implicitWidth + 10) : pill.map ? Math.max(22, icons.implicitWidth + 8) : root.slots ? (is_empty ? root.tile_face * 2 + 4 : icons.implicitWidth + root.tile_face + 6) : is_empty ? height : icons.implicitWidth + (modelData.active ? 22 : 12)
+                radius: pill.map || root.party || root.slots ? 0 : Style.bar_pill_square || pill.qblock ? 0 : height / 2
                 rotation: pill.diamond ? 45 : 0
                 scale: pill.diamond ? 0.75 : 1
                 antialiasing: pill.diamond || radius > 0
@@ -147,7 +149,7 @@ Item {
                     ColorAnimation { duration: 280; easing.type: Easing.InOutCubic }
                 }
 
-                // Console pill art: NES ? blocks, PS1 save cards, PS2 save cubes and lit blocks, SNES map dots, Game Boy party rows.
+                // Console pill art: NES ? blocks, PS1 Tactics tiles, PS2 save cubes and lit blocks, SNES map dots, Game Boy party rows.
                 Loader {
                     anchors.fill: parent
                     z: pill.map ? 1 : 0
@@ -190,9 +192,23 @@ Item {
 
                     Component {
                         id: ps1_card
-                        Ps1.SaveCard {
-                            selected: pill.modelData.focused
-                            empty: pill.is_empty
+                        Item {
+                            Ps1.TacticsTile {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                face: root.tile_face
+                                depth: root.tile_depth
+                                selected: pill.modelData.focused
+                                empty: pill.is_empty
+                                hovered: !pill.modelData.active && pill_hover.hovered
+                                seams: {
+                                    const out = [];
+                                    for (let i = 1; i < pill.toplevels.length; i++)
+                                        out.push(icons.x + i * (pill.glyph + icons.spacing) - icons.spacing / 2);
+                                    return out;
+                                }
+                            }
                         }
                     }
 
@@ -240,7 +256,7 @@ Item {
                     anchors.leftMargin: pill.cursor_gap
                     radius: parent.radius
                     color: root.party ? Style.shade_3 : Theme.fg_core
-                    opacity: !pill.modelData.active && pill_hover.hovered ? 0.1 : 0
+                    opacity: !root.slots && !pill.modelData.active && pill_hover.hovered ? 0.1 : 0
 
                     Behavior on opacity {
                         NumberAnimation { duration: 150 }
@@ -258,10 +274,10 @@ Item {
 
                 Row {
                     id: icons
-                    anchors.centerIn: pill.map ? undefined : parent
-                    anchors.horizontalCenter: pill.map ? parent.horizontalCenter : undefined
-                    anchors.top: pill.map ? parent.top : undefined
-                    anchors.topMargin: pill.modelData.focused ? 1 : 3
+                    anchors.centerIn: pill.map || root.slots ? undefined : parent
+                    anchors.horizontalCenter: pill.map || root.slots ? parent.horizontalCenter : undefined
+                    anchors.top: pill.map || root.slots ? parent.top : undefined
+                    anchors.topMargin: root.slots ? pill.height - root.tile_depth - root.tile_face / 2 + 1 - pill.glyph : pill.modelData.focused ? 1 : 3
                     anchors.horizontalCenterOffset: pill.cursor_gap / 2
                     spacing: pill.map ? 1 : 2
 
