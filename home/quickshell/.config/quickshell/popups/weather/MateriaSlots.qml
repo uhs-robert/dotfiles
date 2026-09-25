@@ -86,7 +86,7 @@ Item {
         font.family: Style.font_family
         font.pixelSize: Math.round((Style.font_size - 3) * root.row_scale)
         font.weight: Font.ExtraBold
-        text: root.widest(root.days.flatMap(d => [Math.round(d.max) + "°", Math.round(d.min) + "°"]).concat(["-9°"]))
+        text: root.widest([].concat(...Array.from(root.days || []).map(d => [Math.round(d.max) + "°", Math.round(d.min) + "°"])).concat(["-9°"]))
     }
 
     TextMetrics {
