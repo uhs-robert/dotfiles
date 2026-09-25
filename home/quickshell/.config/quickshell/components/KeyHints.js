@@ -21,11 +21,12 @@ const glyph_names = Object.keys(key_glyphs).reduce((m, k) => {
 }, {});
 
 // Keyboard key -> controller button per console (Style.controller); a combined key maps whole or by its "/" halves.
+// "?" never maps, so footers always show the help key that explains the buttons.
 const controller_maps = {
     nes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "select", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
-    snes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "y", "[ ]": "lr", "[": "l", "]": "r", t: "x", "?": "x", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
-    ps1: { Enter: "circle", Backspace: "cross", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
-    ps2: { Enter: "cross", Backspace: "circle", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", "?": "select", gg: "l2", G: "r2", "/": "r3", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
+    snes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "y", "[ ]": "lr", "[": "l", "]": "r", t: "x", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
+    ps1: { Enter: "circle", Backspace: "cross", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
+    ps2: { Enter: "cross", Backspace: "circle", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "/": "r3", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
 };
 
 // Esc takes START only where it closes the popup; as cancel/back (n/Esc, Tab/Esc list) it shows the back button.
