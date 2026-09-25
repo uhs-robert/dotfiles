@@ -2,7 +2,7 @@
 import QtQuick
 import "../../theme"
 
-// One Super Famicom controller button: a/b/x/y face buttons, l/r/lr shoulders, the start pill, or the D-pad lit on dpad_v/dpad_h.
+// One Super Famicom controller button: a/b/x/y face buttons, l/r/lr shoulders, the start/select pill, or the D-pad lit on dpad_v/dpad_h.
 Item {
     id: root
 
@@ -12,6 +12,7 @@ Item {
     readonly property bool face: ["a", "b", "x", "y"].indexOf(root.button) >= 0
     readonly property bool shoulder: root.button === "l" || root.button === "r" || root.button === "lr"
     readonly property bool dpad: root.button === "dpad_v" || root.button === "dpad_h"
+    readonly property bool pill: root.button === "start" || root.button === "select"
 
     // Super Famicom hardware colors pulled halfway into the theme's own hues.
     readonly property var face_colors: ({
@@ -24,7 +25,7 @@ Item {
     readonly property color plastic: Qt.tint(Theme.fg_dim, Qt.alpha("#a4a4b4", 0.45))
     readonly property color dark_plastic: Qt.tint(Theme.bg_surface, Qt.alpha("#3a3a44", 0.5))
 
-    implicitWidth: root.face || root.dpad ? root.size : root.shoulder ? shoulders.implicitWidth : start_label.implicitWidth + 8
+    implicitWidth: root.face || root.dpad ? root.size : root.shoulder ? shoulders.implicitWidth : pill_label.implicitWidth + 8
     implicitHeight: root.size
 
     Rectangle {
@@ -83,7 +84,7 @@ Item {
     }
 
     Rectangle {
-        visible: root.button === "start"
+        visible: root.pill
         anchors.fill: parent
         anchors.topMargin: 1
         anchors.bottomMargin: 1
@@ -94,10 +95,10 @@ Item {
         border.color: Qt.lighter(root.dark_plastic, 1.6)
 
         Text {
-            id: start_label
+            id: pill_label
             anchors.centerIn: parent
             anchors.verticalCenterOffset: 0.5
-            text: "START"
+            text: root.button.toUpperCase()
             color: Theme.fg_strong
             font.family: "Silkscreen"
             font.pixelSize: 8

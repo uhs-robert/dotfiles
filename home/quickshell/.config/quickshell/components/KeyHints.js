@@ -24,9 +24,9 @@ const glyph_names = Object.keys(key_glyphs).reduce((m, k) => {
 // "?" never maps, so footers always show the help key that explains the buttons.
 const controller_maps = {
     nes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "select", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
-    snes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "y", "[ ]": "lr", "[": "l", "]": "r", t: "x", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
-    ps1: { Enter: "circle", Backspace: "cross", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
-    ps2: { Enter: "cross", Backspace: "circle", q: "start", Esc: "start", Tab: "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "/": "r3", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
+    snes: { Enter: "a", Backspace: "b", q: "start", Esc: "start", Tab: "select", "/": "y", "[ ]": "lr", "[": "l", "]": "r", t: "x", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" },
+    ps1: { Enter: "circle", Backspace: "cross", q: "start", Esc: "start", Tab: "select", "/": "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_down", k: "dpad_up", h: "dpad_left", l: "dpad_right" },
+    ps2: { Enter: "cross", Backspace: "circle", q: "start", Esc: "start", Tab: "select", "/": "triangle", "[": "l1", "]": "r1", t: "square", gg: "l2", G: "r2", "j/k": "dpad_v", "h/l": "dpad_h", "Up/Down": "dpad_v", j: "dpad_v", k: "dpad_v", h: "dpad_h", l: "dpad_h" }
 };
 // Game Boy pads use the NES buttons, drawn in its four shades (components/gameboy/GameboyButton.qml).
 controller_maps.gameboy = controller_maps.nes;
