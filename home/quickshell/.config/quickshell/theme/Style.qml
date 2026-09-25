@@ -1581,7 +1581,7 @@ Singleton {
                     meter_hot: Theme.theme_label,
                     meter_radius: 0,
                     meter_height: 4,
-                    meter_gap: 0,
+                    meter_gap: 1,
                     title_bg: Theme.theme_primary,
                     title_fg: Theme.bg_crust,
                     title_spacing: 0,

@@ -13,10 +13,6 @@ Item {
     property real radius: root.st.frame_radius
     readonly property real border_y: Math.round(root.chip_height / 2)
 
-    function title_case(t) {
-        return t === "" ? "" : t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
-    }
-
     Rectangle {
         y: root.border_y
         width: root.width
@@ -27,34 +23,13 @@ Item {
         border.color: root.st.frame_border_color
     }
 
-    // Breaks the border line around the chip.
-    Rectangle {
-        visible: chip.visible
-        x: chip.x - 4
-        y: root.border_y - 1
-        width: chip.width + 8
-        height: root.st.frame_border_width + 2
-        color: root.st.frame_color
-    }
-
-    Rectangle {
+    BorderTitle {
         id: chip
         visible: root.title !== ""
         x: 12
-        width: chip_text.implicitWidth + 14
-        height: root.chip_height
-        radius: 3
-        color: root.st.title_bg
-
-        Text {
-            id: chip_text
-            anchors.centerIn: parent
-            text: root.title_case(root.title)
-            color: root.st.title_fg
-            font.family: root.st.title_font_family
-            font.pixelSize: root.st.font_size - 2
-            font.bold: true
-        }
+        y: root.border_y - Math.round(height / 2)
+        st: root.st
+        title: root.title
     }
 
     Rectangle {

@@ -9,6 +9,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
+import "neovim" as Neovim
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
 PanelWindow {
@@ -62,7 +63,8 @@ PanelWindow {
     margins.right: root.gap
     implicitWidth: frame.width
     // Floating frames set the title chip into the top border, half of it above the frame.
-    readonly property real float_top: Style.frame_float ? Math.round(title_tab.height / 2) : 0
+    readonly property bool float_title: Style.frame_float && Style.show_title
+    readonly property real float_top: root.float_title ? Math.round(title_tab.height / 2) : 0
     implicitHeight: frame.height + Style.frame_drop + root.float_top
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
@@ -132,7 +134,7 @@ PanelWindow {
 
     Rectangle {
         visible: Style.frame_drop > 0
-        y: Style.frame_drop
+        y: frame.y + Style.frame_drop
         width: frame.width
         height: frame.height
         radius: frame.radius
@@ -150,7 +152,7 @@ PanelWindow {
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
         readonly property real band_height: Math.max(26, title_tab.height + 4)
-        readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : Style.frame_float ? root.float_top : title_tab.height + frame.ring_pad
+        readonly property real header_height: frame.banded ? frame.band_height + 4 + Style.inset_pad : root.float_title ? root.float_top : title_tab.height + frame.ring_pad
 
         y: root.float_top
 
@@ -249,39 +251,37 @@ PanelWindow {
 
             Rectangle {
                 id: title_tab
-                opacity: frame.banded ? 0 : 1
-                x: Style.frame_float ? 12 : frame.title_x + Style.inset_pad
-                y: Style.frame_float ? -root.float_top : frame.top_edge + frame.ring_pad
+                opacity: frame.banded || root.float_title ? 0 : 1
+                x: frame.title_x + Style.inset_pad
+                y: frame.top_edge + frame.ring_pad
                 width: Style.fade_fills ? frame.width - frame.title_x * 2 : title_text.implicitWidth + 20
                 height: title_text.implicitHeight + 4
                 color: Style.show_title && !Style.fade_fills ? Style.title_bg : "transparent"
-                radius: Style.frame_float ? 3 : 0
 
                 FadeFill {
                     visible: Style.show_title && Style.fade_fills
                     fill: Style.title_bg
                 }
 
-                Rectangle {
-                    visible: Style.frame_float
-                    z: -1
-                    x: -4
-                    y: Math.round(parent.height / 2) - 1
-                    width: parent.width + 8
-                    height: Style.frame_border_width + 2
-                    color: Style.frame_color
-                }
-
                 Text {
                     id: title_text
                     x: 10
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + (Style.frame_float ? root.title.charAt(0).toUpperCase() + root.title.slice(1).toLowerCase() : root.title) + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
+                    text: Style.title_prefix + root.title + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
                     color: Style.show_title ? Style.title_fg : Style.accent_color
                     font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
+                }
+            }
+
+            Loader {
+                active: root.float_title
+                x: 12
+                y: -root.float_top
+                sourceComponent: Neovim.BorderTitle {
+                    title: root.title
                 }
             }
 

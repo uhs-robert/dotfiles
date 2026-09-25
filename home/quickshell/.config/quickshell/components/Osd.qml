@@ -12,6 +12,7 @@ import "../services"
 import "snes" as Snes
 import "ps1" as Ps1
 import "ps2" as Ps2
+import "neovim" as Neovim
 
 PanelWindow {
     id: root
@@ -339,27 +340,16 @@ PanelWindow {
             Rectangle {
                 id: title_tab
                 visible: Style.show_title
-                opacity: root.banded ? 0 : 1
-                x: Style.frame_float ? 12 : (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
-                y: Style.frame_float ? -root.float_top : (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + Style.inset_pad
+                opacity: root.banded || Style.frame_float ? 0 : 1
+                x: (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
+                y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + Style.inset_pad
                 width: Style.fade_fills ? Math.max(title_text.implicitWidth + 20 + title_index.space, body.implicitWidth + frame.pad_x * 2 - frame.radius * 2) : title_text.implicitWidth + 20 + title_index.space
                 height: Math.max(title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
-                radius: Style.frame_float ? 3 : 0
                 color: Style.fade_fills ? "transparent" : Style.title_bg
 
                 FadeFill {
                     visible: Style.fade_fills
                     fill: Style.title_bg
-                }
-
-                Rectangle {
-                    visible: Style.frame_float
-                    z: -1
-                    x: -4
-                    y: Math.round(parent.height / 2) - 1
-                    width: parent.width + 8
-                    height: Style.frame_border_width + 2
-                    color: Style.frame_color
                 }
 
                 TitleIndex {
@@ -375,12 +365,21 @@ PanelWindow {
                     anchors.horizontalCenterOffset: title_index.space / 2
                     x: 10 + title_index.space
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + (Style.frame_float ? root.title.charAt(0) + root.title.slice(1).toLowerCase() : root.title) + Style.title_suffix
+                    text: Style.title_prefix + root.title + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
                     font.pixelSize: Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
+                }
+            }
+
+            Loader {
+                active: Style.frame_float && Style.show_title
+                x: 12
+                y: -root.float_top
+                sourceComponent: Neovim.BorderTitle {
+                    title: root.title
                 }
             }
 

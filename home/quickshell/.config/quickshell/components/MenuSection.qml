@@ -44,24 +44,15 @@ Text {
         }
     }
 
-    Row {
+    Text {
         visible: root.st.section_fold
-        x: root.leftPadding + root.contentWidth + 8
-        y: root.topPadding + Math.round(root.contentHeight / 2)
+        x: root.leftPadding + root.contentWidth + 6
+        y: root.topPadding
         width: Math.max(0, root.width - x)
-        spacing: 4
         clip: true
-
-        Repeater {
-            model: root.st.section_fold ? Math.max(0, Math.floor((root.width - root.leftPadding - root.contentWidth - 8) / 6)) : 0
-
-            Rectangle {
-                width: 2
-                height: 2
-                radius: 1
-                color: root.st.text_muted
-            }
-        }
+        text: root.st.section_fold ? "\u00b7".repeat(120) : ""
+        color: root.st.text_muted
+        font: root.font
     }
 
     Rectangle {

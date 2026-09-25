@@ -11,15 +11,6 @@ Rectangle {
     property var on_open: function () {}
     readonly property var alert: WeatherState.alerts.length > 0 ? WeatherState.alerts[0] : null
     readonly property color red: Theme.theme_label
-    readonly property var weekday_names: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-
-    function until(iso) {
-        if (!iso) return "";
-        const d = new Date(iso);
-        const shifted = new Date(d.getTime() + WeatherState.utc_offset * 1000);
-        const day = shifted.toISOString().substr(0, 10) === WeatherState.location_date_str() ? "" : root.weekday_names[shifted.getUTCDay()] + " ";
-        return "UNTIL " + day + WeatherState.fmt_location_time(d).toUpperCase();
-    }
 
     implicitHeight: column.implicitHeight + 2
     color: Qt.alpha(root.red, 0.06)
@@ -73,7 +64,7 @@ Rectangle {
 
             Text {
                 visible: root.alert && root.alert.ends && root.width >= 260
-                text: root.alert ? root.until(root.alert.ends) : ""
+                text: root.alert ? WeatherState.fmt_until(root.alert.ends).toUpperCase() : ""
                 color: root.red
                 font.family: Style.number_font
                 font.pixelSize: Style.font_size - 4

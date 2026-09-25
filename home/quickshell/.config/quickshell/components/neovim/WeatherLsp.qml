@@ -197,7 +197,7 @@ ColumnLayout {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: root.alert && root.alert.ends ? "until " + WeatherState.fmt_location_time(new Date(root.alert.ends)) : ""
+            text: root.alert ? WeatherState.fmt_until(root.alert.ends) : ""
             color: Qt.tint(Style.text_dim, Qt.alpha(root.diag, 0.6))
             font.family: Style.font_family
             font.pixelSize: Style.font_size - 4
