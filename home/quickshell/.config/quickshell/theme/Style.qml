@@ -170,6 +170,7 @@ Singleton {
             bar_clock_fg: Theme.fg_core,
             bar_clock_font: "",
             bar_clock_size: 0,
+            bar_glyph_size: 0,
             bar_border_width: 1,
             bar_border_color: Theme.fg_muted,
             bar_rounded: false,
@@ -414,6 +415,7 @@ Singleton {
                 bar_clock_fg: Theme.fg_core,
                 bar_clock_font: "",
                 bar_clock_size: 0,
+                bar_glyph_size: 0,
                 bar_border_width: 1,
                 bar_border_color: Qt.alpha(Theme.ui_border, 0.5),
                 bar_rounded: true,
@@ -1894,9 +1896,11 @@ Singleton {
                     toggle_off: Theme.fg_dim,
                     bar_lualine: true,
                     bar_font_family: "Maple Mono NF",
-                    bar_font_size: Theme.font_size,
-                    bar_clock_size: 17,
-                    bar_height: 32,
+                    // Sized like the tmux status line in kitty: Maple Mono at 12pt.
+                    bar_font_size: 16,
+                    bar_glyph_size: 16,
+                    bar_clock_size: 16,
+                    bar_height: 24,
                     bar_side_bg: Theme.bg_surface,
                     bar_center_bg: Theme.bg_surface,
                     bar_fg: Theme.fg_core,
@@ -2252,6 +2256,8 @@ Singleton {
     readonly property string bar_clock_font: root.bar.bar_clock_font || root.bar_font_family
     // Clock icon and time size in px; 0 keeps the style's own size.
     readonly property int bar_clock_size: root.bar.bar_clock_size
+    // Bar module glyphs; 0 in a style keeps Theme.glyph_size.
+    readonly property int bar_glyph_size: root.bar.bar_glyph_size > 0 ? root.bar.bar_glyph_size : Theme.glyph_size
     readonly property int bar_border_width: root.bar.bar_border_width
     readonly property color bar_border_color: root.bar.bar_border_color
     readonly property bool bar_rounded: root.bar.bar_rounded

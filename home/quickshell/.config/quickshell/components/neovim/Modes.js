@@ -15,7 +15,9 @@ function label(name) {
     return name === "" ? "HYPR" : name.toUpperCase();
 }
 
+// The idle (global) submap takes tmux-oasis's normal-mode colour.
 function color(name, theme, submap_color) {
+    if ((name || "") === "") return theme.theme_primary_strong;
     const k = kind(name);
     return k === "normal" ? theme.theme_primary : k === "insert" ? theme.theme_secondary : k === "visual" ? theme.magenta : k === "replace" ? theme.theme_label : submap_color;
 }

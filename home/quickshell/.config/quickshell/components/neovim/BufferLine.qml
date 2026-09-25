@@ -71,6 +71,11 @@ Item {
                     width: root.arrow + 1
                     height: slot.height
 
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + slot.modelData.id + "' })")
+                    }
+
                     Shape {
                         visible: !slot.lit && !slot.prev_lit
                         anchors.centerIn: parent

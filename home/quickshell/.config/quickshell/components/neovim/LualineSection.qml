@@ -115,6 +115,13 @@ Item {
                 onLitChanged: cell.sync()
                 onFirstChanged: cell.sync()
                 onLastChanged: cell.sync()
+                // A click anywhere in the cell, lead and padding included, opens the module's popup.
+                function activate() {
+                    const it = loader.item;
+                    if (!it || !it.island || cell.modelData.base === "voxtype") return;
+                    Popups.toggle(cell.modelData.base, it.island, it.island_color, it.screen_name || "");
+                }
+
                 function sync() {
                     if (cell.first) root.first_lit = cell.lit;
                     if (cell.last) root.last_lit = cell.lit;
@@ -129,6 +136,11 @@ Item {
                     visible: !cell.first
                     width: root.lead_width
                     height: root.height
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: cell.activate()
+                    }
 
                     Shape {
                         visible: root.separators && !cell.lit && !cell.prev_lit
@@ -176,6 +188,12 @@ Item {
                     color: cell.lit ? root.hover_fill : "transparent"
                     readonly property int pad_left: cell.first ? 10 : 4
                     readonly property int pad_right: cell.last ? 10 : 5
+
+                    // Under the module, so its own MouseAreas still take clicks on it.
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: cell.activate()
+                    }
 
                     Loader {
                         id: loader
