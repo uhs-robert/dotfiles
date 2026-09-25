@@ -23,6 +23,9 @@ Item {
     property color inset_color: "transparent"
     // Visor glass: curved bottom corners instead of slants, glass gradient into bg_color, border along sides and bottom.
     property bool visor: false
+    // Readout modules sit in HUD boxes outlined in this color, like Super Metroid's counters.
+    property color hud_box: "transparent"
+    readonly property var hud_modules: ["volume", "battery", "bluetooth", "system", "network", "weather", "updates", "notifications"]
     readonly property bool shaded: root.shade_color.a > 0 || root.visor
     default property alias content: layout.children
 
@@ -127,6 +130,34 @@ Item {
                 major_length: 5
                 minor_length: 3
                 major_color: Style.bar_ticks
+            }
+        }
+
+        Repeater {
+            model: root.hud_box.a > 0 ? layout.children : []
+
+            Rectangle {
+                id: hud
+                required property var modelData
+                readonly property bool boxed: !!hud.modelData && hud.modelData.visible && hud.modelData.width > 0 && !!hud.modelData.modelData && root.hud_modules.indexOf(hud.modelData.modelData.base) >= 0
+
+                visible: hud.boxed
+                x: layout.x + (hud.modelData ? hud.modelData.x : 0) - 5
+                y: 4
+                width: (hud.modelData ? hud.modelData.width : 0) + 10
+                height: body.height - 8
+                radius: 2
+                color: Qt.alpha(Theme.bg_crust, 0.55)
+                border.width: 1
+                border.color: root.hud_box
+
+                Rectangle {
+                    x: 2
+                    y: 1
+                    width: parent.width - 4
+                    height: 1
+                    color: Qt.alpha(root.hud_box, 0.35)
+                }
             }
         }
 
