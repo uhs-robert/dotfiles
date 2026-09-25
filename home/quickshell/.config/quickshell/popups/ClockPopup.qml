@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/popups/ClockPopup.qml
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import "../components"
 import "../theme"
 import "../services"
@@ -9,7 +10,7 @@ Popup {
     id: root
 
     popup_name: "clock"
-    title: Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMM yyyy").toUpperCase()
+    title: root.nes ? root.hud_title : Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMM yyyy").toUpperCase()
     preferred_width: 320
     footer_hint: "h/l month · j/k year · t/gg today · [ ] zone · q close"
     body_height: content.implicitHeight + 24
@@ -20,6 +21,18 @@ Popup {
     jumps_enabled: true
 
     readonly property bool is_open: Popups.open_name === "clock"
+    // A Mario HUD title with today's date and time; the viewed month moves into the body.
+    readonly property bool nes: root.st.console_skin === "nes"
+    readonly property string hud_title: {
+        const d = Timezones.shift(hud_clock.date);
+        return "WORLD " + (d.getMonth() + 1) + "-" + d.getDate() + "  TIME " + Qt.formatTime(d, "HH:mm");
+    }
+
+    SystemClock {
+        id: hud_clock
+        enabled: root.nes && root.is_open
+        precision: SystemClock.Minutes
+    }
     onIs_openChanged: if (is_open) go_today()
     onJump_first: go_today()
 
@@ -147,7 +160,7 @@ Popup {
             spacing: 8
 
             Text {
-                visible: !root.has_title
+                visible: !root.has_title || root.nes
                 Layout.alignment: Qt.AlignHCenter
                 text: Qt.formatDate(new Date(root.view_year, root.view_month, 1), "MMMM yyyy")
                 color: root.st.text_fg
