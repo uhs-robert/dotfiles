@@ -250,7 +250,8 @@ PanelWindow {
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
-        radius: Style.rounded && !Style.frame_visor ? height / 2 : Style.frame_radius
+        // Sized console art makes the frame near square, where a pill radius would round it into a circle.
+        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && root.console_osd.size) ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
         border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
