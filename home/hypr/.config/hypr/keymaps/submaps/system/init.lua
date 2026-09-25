@@ -22,8 +22,6 @@ local POWER = {
   off = Scripts.qs_ipc .. " call power confirm poweroff",
 }
 
-local NOTIFICATIONS = { "N", Cmd.run(Scripts.qs_ipc .. " call popup open notifications"), "Notification Center" }
-
 Submap.define({
   name = "System",
   desc = "+System",
@@ -44,7 +42,7 @@ Submap.define({
     { "I",         Cmd.run(Scripts.nmtui),              "Internet (nmtui)" },
     { "K",         Cmd.run("hyprctl kill"),             "Kill App (Click)" },
     { "L",         Cmd.run(POWER.lock),                 "Lock" },
-    NOTIFICATIONS,
+    { "N",         Cmd.run(Scripts.qs_ipc .. " call popup open notifications"), "Notification Center" },
     { "R",         Cmd.run(POWER.reboot),               "Reboot" },
     { "SHIFT + R", require("config.autostart"),         "Replay Autostart" },
     { "P",         Cmd.run(POWER.off),                  "Power Off" },
