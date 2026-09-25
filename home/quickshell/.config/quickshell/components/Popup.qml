@@ -497,6 +497,15 @@ PanelWindow {
                 chamfer: root.st.frame_chamfer
             }
 
+            // Under a capsule the top border gives way, so the capsule's fill runs straight into the frame's.
+            Rectangle {
+                visible: root.island_capsule && !root.dock_bottom && root.st.frame_border_width > 0
+                x: root.edge_x(root.island_width) + root.st.frame_border_width
+                width: root.island_width - root.st.frame_border_width * 2
+                height: root.st.frame_border_width
+                color: root.st.frame_shade.a > 0 ? root.st.frame_shade : root.st.frame_color
+            }
+
             Sheen {
                 color_top: root.floating ? root.st.sheen : "transparent"
                 corner: root.top_radius

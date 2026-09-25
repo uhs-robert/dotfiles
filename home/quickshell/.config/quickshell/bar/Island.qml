@@ -79,8 +79,22 @@ Item {
         border.width: root.border_width
         border.color: root.border_color
         gradient: Gradient {
-            GradientStop { position: 0; color: root.shade_color.a > 0 ? root.shade_color : root.bg_color }
-            GradientStop { position: 1; color: root.bg_color }
+            GradientStop { position: 0; color: capsule_fill.top_color }
+            GradientStop { position: 1; color: capsule_fill.bottom_color }
+        }
+
+        // Joined, the bottom takes the popup's top shade and drops its border so the fills run on unbroken.
+        Rectangle {
+            id: capsule_fill
+            readonly property color top_color: root.shade_color.a > 0 ? root.shade_color : root.bg_color
+            readonly property color bottom_color: Qt.tint(root.bg_color, Qt.alpha(capsule_fill.top_color, root.join))
+            visible: root.join > 0 && root.border_width > 0
+            x: root.border_width
+            y: parent.height - root.border_width
+            width: parent.width - root.border_width * 2
+            height: root.border_width
+            color: capsule_fill.bottom_color
+            opacity: root.join
         }
 
         Sheen {

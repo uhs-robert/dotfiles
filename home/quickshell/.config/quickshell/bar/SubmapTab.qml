@@ -123,6 +123,15 @@ PanelWindow {
                 }
             }
 
+            // Under a capsule the tab's top border gives way so its fill meets the line.
+            Rectangle {
+                visible: Style.bar_capsule > 0 && tab.border.width > 0
+                x: tab.border.width
+                width: tab.width - tab.border.width * 2
+                height: tab.border.width
+                color: tab.color
+            }
+
             FrameInset {
                 edge: tab.border.width
                 bottom_radius: tab.bottomLeftRadius
