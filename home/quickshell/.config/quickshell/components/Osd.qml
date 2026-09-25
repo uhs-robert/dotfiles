@@ -405,7 +405,7 @@ PanelWindow {
                     anchors.horizontalCenterOffset: title_index.space / 2
                     x: 10 + title_index.space
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + Style.title_text(Style.shown_title(root.title)) + Style.title_suffix
+                    text: Style.title_prefix + Style.title_text(root.title) + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
                     font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
@@ -419,7 +419,7 @@ PanelWindow {
                 x: 12
                 y: -root.float_top
                 sourceComponent: Neovim.BorderTitle {
-                    title: root.title
+                    title: Style.title_text(root.title)
                 }
             }
 

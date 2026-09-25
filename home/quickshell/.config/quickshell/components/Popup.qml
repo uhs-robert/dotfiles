@@ -30,6 +30,8 @@ PanelWindow {
     property string title: popup_name.toUpperCase()
     // A live value after the style's title readout, e.g. unread counts.
     property string title_value: ""
+    // Passive popups (the tooltip shelf) show app text as it is.
+    readonly property string shown_title: root.passive ? root.title : Style.title_text(root.title, root.st)
     property string footer_hint: ""
     // The full key list behind `?`; while set, the footer shows only help_hint.
     property string key_help: footer_hint
@@ -451,8 +453,8 @@ PanelWindow {
                 active: root.st.border_title
                 sourceComponent: Neovim.FloatFrame {
                     st: root.st
-                    title: root.has_title ? root.title : ""
-                    status: root.title_value
+                    title: root.has_title ? root.shown_title : ""
+                    status: root.st.title_status ? root.title_value : ""
                     chip_height: root.has_title ? title_tab.height : 0
                     radius: root.frame_radius
                 }
@@ -669,7 +671,7 @@ PanelWindow {
                         y: (parent.height - height) / 2
                         width: Math.min(Math.ceil(Math.max(title_metrics.width, title_metrics.advanceWidth)), parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
-                        text: root.st.title_prefix + (root.passive ? root.title : Style.title_text(Style.shown_title(root.title, root.st), root.st)) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
+                        text: root.st.title_prefix + root.shown_title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
                         font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
@@ -694,7 +696,7 @@ PanelWindow {
 
                 // Plain sentence-case titles carry the live title value at the right, like a status line.
                 Text {
-                    visible: root.has_title && !root.banded && root.st.title_mixed && root.st.title_readout === "" && root.title_value !== "" && title_tab.x + title_tab.width + 12 <= parent.width - anchors.rightMargin - implicitWidth
+                    visible: root.has_title && !root.banded && root.st.title_status && !root.st.border_title && root.st.title_readout === "" && root.title_value !== "" && title_tab.x + title_tab.width + 12 <= parent.width - anchors.rightMargin - implicitWidth
                     anchors.right: parent.right
                     anchors.rightMargin: title_readout.anchors.rightMargin + 4
                     y: title_tab.y + (title_tab.height - height) / 2

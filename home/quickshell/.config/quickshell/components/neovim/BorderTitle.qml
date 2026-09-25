@@ -31,7 +31,7 @@ Item {
         Text {
             id: label
             anchors.centerIn: parent
-            text: root.title === "" ? "" : root.title.charAt(0).toUpperCase() + root.title.slice(1).toLowerCase()
+            text: root.title
             color: root.st.title_fg
             font.family: root.st.title_font_family
             font.pixelSize: root.st.font_size - 2

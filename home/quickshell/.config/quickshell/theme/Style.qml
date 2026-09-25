@@ -244,7 +244,7 @@ Singleton {
             tab_well: "transparent",
             tab_active_shade: "transparent",
             tab_key_plain: false,
-            title_mixed: false,
+            title_status: false,
             chip_fg: "transparent",
             bar_capsule: 0,
             bar_workspace_shade: "transparent",
@@ -485,7 +485,7 @@ Singleton {
                 tab_well: "transparent",
                 tab_active_shade: "transparent",
                 tab_key_plain: false,
-                title_mixed: false,
+                title_status: false,
                 chip_fg: "transparent",
                 bar_capsule: 0,
                 bar_workspace_shade: "transparent",
@@ -1766,7 +1766,8 @@ Singleton {
                     title_fg: t1,
                     title_spacing: -0.2,
                     title_weight: Font.DemiBold,
-                    title_mixed: true,
+                    title_case: true,
+                    title_status: true,
                     title_size: Theme.popup_font_size,
                     row_keys: false,
                     boxed_cards: false,
@@ -1819,6 +1820,8 @@ Singleton {
                     scale: 1.1,
                     rounded: false,
                     border_title: true,
+                    title_case: true,
+                    title_status: true,
                     frame_color: Theme.bg_mantle,
                     frame_radius: 8,
                     frame_border_width: 1,
@@ -2175,7 +2178,7 @@ Singleton {
     readonly property color tab_mark: root.active.tab_mark
     // A 1px highlight along the top of raised tabs and cards.
     readonly property color rim: root.active.rim
-    // Titles recase all-caps words over three letters ("NETWORK" to "Network"); title_size 0 keeps font_size - 2.
+    // Popup, OSD and which-key titles in title case ("NETWORK" to "Network", see title_text); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
     // Footer keycaps with rounded corners and a key_border outline.
     readonly property bool footer_key_round: root.active.footer_key_round
@@ -2194,10 +2197,11 @@ Singleton {
     readonly property color tab_well: root.active.tab_well
     // Tab jump keys as bare digits instead of badges.
     readonly property bool tab_key_plain: root.active.tab_key_plain
-    readonly property bool title_mixed: root.active.title_mixed
+    // The popup's live title value at the right of its title (in the border under border_title).
+    readonly property bool title_status: root.active.title_status
     // Action chip text; transparent keeps theme_secondary.
     readonly property color chip_fg: root.active.chip_fg
-    // Frames float free of the bar with all corners rounded and the title as a chip set into the top border (FloatFrame).
+    // Frames drawn as Neovim floating windows (FloatFrame): rounded all round, the title as a chip set into the top border.
     readonly property bool border_title: root.active.border_title
     // Rows get a line-number gutter showing their key; the selected row's number takes text_accent.
     readonly property bool row_gutter: root.active.row_gutter
@@ -2261,15 +2265,10 @@ Singleton {
     readonly property bool bar_lualine: root.bar.bar_lualine
     readonly property int bar_text_style: root.bar.bar_text_raised ? Text.Raised : root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
 
-    // A popup or OSD title as the style shows it.
+    // A title as the token set `st` (this singleton when omitted) shows it: all-caps words of three letters or more recased under title_case.
     function title_text(text, st) {
-        return (st || root).title_case ? text.replace(/\b[A-Z]{4,}\b/g, w => w.charAt(0) + w.slice(1).toLowerCase()) : text;
-    }
-
-    // A title as the token set `set` (this singleton when omitted) shows it: all-caps titles in sentence case under title_mixed.
-    function shown_title(t, set) {
-        const s = t || "";
-        return (set || root).title_mixed && s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
+        const t = text || "";
+        return (st || root).title_case ? t.replace(/\b[A-Z]{3,}\b/g, w => w.charAt(0) + w.slice(1).toLowerCase()) : t;
     }
 
     // Corner radius for a shape that is rounded by `r` in the default look.

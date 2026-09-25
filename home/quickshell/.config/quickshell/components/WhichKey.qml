@@ -24,7 +24,7 @@ PanelWindow {
     readonly property string position: root.payload.position || "bottom-right"
     readonly property string title: {
         const t = root.payload.title || "";
-        return Style.show_title && !Style.title_mixed ? t.toUpperCase() : t;
+        return Style.show_title ? t.toUpperCase() : t;
     }
     readonly property string footer_hint: (root.payload.footer || []).map(f => ({ ESC: "Esc", BS: "Backspace", RET: "Enter", TAB: "Tab", SPACE: "space" }[f.key] || f.key) + " " + f.desc).join(" · ")
     readonly property bool has_footer: Style.show_footer && root.footer_hint !== ""
@@ -166,7 +166,7 @@ PanelWindow {
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
-        readonly property real title_x: (Style.fade_fills || Style.rounded) && !Style.title_mixed ? frame.radius : 0
+        readonly property real title_x: Style.fade_fills || Style.rounded && !Style.title_case ? frame.radius : 0
         // The inner ring's room below the accent line, which already covers the border.
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
@@ -317,7 +317,7 @@ PanelWindow {
                 x: 12
                 y: -root.float_top
                 sourceComponent: Neovim.BorderTitle {
-                    title: root.title
+                    title: Style.title_text(root.title)
                 }
             }
 
