@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../theme"
+import "modern" as Modern
 
 // A tab or sub-view chip; tabs fill their row, chips size to the label.
 Rectangle {
@@ -47,6 +48,21 @@ Rectangle {
         stroke: root.is_chip && !root.active ? root.st.chip_border : "transparent"
     }
 
+    Rectangle {
+        visible: root.active && root.st.tab_active_shade.a > 0 && root.cut <= 0
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0; color: root.st.tab_active_shade }
+            GradientStop { position: 1; color: root.fill }
+        }
+
+        Modern.Sheen {
+            color_top: root.st.sheen
+            corner: parent.radius
+        }
+    }
+
     KeyBadge {
         id: key_badge
         visible: root.show_key
@@ -55,6 +71,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         key: root.key
         on_fill: root.active
+        plain: root.st.tab_key_plain
     }
 
     Text {

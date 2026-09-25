@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Wayland
 import "../theme"
 import "../services"
+import "modern" as Modern
 import "Search.js" as Search
 
 PanelWindow {
@@ -186,6 +187,13 @@ PanelWindow {
     // Full width along the bottom of the screen, rising from its edge; the frame loses its rounded corners.
     property bool dock_bottom: false
     readonly property real frame_radius: root.dock_bottom ? 0 : root.st.frame_radius
+    readonly property bool floating: root.st.frame_float > 0 && !root.dock_bottom
+    readonly property real top_radius: root.floating ? root.frame_radius : 0
+
+    // Styles with title_mixed show all-caps titles in sentence case.
+    function shown_title(t) {
+        return root.st.title_mixed && t === t.toUpperCase() ? t.charAt(0) + t.slice(1).toLowerCase() : t;
+    }
     // Shortcuts fire before the focused item, so popups that bind h/l themselves still walk.
     function walk_allowed() {
         const f = content_scope.Window.activeFocusItem;
@@ -230,6 +238,9 @@ PanelWindow {
     anchors.bottom: dock_bottom
     anchors.left: side === "left" || dock_bottom
     anchors.right: side === "right" || dock_bottom
+    margins.top: root.floating ? root.st.frame_float : 0
+    margins.left: root.floating && root.side === "left" ? root.st.frame_float : 0
+    margins.right: root.floating && root.side === "right" ? root.st.frame_float : 0
     exclusiveZone: 0
     color: "transparent"
     visible: false
@@ -396,13 +407,26 @@ PanelWindow {
         clip: true
 
         Rectangle {
-            visible: !root.dock_bottom && root.st.frame_drop > 0
+            visible: !root.dock_bottom && root.st.frame_drop > 0 && root.st.frame_shadow.a === 0
             y: root.st.frame_drop
             width: root.width
             height: root.height - root.line_height - root.st.frame_drop
             color: Theme.bg_shadow
             bottomLeftRadius: root.frame_radius
             bottomRightRadius: root.frame_radius
+        }
+
+        Loader {
+            active: !root.dock_bottom && root.st.frame_shadow.a > 0
+            x: root.frame_radius
+            y: root.st.frame_drop / 2
+            width: root.width - root.frame_radius * 2
+            height: root.height - root.line_height - root.st.frame_drop
+            sourceComponent: RectangularShadow {
+                blur: root.st.frame_drop
+                radius: root.frame_radius
+                color: root.st.frame_shadow
+            }
         }
 
         Item {
@@ -413,6 +437,8 @@ PanelWindow {
             Rectangle {
                 anchors.fill: parent
                 color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.custom_frame || root.device ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
+                topLeftRadius: root.top_radius
+                topRightRadius: root.top_radius
                 bottomLeftRadius: root.frame_radius
                 bottomRightRadius: root.frame_radius
                 border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.custom_frame ? 0 : root.st.frame_border_width
@@ -448,8 +474,15 @@ PanelWindow {
             FrameShade {
                 anchors.fill: parent
                 anchors.margins: root.st.frame_border_width
+                top_radius: Math.max(0, root.top_radius - root.st.frame_border_width)
                 bottom_radius: Math.max(0, root.frame_radius - root.st.frame_border_width)
                 chamfer: root.st.frame_chamfer
+            }
+
+            Modern.Sheen {
+                color_top: root.floating ? root.st.sheen : "transparent"
+                corner: root.top_radius
+                edge: root.st.frame_border_width
             }
 
             CustomFrame {
@@ -611,10 +644,10 @@ PanelWindow {
                         y: (parent.height - height) / 2
                         width: Math.min(title_metrics.width, parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
-                        text: root.st.title_prefix + root.title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
+                        text: root.st.title_prefix + root.shown_title(root.title) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
-                        font.pixelSize: root.st.font_size - 2
+                        font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
                         font.weight: root.st.title_weight > 0 ? root.st.title_weight : root.st.title_font_family === root.st.font_family ? Font.Bold : Font.Normal
                         font.letterSpacing: root.st.title_spacing
                     }

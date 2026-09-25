@@ -20,8 +20,12 @@ ColumnLayout {
 
     signal picked(int index)
 
+    // Room between a row and the edge of its well, in styles with a tab_well.
+    readonly property real well_pad: root.st.tab_well.a > 0 ? 3 : 0
+    readonly property real row_height: root.tab_height + root.well_pad * 2
+
     spacing: 4
-    Layout.preferredHeight: root.row_count > 0 ? root.row_count * root.tab_height + (root.row_count - 1) * root.spacing : 0
+    Layout.preferredHeight: root.row_count > 0 ? root.row_count * root.row_height + (root.row_count - 1) * root.spacing : 0
 
     FontMetrics {
         id: label_metrics
@@ -74,36 +78,60 @@ ColumnLayout {
     }
 
     readonly property var label_needs: root.needs(root.labels)
-    readonly property var rows: root.split(root.label_needs, root.width)
-    readonly property int row_count: Math.max(root.rows.length, ...root.reserve_labels.map(l => root.split(root.needs(l), root.width).length))
+    readonly property real row_room: root.width - root.well_pad * 2
+    readonly property var rows: root.split(root.label_needs, root.row_room)
+    readonly property int row_count: Math.max(root.rows.length, ...root.reserve_labels.map(l => root.split(root.needs(l), root.row_room).length))
 
     Repeater {
         model: root.rows
 
-        RowLayout {
-            id: tab_row
+        Rectangle {
+            id: tab_well
             required property var modelData
 
             Layout.fillWidth: !root.chips
             Layout.alignment: Qt.AlignHCenter
-            spacing: root.spacing
+            implicitWidth: tab_row.implicitWidth + root.well_pad * 2
+            implicitHeight: root.row_height
+            radius: Style.radius(root.chips ? 5 : 6)
+            color: root.st.tab_well
 
-            Repeater {
-                model: tab_row.modelData
+            // The inner shadow along the well's top edge.
+            Rectangle {
+                visible: root.well_pad > 0
+                x: parent.radius
+                y: 1
+                width: parent.width - parent.radius * 2
+                height: 1
+                color: Qt.alpha(Theme.bg_shadow, 0.35)
+            }
 
-                MenuTab {
-                    id: tab
-                    required property int modelData
+            RowLayout {
+                id: tab_row
+                readonly property var modelData: tab_well.modelData
 
-                    Layout.fillWidth: !root.chips
-                    Layout.preferredWidth: root.chips ? -1 : root.label_needs[tab.modelData] || 0
-                    implicitHeight: root.tab_height
-                    base_radius: root.chips ? 12 : 4
-                    font_size: root.font_size
-                    label: root.labels[tab.modelData] || ""
-                    active: tab.modelData === root.current
-                    key: root.chips || tab.modelData >= 9 ? "" : String(tab.modelData + 1)
-                    onClicked: root.picked(tab.modelData)
+                x: root.well_pad
+                y: root.well_pad
+                width: parent.width - root.well_pad * 2
+                spacing: root.well_pad > 0 ? 2 : root.spacing
+
+                Repeater {
+                    model: tab_row.modelData
+
+                    MenuTab {
+                        id: tab
+                        required property int modelData
+
+                        Layout.fillWidth: !root.chips
+                        Layout.preferredWidth: root.chips ? -1 : root.label_needs[tab.modelData] || 0
+                        implicitHeight: root.tab_height
+                        base_radius: root.chips && root.well_pad <= 0 ? 12 : 4
+                        font_size: root.font_size
+                        label: root.labels[tab.modelData] || ""
+                        active: tab.modelData === root.current
+                        key: root.chips || tab.modelData >= 9 ? "" : String(tab.modelData + 1)
+                        onClicked: root.picked(tab.modelData)
+                    }
                 }
             }
         }

@@ -10,9 +10,9 @@ Singleton {
     property string name: "default"
     // The saved choice; `name` differs from it only while the style picker previews.
     property string saved_name: "default"
-    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech"]
+    readonly property var order: ["default", "modern", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech"]
     readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0))
-    readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter" })
+    readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter", modern: "Modern" })
 
     function label(style_name) {
         return root.labels[style_name] || style_name.charAt(0).toUpperCase() + style_name.slice(1);
@@ -224,7 +224,22 @@ Singleton {
             meter_art: ({}),
             toast_enter: "",
             console_views: "",
-            workspace_art: ""
+            workspace_art: "",
+            frame_float: 0,
+            frame_shadow: "transparent",
+            sheen: "transparent",
+            selection_shade: "transparent",
+            tab_well: "transparent",
+            tab_active_shade: "transparent",
+            tab_key_plain: false,
+            title_mixed: false,
+            title_size: 0,
+            chip_fg: "transparent",
+            bar_capsule: 0,
+            bar_workspace_shade: "transparent",
+            bar_workspace_dot: "transparent",
+            bar_clock_layout: "",
+            bar_start_well: "transparent"
         };
         return {
             "default": {
@@ -432,7 +447,22 @@ Singleton {
                     meter_art: ({}),
                     toast_enter: "",
                 console_views: "",
-                workspace_art: ""
+                workspace_art: "",
+                frame_float: 0,
+                frame_shadow: "transparent",
+                sheen: "transparent",
+                selection_shade: "transparent",
+                tab_well: "transparent",
+                tab_active_shade: "transparent",
+                tab_key_plain: false,
+                title_mixed: false,
+                title_size: 0,
+                chip_fg: "transparent",
+                bar_capsule: 0,
+                bar_workspace_shade: "transparent",
+                bar_workspace_dot: "transparent",
+                bar_clock_layout: "",
+                bar_start_well: "transparent"
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1516,6 +1546,122 @@ Singleton {
                     bar_glow_color: Theme.bg_crust,
                     bar_text_raised: true
                 });
+            })(),
+            // Layered surfaces in Geist: floating cards, one segmented tab control, primary gradient selection.
+            "modern": (() => {
+                const t1 = Theme.fg_strong;
+                const t2 = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.fg_core, 0.74));
+                const t3 = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.fg_core, 0.5));
+                const l0 = Qt.tint(Theme.bg_core, Qt.alpha(Theme.bg_mantle, 0.78));
+                const l1 = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.bg_surface, 0.62));
+                const l2 = Qt.tint(Theme.bg_surface, Qt.alpha(Theme.ui_visual_bg, 0.55));
+                const raised = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.bg_surface, 0.72));
+                const well = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.bg_core, 0.72));
+                const edge = Qt.alpha(Theme.fg_strong, 0.07);
+                const hi = Qt.alpha(Theme.fg_strong, 0.13);
+                const accent_top = Qt.tint(Theme.theme_primary_light, Qt.alpha(Theme.theme_primary, 0.82));
+                const accent = Theme.theme_primary_strong;
+                return Object.assign({}, terminal, {
+                    text_muted: t3,
+                    text_dim: t2,
+                    text_fg: t1,
+                    text_strong: t1,
+                    text_primary: Theme.theme_primary,
+                    text_accent: Theme.theme_secondary,
+                    font_family: "Geist",
+                    font_size: Theme.popup_font_size - 1,
+                    number_font: "Geist Mono",
+                    mono_font: "Geist Mono",
+                    scale: 1.1,
+                    rounded: true,
+                    corner_scale: 1.75,
+                    frame_color: l0,
+                    frame_shade: l1,
+                    shade_vertical: true,
+                    frame_radius: 22,
+                    frame_border_width: 1,
+                    frame_border_color: edge,
+                    frame_pad: 8,
+                    frame_drop: 14,
+                    frame_float: 6,
+                    frame_shadow: Qt.alpha(Theme.bg_crust, 0.6),
+                    sheen: hi,
+                    accent_color: Theme.theme_primary,
+                    accent_height: 0,
+                    selection_bg: accent,
+                    selection_shade: accent_top,
+                    selection_inverse: true,
+                    selection_fg: Theme.bg_crust,
+                    selection_outline: "transparent",
+                    caret_color: Theme.theme_primary,
+                    caret_blink: false,
+                    row_cursor: "",
+                    tab_well: well,
+                    tab_active_bg: raised,
+                    tab_active_shade: l2,
+                    tab_active_fg: t1,
+                    tab_fg: t2,
+                    tab_key_plain: true,
+                    key_bg: l2,
+                    key_fg: t2,
+                    key_border: edge,
+                    section_fg: t3,
+                    section_rule: false,
+                    footer_fg: t3,
+                    footer_key_fg: t2,
+                    footer_key_bg: l2,
+                    footer_rule_solid: true,
+                    footer_rule_color: edge,
+                    meter_on: Theme.theme_primary,
+                    meter_shade: Theme.theme_primary_light,
+                    meter_off: well,
+                    meter_hot: Theme.theme_label,
+                    meter_radius: 2,
+                    meter_height: 8,
+                    chart_fill: Theme.theme_primary,
+                    title_bg: "transparent",
+                    title_fg: t1,
+                    title_spacing: -0.2,
+                    title_weight: Font.DemiBold,
+                    title_mixed: true,
+                    title_size: Theme.popup_font_size,
+                    row_keys: false,
+                    boxed_cards: false,
+                    chip_brackets: false,
+                    chip_active_bg: raised,
+                    chip_active_fg: t1,
+                    chip_pick: accent,
+                    chip_fg: t1,
+                    toggle_brackets: false,
+                    toggle_on: Theme.theme_primary,
+                    toggle_off: t3,
+                    marker_fill: false,
+                    osd_layout: "tile",
+                    card_layout: "tile",
+                    weather_header: "hero",
+                    bar_font_family: "Geist",
+                    bar_font_size: Theme.font_size,
+                    bar_side_bg: l0,
+                    bar_center_bg: l0,
+                    bar_fg: t1,
+                    bar_clock_fg: t1,
+                    bar_border_width: 1,
+                    bar_border_color: edge,
+                    bar_rounded: true,
+                    bar_capsule: 3,
+                    bar_clock_layout: "capsule",
+                    bar_start_well: well,
+                    bar_workspace_focused: accent,
+                    bar_workspace_shade: accent_top,
+                    bar_workspace_active: Qt.alpha(Theme.theme_primary, 0.35),
+                    bar_workspace_idle: Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.bg_surface, 0.8)),
+                    bar_workspace_dot: Qt.alpha(Theme.fg_core, 0.26),
+                    bar_workspace_ring: "transparent",
+                    bar_hover_bg: Qt.alpha(Theme.fg_strong, 0.08),
+                    small: {
+                        frame_radius: 18
+                    }
+                });
             })()
         };
     }
@@ -1757,7 +1903,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert" or "glow", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq", "dialogue" or "dialog".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert", "glow" or "tile", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status" or "hero", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog" or "tile".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1798,6 +1944,23 @@ Singleton {
     readonly property string console_views: root.active.console_views
     // Bar workspace indicator art for non-console styles ("dial", "materia", "doors"); "" keeps pills.
     readonly property string workspace_art: root.active.workspace_art
+    // Popups float this many px below the bar with every corner rounded; frame_shadow fills frame_drop's room with a soft shadow.
+    readonly property int frame_float: root.active.frame_float
+    readonly property color frame_shadow: root.active.frame_shadow
+    // A 1px highlight along the top edge of raised surfaces: frames, islands, the active tab, the selected row, keycaps.
+    readonly property color sheen: root.active.sheen
+    // Top colors of vertical gradients into selection_bg (selected rows) and tab_active_bg (active tabs and chips).
+    readonly property color selection_shade: root.active.selection_shade
+    readonly property color tab_active_shade: root.active.tab_active_shade
+    // Tab and chip rows sit in a recessed well of this color.
+    readonly property color tab_well: root.active.tab_well
+    // Tab jump keys as bare digits instead of badges.
+    readonly property bool tab_key_plain: root.active.tab_key_plain
+    // Titles in sentence case at title_size px (0 keeps font_size - 2).
+    readonly property bool title_mixed: root.active.title_mixed
+    readonly property int title_size: root.active.title_size
+    // Action chip text; transparent keeps theme_secondary.
+    readonly property color chip_fg: root.active.chip_fg
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -1835,6 +1998,14 @@ Singleton {
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color
+    // Islands as floating capsules this many px inside the bar; 0 keeps the slanted islands.
+    readonly property int bar_capsule: root.bar.bar_capsule
+    readonly property color bar_workspace_shade: root.bar.bar_workspace_shade
+    // Empty workspaces as small dots of this color instead of pills.
+    readonly property color bar_workspace_dot: root.bar.bar_workspace_dot
+    // "capsule": time with a small zone, a hairline and the date.
+    readonly property string bar_clock_layout: root.bar.bar_clock_layout
+    readonly property color bar_start_well: root.bar.bar_start_well
     readonly property int bar_text_style: root.bar.bar_text_raised ? Text.Raised : root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
 
     // Corner radius for a shape that is rounded by `r` in the default look.

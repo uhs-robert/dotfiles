@@ -109,6 +109,7 @@ Item {
                         anchors.fill: parent
                         anchors.topMargin: 1
                         anchors.bottomMargin: 1
+                        radius: Style.radius(3)
                         color: root.st.footer_key_bg
                     }
                 }
