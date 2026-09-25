@@ -2323,7 +2323,9 @@ Singleton {
     readonly property int bar_capsule: root.bar.bar_capsule
     readonly property int bar_capsule_pad: root.bar.bar_capsule_pad
     // Metroid island shape: "current", "frame", "combat" or "scan"; empty for every other style.
-    readonly property string metroid_bar: root.bar.metroid_bar || ""
+    readonly property string metroid_bar: root.bar.metroid_bar && root.metroid_bar_draft !== "" ? root.metroid_bar_draft : root.bar.metroid_bar || ""
+    // Set by the temporary metroid_draft IPC to compare shapes live.
+    property string metroid_bar_draft: ""
     // Bar height when bars.json sets none; 0 keeps the default.
     readonly property int bar_height: root.bar.bar_height
     readonly property int bar_module_gap: root.bar.bar_module_gap
