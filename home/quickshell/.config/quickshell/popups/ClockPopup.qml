@@ -268,37 +268,41 @@ Popup {
                 Repeater {
                     model: root.flat_cells
 
-                    Text {
+                    Item {
                         id: cell
                         required property var modelData
                         readonly property bool marked: modelData.kind === "day" && modelData.is_today === true && root.st.marker_fill
 
                         Layout.fillWidth: true
                         Layout.preferredWidth: 0
-                        horizontalAlignment: Text.AlignHCenter
-                        elide: Text.ElideNone
-                        text: modelData.text
-                        font.family: root.st.font_family
-                        font.pixelSize: modelData.kind === "header" || modelData.kind === "weeknum" ? root.grid_font_size - 1 : root.grid_font_size
-                        color: cell.marked ? root.st.title_fg : modelData.kind === "header" ? root.st.text_muted : modelData.kind === "weeknum" ? root.st.text_dim : modelData.is_today ? Theme.theme_accent : (modelData.in_month ? root.st.text_fg : root.st.text_muted)
-                        font.underline: modelData.kind === "day" && modelData.is_today === true && !root.st.marker_fill
-                        font.bold: cell.marked
+                        implicitHeight: cell_text.implicitHeight
 
                         Rectangle {
-                            z: -1
                             visible: cell.marked && !root.bios
                             anchors.fill: parent
                             color: root.st.title_bg
                         }
 
                         Loader {
-                            z: -1
                             active: cell.marked && root.bios
                             anchors.fill: parent
                             sourceComponent: Ps1.BiosPanel {
                                 lit: true
                                 radius: 3
                             }
+                        }
+
+                        Text {
+                            id: cell_text
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideNone
+                            text: cell.modelData.text
+                            font.family: root.st.font_family
+                            font.pixelSize: cell.modelData.kind === "header" || cell.modelData.kind === "weeknum" ? root.grid_font_size - 1 : root.grid_font_size
+                            color: cell.marked ? root.st.title_fg : cell.modelData.kind === "header" ? root.st.text_muted : cell.modelData.kind === "weeknum" ? root.st.text_dim : cell.modelData.is_today ? Theme.theme_accent : (cell.modelData.in_month ? root.st.text_fg : root.st.text_muted)
+                            font.underline: cell.modelData.kind === "day" && cell.modelData.is_today === true && !root.st.marker_fill
+                            font.bold: cell.marked
                         }
                     }
                 }
