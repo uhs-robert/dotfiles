@@ -6,6 +6,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "weather"
+import "../components/oasis" as Oasis
 
 Popup {
     id: root
@@ -206,7 +207,7 @@ Popup {
                 Layout.fillWidth: true
                 active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, hev: hev_header, pokedex: dex_header, status: status_header })[Style.weather_header] || ring_header
+                sourceComponent: ({ spec: spec_header, scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, hev: hev_header, pokedex: dex_header, status: status_header, oasis: oasis_header })[Style.weather_header] || ring_header
 
                 Component {
                     id: spec_header
@@ -278,6 +279,11 @@ Popup {
                 Component {
                     id: hev_header
                     HevHeader {}
+                }
+
+                Component {
+                    id: oasis_header
+                    Oasis.OasisHeader {}
                 }
             }
 

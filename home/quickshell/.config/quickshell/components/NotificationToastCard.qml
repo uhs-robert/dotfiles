@@ -7,6 +7,7 @@ import "../theme"
 import "../services"
 import "../popups/weather" as Weather
 import "ps1" as Ps1
+import "oasis" as Oasis
 
 Rectangle {
     id: root
@@ -17,6 +18,7 @@ Rectangle {
     readonly property var notification: root.entry ? root.entry.notification : null
     // A Dragon Quest window; toast_enter "type" types its summary out once.
     readonly property bool dq: Style.card_layout === "dq"
+    readonly property bool oasis: Style.card_layout === "oasis"
     property real typed: 1
     readonly property string summary: root.notification ? root.notification.summary : ""
 
@@ -65,10 +67,10 @@ Rectangle {
 
     implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
     radius: Style.radius(8)
-    color: Style.frame_visor || Style.custom_frame || root.dq ? "transparent" : Style.boxed_cards
+    color: Style.frame_visor || Style.custom_frame || root.dq || root.oasis ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: Style.frame_visor || Style.custom_frame || root.dq ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor || Style.custom_frame || root.dq || root.oasis ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
@@ -131,6 +133,28 @@ Rectangle {
         anchors.fill: parent
         sourceComponent: Weather.DqWindow {
             border.color: root.selected ? Style.caret_color : Theme.fg_strong
+        }
+    }
+
+    Loader {
+        active: root.oasis
+        anchors.fill: parent
+        sourceComponent: Item {
+            Oasis.OasisCard {
+                anchors.fill: parent
+                panel: true
+                selected: root.selected
+                critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
+            }
+
+            Oasis.DuneFoot {
+                x: 1
+                width: parent.width - 2
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 1
+                color: Style.dune
+                bottom_radius: Style.radius(8) - 1
+            }
         }
     }
 
@@ -220,7 +244,7 @@ Rectangle {
     }
 
     Rectangle {
-        visible: !Style.boxed_cards
+        visible: !Style.boxed_cards && !root.oasis
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom

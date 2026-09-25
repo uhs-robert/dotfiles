@@ -10,6 +10,7 @@ import "../weather" as Weather
 import "../../components/snes" as Snes
 import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
+import "../../components/oasis" as Oasis
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -104,7 +105,7 @@ Item {
         Loader {
             anchors.fill: parent
             z: -1
-            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card })[Style.card_layout] || null
+            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card, oasis: oasis_card })[Style.card_layout] || null
         }
 
         CardRule {
@@ -215,7 +216,7 @@ Item {
         }
 
         Rectangle {
-            visible: !Style.boxed_cards
+            visible: !Style.boxed_cards && Style.card_layout !== "oasis"
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -458,6 +459,14 @@ Item {
         Ps2.DialogPanel {
             selected: root.selected
             accent: root.critical ? Theme.error : Theme.theme_primary_light
+        }
+    }
+
+    Component {
+        id: oasis_card
+        Oasis.OasisCard {
+            selected: root.selected
+            critical: root.critical
         }
     }
 }
