@@ -169,6 +169,7 @@ Singleton {
             bar_clock_bg: "transparent",
             bar_clock_fg: Theme.fg_core,
             bar_clock_font: "",
+            bar_clock_size: 0,
             bar_border_width: 1,
             bar_border_color: Theme.fg_muted,
             bar_rounded: false,
@@ -412,6 +413,7 @@ Singleton {
                 bar_clock_bg: "transparent",
                 bar_clock_fg: Theme.fg_core,
                 bar_clock_font: "",
+                bar_clock_size: 0,
                 bar_border_width: 1,
                 bar_border_color: Qt.alpha(Theme.ui_border, 0.5),
                 bar_rounded: true,
@@ -1893,6 +1895,7 @@ Singleton {
                     bar_lualine: true,
                     bar_font_family: "Maple Mono NF",
                     bar_font_size: Theme.font_size,
+                    bar_clock_size: 17,
                     bar_side_bg: Theme.bg_surface,
                     bar_center_bg: Theme.bg_surface,
                     bar_fg: Theme.fg_core,
@@ -2245,6 +2248,8 @@ Singleton {
     readonly property color bar_clock_bg: root.bar.bar_clock_bg
     readonly property color bar_clock_fg: root.bar.bar_clock_fg
     readonly property string bar_clock_font: root.bar.bar_clock_font || root.bar_font_family
+    // Clock icon and time size in px; 0 keeps the style's own size.
+    readonly property int bar_clock_size: root.bar.bar_clock_size
     readonly property int bar_border_width: root.bar.bar_border_width
     readonly property color bar_border_color: root.bar.bar_border_color
     readonly property bool bar_rounded: root.bar.bar_rounded
