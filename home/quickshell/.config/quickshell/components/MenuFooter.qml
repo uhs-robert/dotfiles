@@ -141,6 +141,7 @@ Item {
                     color: root.st.footer_fg
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 4
+                    font.italic: root.st.footer_italic
                     font.capitalization: root.st.label_caps ? Font.AllUppercase : Font.MixedCase
                     font.letterSpacing: root.st.label_spacing
                 }
