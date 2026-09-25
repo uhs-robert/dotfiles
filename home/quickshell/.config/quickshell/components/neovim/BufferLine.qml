@@ -21,12 +21,11 @@ Item {
     readonly property int arrow: Math.round(root.bar_height * 0.4)
     readonly property color accent: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
 
-    implicitWidth: row.implicitWidth + 8
+    implicitWidth: row.implicitWidth + 4
     implicitHeight: root.bar_height
 
     Row {
         id: row
-        x: 4
         height: root.height
 
         Repeater {
@@ -68,7 +67,7 @@ Item {
                 }
 
                 Shape {
-                    visible: slot.focused
+                    visible: slot.focused && slot.index > 0
                     width: root.arrow + 1
                     height: slot.height
                     preferredRendererType: Shape.CurveRenderer

@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/bar/modules/StartButton.qml
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import "../../theme"
 import "../../services"
 import "../../components/neovim" as Neovim
@@ -19,6 +20,12 @@ Item {
     readonly property int well_size: root.compact ? 22 : 26
     // Lualine: the button is the HyprVim mode chip, full bar height.
     readonly property bool lualine: Style.bar_lualine
+    // The first workspace's focused segment starts right at the chip's arrow.
+    readonly property bool first_focused: {
+        const list = Hyprland.workspaces.values.filter(w => w.id > 0 && w.monitor && w.monitor.name === root.screen_name);
+        list.sort((a, b) => a.id - b.id);
+        return list.length > 0 && list[0].focused;
+    }
 
     implicitWidth: root.lualine && chip_loader.item ? chip_loader.item.implicitWidth : root.well ? root.well_size : icon.implicitSize
     implicitHeight: root.lualine ? root.bar_height : root.well ? root.well_size : icon.implicitSize
@@ -29,6 +36,7 @@ Item {
         anchors.fill: parent
         sourceComponent: Neovim.ModeChip {
             hovered: hover_handler.hovered
+            next_bg: root.first_focused ? Theme.ui_visual_bg : Style.bar_side_bg
         }
     }
 
