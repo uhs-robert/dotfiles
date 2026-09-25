@@ -20,6 +20,8 @@ Popup {
     anim_scale: 0.3
     title: String(root.spec.title || "Prompt").toUpperCase()
     footer_hint: root.is_output ? "j/k scroll · Ctrl+d/u half page · gg/G top/bottom · Enter/Esc/q close" : "Enter run · Esc normal · q close"
+    footer_size: Style.whichkey_size
+    footer_arrows: false
     footer_override: !root.is_output && root.insert ? "Enter run · Tab complete · Esc normal" : ""
     key_help: root.is_output ? "" : ["Enter run", "Tab/Shift+Tab complete", "Up/Down history", "Ctrl+p/n history", "Ctrl+u clear to start", "Ctrl+w delete word", "Esc normal mode", "h/l char", "w/b/e word", "0/^/$ start/first/end", "x/X delete char", "D/C delete/change to end", "dd/cc clear line", "d/c+motion delete/change", "r replace char", "u undo", "i/a insert/append", "I/A insert at start/end", "j/k menu, or history on an empty line", "gg/G first/last completion", "Enter accept completion or run", "q/Esc cancel"].join(" · ")
 

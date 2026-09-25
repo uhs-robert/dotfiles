@@ -36,6 +36,8 @@ PanelWindow {
     readonly property string help_hint: "? help · q close"
     // Overrides help_hint/footer_hint outright when non-empty, for popups whose ? and q are typed rather than pressed.
     property string footer_override: ""
+    property int footer_size: 0
+    property bool footer_arrows: true
     property bool help_open: false
     // Styles with a `small` block draw "small" popups apart from "large" ones (notifications, weather, media).
     property string size_class: "small"
@@ -767,6 +769,8 @@ PanelWindow {
                     anchors.rightMargin: 12 + root.st.lcd_margin + root.device_side
                     anchors.bottomMargin: (root.search_overlay ? 4 : 8) + root.st.inset_pad + root.st.lcd_margin * 2 + root.engraving_height + root.device_bottom + Style.slant_room
                     text: root.footer_override !== "" ? root.footer_override : (root.key_help !== "" ? root.help_hint : root.footer_hint)
+                    size: root.footer_size
+                    arrows: root.footer_arrows
                 }
 
                 // Takes the typed query off screen; MenuFooter draws it in the footer line.
