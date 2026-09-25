@@ -158,11 +158,11 @@ Row {
         visible: !root.compact && !root.capsule && !root.on_accent
         anchors.verticalCenter: parent.verticalCenter
         text: root.date_text
-        color: root.on_accent ? Qt.alpha(root.ink, 0.75) : root.lualine ? Style.text_dim : Style.bar_fg
+        color: root.on_accent ? Qt.alpha(root.ink, 0.75) : root.lualine || root.horizon ? Style.text_dim : Style.bar_fg
         font.family: Style.bar_font_family
         style: Style.bar_text_style
         styleColor: Style.bar_glow_color
-        font.pixelSize: Style.bar_font_size
+        font.pixelSize: root.horizon ? Style.bar_font_size - 2 : Style.bar_font_size
         font.capitalization: Style.bar_capitalization
         font.letterSpacing: Style.bar_letter_spacing
     }
