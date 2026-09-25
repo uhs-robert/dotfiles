@@ -343,7 +343,7 @@ Popup {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            visible: progress_item.has_length && Style.segmented_levels && !progress_art.active
+                            visible: progress_item.has_length && Style.segmented_levels && !progress_art.item
                             segment_count: 40
                             implicitHeight: Style.console_views === "nes" ? 16 : Style.px(8)
                             value: progress_item.ratio
