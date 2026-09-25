@@ -6,6 +6,7 @@ import Quickshell.Services.Pipewire
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -71,6 +72,22 @@ Popup {
 
     function is_slider_row(type) {
         return type !== "sink_device" && type !== "source_device";
+    }
+
+    // The PS1 CD Player: devices and streams as numbered tracks, levels as its VU meter.
+    readonly property bool cd: root.st.console_views === "ps1"
+
+    function track_number(index) {
+        const row = root.rows[index];
+        if (!row) return 0;
+        if (row.type === "stream") return root.device_indices.length + root.streams.indexOf(row.node) + 1;
+        return root.device_indices.indexOf(index) + 1;
+    }
+
+    function channel_levels(node) {
+        const a = node && node.audio;
+        if (!a) return [0];
+        return a.volumes && a.volumes.length >= 2 ? [a.volumes[0], a.volumes[1]] : [a.volume];
     }
 
     property int selected: 0
@@ -190,6 +207,16 @@ Popup {
                             anchors.rightMargin: 6 + vol_row.key_space
                             spacing: 6
 
+                            Loader {
+                                active: root.cd
+                                visible: root.cd
+                                sourceComponent: Ps1.TrackBox {
+                                    size: vol_row.height - 4
+                                    number: root.track_number(row_wrap.index)
+                                    lit: row_wrap.modelData.node === Pipewire.defaultAudioSink || row_wrap.modelData.node === Pipewire.defaultAudioSource
+                                }
+                            }
+
                             RowLabel {
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
@@ -216,6 +243,16 @@ Popup {
                             anchors.rightMargin: 6 + vol_row.key_space
                             spacing: 6
 
+                            Loader {
+                                active: root.cd && row_wrap.modelData.type === "stream"
+                                visible: active
+                                sourceComponent: Ps1.TrackBox {
+                                    size: vol_row.height - 4
+                                    number: root.track_number(row_wrap.index)
+                                    lit: vol_row.selected
+                                }
+                            }
+
                             RowLabel {
                                 Layout.preferredWidth: Style.px(90)
                                 elide: Text.ElideRight
@@ -226,7 +263,22 @@ Popup {
                                 font.pixelSize: root.st.font_size - 1
                             }
 
+                            Loader {
+                                active: root.cd
+                                visible: root.cd
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: Style.px(12)
+                                sourceComponent: Ps1.VuMeter {
+                                    levels: root.channel_levels(row_wrap.modelData.node)
+                                    muted: !!row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted
+                                    onMoved: v => {
+                                        if (row_wrap.modelData.node.audio) row_wrap.modelData.node.audio.volume = v;
+                                    }
+                                }
+                            }
+
                             Slider {
+                                visible: !root.cd
                                 Layout.fillWidth: true
                                 on_selection: vol_row.selected
                                 value: row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0
