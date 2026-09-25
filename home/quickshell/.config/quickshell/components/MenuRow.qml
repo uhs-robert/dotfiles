@@ -12,8 +12,10 @@ Rectangle {
     // A slot number the style's row marker may show; -1 for none.
     property int slot: -1
     readonly property bool marked: root.st.row_marker !== ""
+    // Points at the selected row with the white hand instead of the row cursor.
+    property bool hand: root.st.hand_cursor
     // Room reserved at the left for the style's cursor marker; rows add it to their left margin.
-    readonly property real inset: root.marked ? 16 : root.st.hand_cursor ? 24 : root.st.row_cursor !== "" ? cursor_text.implicitWidth + 4 : 0
+    readonly property real inset: root.marked ? 16 : root.hand ? 24 : root.st.row_cursor !== "" ? cursor_text.implicitWidth + 4 : 0
     // The row's shortcut, drawn as a badge at the right by styles that show row keys.
     property string key: ""
     readonly property bool show_key: root.st.row_keys && root.key !== ""
@@ -102,7 +104,7 @@ Rectangle {
 
     Text {
         id: cursor_text
-        visible: root.selected && !root.marked && root.st.row_cursor !== "" && Style.caret_phase
+        visible: root.selected && !root.marked && !root.hand && root.st.row_cursor !== "" && Style.caret_phase
         x: 6
         anchors.verticalCenter: parent.verticalCenter
         text: root.st.row_cursor
@@ -113,7 +115,7 @@ Rectangle {
     }
 
     HandCursor {
-        visible: root.selected && !root.marked && root.st.hand_cursor
+        visible: root.selected && !root.marked && root.hand
         x: 3
         anchors.verticalCenter: parent.verticalCenter
         width: 19

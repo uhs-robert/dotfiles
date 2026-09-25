@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps1" as Ps1
 
 Popup {
     id: root
@@ -22,6 +23,7 @@ Popup {
 
     property int selected: 0
     property bool confirm: false
+    readonly property bool bios: root.st.console_views === "ps1"
 
     readonly property bool is_open: Popups.open_name === "start"
     onIs_openChanged: if (is_open) {
@@ -111,7 +113,7 @@ Popup {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            spacing: 4
+            spacing: root.bios ? 6 : 4
             visible: !root.confirm
 
             Repeater {
@@ -123,11 +125,21 @@ Popup {
                     required property string modelData
 
                     Layout.fillWidth: true
-                    height: Style.px(28)
+                    height: root.bios ? Style.px(32) : Style.px(28)
                     base_radius: 6
                     selected: index === root.selected
                     key: root.keys[row.index]
                     slot: row.index + 1
+                    hand: root.st.hand_cursor || root.bios
+
+                    Loader {
+                        active: root.bios
+                        anchors.fill: parent
+                        z: -1
+                        sourceComponent: Ps1.BiosPanel {
+                            lit: row.selected
+                        }
+                    }
 
                     RowLayout {
                         anchors.left: parent.left
