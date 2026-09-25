@@ -246,6 +246,7 @@ Singleton {
             chip_fg: "transparent",
             bar_capsule: 0,
             bar_capsule_pad: 0,
+            metroid_bar: "",
             bar_height: 0,
             bar_module_gap: 16,
             bar_pill_height: 0,
@@ -937,6 +938,7 @@ Singleton {
                 bar_border_color: Qt.alpha(Theme.theme_primary, 0.5),
                 bar_workspace_idle: Qt.alpha(Theme.theme_primary, 0.18),
                 bar_hover_bg: Qt.alpha(Theme.theme_primary, 0.18),
+                metroid_bar: "current",
                 small: {
                     title_readout: "COMBAT VISOR"
                 }
@@ -2320,6 +2322,8 @@ Singleton {
     // Islands as floating capsules this many px inside the bar's top and ends, resting on its bottom edge; 0 keeps the slanted islands.
     readonly property int bar_capsule: root.bar.bar_capsule
     readonly property int bar_capsule_pad: root.bar.bar_capsule_pad
+    // Metroid island shape: "current", "frame", "combat" or "scan"; empty for every other style.
+    readonly property string metroid_bar: root.bar.metroid_bar || ""
     // Bar height when bars.json sets none; 0 keeps the default.
     readonly property int bar_height: root.bar.bar_height
     readonly property int bar_module_gap: root.bar.bar_module_gap

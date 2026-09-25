@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
+import "../components/metroid" as Metroid
 import "../services"
 import "../theme"
 
@@ -25,6 +26,8 @@ Item {
     property color inset_color: "transparent"
     // Visor glass: curved bottom corners instead of slants, glass gradient into bg_color, border along sides and bottom.
     property bool visor: false
+    // A Metroid Prime helmet-frame cut drawn by VisorIsland; empty keeps the visor glass above.
+    readonly property string metroid_variant: root.visor && ["frame", "combat", "scan"].indexOf(Style.metroid_bar) >= 0 ? Style.metroid_bar : ""
     // A capsule this many px inside the island's top and ends, resting on its bottom edge; sheen_color lights its top edge.
     property real capsule_inset: 0
     property color sheen_color: "transparent"
@@ -46,7 +49,7 @@ Item {
     property color cap_right_fill: "transparent"
     property color cap_left_fill: "transparent"
     readonly property bool center: root.cap_left && root.cap_right
-    readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : height / 2
+    readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : root.metroid_variant === "frame" ? Math.round(height * 1.6) : root.metroid_variant === "combat" ? Math.round(height * 0.8) : root.metroid_variant === "scan" ? Math.round(height * 0.75) : height / 2
     readonly property real pad: root.capsule ? Style.bar_capsule_pad : root.lualine ? (root.center ? 10 : 0) : 8
 
     signal clicked
@@ -145,7 +148,7 @@ Item {
             return closed ? d + " L " + w + " 0 L 0 0 Z" : d;
         }
 
-        visible: root.visor
+        visible: root.visor && root.metroid_variant === ""
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -168,6 +171,20 @@ Item {
             fillColor: "transparent"
             capStyle: ShapePath.FlatCap
             PathSvg { path: visor_glass.edge(root.border_width / 2, false) }
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.metroid_variant !== ""
+        sourceComponent: Metroid.VisorIsland {
+            variant: root.metroid_variant
+            cap_left: root.cap_left
+            cap_right: root.cap_right
+            cap: root.cap_width
+            bg_color: root.bg_color
+            border_width: root.border_width
+            border_color: root.border_color
         }
     }
 
