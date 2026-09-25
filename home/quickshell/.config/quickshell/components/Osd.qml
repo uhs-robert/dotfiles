@@ -406,6 +406,7 @@ PanelWindow {
 
                     Meter {
                         id: meter
+                        art_key: "osd"
                         visible: !root.showing_vox
                         width: parent.width
                         anchors.verticalCenter: parent.verticalCenter

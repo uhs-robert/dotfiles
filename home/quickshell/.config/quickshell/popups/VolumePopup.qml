@@ -236,6 +236,14 @@ Popup {
                             }
 
                             Text {
+                                visible: root.st.console_skin === "nes"
+                                text: Math.round((row_wrap.modelData.node.audio ? row_wrap.modelData.node.audio.volume : 0) * 100) + "%"
+                                color: vol_row.fg(root.st.text_fg)
+                                font.family: root.st.font_family
+                                font.pixelSize: root.st.font_size - 4
+                            }
+
+                            Text {
                                 text: row_wrap.modelData.node.audio && row_wrap.modelData.node.audio.muted ? "" : ""
                                 color: vol_row.fg(root.st.text_primary)
                                 font.family: root.st.font_family
