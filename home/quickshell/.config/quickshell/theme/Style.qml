@@ -1428,6 +1428,9 @@ Singleton {
                     caret_blink: false,
                     row_cursor: "",
                     hand_cursor: true,
+                    controller: "ps1",
+                    // Lighter than PS1's so the dark end of the window gradient keeps its blue.
+                    dither: Qt.alpha(Theme.bg_shadow, 0.14),
                     tab_active_bg: "transparent",
                     tab_active_fg: Theme.fg_strong,
                     tab_fg: Theme.theme_primary_light,

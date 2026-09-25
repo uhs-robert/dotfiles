@@ -57,7 +57,8 @@ Rectangle {
                 key: root.key
                 desc: root.desc
                 size: key_text.implicitHeight + 2
-                text_color: key_text.color
+                // key_fg is ink for an orb; bare letters beside buttons take the orb's own color.
+                text_color: root.st.materia.key !== undefined ? root.st.materia.key : key_text.color
                 font_family: key_text.font.family
                 font_size: key_text.font.pixelSize
             }
