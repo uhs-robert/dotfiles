@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Widgets
 import "../../theme"
 import "../../services"
 import "../../components"
@@ -386,11 +385,14 @@ Item {
                     Repeater {
                         model: pill.toplevels
 
-                        Item {
+                        WorkspaceIcon {
                             id: icon_item
-                            required property var modelData
                             required property int index
 
+                            host: root
+                            workspace_id: pill.modelData.id
+                            glyph: pill.glyph
+                            icon_opacity: pill.map && !pill.modelData.focused ? 0.6 : 1
                             width: root.materia ? root.slot_size : pill.glyph + (root.doors || root.slots || pill.map || root.party ? 0 : 4)
                             height: width
 
@@ -400,32 +402,6 @@ Item {
                                 lit: pill.modelData.focused
                                 raised: pill.modelData.active || pill_hover.hovered
                                 color: visible ? (Style.materia.days || {})[Materia.slot_names(pill.toplevels.map(t => root.class_of(t)))[icon_item.index]] || "transparent" : "transparent"
-                            }
-
-                            IconImage {
-                                anchors.centerIn: parent
-                                implicitSize: pill.glyph
-                                opacity: pill.map && !pill.modelData.focused ? 0.6 : 1
-                                source: root.icon_for(root.class_of(icon_item.modelData))
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-                                onClicked: mouse => {
-                                    if (mouse.button === Qt.LeftButton) {
-                                        root.focus_toplevel(pill.modelData.id, icon_item.modelData.address);
-                                    } else if (mouse.button === Qt.MiddleButton) {
-                                        root.close_toplevel(icon_item.modelData.address);
-                                    }
-                                }
-                            }
-
-                            HoverHandler {
-                                onHoveredChanged: {
-                                    if (hovered) Tooltip.show(icon_item, icon_item.modelData.title, root.name_of(icon_item.modelData));
-                                    else Tooltip.hide(icon_item);
-                                }
                             }
                         }
                     }

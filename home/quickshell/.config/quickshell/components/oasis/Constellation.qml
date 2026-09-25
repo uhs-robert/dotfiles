@@ -2,9 +2,8 @@
 import QtQuick
 import QtQuick.Shapes
 import Quickshell.Hyprland
-import Quickshell.Widgets
 import "../../theme"
-import "../../services"
+import ".."
 
 // Workspaces as a constellation: a star per workspace with its apps beside it, stars linked across the gaps; the focused one a sand sparkle.
 Item {
@@ -191,38 +190,11 @@ Item {
                 Repeater {
                     model: slot.modelData.toplevels.values
 
-                    Item {
-                        id: icon_item
-                        required property var modelData
-
-                        width: root.glyph
-                        height: width
+                    WorkspaceIcon {
+                        host: root.host
+                        workspace_id: slot.modelData.id
+                        glyph: root.glyph
                         opacity: slot.info.focused || slot_hover.hovered ? 1 : 0.75
-
-                        IconImage {
-                            anchors.centerIn: parent
-                            implicitSize: root.glyph
-                            source: root.host.icon_for(root.host.class_of(icon_item.modelData))
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-                            onClicked: mouse => {
-                                if (mouse.button === Qt.LeftButton) {
-                                    root.host.focus_toplevel(slot.modelData.id, icon_item.modelData.address);
-                                } else if (mouse.button === Qt.MiddleButton) {
-                                    root.host.close_toplevel(icon_item.modelData.address);
-                                }
-                            }
-                        }
-
-                        HoverHandler {
-                            onHoveredChanged: {
-                                if (hovered) Tooltip.show(icon_item, icon_item.modelData.title, root.host.name_of(icon_item.modelData));
-                                else Tooltip.hide(icon_item);
-                            }
-                        }
                     }
                 }
             }

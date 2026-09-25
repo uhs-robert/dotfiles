@@ -2,9 +2,9 @@
 import QtQuick
 import QtQuick.Shapes
 import Quickshell.Hyprland
-import Quickshell.Widgets
 import "../../theme"
 import "../../services"
+import ".."
 import "Modes.js" as Modes
 
 // Workspaces as lualine buffers: number and app icons, the focused one on Visual with an underline in the mode color.
@@ -105,36 +105,14 @@ Item {
                         Repeater {
                             model: slot.toplevels
 
-                            Item {
-                                id: app
-                                required property var modelData
-
+                            WorkspaceIcon {
                                 anchors.verticalCenter: parent.verticalCenter
+                                host: root.host
+                                workspace_id: slot.modelData.id
+                                glyph: root.glyph
+                                icon_opacity: slot.focused || slot.modelData.active ? 1 : 0.7
                                 width: root.glyph + 2
                                 height: root.glyph + 2
-
-                                IconImage {
-                                    anchors.centerIn: parent
-                                    implicitSize: root.glyph
-                                    opacity: slot.focused || slot.modelData.active ? 1 : 0.7
-                                    source: root.host.icon_for(root.host.class_of(app.modelData))
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-                                    onClicked: mouse => {
-                                        if (mouse.button === Qt.LeftButton) root.host.focus_toplevel(slot.modelData.id, app.modelData.address);
-                                        else root.host.close_toplevel(app.modelData.address);
-                                    }
-                                }
-
-                                HoverHandler {
-                                    onHoveredChanged: {
-                                        if (hovered) Tooltip.show(app, app.modelData.title, root.host.name_of(app.modelData));
-                                        else Tooltip.hide(app);
-                                    }
-                                }
                             }
                         }
                     }
