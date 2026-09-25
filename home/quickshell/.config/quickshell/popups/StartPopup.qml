@@ -7,7 +7,6 @@ import "../theme"
 import "../services"
 import "start" as Start
 import "snes" as Snes
-import "../components/ps1" as Ps1
 import "../components/ps2" as Ps2
 
 Popup {
@@ -26,7 +25,6 @@ Popup {
 
     property int selected: 0
     property bool confirm: false
-    readonly property bool bios: root.st.console_views === "ps1"
 
     readonly property bool is_open: Popups.open_name === "start"
     onIs_openChanged: if (is_open) {
@@ -124,7 +122,7 @@ Popup {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            spacing: root.bios ? 6 : 4
+            spacing: 4
             visible: !root.confirm && !menu_view.active
 
             Repeater {
@@ -136,24 +134,16 @@ Popup {
                     required property string modelData
 
                     Layout.fillWidth: true
-                    height: root.bios ? Style.px(32) : Style.px(28)
+                    height: Style.px(28)
                     base_radius: 6
                     selected: index === root.selected
                     key: root.keys[row.index]
                     slot: row.index + 1
-                    hand: root.st.hand_cursor || root.bios
 
                     Loader {
                         anchors.fill: parent
                         z: -1
-                        sourceComponent: ({ ps1: bios_panel, ps2: ps2_block })[root.st.console_views] || null
-
-                        Component {
-                            id: bios_panel
-                            Ps1.BiosPanel {
-                                lit: row.selected
-                            }
-                        }
+                        sourceComponent: ({ ps2: ps2_block })[root.st.console_views] || null
 
                         Component {
                             id: ps2_block
