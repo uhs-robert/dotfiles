@@ -17,6 +17,8 @@ local function run()
   os.execute("dbus-update-activation-environment --systemd GNOME_KEYRING_CONTROL SSH_AUTH_SOCK")
   if (TERM == 'foot') then hl.exec_cmd('foot --server') end
   hl.exec_cmd("hypridle")
+  -- Guards machines that still have swaync installed: D-Bus activation would otherwise respawn it and steal notifications from qs.
+  os.execute("systemctl --user mask --runtime --now swaync.service")
   hl.exec_cmd("qs -n")
   hl.exec_cmd("easyeffects --gapplication-service")
   hl.exec_cmd("udiskie")
