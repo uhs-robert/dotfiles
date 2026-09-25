@@ -100,7 +100,9 @@ Item {
                 readonly property bool wanted: !loader.item || loader.item.shown === undefined || loader.item.shown
                 readonly property bool first: cell.index === root.first_shown
                 readonly property bool last: cell.index === root.last_shown
-                readonly property bool lit: root.hoverable && cell_hover.hovered
+                // Its module's popup is open on this screen, by click, key or IPC.
+                readonly property bool popup_open: !!loader.item && Popups.open_name === cell.modelData.base && Popups.open_screen_name === (loader.item.screen_name || "")
+                readonly property bool lit: root.hoverable && (cell_hover.hovered || cell.popup_open)
                 readonly property bool prev_lit: {
                     for (let i = cell.index - 1; i >= 0; i--) {
                         const c = cells.itemAt(i);
@@ -193,6 +195,18 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: cell.activate()
+                    }
+
+                    // Accent sections keep their soft wash instead of a lit segment.
+                    Rectangle {
+                        visible: root.accent && !!loader.item
+                        x: loader.x - 4
+                        y: loader.y - 4
+                        width: loader.width + 8
+                        height: loader.height + 8
+                        radius: Style.bar_radius(4)
+                        color: Theme.ui_visual_bg
+                        opacity: cell_hover.hovered || cell.popup_open ? 0.5 : 0
                     }
 
                     Loader {

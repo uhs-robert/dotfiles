@@ -33,8 +33,9 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         radius: Style.bar_radius(4)
-        color: root.on_accent ? Theme.ui_visual_bg : Style.bar_hover_bg
-        opacity: hover_handler.hovered ? 0.5 : 0
+        color: Style.bar_hover_bg
+        // On a lualine accent section the section draws this wash.
+        opacity: hover_handler.hovered && !root.on_accent ? 0.5 : 0
     }
 
     RowLayout {

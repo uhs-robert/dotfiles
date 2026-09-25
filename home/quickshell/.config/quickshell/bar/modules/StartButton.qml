@@ -28,7 +28,8 @@ Item {
         active: root.lualine
         anchors.fill: parent
         sourceComponent: Neovim.ModeChip {
-            hovered: hover_handler.hovered
+            // Start, and Style which drops from it, keep the chip lit while open.
+            hovered: hover_handler.hovered || ((Popups.open_name === "start" || Popups.open_name === "style") && Popups.open_screen_name === root.screen_name)
             next_bg: { const c = LualineState.first_fill[root.screen_name]; return c && c.a > 0 ? c : Style.bar_side_bg; }
         }
     }
