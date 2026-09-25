@@ -39,12 +39,21 @@ Item {
                 readonly property bool empty: slot.toplevels.length === 0
                 readonly property bool focused: slot.modelData.focused
                 readonly property bool after_focused: slot.index > 0 && !!root.workspaces[slot.index - 1] && root.workspaces[slot.index - 1].focused
+                readonly property bool lit: slot.focused || buffer_hover.hovered
+                readonly property color lit_fill: slot.focused ? Theme.ui_visual_bg : Qt.tint(Style.bar_side_bg, Qt.alpha(Theme.ui_visual_bg, 0.55))
+
+                onLit_fillChanged: slot.publish()
+                onLitChanged: slot.publish()
+                Component.onCompleted: slot.publish()
+                function publish() {
+                    if (slot.index === 0 && root.host) LualineState.set_first_fill(root.host.screen_name, slot.lit ? slot.lit_fill : Qt.rgba(0, 0, 0, 0));
+                }
 
                 height: row.height
 
                 // The focused buffer's arrows stand in for the separators on both sides of it.
                 Item {
-                    visible: slot.index > 0 && !slot.focused && !slot.after_focused
+                    visible: slot.index > 0 && !slot.lit && !slot.after_focused
                     width: 10
                     height: slot.height
 
@@ -67,14 +76,14 @@ Item {
                 }
 
                 Shape {
-                    visible: slot.focused && slot.index > 0
+                    visible: slot.lit && slot.index > 0
                     width: root.arrow + 1
                     height: slot.height
                     preferredRendererType: Shape.CurveRenderer
 
                     ShapePath {
                         strokeWidth: -1
-                        fillColor: Theme.ui_visual_bg
+                        fillColor: slot.lit_fill
                         PathPolyline {
                             path: [Qt.point(0, 0), Qt.point(root.arrow + 1, 0), Qt.point(root.arrow + 1, slot.height), Qt.point(0, slot.height), Qt.point(root.arrow, slot.height / 2), Qt.point(0, 0)]
                         }
@@ -85,7 +94,7 @@ Item {
                     id: buffer
                     width: content.implicitWidth + 16
                     height: slot.height
-                    color: slot.focused ? Theme.ui_visual_bg : buffer_hover.hovered ? Qt.alpha(Theme.ui_visual_bg, 0.5) : "transparent"
+                    color: slot.lit ? slot.lit_fill : "transparent"
 
                     HoverHandler {
                         id: buffer_hover
@@ -128,14 +137,14 @@ Item {
                 }
 
                 Shape {
-                    visible: slot.focused
+                    visible: slot.lit
                     width: root.arrow
                     height: slot.height
                     preferredRendererType: Shape.CurveRenderer
 
                     ShapePath {
                         strokeWidth: -1
-                        fillColor: Theme.ui_visual_bg
+                        fillColor: slot.lit_fill
                         PathPolyline {
                             path: [Qt.point(-1, 0), Qt.point(0, 0), Qt.point(root.arrow, slot.height / 2), Qt.point(0, slot.height), Qt.point(-1, slot.height), Qt.point(-1, 0)]
                         }
