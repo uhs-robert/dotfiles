@@ -1,5 +1,6 @@
 // home/quickshell/.config/quickshell/components/modern/CapsuleSlider.qml
 import QtQuick
+import QtQuick.Shapes
 import Quickshell.Services.Pipewire
 import "../../theme"
 import ".." as Shared
@@ -19,6 +20,11 @@ Item {
     property bool solid: false
     // A static glow rising toward the level instead of the wave, for levels without audio.
     property bool glow: false
+    // Read-only sparkline: recent values (0-1, oldest first) as an area chart ending at the right edge.
+    property var spark: []
+    readonly property bool sparkline: root.spark.length > 0
+    // Replaces the percent readout, e.g. a temperature.
+    property string readout_text: ""
     // Live wave from this node; the monitor and the wave only run while peaks_on.
     property var node: null
     property bool peaks_on: false
@@ -83,7 +89,7 @@ Item {
     // The level region: a faint primary wash, the wave, and a red wash on the part past 90%.
     Item {
         id: wave_region
-        visible: !root.solid
+        visible: !root.solid && !root.sparkline
         x: root.radius * 0.5
         width: Math.max(0, root.fill_width - x)
         height: root.height
@@ -142,8 +148,53 @@ Item {
         }
     }
 
+    Shape {
+        id: spark_shape
+        visible: root.sparkline
+        readonly property real x0: root.radius * 0.6
+        readonly property real w: root.width - x0 * 2
+        readonly property real chart_top: root.height * 0.14
+        readonly property real h: root.height - chart_top * 2
+        readonly property var line: {
+            const n = root.spark.length;
+            const pts = [];
+            for (let i = 0; i < n; i++) {
+                const v = Math.max(0, Math.min(1, root.spark[i]));
+                pts.push(Qt.point(x0 + (n <= 1 ? w : i / (n - 1) * w), chart_top + h * (1 - v)));
+            }
+            if (n === 1) pts.unshift(Qt.point(x0, pts[0].y));
+            return pts;
+        }
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeWidth: -1
+            fillGradient: LinearGradient {
+                y1: spark_shape.chart_top
+                y2: spark_shape.chart_top + spark_shape.h
+                GradientStop { position: 0; color: Qt.alpha(Theme.theme_label, 0.5) }
+                GradientStop { position: 0.099; color: Qt.alpha(Theme.theme_label, 0.4) }
+                GradientStop { position: 0.1; color: Qt.alpha(Theme.theme_primary_light, 0.38) }
+                GradientStop { position: 1; color: Qt.alpha(Theme.theme_primary, 0.04) }
+            }
+            PathPolyline {
+                path: spark_shape.line.length ? [Qt.point(spark_shape.line[0].x, spark_shape.chart_top + spark_shape.h)].concat(spark_shape.line, [Qt.point(spark_shape.line[spark_shape.line.length - 1].x, spark_shape.chart_top + spark_shape.h)]) : []
+            }
+        }
+
+        ShapePath {
+            strokeColor: Qt.alpha(Theme.theme_primary_light, 0.8)
+            strokeWidth: 1.4
+            fillColor: "transparent"
+            joinStyle: ShapePath.RoundJoin
+            capStyle: ShapePath.RoundCap
+            PathPolyline { path: spark_shape.line }
+        }
+    }
+
     Rectangle {
-        visible: !root.solid && root.level > 0
+        visible: !root.solid && !root.sparkline && root.level > 0
         x: Math.max(root.radius * 0.5, Math.min(root.width - root.radius * 0.5, root.fill_width)) - 1
         y: root.height * 0.2
         width: 2
@@ -187,7 +238,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: root.pad
         anchors.verticalCenter: parent.verticalCenter
-        text: root.muted ? "Muted" : Math.round(root.level * 100) + "%"
+        text: root.readout_text !== "" ? root.readout_text : root.muted ? "Muted" : Math.round(root.level * 100) + "%"
         color: Style.text_dim
         style: Text.Outline
         styleColor: Qt.alpha(Style.tab_well, 0.9)
