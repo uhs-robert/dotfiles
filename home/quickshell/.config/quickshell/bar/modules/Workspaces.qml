@@ -95,9 +95,8 @@ Item {
                 readonly property bool diamond: Style.bar_workspace_diamond && is_empty
                 // Mario ? blocks; the focused workspace is the one already hit.
                 readonly property bool qblock: Style.console_views === "nes"
-
-                readonly property real slot_space: root.slots ? slot_text.implicitWidth + 6 : 0
                 readonly property bool ps2: Style.console_views === "ps2"
+                readonly property real slot_space: root.slots ? slot_text.implicitWidth + 6 : 0
 
                 height: root.pill_height
                 width: is_empty ? Math.max(height, pill.slot_space + 6) : icons.implicitWidth + (modelData.active ? 22 : 12) + pill.slot_space
@@ -116,19 +115,18 @@ Item {
                     ColorAnimation { duration: 280; easing.type: Easing.InOutCubic }
                 }
 
+                // Console pill art: NES ? blocks, PS2 save cubes and lit blocks.
                 Loader {
-                    active: pill.qblock
                     anchors.fill: parent
-                    sourceComponent: Nes.QBlock {
-                        kind: pill.modelData.focused ? "hit" : "q"
-                        mark: pill.is_empty
-                    }
-                }
+                    sourceComponent: pill.qblock ? nes_qblock : pill.ps2 ? (pill.is_empty ? ps2_cube : ps2_block) : null
 
-                Loader {
-                    active: pill.ps2
-                    anchors.fill: parent
-                    sourceComponent: pill.is_empty ? ps2_cube : ps2_block
+                    Component {
+                        id: nes_qblock
+                        Nes.QBlock {
+                            kind: pill.modelData.focused ? "hit" : "q"
+                            mark: pill.is_empty
+                        }
+                    }
 
                     Component {
                         id: ps2_cube
