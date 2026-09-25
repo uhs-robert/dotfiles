@@ -2,6 +2,7 @@
 import QtQuick
 import "../../components"
 import "../../theme"
+import "../../services"
 import "PixelArt.js" as PixelArt
 
 // One day as a framed Game Boy Camera photo with its hi/lo dot bar, temperatures and rain chance.
@@ -14,21 +15,49 @@ Item {
     property real scale_min: 0
     property real scale_max: 1
 
+    // Space reserved on every side for the selection box, kept constant so sizing never jumps when selection changes.
+    readonly property int box_pad: 6
+    readonly property real avail_w: root.width - 2 * root.box_pad
+    readonly property real avail_h: root.height - 2 * root.box_pad
+
     // Silkscreen sits on an 8px grid, so step up by whole grid units while the widest label and temp pair still fit.
     readonly property int text_size: {
         for (const size of [32, 24]) {
-            if (Math.max(root.label_w(size), root.temp_w(size)) <= root.width - 2 && root.height >= 6 * size + 110) return size;
+            if (Math.max(root.label_w(size), root.temp_w(size)) <= root.avail_w - 2 && root.avail_h >= 6 * size + 110) return size;
         }
         return Style.font_size;
     }
     // The high reads one grid step larger when a single stacked temperature has the width for it.
-    readonly property int hi_size: root.text_size < 32 && root.temp_w(root.text_size + 8) <= root.width - 2 ? root.text_size + 8 : root.text_size
+    readonly property int hi_size: root.text_size < 32 && root.temp_w(root.text_size + 8) <= root.avail_w - 2 ? root.text_size + 8 : root.text_size
     // Rough label/temp/pop row height, used only to budget the sprite scale; the real gap is filled below.
     readonly property real text_row_h: root.text_size + 6
-    readonly property int width_pixel: Math.max(1, Math.floor((root.width - 18) / 24))
-    readonly property int height_pixel: Math.max(1, Math.floor((root.height - 4 * root.text_row_h - 46) / 20))
+    readonly property int width_pixel: Math.max(1, Math.floor((root.avail_w - 18) / 24))
+    readonly property int height_pixel: Math.max(1, Math.floor((root.avail_h - 4 * root.text_row_h - 46) / 20))
     // Largest integer scale of the 24x18 photo that fits both the column width and the available height.
     readonly property int pixel: Math.max(1, Math.min(6, Math.min(root.width_pixel, root.height_pixel)))
+
+    // One-shot hop offset applied to the photo frame when the selection lands here; never loops.
+    property int hop_offset: 0
+
+    onSelectedChanged: {
+        if (root.selected && Popups.open_name === "weather") hop_anim.restart();
+    }
+
+    Connections {
+        target: Popups
+        function onOpen_nameChanged() {
+            if (Popups.open_name !== "weather") hop_anim.stop();
+        }
+    }
+
+    SequentialAnimation {
+        id: hop_anim
+        PropertyAction { target: root; property: "hop_offset"; value: -3 }
+        PauseAnimation { duration: 100 }
+        PropertyAction { target: root; property: "hop_offset"; value: -1 }
+        PauseAnimation { duration: 100 }
+        PropertyAction { target: root; property: "hop_offset"; value: 0 }
+    }
 
     // Space left over after the photo, dot bar and labels take their natural size, spread across the gaps between them.
     readonly property real content_h: label_row.height + photo_box.height + dot_bar.height + temp_row.height + pop_text.height
@@ -52,6 +81,15 @@ Item {
     }
     TextMetrics { id: temp_24; font.family: Style.font_family; font.pixelSize: 24; text: root.widest_temp }
     TextMetrics { id: temp_32; font.family: Style.font_family; font.pixelSize: 32; text: root.widest_temp }
+
+    // Pokémon-menu selection box around the whole column, sized to the padding reserved above.
+    PixelBox {
+        visible: root.selected
+        anchors.fill: parent
+        anchors.margins: root.box_pad - 4
+        fill: "transparent"
+        rings: [Style.shade_0, Style.shade_3]
+    }
 
     Column {
         x: Math.round((root.width - width) / 2)
@@ -85,6 +123,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             width: photo.width + 18
             height: photo.height + 18
+            transform: Translate { y: root.hop_offset }
 
             PixelBox {
                 anchors.fill: parent
