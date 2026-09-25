@@ -431,7 +431,8 @@ PanelWindow {
 
                     Meter {
                         id: meter
-                        art_key: "osd"
+                        // Volume OSD matches the Volume popup's art (hearts on NES); brightness keeps its own.
+                        art_key: root.kind === "volume" ? "volume" : "osd"
                         visible: !root.showing_vox
                         width: parent.width
                         anchors.verticalCenter: parent.verticalCenter
