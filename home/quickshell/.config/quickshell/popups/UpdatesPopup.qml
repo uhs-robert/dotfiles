@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "../components/ps2" as Ps2
 
 Popup {
     id: root
@@ -21,6 +22,7 @@ Popup {
     readonly property var current_list: root.current_sub === 0 ? UpdatesState.official : UpdatesState.aur
 
     property int selected: 0
+    readonly property bool ps2: root.st.controller === "ps2"
 
     readonly property bool is_open: Popups.open_name === "updates"
     onIs_openChanged: if (is_open) {
@@ -95,11 +97,50 @@ Popup {
             anchors.top: parent.top
             spacing: 6
 
+            Loader {
+                active: root.ps2
+                visible: active
+                Layout.fillWidth: true
+                sourceComponent: Row {
+                    spacing: 8
+
+                    Text {
+                        text: UpdatesState.total
+                        color: Theme.fg_strong
+                        font.family: root.st.font_family
+                        font.pixelSize: root.st.font_size * 2
+                        font.weight: Font.ExtraLight
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 0
+
+                        Text {
+                            text: UpdatesState.total === 1 ? "block" : "blocks"
+                            color: Theme.theme_primary_light
+                            font.family: root.st.font_family
+                            font.pixelSize: root.st.font_size - 4
+                            font.capitalization: Font.AllUppercase
+                            font.letterSpacing: 1.2
+                        }
+
+                        Text {
+                            text: UpdatesState.official.length + " official · " + UpdatesState.aur.length + " AUR"
+                            color: root.st.text_muted
+                            font.family: root.st.font_family
+                            font.pixelSize: root.st.font_size - 4
+                        }
+                    }
+                }
+            }
+
             Flow {
                 Layout.fillWidth: true
                 spacing: 8
 
                 Text {
+                    visible: !root.ps2
                     width: Math.min(implicitWidth, parent.width)
                     text: UpdatesState.total + " update" + (UpdatesState.total === 1 ? "" : "s") + " · " + UpdatesState.official.length + " official, " + UpdatesState.aur.length + " AUR"
                     color: root.st.text_fg
@@ -145,7 +186,7 @@ Popup {
                     currentIndex: root.selected
 
                     // Rows too narrow for a typical name beside its versions put the versions on a second line.
-                    readonly property bool stacked: row_list.width < row_metrics.advanceWidth("python-package-name 1.23.4-1 → 1.23.5-1") + 24
+                    readonly property bool stacked: row_list.width < row_metrics.advanceWidth("python-package-name 1.23.4-1 → 1.23.5-1") + 24 + (root.ps2 ? Style.px(20) + 10 : 0)
 
                     FontMetrics {
                         id: row_metrics
@@ -162,12 +203,25 @@ Popup {
                         height: row_list.stacked ? Math.max(Style.px(30), row_text.implicitHeight + 8) : Style.px(30)
                         selected: update_row.index === root.selected
 
+                        Loader {
+                            id: save_icon
+                            active: root.ps2
+                            x: 8 + update_row.inset
+                            anchors.verticalCenter: parent.verticalCenter
+                            sourceComponent: Ps2.SaveCube {
+                                width: Style.px(20)
+                                letter: update_row.modelData.name.charAt(0)
+                                color: root.current_sub === 0 ? Theme.theme_primary : Theme.theme_secondary_strong
+                                selected: update_row.selected
+                            }
+                        }
+
                         GridLayout {
                             id: row_text
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: 8 + update_row.inset
+                            anchors.leftMargin: 8 + update_row.inset + (save_icon.active ? save_icon.width + 10 : 0)
                             anchors.rightMargin: 8 + update_row.key_space
                             columns: row_list.stacked ? 1 : 2
                             columnSpacing: 8
