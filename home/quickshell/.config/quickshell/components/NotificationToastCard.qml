@@ -7,6 +7,7 @@ import "../theme"
 import "../services"
 import "../popups/weather" as Weather
 import "ps1" as Ps1
+import "neovim" as Neovim
 
 Rectangle {
     id: root
@@ -17,6 +18,8 @@ Rectangle {
     readonly property var notification: root.entry ? root.entry.notification : null
     // A Dragon Quest window; toast_enter "type" types its summary out once.
     readonly property bool dq: Style.card_layout === "dq"
+    // An nvim-notify window: border and title line in the level color.
+    readonly property bool notify: Style.card_layout === "notify"
     property real typed: 1
     readonly property string summary: root.notification ? root.notification.summary : ""
 
@@ -33,7 +36,7 @@ Rectangle {
         if (!root.notification) return Style.text_dim;
         if (root.notification.urgency === NotificationUrgency.Critical) return Theme.error;
         if (root.notification.urgency === NotificationUrgency.Low) return Style.text_dim;
-        return Style.text_primary;
+        return root.notify ? Theme.info : Style.text_primary;
     }
 
     readonly property string urgency_tag: {
@@ -64,12 +67,12 @@ Rectangle {
     }
 
     implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
-    radius: Style.radius(8)
+    radius: root.notify ? 6 : Style.radius(8)
     color: Style.frame_visor || Style.custom_frame || root.dq ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
     border.width: Style.frame_visor || Style.custom_frame || root.dq ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
-    border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
+    border.color: root.selected ? Style.caret_color : root.notify ? Qt.tint(Style.frame_color, Qt.alpha(root.accent, 0.7)) : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
     opacity: 0
@@ -353,7 +356,21 @@ Rectangle {
                 Layout.bottomMargin: Style.title_strip.a > 0 ? 6 : 0
                 spacing: 6
 
+                Loader {
+                    active: root.notify
+                    visible: active
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    sourceComponent: Neovim.NotifyHeader {
+                        app: root.notification ? root.notification.appName : ""
+                        age: root.relative_time
+                        level: root.urgency_tag === "" ? "" : root.notification.urgency === NotificationUrgency.Critical ? "critical" : "low"
+                        accent: root.accent
+                    }
+                }
+
                 Text {
+                    visible: !root.notify
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight

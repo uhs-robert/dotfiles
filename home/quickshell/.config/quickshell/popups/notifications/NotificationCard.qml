@@ -10,6 +10,7 @@ import "../weather" as Weather
 import "../../components/snes" as Snes
 import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
+import "../../components/neovim" as Neovim
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -30,6 +31,7 @@ Item {
     // MGS codec calls: the app icon as the caller's portrait.
     readonly property bool codec: Style.console_views === "ps1"
     readonly property bool dialog: Style.card_layout === "dialog"
+    readonly property bool notify: Style.card_layout === "notify"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
 
     readonly property bool focused_valid: root.focused_action >= 0 && root.focused_action < root.actions.length
@@ -59,7 +61,7 @@ Item {
         if (!root.notification) return Style.text_dim;
         if (root.notification.urgency === NotificationUrgency.Critical) return Theme.error;
         if (root.notification.urgency === NotificationUrgency.Low) return Style.text_dim;
-        return Style.text_primary;
+        return root.notify ? Theme.info : Style.text_primary;
     }
 
     readonly property string urgency_tag: {
@@ -104,7 +106,7 @@ Item {
         Loader {
             anchors.fill: parent
             z: -1
-            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card })[Style.card_layout] || null
+            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card, notify: notify_card })[Style.card_layout] || null
         }
 
         CardRule {
@@ -270,7 +272,22 @@ Item {
                 Layout.minimumWidth: 0
                 spacing: 3
 
+                Loader {
+                    active: root.notify
+                    visible: active
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    Layout.rightMargin: root.unread ? 12 : 0
+                    sourceComponent: Neovim.NotifyHeader {
+                        app: root.notification ? root.notification.appName : ""
+                        age: root.entry ? root.relative_time(root.entry.time) : ""
+                        level: root.critical ? "critical" : root.urgency_tag === "" ? "" : "low"
+                        accent: root.accent
+                    }
+                }
+
                 RowLabel {
+                    visible: !root.notify
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight
@@ -450,6 +467,16 @@ Item {
         id: dialogue_card
         Snes.SnesWindow {
             lit: root.selected
+        }
+    }
+
+    Component {
+        id: notify_card
+        Rectangle {
+            radius: 6
+            color: root.selected ? Theme.bg_surface : "transparent"
+            border.width: 1
+            border.color: root.selected ? Style.caret_color : Qt.tint(Style.frame_color, Qt.alpha(root.accent, 0.7))
         }
     }
 
