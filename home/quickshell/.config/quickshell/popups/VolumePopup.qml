@@ -6,6 +6,7 @@ import Quickshell.Services.Pipewire
 import "../components"
 import "../theme"
 import "../services"
+import "snes" as Snes
 
 Popup {
     id: root
@@ -176,8 +177,34 @@ Popup {
                         label: root.section_of(row_wrap.modelData.type)
                     }
 
+                    Loader {
+                        active: root.st.console === "snes"
+                        visible: active
+                        width: row_wrap.width
+                        sourceComponent: Snes.SnesVolumeRow {
+                            readonly property var audio: row_wrap.modelData.node.audio
+                            label: root.row_label(row_wrap.modelData)
+                            key: root.row_key(row_wrap.index)
+                            selected: row_wrap.index === root.selected
+                            level_row: root.is_slider_row(row_wrap.modelData.type)
+                            is_default: row_wrap.modelData.node === Pipewire.defaultAudioSink || row_wrap.modelData.node === Pipewire.defaultAudioSource
+                            searchable: !level_row || row_wrap.modelData.type === "stream"
+                            volume: audio ? audio.volume : 0
+                            muted: !!audio && audio.muted
+                            onClicked: {
+                                root.selected = row_wrap.index;
+                                if (!level_row) root.set_default(row_wrap.modelData);
+                            }
+                            onMoved: v => {
+                                if (audio) audio.volume = v;
+                            }
+                            onMute_clicked: root.toggle_mute(row_wrap.modelData.node)
+                        }
+                    }
+
                     MenuRow {
                         id: vol_row
+                        visible: root.st.console !== "snes"
                         width: row_wrap.width
                         height: Style.px(22)
                         selected: row_wrap.index === root.selected
