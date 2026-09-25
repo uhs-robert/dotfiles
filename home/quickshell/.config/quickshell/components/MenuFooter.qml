@@ -14,11 +14,9 @@ Item {
     property string text: ""
     property bool wrap: root.st.footer_wrap
     property bool centered: false
-    // Text size override; 0 keeps the style's footer sizes.
-    property int size: 0
-    property bool arrows: true
-    readonly property int text_px: root.size > 0 ? root.size : root.text_px
-    readonly property int small_px: root.size > 0 ? root.size : root.small_px
+    readonly property int text_px: root.st.footer_size > 0 ? root.st.footer_size : root.st.font_size - 4
+    readonly property int small_px: root.st.footer_size > 0 ? root.st.footer_size : root.st.font_size - 5
+    readonly property bool arrows: root.st.footer_arrow !== ""
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
     readonly property int rule_gap: root.st.footer_rule ? (root.st.footer_moon ? 11 : 5) : 0
@@ -131,7 +129,7 @@ Item {
                 }
 
                 Text {
-                    visible: root.arrows && root.st.footer_arrow !== "" && !group.pad
+                    visible: root.arrows && !group.pad
                     anchors.verticalCenter: parent.verticalCenter
                     text: root.st.footer_arrow
                     color: root.st.text_muted

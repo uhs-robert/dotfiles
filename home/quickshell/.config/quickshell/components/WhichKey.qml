@@ -43,7 +43,7 @@ PanelWindow {
     }
     readonly property string longest_key: root.items.reduce((a, item) => item.key.length > a.length ? item.key : a, "")
     readonly property real key_width: Style.controller !== "" ? Math.max(key_metrics.height + 2, key_measure.implicitWidth) : Math.max(key_metrics.height + 2, key_metrics.advanceWidth + 8)
-    readonly property real arrow_space: Style.footer_arrow !== "" ? arrow_metrics.advanceWidth + Style.px(6) : 0
+    readonly property real arrow_space: Style.whichkey_arrow !== "" ? arrow_metrics.advanceWidth + Style.px(6) : 0
     readonly property real desc_max_width: Math.max(Style.px(80), (root.screen_width * 0.9 - frame.pad_x * 2) / root.columns - root.key_width - root.arrow_space - Style.px(24))
 
     screen: {
@@ -113,7 +113,7 @@ PanelWindow {
         id: arrow_metrics
         font.family: Style.font_family
         font.pixelSize: root.text_size
-        text: Style.footer_arrow
+        text: Style.whichkey_arrow
     }
 
     TextMetrics {
@@ -370,7 +370,7 @@ PanelWindow {
                                 visible: root.arrow_space > 0
                                 x: root.key_width + Style.px(5)
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: Style.footer_arrow
+                                text: Style.whichkey_arrow
                                 color: Style.text_muted
                                 font.family: Style.font_family
                                 font.pixelSize: root.text_size
@@ -396,8 +396,6 @@ PanelWindow {
                     visible: root.has_footer
                     Layout.fillWidth: true
                     centered: true
-                    size: Style.whichkey_size
-                    arrows: false
                     text: root.footer_hint
                 }
             }

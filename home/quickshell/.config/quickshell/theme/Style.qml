@@ -261,6 +261,8 @@ Singleton {
             section_fold: false,
             footer_arrow: "",
             footer_italic: false,
+            footer_size: 0,
+            whichkey_arrow: "",
             whichkey_size: 0,
             meter_gap: 2,
             bar_lualine: false
@@ -508,6 +510,8 @@ Singleton {
                 section_fold: false,
                 footer_arrow: "",
                 footer_italic: false,
+                footer_size: 0,
+                whichkey_arrow: "",
                 whichkey_size: 0,
                 meter_gap: 2,
                 bar_lualine: false
@@ -1865,9 +1869,9 @@ Singleton {
                     row_keys: false,
                     tab_bg: Theme.bg_crust,
                     tab_active_bg: Theme.bg_mantle,
-                    tab_active_fg: Theme.fg_strong,
+                    tab_active_fg: Theme.theme_secondary,
                     tab_fg: Theme.fg_dim,
-                    tab_marker: Theme.theme_primary,
+                    tab_marker: Theme.theme_secondary,
                     key_bg: "transparent",
                     key_fg: Theme.theme_secondary,
                     key_border: "transparent",
@@ -1880,8 +1884,10 @@ Singleton {
                     footer_rule_solid: true,
                     footer_rule_color: Theme.bg_surface,
                     footer_separator: "",
-                    footer_arrow: "\u279c",
+                    footer_arrow: "",
                     footer_italic: true,
+                    footer_size: 16,
+                    whichkey_arrow: "\u279c",
                     whichkey_size: 16,
                     meter_on: Theme.theme_primary,
                     meter_off: Theme.bg_surface,
@@ -2245,6 +2251,9 @@ Singleton {
     // Drawn between each footer key and its description.
     readonly property string footer_arrow: root.active.footer_arrow
     readonly property bool footer_italic: root.active.footer_italic
+    // Footer text size in px; 0 keeps the popup-derived sizes.
+    readonly property int footer_size: root.active.footer_size
+    readonly property string whichkey_arrow: root.active.whichkey_arrow
     // Which-key keys and labels in px; 0 keeps the popup-derived sizes.
     readonly property int whichkey_size: root.active.whichkey_size
     readonly property real meter_gap: root.active.meter_gap
