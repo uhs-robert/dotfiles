@@ -35,7 +35,11 @@ Item {
     readonly property real key_column: {
         const h = key_metrics.height + 2;
         let w = 0;
-        for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)));
+        for (const g of root.own_entries.concat(root.general_entries)) {
+            const shown = key_metrics.advanceWidth(KeyHints.with_glyphs(g.key));
+            const parts = root.st.controller !== "" ? KeyHints.controller_parts(root.st.controller, g.key) : null;
+            w = Math.max(w, parts ? KeyHints.parts_width(parts, h, 2, t => key_metrics.advanceWidth(t)) + 5 + shown - 8 : shown);
+        }
         return Math.min(list.width * 0.45, Math.max(h, w + 8));
     }
     readonly property real step: desc_metrics.height * 2
@@ -111,6 +115,8 @@ Item {
                 KeyBadge {
                     id: badge
                     key: KeyHints.with_glyphs(help_row.modelData.key)
+                    button_key: help_row.modelData.key
+                    with_key: true
                 }
             }
 

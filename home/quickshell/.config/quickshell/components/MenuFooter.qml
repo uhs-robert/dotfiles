@@ -15,9 +15,8 @@ Item {
     property bool centered: false
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
-    readonly property string shown_text: KeyHints.with_glyphs(root.filtered_text)
     readonly property int rule_gap: root.st.footer_rule ? 5 : 0
-    readonly property var groups: KeyHints.parse(root.shown_text)
+    readonly property var groups: KeyHints.parse(root.filtered_text)
     // While the enclosing popup searches, its query line takes this footer's place at the same height.
     readonly property var popup: {
         for (let p = root.parent; p; p = p.parent) {
@@ -70,18 +69,32 @@ Item {
             model: root.groups
 
             Row {
+                id: group_row
                 required property var modelData
                 required property int index
+                readonly property var parts: root.st.controller !== "" ? KeyHints.controller_parts(root.st.controller, modelData.key) : null
                 spacing: 4
+
+                ControllerBadge {
+                    visible: !!group_row.parts
+                    anchors.verticalCenter: parent.verticalCenter
+                    controller: root.st.controller
+                    parts: group_row.parts || []
+                    size: Math.round(desc_text.implicitHeight * 0.8)
+                    text_color: key_text.color
+                    font_family: key_text.font.family
+                    font_size: key_text.font.pixelSize
+                }
 
                 Text {
                     id: key_text
+                    visible: !group_row.parts
                     readonly property bool capped: root.st.footer_key_bg.a > 0
                     height: desc_text.implicitHeight
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: key_text.capped ? 4 : 0
                     rightPadding: key_text.capped ? 4 : 0
-                    text: parent.modelData.key
+                    text: KeyHints.with_glyphs(parent.modelData.key)
                     color: root.st.footer_key_fg
                     font.family: key_text.capped ? root.st.mono_font : root.st.font_family
                     font.pixelSize: root.st.font_size - 4
@@ -98,7 +111,7 @@ Item {
 
                 Text {
                     id: desc_text
-                    text: parent.modelData.desc + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
+                    text: KeyHints.with_glyphs(parent.modelData.desc) + (parent.index < root.groups.length - 1 ? root.st.footer_separator : "")
                     color: root.st.footer_fg
                     font.family: root.st.font_family
                     font.pixelSize: root.st.font_size - 4

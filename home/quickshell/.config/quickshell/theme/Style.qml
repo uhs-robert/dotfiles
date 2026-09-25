@@ -213,7 +213,9 @@ Singleton {
             window_gradient: [],
             materia: ({}),
             hand_cursor: false,
-            meter_solid: false
+            meter_solid: false,
+            controller: "",
+            console_views: ""
         };
         return {
             "default": {
@@ -416,7 +418,9 @@ Singleton {
                 window_gradient: [],
                 materia: ({}),
                 hand_cursor: false,
-                meter_solid: false
+                meter_solid: false,
+                controller: "",
+                console_views: ""
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -579,6 +583,9 @@ Singleton {
                 bar_text_raised: true
             }),
             "ps1": Object.assign({}, terminal, {
+                controller: "ps1",
+                console_views: "ps1",
+                osd_layout: "alert",
                 wait_anim: "alert",
                 done_anim: "pixel",
                 weather_header: "memcard",
@@ -1707,7 +1714,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout" or "hud", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel" or "pixel".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud" or "alert", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel" or "pixel".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1738,6 +1745,10 @@ Singleton {
     readonly property bool hand_cursor: root.active.hand_cursor
     // Meters as one continuous gauge (AtbBar) instead of segments.
     readonly property bool meter_solid: root.active.meter_solid
+    // Key badges and footers draw this console's buttons for the keys it maps (KeyHints.controller_parts).
+    readonly property string controller: root.active.controller
+    // Popups, toasts and bar pills swap in this console's module views (components/<console>/).
+    readonly property string console_views: root.active.console_views
 
     property bool cava_line: true
     readonly property var bar: root.active
