@@ -35,12 +35,18 @@ Item {
     readonly property real key_column: {
         const h = key_metrics.height + 2;
         let w = 0;
-        for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)));
+        for (const g of root.own_entries.concat(root.general_entries)) w = Math.max(w, key_metrics.advanceWidth(KeyHints.with_glyphs(g.key)) + root.pad_width(g.key));
         return Math.min(list.width * 0.45, Math.max(h, w + 8));
     }
     readonly property real step: desc_metrics.height * 2
     readonly property real max_y: Math.max(0, flick.contentHeight - flick.height)
     property double last_g_ms: 0
+
+    // Room for a controller button drawn before its key; roughly its sprite plus label.
+    function pad_width(key) {
+        const b = KeyHints.button(key, root.st.controller);
+        return b === "" ? 0 : b.startsWith("dpad") ? 18 : 28 + b.length * 8;
+    }
 
     function scroll_to(y) {
         flick.contentY = Math.max(0, Math.min(root.max_y, y));
@@ -110,6 +116,7 @@ Item {
 
                 KeyBadge {
                     id: badge
+                    pair: true
                     key: KeyHints.with_glyphs(help_row.modelData.key)
                 }
             }

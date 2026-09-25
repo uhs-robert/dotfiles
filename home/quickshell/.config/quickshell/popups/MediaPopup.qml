@@ -8,6 +8,7 @@ import "../components"
 import "../theme"
 import "../services"
 import "media" as Media
+import "weather" as Weather
 
 Popup {
     id: root
@@ -242,6 +243,7 @@ Popup {
                     }
 
                     Text {
+                        visible: Style.console_skin !== "nes"
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                         elide: Text.ElideRight
@@ -250,6 +252,28 @@ Popup {
                         font.family: Style.font_family
                         font.pixelSize: Style.font_size + 5
                         font.bold: true
+                    }
+
+                    Loader {
+                        active: Style.console_skin === "nes"
+                        visible: active
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        sourceComponent: Weather.DqWindow {
+                            implicitHeight: dq_title.implicitHeight + 24
+
+                            Text {
+                                id: dq_title
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideRight
+                                text: root.player ? (root.player.trackTitle || "Unknown title") : "Nothing playing"
+                                color: Theme.fg_strong
+                                font.family: Style.font_family
+                                font.pixelSize: Style.font_size + 2
+                            }
+                        }
                     }
 
                     Text {
@@ -312,7 +336,7 @@ Popup {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: progress_item.has_length && Style.segmented_levels
                             segment_count: 40
-                            implicitHeight: Style.px(8)
+                            implicitHeight: Style.console_skin === "nes" ? 16 : Style.px(8)
                             value: progress_item.ratio
                         }
 

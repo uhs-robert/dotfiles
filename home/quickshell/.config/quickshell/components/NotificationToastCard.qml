@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.Notifications
 import "../theme"
 import "../services"
+import "../popups/weather" as Weather
 
 Rectangle {
     id: root
@@ -13,6 +14,10 @@ Rectangle {
     property bool selected: false
     property int focused_action: -1
     readonly property var notification: root.entry ? root.entry.notification : null
+    // A Dragon Quest window that slides in and types its summary out once.
+    readonly property bool dq: Style.card_layout === "dq"
+    property real typed: 1
+    readonly property string summary: root.notification ? root.notification.summary : ""
 
     readonly property var actions: {
         if (!root.notification || !root.notification.actions) return [];
@@ -59,15 +64,38 @@ Rectangle {
 
     implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
     radius: Style.radius(8)
-    color: Style.frame_visor || Style.custom_frame ? "transparent" : Style.boxed_cards
+    color: Style.frame_visor || Style.custom_frame || root.dq ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: Style.frame_visor || Style.custom_frame ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor || Style.custom_frame || root.dq ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
     opacity: 0
-    Component.onCompleted: enter_anim.start()
+    transform: Translate {
+        id: slide_shift
+    }
+    Component.onCompleted: {
+        enter_anim.start();
+        if (root.dq) {
+            root.typed = 0;
+            dq_anim.start();
+        }
+    }
+
+    SequentialAnimation {
+        id: dq_anim
+        NumberAnimation { target: slide_shift; property: "x"; from: (root.parent ? root.parent.width : 400) + 16; to: 0; duration: 240; easing.type: Easing.OutCubic }
+        NumberAnimation { target: root; property: "typed"; from: 0; to: 1; duration: Math.min(1200, root.summary.length * 35) }
+    }
+
+    Loader {
+        active: root.dq
+        anchors.fill: parent
+        sourceComponent: Weather.DqWindow {
+            border.color: root.selected ? Style.caret_color : Theme.fg_strong
+        }
+    }
 
     NumberAnimation {
         id: enter_anim
@@ -128,7 +156,7 @@ Rectangle {
     }
 
     FrameInset {
-        visible: Style.boxed_cards && Style.frame_inset_width > 0
+        visible: Style.boxed_cards && Style.frame_inset_width > 0 && !root.dq
         edge: root.border.width
         top_radius: root.radius
         bottom_radius: root.radius
@@ -290,7 +318,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
                 elide: Text.ElideRight
-                text: root.notification ? root.notification.summary : ""
+                text: root.typed < 1 ? root.summary.slice(0, Math.ceil(root.typed * root.summary.length)) : root.summary
                 color: Theme.fg_core
                 font.bold: Style.title_font_family === Style.font_family
                 font.family: Style.title_font_family

@@ -6,6 +6,7 @@ import Quickshell.Services.UPower
 import "../components"
 import "../theme"
 import "../services"
+import "../components/nes" as Nes
 
 Popup {
     id: root
@@ -46,6 +47,8 @@ Popup {
     }
 
     property bool ppd_available: false
+    readonly property bool nes: root.st.console_skin === "nes"
+    readonly property real status_indent: root.nes ? 22 : 0
     property int selected: 0
 
     readonly property var profiles: {
@@ -133,6 +136,17 @@ Popup {
             }
         }
 
+        Loader {
+            active: root.nes
+            width: 14
+            height: Math.max(0, brightness_row.y - 10)
+            sourceComponent: Nes.EnergyBar {
+                vertical: true
+                value: root.percent / 100
+                low_from: 0.2
+            }
+        }
+
         ColumnLayout {
             id: main_column
             anchors.left: parent.left
@@ -141,13 +155,15 @@ Popup {
             spacing: 4
 
             Text {
-                text: Math.round(root.percent) + "%"
+                Layout.leftMargin: root.status_indent
+                text: (root.nes ? "BAT " : "") + Math.round(root.percent) + "%"
                 color: root.st.text_strong
                 font.family: root.st.font_family
                 font.pixelSize: root.st.font_size + 4
             }
 
             Text {
+                Layout.leftMargin: root.status_indent
                 text: root.state_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -156,6 +172,7 @@ Popup {
 
             Text {
                 visible: root.time_label !== ""
+                Layout.leftMargin: root.status_indent
                 text: root.time_label
                 color: root.st.text_muted
                 font.family: root.st.font_family
@@ -164,6 +181,7 @@ Popup {
 
             Text {
                 visible: root.rate > 0
+                Layout.leftMargin: root.status_indent
                 text: root.rate.toFixed(1) + " W"
                 color: root.st.text_muted
                 font.family: root.st.font_family

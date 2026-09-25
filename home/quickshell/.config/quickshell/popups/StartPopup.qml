@@ -5,6 +5,7 @@ import Quickshell
 import "../components"
 import "../theme"
 import "../services"
+import "start" as Start
 
 Popup {
     id: root
@@ -64,7 +65,7 @@ Popup {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: 12
-        implicitHeight: root.confirm ? confirm_row.implicitHeight : actions_col.implicitHeight + (strip_loader.active ? strip_loader.height + 10 : 0)
+        implicitHeight: root.confirm ? confirm_row.implicitHeight : (nes_menu.active ? nes_menu.implicitHeight : actions_col.implicitHeight) + (strip_loader.active ? strip_loader.height + 10 : 0)
         focus: true
 
         Loader {
@@ -112,7 +113,7 @@ Popup {
             anchors.right: parent.right
             anchors.top: parent.top
             spacing: 4
-            visible: !root.confirm
+            visible: !root.confirm && !nes_menu.active
 
             Repeater {
                 model: root.actions
@@ -155,6 +156,16 @@ Popup {
                         onClicked: root.choose(row.index)
                     }
                 }
+            }
+        }
+
+        Loader {
+            id: nes_menu
+            active: root.st.console_skin === "nes"
+            visible: !root.confirm
+            width: parent.width
+            sourceComponent: Start.NesMenu {
+                popup: root
             }
         }
 

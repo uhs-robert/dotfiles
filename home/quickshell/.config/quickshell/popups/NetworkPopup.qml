@@ -7,6 +7,7 @@ import Quickshell.Networking
 import "../components"
 import "../theme"
 import "../services"
+import "../components/nes" as Nes
 
 Popup {
     id: root
@@ -572,11 +573,20 @@ Popup {
                             spacing: 6
 
                             Text {
-                                visible: !net_row.is_advanced
+                                visible: !net_row.is_advanced && root.st.console_skin !== "nes"
                                 text: root.signal_glyph(net_row.modelData.signalStrength || 0)
                                 color: net_row.fg(net_row.modelData.connected ? root.st.text_primary : root.st.text_fg)
                                 font.family: root.st.font_family
                                 font.pixelSize: root.st.font_size - 1
+                            }
+
+                            Loader {
+                                active: !net_row.is_advanced && root.st.console_skin === "nes"
+                                visible: active
+                                sourceComponent: Nes.BlockMeter {
+                                    size: 12
+                                    value: net_row.modelData.signalStrength || 0
+                                }
                             }
 
                             RowLabel {

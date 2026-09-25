@@ -6,6 +6,7 @@ import Quickshell.Services.Notifications
 import "../../components"
 import "../../theme"
 import "../../services"
+import "../weather" as Weather
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -68,7 +69,7 @@ Item {
         id: card
         anchors.left: parent.left
         anchors.right: parent.right
-        implicitHeight: layout.implicitHeight + 20
+        implicitHeight: layout.implicitHeight + (Style.card_layout === "dq" ? 28 : 20)
         radius: Style.radius(8)
         color: Style.card_layout !== "" ? "transparent" : Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
         border.width: Style.card_layout !== "" ? 0 : 1
@@ -82,6 +83,26 @@ Item {
         CardRule {
             visible: Style.card_layout === "rule"
             selected: root.selected
+        }
+
+        Loader {
+            active: Style.card_layout === "dq"
+            anchors.fill: parent
+            sourceComponent: Weather.DqWindow {
+                border.color: root.selected ? Style.caret_color : Theme.fg_strong
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: 10
+                    anchors.bottomMargin: 8
+                    opacity: !root.selected || Style.caret_phase ? 1 : 0
+                    text: "\u25bc"
+                    color: root.selected ? Style.caret_color : Theme.fg_strong
+                    font.family: Style.font_family
+                    font.pixelSize: 8
+                }
+            }
         }
 
         PixelBox {
