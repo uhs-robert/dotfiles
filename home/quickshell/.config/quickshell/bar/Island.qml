@@ -42,6 +42,8 @@ Item {
     readonly property alias body_item: body
     // Lualine: side islands end in arrows, the center one leans; content brings its own padding.
     readonly property bool lualine: Style.bar_lualine
+    // Fill for the right cap when the content's last segment runs into it.
+    property color cap_right_fill: "transparent"
     readonly property bool center: root.cap_left && root.cap_right
     readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : height / 2
     readonly property real pad: root.capsule ? Style.bar_capsule_pad : root.lualine ? (root.center ? 10 : 0) : 8
@@ -245,7 +247,7 @@ Item {
 
         ShapePath {
             strokeWidth: -1
-            fillColor: root.shaded ? "transparent" : root.bg_color
+            fillColor: root.cap_right_fill.a > 0 ? root.cap_right_fill : root.shaded ? "transparent" : root.bg_color
             PathPolyline {
                 path: {
                     const c = root.cap_width, h = root.height;

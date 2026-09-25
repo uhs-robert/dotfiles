@@ -105,6 +105,7 @@ Item {
     Island {
         height: root.bar_height
         id: left_island
+        cap_right_fill: Style.bar_lualine && LualineState.last_fill[root.screen_name] ? LualineState.last_fill[root.screen_name] : "transparent"
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         bg_color: Style.bar_side_bg

@@ -21,7 +21,7 @@ Item {
     readonly property int arrow: Math.round(root.bar_height * 0.4)
     readonly property color accent: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
 
-    implicitWidth: row.implicitWidth + 4
+    implicitWidth: row.implicitWidth
     implicitHeight: root.bar_height
 
     Row {
@@ -29,6 +29,7 @@ Item {
         height: root.height
 
         Repeater {
+            id: slots
             model: root.workspaces
 
             Row {
@@ -38,26 +39,40 @@ Item {
                 readonly property var toplevels: slot.modelData.toplevels.values
                 readonly property bool empty: slot.toplevels.length === 0
                 readonly property bool focused: slot.modelData.focused
-                readonly property bool after_focused: slot.index > 0 && !!root.workspaces[slot.index - 1] && root.workspaces[slot.index - 1].focused
-                readonly property bool lit: slot.focused || buffer_hover.hovered
-                readonly property color lit_fill: slot.focused ? Theme.ui_visual_bg : Qt.tint(Style.bar_side_bg, Qt.alpha(Theme.ui_visual_bg, 0.55))
+                readonly property bool lit: slot.focused || slot_hover.hovered
+                readonly property color lit_fill: slot.focused ? Theme.ui_visual_bg : Qt.tint(Style.bar_side_bg, Qt.alpha(Theme.ui_visual_bg, 0.75))
+                readonly property Item prev_slot: slot.index > 0 ? slots.itemAt(slot.index - 1) : null
+                readonly property bool is_last: slot.index === root.workspaces.length - 1
+                onIs_lastChanged: slot.publish()
+                readonly property Item next_slot: slots.count > slot.index + 1 ? slots.itemAt(slot.index + 1) : null
+                readonly property bool prev_lit: !!slot.prev_slot && slot.prev_slot.lit
+                readonly property color next_fill: !!slot.next_slot && slot.next_slot.lit ? slot.next_slot.lit_fill : "transparent"
 
                 onLit_fillChanged: slot.publish()
                 onLitChanged: slot.publish()
                 Component.onCompleted: slot.publish()
                 function publish() {
-                    if (slot.index === 0 && root.host) LualineState.set_first_fill(root.host.screen_name, slot.lit ? slot.lit_fill : Qt.rgba(0, 0, 0, 0));
+                    if (!root.host) return;
+                    const fill = slot.lit ? slot.lit_fill : Qt.rgba(0, 0, 0, 0);
+                    if (slot.index === 0) LualineState.set_first_fill(root.host.screen_name, fill);
+                    if (slot.is_last) LualineState.set_last_fill(root.host.screen_name, fill);
                 }
 
                 height: row.height
+                z: slot.lit ? 1 : 0
 
-                // The focused buffer's arrows stand in for the separators on both sides of it.
+                HoverHandler {
+                    id: slot_hover
+                }
+
+                // Fixed width, so lighting a buffer never shifts the row under the pointer.
                 Item {
-                    visible: slot.index > 0 && !slot.lit && !slot.after_focused
-                    width: 10
+                    visible: slot.index > 0
+                    width: root.arrow + 1
                     height: slot.height
 
                     Shape {
+                        visible: !slot.lit && !slot.prev_lit
                         anchors.centerIn: parent
                         width: 6
                         height: 16
@@ -73,19 +88,18 @@ Item {
                             PathLine { x: 1; y: 15 }
                         }
                     }
-                }
 
-                Shape {
-                    visible: slot.lit && slot.index > 0
-                    width: root.arrow + 1
-                    height: slot.height
-                    preferredRendererType: Shape.CurveRenderer
+                    Shape {
+                        visible: slot.lit && !slot.prev_lit
+                        anchors.fill: parent
+                        preferredRendererType: Shape.CurveRenderer
 
-                    ShapePath {
-                        strokeWidth: -1
-                        fillColor: slot.lit_fill
-                        PathPolyline {
-                            path: [Qt.point(0, 0), Qt.point(root.arrow + 1, 0), Qt.point(root.arrow + 1, slot.height), Qt.point(0, slot.height), Qt.point(root.arrow, slot.height / 2), Qt.point(0, 0)]
+                        ShapePath {
+                            strokeWidth: -1
+                            fillColor: slot.lit_fill
+                            PathPolyline {
+                                path: [Qt.point(0, 0), Qt.point(root.arrow + 1, 0), Qt.point(root.arrow + 1, slot.height), Qt.point(0, slot.height), Qt.point(root.arrow, slot.height / 2), Qt.point(0, 0)]
+                            }
                         }
                     }
                 }
@@ -96,13 +110,31 @@ Item {
                     height: slot.height
                     color: slot.lit ? slot.lit_fill : "transparent"
 
-                    HoverHandler {
-                        id: buffer_hover
-                    }
-
                     MouseArea {
                         anchors.fill: parent
                         onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + slot.modelData.id + "' })")
+                    }
+
+                    Shape {
+                        visible: slot.lit && !slot.is_last
+                        x: parent.width
+                        width: root.arrow + 1
+                        height: slot.height
+                        preferredRendererType: Shape.CurveRenderer
+
+                        ShapePath {
+                            strokeWidth: -1
+                            fillColor: slot.next_fill
+                            PathRectangle { width: root.arrow + 1; height: slot.height }
+                        }
+
+                        ShapePath {
+                            strokeWidth: -1
+                            fillColor: slot.lit_fill
+                            PathPolyline {
+                                path: [Qt.point(-1, 0), Qt.point(0, 0), Qt.point(root.arrow, slot.height / 2), Qt.point(0, slot.height), Qt.point(-1, slot.height), Qt.point(-1, 0)]
+                            }
+                        }
                     }
 
                     Row {
@@ -136,20 +168,6 @@ Item {
                     }
                 }
 
-                Shape {
-                    visible: slot.lit
-                    width: root.arrow
-                    height: slot.height
-                    preferredRendererType: Shape.CurveRenderer
-
-                    ShapePath {
-                        strokeWidth: -1
-                        fillColor: slot.lit_fill
-                        PathPolyline {
-                            path: [Qt.point(-1, 0), Qt.point(0, 0), Qt.point(root.arrow, slot.height / 2), Qt.point(0, slot.height), Qt.point(-1, slot.height), Qt.point(-1, 0)]
-                        }
-                    }
-                }
             }
         }
     }
