@@ -15,7 +15,7 @@ Item {
     property var workspaces: []
     property bool compact: false
 
-    readonly property int glyph: compact ? 11 : 13
+    readonly property int glyph: compact ? 11 : 12
     readonly property int gap: 3
     readonly property int lead: 2
     readonly property color sand: Theme.theme_secondary
@@ -30,7 +30,7 @@ Item {
         let x = root.lead;
         for (const w of root.workspaces) {
             const k = w.toplevels.values.length, wd = root.slot_width(k);
-            out.push({ id: w.id, x: x, w: wd, cx: x + wd / 2, cy: 7 + root.lifts[Math.abs(w.id) % 5], k: k, focused: w.focused, active: w.active });
+            out.push({ id: w.id, x: x, w: wd, cx: x + wd / 2, cy: 9 + root.lifts[Math.abs(w.id) % 5], k: k, focused: w.focused, active: w.active });
             x += wd;
         }
         return out;
@@ -157,7 +157,7 @@ Item {
 
             Text {
                 x: slot.info.w / 2 + (slot.info.focused ? 8 : 5)
-                y: slot.info.cy - implicitHeight + (slot.info.focused ? 2 : 4)
+                y: slot.info.cy - implicitHeight + (slot.info.focused ? 0 : 1)
                 text: String(slot.modelData.id)
                 color: slot.info.focused ? root.sand : slot_hover.hovered ? Theme.fg_strong : slot.info.k ? Theme.fg_dim : Theme.fg_muted
                 font.family: Style.bar_font_family
@@ -168,7 +168,7 @@ Item {
 
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                y: root.height - root.glyph - 3
+                y: root.height - root.glyph - 2
                 spacing: root.gap
 
                 Repeater {
