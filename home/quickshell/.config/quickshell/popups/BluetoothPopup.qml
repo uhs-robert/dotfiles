@@ -175,7 +175,7 @@ Popup {
                         Loader {
                             active: root.st.console_views === "nes" && device_row.modelData.batteryAvailable
                             visible: active
-                            sourceComponent: Nes.BlockMeter {
+                            sourceComponent: Nes.CoinMeter {
                                 size: 12
                                 value: device_row.modelData.battery
                             }

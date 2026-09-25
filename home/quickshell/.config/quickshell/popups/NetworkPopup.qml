@@ -644,7 +644,7 @@ Popup {
 
                                 Component {
                                     id: nes_signal
-                                    Nes.BlockMeter {
+                                    Nes.CoinMeter {
                                         size: 12
                                         value: net_row.modelData.signalStrength || 0
                                     }
@@ -678,7 +678,7 @@ Popup {
                             }
 
                             Text {
-                                visible: root.codec && !net_row.is_advanced
+                                visible: (root.codec || root.st.console_views === "nes") && !net_row.is_advanced
                                 text: Math.round((net_row.modelData.signalStrength || 0) * 100) + "%"
                                 color: net_row.fg(root.st.text_muted)
                                 font.family: root.st.font_family
