@@ -6,6 +6,7 @@ import "../../components"
 import "../../theme"
 import "../../services"
 import "../../components/oasis" as Oasis
+import "../../components/modern" as Modern
 
 // One column per day in a window of up to five that the popup scrolls with day_cursor.
 // sub 0: temp band + precip chance. 1: wind. 2: UV. 3: sunshine.
@@ -38,7 +39,9 @@ Item {
     readonly property bool camera: Style.weather_header === "pokedex" && root.sub === 0
     // Oasis: range pills over a horizon of weekday names, the selected day rising in sand.
     readonly property bool dunes: Style.weather_header === "oasis" && root.sub === 0
-    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns || root.camera || root.dunes
+    // Modern: raised day columns with a pill label and a range track.
+    readonly property bool pill_columns: Style.weather_header === "hero" && root.sub === 0
+    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns || root.camera || root.dunes || root.pill_columns
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
     // SNES: columns standing on a Mode 7 floor.
@@ -348,6 +351,18 @@ Item {
                             first: day_col.index === 0
                             last: day_col.index === root.window_days.length - 1
                             bleed: day_row.spacing / 2
+                        }
+                    }
+
+                    Loader {
+                        active: root.pill_columns
+                        anchors.fill: parent
+                        sourceComponent: Modern.DayColumn {
+                            day: day_col.modelData
+                            label: root.day_label(day_col.modelData, day_col.day_index)
+                            selected: day_col.day_index === root.day_cursor
+                            scale_min: root.week_temp_range.min
+                            scale_max: root.week_temp_range.max
                         }
                     }
 

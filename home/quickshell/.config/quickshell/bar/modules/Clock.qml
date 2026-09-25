@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import "../../theme"
 import "../../services"
+import "../../components/modern" as Modern
 
 Row {
     id: root
@@ -27,6 +28,7 @@ Row {
 
     // Styles with a clock chip draw the digits on it and the zone beside it.
     readonly property bool chip: Style.bar_clock_bg.a > 0
+    readonly property bool capsule: Style.bar_clock_layout === "capsule"
     readonly property string digits_text: {
         const d = Timezones.shift(clock.date);
         const hm = pad2(d.getHours() % 12 || 12) + ":" + pad2(d.getMinutes());
@@ -42,12 +44,26 @@ Row {
     // Proportional fonts would resize the island every tick; tabular digits and a width floor hold it still.
     TextMetrics {
         id: time_metrics
-        text: time_label.text.replace(/\d/g, "0")
-        font: time_label.font
+        text: (root.capsule ? root.digits_text : time_label.text).replace(/\d/g, "0")
+        font: root.capsule && capsule_loader.item ? capsule_loader.item.time_font : time_label.font
+    }
+
+    Loader {
+        id: capsule_loader
+        active: root.capsule
+        visible: active
+        anchors.verticalCenter: parent.verticalCenter
+        sourceComponent: Modern.CapsuleClock {
+            time_text: root.digits_text
+            zone_text: root.zone_text
+            date_text: root.date_text
+            compact: root.compact
+            time_floor: time_metrics.advanceWidth
+        }
     }
 
     Text {
-        visible: Style.bar_clock_brackets.a > 0
+        visible: Style.bar_clock_brackets.a > 0 && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: "["
         color: Style.bar_clock_brackets
@@ -55,7 +71,7 @@ Row {
     }
 
     Text {
-        visible: root.hud
+        visible: root.hud && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: "TIME"
         color: Theme.theme_primary
@@ -64,6 +80,7 @@ Row {
     }
 
     Rectangle {
+        visible: !root.capsule
         readonly property real pad: root.chip ? 5 : 0
         anchors.verticalCenter: parent.verticalCenter
         width: time_label.width + pad * 2
@@ -90,7 +107,7 @@ Row {
     }
 
     Text {
-        visible: root.chip && root.zone_text !== ""
+        visible: root.chip && root.zone_text !== "" && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: root.zone_text
         color: Style.bar_fg
@@ -103,7 +120,7 @@ Row {
     }
 
     Text {
-        visible: !root.compact && !root.horizon
+        visible: !root.compact && !root.horizon && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: root.hud ? " WORLD" : "|"
         color: Theme.theme_primary
@@ -116,7 +133,7 @@ Row {
     }
 
     Text {
-        visible: !root.compact
+        visible: !root.compact && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: root.date_text
         color: Style.bar_fg
@@ -129,7 +146,7 @@ Row {
     }
 
     Text {
-        visible: Style.bar_clock_brackets.a > 0
+        visible: Style.bar_clock_brackets.a > 0 && !root.capsule
         anchors.verticalCenter: parent.verticalCenter
         text: "]"
         color: Style.bar_clock_brackets

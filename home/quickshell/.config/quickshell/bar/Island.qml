@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
+import "../components/modern" as Modern
 import "../theme"
 
 Item {
@@ -26,7 +27,12 @@ Item {
     // The visor's rounded bottom corners, filled with the shade instead of glass.
     property bool round_caps: false
     readonly property bool curved: root.visor || root.round_caps
-    readonly property bool shaded: root.shade_color.a > 0 || root.curved
+    // A floating capsule this many px inside the island's box, in place of the slants; sheen_color lights its top edge.
+    property real capsule_inset: 0
+    property color sheen_color: "transparent"
+    readonly property bool capsule: root.capsule_inset > 0
+    readonly property real capsule_width: root.width - root.capsule_inset * 2
+    readonly property bool shaded: root.shade_color.a > 0 || root.curved || root.capsule
     default property alias content: layout.children
 
     readonly property alias body_item: body
@@ -37,9 +43,30 @@ Item {
     height: 30
     width: body.width + (cap_left ? cap_width : 0) + (cap_right ? cap_width : 0)
 
+    Rectangle {
+        visible: root.capsule
+        x: root.capsule_inset
+        y: root.capsule_inset
+        width: root.width - root.capsule_inset * 2
+        height: root.height - root.capsule_inset * 2
+        radius: height / 2
+        border.width: root.border_width
+        border.color: root.border_color
+        gradient: Gradient {
+            GradientStop { position: 0; color: root.shade_color.a > 0 ? root.shade_color : root.bg_color }
+            GradientStop { position: 1; color: root.bg_color }
+        }
+
+        Modern.Sheen {
+            color_top: root.sheen_color
+            corner: parent.radius
+            edge: root.border_width
+        }
+    }
+
     // The popup style's shade and dither, behind the modules and clipped to the slants.
     Shape {
-        visible: root.shaded && !root.curved
+        visible: root.shaded && !root.curved && !root.capsule
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -133,9 +160,11 @@ Item {
             }
         }
 
-        // Declared before the layout so module MouseAreas stack above it.
+        // Declared before the layout so module MouseAreas stack above it; capsules take clicks across their round ends.
         MouseArea {
-            anchors.fill: parent
+            x: root.capsule ? root.capsule_inset - body.x : 0
+            width: root.capsule ? root.capsule_width : parent.width
+            height: parent.height
             onClicked: root.clicked()
         }
 
@@ -149,7 +178,7 @@ Item {
 
     // Caps overlap the body by 1px so fractional scaling (1.6 on the laptop) leaves no seam.
     Shape {
-        visible: root.cap_left
+        visible: root.cap_left && !root.capsule
         width: root.cap_width + 1
         height: root.height
         preferredRendererType: Shape.CurveRenderer
@@ -167,7 +196,7 @@ Item {
     }
 
     Shape {
-        visible: root.cap_right
+        visible: root.cap_right && !root.capsule
         x: root.width - root.cap_width - 1
         width: root.cap_width + 1
         height: root.height
@@ -208,7 +237,7 @@ Item {
 
     // Traces the slants and bottom edge; the sides on the screen edge stay open.
     Shape {
-        visible: root.border_width > 0 && !root.curved
+        visible: root.border_width > 0 && !root.curved && !root.capsule
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 
@@ -234,7 +263,7 @@ Item {
     }
 
     Shape {
-        visible: root.inset_width > 0 && root.inset_color.a > 0
+        visible: root.inset_width > 0 && root.inset_color.a > 0 && !root.capsule
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
 

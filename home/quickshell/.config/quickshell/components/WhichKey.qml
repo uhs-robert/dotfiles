@@ -10,6 +10,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
 import "oasis" as Oasis
+import "modern" as Modern
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
 PanelWindow {
@@ -22,7 +23,7 @@ PanelWindow {
     readonly property string position: root.payload.position || "bottom-right"
     readonly property string title: {
         const t = root.payload.title || "";
-        return Style.show_title ? t.toUpperCase() : t;
+        return Style.show_title && !Style.title_mixed ? t.toUpperCase() : t;
     }
     readonly property string footer_hint: (root.payload.footer || []).map(f => ({ ESC: "Esc", BS: "Backspace", RET: "Enter", TAB: "Tab", SPACE: "space" }[f.key] || f.key) + " " + f.desc).join(" · ")
     readonly property bool has_footer: Style.show_footer && root.footer_hint !== ""
@@ -56,12 +57,14 @@ PanelWindow {
     anchors.bottom: root.position.startsWith("bottom")
     anchors.left: root.position.endsWith("left")
     anchors.right: root.position.endsWith("right")
-    margins.top: root.gap
-    margins.bottom: root.gap
-    margins.left: root.gap
-    margins.right: root.gap
-    implicitWidth: frame.width
-    implicitHeight: frame.height + Style.frame_drop
+    margins.top: root.gap - root.shadow_pad
+    margins.bottom: root.gap - root.shadow_pad
+    margins.left: root.gap - root.shadow_pad
+    margins.right: root.gap - root.shadow_pad
+    // Room on every side for a soft shadow, taken out of the gap so the frame stays put.
+    readonly property int shadow_pad: Style.frame_shadow.a > 0 ? Math.min(Style.frame_drop, root.gap) : 0
+    implicitWidth: frame.width + root.shadow_pad * 2
+    implicitHeight: frame.height + (root.shadow_pad > 0 ? root.shadow_pad * 2 : Style.frame_drop)
     mask: Region {}
     WlrLayershell.namespace: "quickshell-whichkey"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -122,7 +125,7 @@ PanelWindow {
     }
 
     Rectangle {
-        visible: Style.frame_drop > 0
+        visible: Style.frame_drop > 0 && Style.frame_shadow.a === 0
         y: Style.frame_drop
         width: frame.width
         height: frame.height
@@ -130,13 +133,28 @@ PanelWindow {
         color: Theme.bg_shadow
     }
 
+    Loader {
+        active: Style.frame_shadow.a > 0
+        x: frame.x + 4
+        y: frame.y + 4
+        width: frame.width - 8
+        height: frame.height
+        sourceComponent: RectangularShadow {
+            blur: root.shadow_pad
+            radius: frame.radius
+            color: Style.frame_shadow
+        }
+    }
+
     Rectangle {
         id: frame
+        x: root.shadow_pad
+        y: root.shadow_pad
 
         readonly property int pad_x: Style.px(14)
         readonly property int pad_y: Style.px(8)
         readonly property real top_edge: Math.max(Style.accent_height, Style.frame_border_width)
-        readonly property real title_x: Style.fade_fills || Style.rounded ? frame.radius : 0
+        readonly property real title_x: (Style.fade_fills || Style.rounded) && !Style.title_mixed ? frame.radius : 0
         // The inner ring's room below the accent line, which already covers the border.
         readonly property real ring_pad: Style.inset_pad > 0 ? Style.inset_pad - Style.frame_border_width : 0
         readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
@@ -204,6 +222,12 @@ PanelWindow {
                 color: Style.dune
                 bottom_radius: Math.max(0, frame.radius - Style.frame_border_width)
             }
+        }
+
+        Modern.Sheen {
+            color_top: Style.sheen
+            corner: frame.radius
+            edge: Style.frame_border_width
         }
 
         Rectangle {

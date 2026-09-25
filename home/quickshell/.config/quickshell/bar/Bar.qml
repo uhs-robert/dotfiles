@@ -116,6 +116,8 @@ Item {
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
         round_caps: Style.bar_round_caps
+        capsule_inset: Style.bar_capsule
+        sheen_color: Style.sheen
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -153,6 +155,8 @@ Item {
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
         round_caps: Style.bar_round_caps
+        capsule_inset: Style.bar_capsule
+        sheen_color: Style.sheen
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -189,7 +193,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 6
         anchors.rightMargin: 6
-        anchors.bottomMargin: center_island.inset_color.a > 0 ? center_island.inset_gap + center_island.inset_width : 0
+        anchors.bottomMargin: center_island.capsule ? center_island.capsule_inset + 1 : center_island.inset_color.a > 0 ? center_island.inset_gap + center_island.inset_width : 0
         active: MediaState.playing && root.has_center
     }
 
@@ -210,6 +214,8 @@ Item {
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
         round_caps: Style.bar_round_caps
+        capsule_inset: Style.bar_capsule
+        sheen_color: Style.sheen
         cap_left: true
         visible: root.right_entries.length > 0
 

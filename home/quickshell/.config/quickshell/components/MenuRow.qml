@@ -1,6 +1,7 @@
 // home/quickshell/.config/quickshell/components/MenuRow.qml
 import QtQuick
 import "../theme"
+import "modern" as Modern
 
 Rectangle {
     id: root
@@ -47,6 +48,21 @@ Rectangle {
         visible: root.selected && root.st.fade_fills
         fill: root.st.selection_bg
         radius: root.st.selection_edge.a > 0 ? root.radius : 0
+    }
+
+    Rectangle {
+        visible: root.selected && root.st.selection_shade.a > 0
+        anchors.fill: parent
+        radius: root.radius
+        gradient: Gradient {
+            GradientStop { position: 0; color: root.st.selection_shade }
+            GradientStop { position: 1; color: root.st.selection_bg }
+        }
+
+        Modern.Sheen {
+            color_top: root.st.sheen
+            corner: parent.radius
+        }
     }
 
     DashedOutline {

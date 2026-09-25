@@ -13,6 +13,7 @@ import "snes" as Snes
 import "ps1" as Ps1
 import "ps2" as Ps2
 import "oasis" as Oasis
+import "modern" as Modern
 
 PanelWindow {
     id: root
@@ -58,7 +59,8 @@ PanelWindow {
             rpg: { art: rpg_osd, hides: ["glyph", "meter", "percent"] },
             alert: { art: alert_osd, hides: ["glyph"] },
             glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) },
-            horizon: { art: horizon_osd, hides: ["glyph", "meter", "percent"], untitled: true, panel: true }
+            horizon: { art: horizon_osd, hides: ["glyph", "meter", "percent"], untitled: true, panel: true },
+            tile: { art: tile_osd, hides: ["glyph", "meter", "percent"], framed: true, untitled: true }
         })[Style.osd_layout] || null
 
     function replaced(part) {
@@ -84,11 +86,13 @@ PanelWindow {
     screen: Quickshell.screens.find(s => s.name === root.held_screen_name) || null
     visible: root.wanted || root.reveal > 0
     anchors.bottom: true
-    margins.bottom: Style.px(72)
+    margins.bottom: Style.px(72) - root.shadow_pad
+    // Room around the frame for a soft shadow, so the window never clips it.
+    readonly property int shadow_pad: Style.frame_shadow.a > 0 ? Style.frame_drop : 0
     exclusiveZone: 0
     color: "transparent"
-    implicitWidth: frame.width
-    implicitHeight: frame.height + root.slide
+    implicitWidth: frame.width + root.shadow_pad * 2
+    implicitHeight: frame.height + root.slide + root.shadow_pad
     mask: Region {}
     WlrLayershell.namespace: "quickshell-osd"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -230,13 +234,28 @@ PanelWindow {
 
     // Fits in the slide room under the frame, so the window keeps its size.
     Rectangle {
-        visible: Style.frame_drop > 0
+        visible: Style.frame_drop > 0 && Style.frame_shadow.a === 0
+        x: frame.x
         y: frame.y + Style.frame_drop
         width: frame.width
         height: frame.height
         radius: frame.radius
         color: Theme.bg_shadow
         opacity: frame.opacity
+    }
+
+    Loader {
+        active: Style.frame_shadow.a > 0
+        x: frame.x + 4
+        y: frame.y + 4
+        width: frame.width - 8
+        height: frame.height
+        opacity: frame.opacity
+        sourceComponent: RectangularShadow {
+            blur: root.shadow_pad
+            radius: frame.radius
+            color: Style.frame_shadow
+        }
     }
 
     Rectangle {
@@ -248,12 +267,13 @@ PanelWindow {
         readonly property real band_height: Math.max(26, title_tab.height + 4)
         readonly property real header_height: !title_tab.visible ? 0 : root.banded ? frame.band_height + 4 + Style.inset_pad : title_tab.height + frame.top_rule + Style.inset_pad
 
+        x: root.shadow_pad
         y: root.slide * (1 - root.reveal)
         opacity: root.reveal
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
-        // Sized console art makes the frame near square, where a pill radius would round it into a circle.
-        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && (root.console_osd.size || root.console_osd.panel)) ? height / 2 : Style.frame_radius
+        // Sized console art makes the frame near square, where a pill radius would round it into a circle; framed art keeps the frame radius.
+        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && (root.console_osd.size || root.console_osd.panel || root.console_osd.framed)) ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
         border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
@@ -311,6 +331,12 @@ PanelWindow {
                 color: Style.dune
                 bottom_radius: Math.max(0, frame.radius - Style.frame_border_width)
             }
+        }
+
+        Modern.Sheen {
+            color_top: Style.sheen
+            corner: frame.radius
+            edge: Style.frame_border_width
         }
 
         Item {
@@ -376,7 +402,7 @@ PanelWindow {
                     anchors.horizontalCenterOffset: title_index.space / 2
                     x: 10 + title_index.space
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + Style.title_text(root.title) + Style.title_suffix
+                    text: Style.title_prefix + Style.title_text(Style.shown_title(root.title)) + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
                     font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
@@ -504,6 +530,18 @@ PanelWindow {
                 glyph: root.glyph
                 label: root.kind === "brightness" ? "Brightness" : root.muted ? "Muted" : "Volume"
                 detail: root.kind === "brightness" ? "Backlight" : root.sink ? root.sink.description || root.sink.name : ""
+            }
+        }
+
+        Component {
+            id: tile_osd
+            Modern.TileOsd {
+                kind: root.kind
+                level: root.level
+                percent: root.percent
+                muted: root.muted
+                glyph: root.glyph
+                device: root.kind === "volume" && root.sink ? root.sink.description || root.sink.name : ""
             }
         }
 

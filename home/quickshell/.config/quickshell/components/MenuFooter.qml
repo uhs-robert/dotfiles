@@ -119,7 +119,7 @@ Item {
                         anchors.fill: parent
                         anchors.topMargin: 1
                         anchors.bottomMargin: 1
-                        radius: root.st.footer_key_round ? 4 : 0
+                        radius: root.st.footer_key_round ? 4 : Style.radius(3)
                         color: root.st.footer_key_bg
                         border.width: root.st.footer_key_round ? 1 : 0
                         border.color: root.st.key_border

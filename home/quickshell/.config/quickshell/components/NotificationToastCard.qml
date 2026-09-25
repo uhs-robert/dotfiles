@@ -8,6 +8,7 @@ import "../services"
 import "../popups/weather" as Weather
 import "ps1" as Ps1
 import "oasis" as Oasis
+import "modern" as Modern
 
 Rectangle {
     id: root
@@ -19,6 +20,7 @@ Rectangle {
     // A Dragon Quest window; toast_enter "type" types its summary out once.
     readonly property bool dq: Style.card_layout === "dq"
     readonly property bool oasis: Style.card_layout === "oasis"
+    readonly property bool tile: Style.card_layout === "tile"
     property real typed: 1
     readonly property string summary: root.notification ? root.notification.summary : ""
 
@@ -65,12 +67,12 @@ Rectangle {
         onTriggered: root.time_tick += 1
     }
 
-    implicitHeight: layout.implicitHeight + 16 + Style.inset_pad * 2
-    radius: Style.radius(8)
-    color: Style.frame_visor || Style.custom_frame || root.dq || root.oasis ? "transparent" : Style.boxed_cards
+    implicitHeight: layout.implicitHeight + (root.tile ? 28 : 16) + Style.inset_pad * 2
+    radius: root.tile ? Style.frame_radius : Style.radius(8)
+    color: Style.frame_visor || Style.custom_frame || root.dq || root.oasis || root.tile ? "transparent" : Style.boxed_cards
         ? (root.selected ? Qt.tint(Style.frame_color, Qt.alpha(Style.caret_color, 0.08)) : Style.frame_color)
         : (root.selected ? Theme.bg_surface : Theme.bg_mantle)
-    border.width: Style.frame_visor || Style.custom_frame || root.dq || root.oasis ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
+    border.width: Style.frame_visor || Style.custom_frame || root.dq || root.oasis || root.tile ? 0 : root.selected && !Style.boxed_cards ? 2 : 1
     border.color: root.selected ? Style.caret_color : Style.boxed_cards ? root.accent : Theme.ui_border
     clip: true
 
@@ -125,6 +127,15 @@ Rectangle {
             NumberAnimation { target: enter_tilt; property: "angle"; from: 7; to: -3; duration: 140; easing.type: Easing.OutQuad }
             NumberAnimation { target: enter_tilt; property: "angle"; to: 1.5; duration: 90 }
             NumberAnimation { target: enter_tilt; property: "angle"; to: 0; duration: 80 }
+        }
+    }
+
+    Loader {
+        active: root.tile
+        anchors.fill: parent
+        sourceComponent: Modern.CardSurface {
+            floating: true
+            selected: root.selected
         }
     }
 
@@ -244,7 +255,7 @@ Rectangle {
     }
 
     Rectangle {
-        visible: !Style.boxed_cards && !root.oasis
+        visible: !Style.boxed_cards && !root.oasis && !root.tile
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -342,9 +353,9 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: 8 + Style.inset_pad
-        anchors.leftMargin: (Style.row_cursor !== "" ? 16 : 12) + Style.inset_pad
-        spacing: 8
+        anchors.margins: (root.tile ? 14 : 8) + Style.inset_pad
+        anchors.leftMargin: (root.tile ? 14 : Style.row_cursor !== "" ? 16 : 12) + Style.inset_pad
+        spacing: root.tile ? 12 : 8
 
         Loader {
             active: Style.console_views === "ps1"
@@ -356,11 +367,22 @@ Rectangle {
             }
         }
 
+        Loader {
+            active: root.tile
+            visible: active
+            Layout.alignment: Qt.AlignTop
+            sourceComponent: Modern.AccentTile {
+                tint: root.notification && root.notification.urgency === NotificationUrgency.Critical ? Theme.theme_label : Theme.info
+                glyph: "\u{f0f3}"
+                notification: root.notification
+            }
+        }
+
         Image {
             Layout.alignment: Qt.AlignTop
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
-            visible: Style.console_views !== "ps1" && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+            visible: Style.console_views !== "ps1" && !root.tile && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
             source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
             fillMode: Image.PreserveAspectFit
         }
@@ -453,7 +475,7 @@ Rectangle {
                         implicitWidth: Math.min(action_label.implicitWidth + 16 + (action_chip.hand ? 20 : 0), layout.width)
                         implicitHeight: 22
                         radius: Style.pill_chips ? height / 2 : Style.radius(11)
-                        color: action_chip.hand ? "transparent" : action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : Theme.bg_surface
+                        color: action_chip.hand ? "transparent" : action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : root.tile ? Style.tab_active_bg : Theme.bg_surface
                         border.width: Style.boxed_cards || action_chip.focused ? 1 : 0
                         border.color: action_chip.focused ? Style.chip_pick : Style.chip_border.a > 0 ? Style.chip_border : Style.key_border
 
@@ -465,7 +487,7 @@ Rectangle {
                             width: Math.min(implicitWidth, layout.width - 16)
                             horizontalAlignment: Text.AlignHCenter
                             text: action_chip.modelData.text
-                            color: action_chip.hand ? Theme.fg_strong : action_chip.focused ? Theme.bg_crust : Theme.theme_secondary
+                            color: action_chip.hand ? Theme.fg_strong : action_chip.focused ? Theme.bg_crust : Style.chip_fg.a > 0 ? Style.chip_fg : Theme.theme_secondary
                             font.bold: action_chip.focused
                             font.family: Style.font_family
                             font.pixelSize: Style.font_size - (Style.boxed_cards ? 3 : 4)
