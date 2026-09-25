@@ -28,7 +28,11 @@ Popup {
     search_rows: Style.names.map(n => root.label(n))
     search_cursor: root.selected
     onSearch_select: index => root.selected = index
-    onSearch_accept: root.apply()
+    // Enter while typing drops to NORMAL on the match and previews it; a second Enter applies.
+    onSearch_accept: {
+        root.accept_search();
+        Style.preview(Style.names[root.selected]);
+    }
     onJump_first: root.selected = 0
     onJump_last: root.selected = Style.names.length - 1
 
