@@ -1375,7 +1375,7 @@ Singleton {
                     text_fg: label,
                     text_primary: Theme.theme_primary_light,
                     font_family: "Nunito",
-                    font_size: Theme.popup_font_size + 2,
+                    font_size: Theme.popup_font_size + 4,
                     frame_color: win_end,
                     frame_shade: win_top,
                     window_gradient: [[0, win_top], [0.4, win_mid], [1, win_end]],
