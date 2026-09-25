@@ -1,7 +1,6 @@
 // home/quickshell/.config/quickshell/components/oasis/Horizon.qml
 import QtQuick
 import QtQuick.Shapes
-import Quickshell
 import "../../theme"
 import "../../services"
 
@@ -14,9 +13,13 @@ Item {
     readonly property real track_left: 34
     readonly property real track_right: Math.max(root.track_left, root.width - 16)
 
-    SystemClock {
-        id: clock
-        precision: SystemClock.Minutes
+    // The clock this horizon sits behind lends its time.
+    property date date: new Date()
+    // In the weather location's clock, the base its sunrise and sunset use; ticks once a minute.
+    readonly property int minute_of_day: {
+        if (!WeatherState.has_data) return root.date.getHours() * 60 + root.date.getMinutes();
+        const d = new Date(root.date.getTime() + WeatherState.utc_offset * 1000);
+        return d.getUTCHours() * 60 + d.getUTCMinutes();
     }
 
     function minutes(hhmm, fallback) {
@@ -25,8 +28,7 @@ Item {
     }
 
     readonly property var sky: {
-        const d = clock.date;
-        const now = d.getHours() * 60 + d.getMinutes();
+        const now = root.minute_of_day;
         const rise = root.minutes(WeatherState.sunrise, 390);
         const set = Math.max(rise + 1, root.minutes(WeatherState.sunset, 1110));
         if (now >= rise && now < set) return { day: true, f: (now - rise) / (set - rise) };
@@ -34,8 +36,6 @@ Item {
         return { day: false, f: since / Math.max(1, 1440 - (set - rise)) };
     }
     readonly property real body_x: root.track_left + root.sky.f * (root.track_right - root.track_left)
-    // Half sunk into the horizon, below the clock text the Clock lifts clear of it.
-    readonly property real body_y: root.horizon_y
 
     Rectangle {
         y: root.horizon_y + 1
@@ -80,7 +80,7 @@ Item {
 
     Rectangle {
         x: root.body_x - width / 2
-        y: root.body_y - height / 2
+        y: root.horizon_y - height / 2
         width: 13
         height: 13
         radius: width / 2
@@ -90,7 +90,7 @@ Item {
     Rectangle {
         visible: root.sky.day
         x: root.body_x - width / 2
-        y: root.body_y - height / 2
+        y: root.horizon_y - height / 2
         width: 7
         height: 7
         radius: width / 2
@@ -100,7 +100,7 @@ Item {
     Shape {
         visible: !root.sky.day
         x: root.body_x - 5
-        y: root.body_y - 5
+        y: root.horizon_y - 5
         width: 10
         height: 10
         preferredRendererType: Shape.CurveRenderer

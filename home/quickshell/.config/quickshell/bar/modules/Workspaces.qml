@@ -23,6 +23,7 @@ Item {
 
     property string screen_name: ""
     property bool compact: false
+    property int bar_height: 34
 
     // Final Fantasy Tactics map: an isometric tile per workspace, stretching so every app stands on it.
     readonly property bool slots: Style.console_views === "ps1"
@@ -154,6 +155,7 @@ Item {
                 host: root
                 workspaces: root.workspace_list
                 compact: root.compact
+                bar_height: root.bar_height
             }
         }
 

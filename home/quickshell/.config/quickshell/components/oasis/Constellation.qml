@@ -14,6 +14,7 @@ Item {
     required property Item host
     property var workspaces: []
     property bool compact: false
+    property int bar_height: 34
 
     readonly property int glyph: compact ? 15 : 17
     readonly property int gap: 4
@@ -34,14 +35,25 @@ Item {
         for (const w of root.workspaces) {
             const k = w.toplevels.values.length, wd = root.slot_width(k);
             const end = k > 0 ? x + root.apps_x + k * root.glyph + (k - 1) * root.gap : x + root.star_x;
-            out.push({ id: w.id, x: x, w: wd, cx: x + root.star_x, cy: root.height / 2 + root.lifts[Math.abs(w.id) % 5], end: end, k: k, focused: w.focused, active: w.active });
+            out.push({ id: w.id, x: x, w: wd, cx: x + root.star_x, cy: root.bar_height / 2 + root.lifts[Math.abs(w.id) % 5], end: end, k: k, focused: w.focused, active: w.active });
             x += wd;
         }
         return out;
     }
 
-    implicitWidth: slots.length ? slots[slots.length - 1].x + slots[slots.length - 1].w - root.link_room + 4 : 0
-    implicitHeight: 34
+    // An empty last slot still needs room for its two-digit label right of the star.
+    implicitWidth: {
+        const s = slots.length ? slots[slots.length - 1] : null;
+        return s ? Math.max(s.x + s.w - root.link_room + 4, s.cx + 5 + label_metrics.advanceWidth(String(s.id)) + 2) : 0;
+    }
+    implicitHeight: root.bar_height
+
+    FontMetrics {
+        id: label_metrics
+        font.family: Style.bar_font_family
+        font.pixelSize: 9
+        font.weight: Font.DemiBold
+    }
 
     // A four-point sparkle of radius r at (x, y).
     function sparkle(x, y, r) {

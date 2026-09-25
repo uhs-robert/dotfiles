@@ -9,7 +9,6 @@ Shape {
     property color color: "transparent"
     property real bottom_radius: 0
 
-    // Fixed, so the path never feeds back through the Shape's implicit size.
     readonly property real foot: 46
 
     visible: root.color.a > 0

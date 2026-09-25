@@ -54,7 +54,15 @@ Item {
     readonly property var right_entries: root.build_entries(root.rule ? root.rule.right : [])
 
     // Sets island/screen/stat properties a module declares, after the Loader instantiates it.
+    // The oasis horizon decorates the center island when it holds the clock; that clock makes room for it and lends it the time.
+    readonly property bool clock_horizon: Style.clock_art === "horizon" && root.center_entries.some(e => e.base === "clock")
+    property var horizon_clock: null
+
     function wire_module(item, entry, island) {
+        if (entry.base === "clock" && island === center_island) {
+            root.horizon_clock = item;
+            item.horizon = Qt.binding(() => root.clock_horizon);
+        }
         // Color first: setting island triggers the module's popup registration, which reads it.
         if (item.hasOwnProperty("island_color")) item.island_color = Qt.binding(() => island.bg_color);
         if (item.hasOwnProperty("island")) item.island = island.body_item;
@@ -62,7 +70,7 @@ Item {
     }
 
     Component { id: start_component; StartButton { compact: root.compact; screen_name: root.screen_name } }
-    Component { id: workspaces_component; Workspaces { compact: root.compact; screen_name: root.screen_name } }
+    Component { id: workspaces_component; Workspaces { compact: root.compact; screen_name: root.screen_name; bar_height: root.bar_height } }
     Component { id: clock_component; Clock { compact: root.compact } }
     Component { id: tray_component; Tray { compact: root.compact; screen_name: root.screen_name } }
     Component { id: volume_component; Volume { compact: root.compact; screen_name: root.screen_name } }
@@ -168,8 +176,10 @@ Item {
         parent: center_island.body_item
         anchors.fill: parent
         z: -1
-        active: Style.clock_art === "horizon" && root.center_entries.some(e => e.base === "clock")
-        sourceComponent: Oasis.Horizon {}
+        active: root.clock_horizon
+        sourceComponent: Oasis.Horizon {
+            date: root.horizon_clock ? root.horizon_clock.date : new Date()
+        }
     }
 
     CavaBars {

@@ -8,8 +8,9 @@ Row {
     id: root
 
     property bool compact: false
-    // The oasis horizon art in the island needs room for its palm and sky, and the line under the text.
-    readonly property bool horizon: Style.clock_art === "horizon"
+    // Set by the bar when its oasis horizon art sits behind this clock; it needs room for the palm and sky.
+    property bool horizon: false
+    readonly property date date: clock.date
     spacing: 6
     leftPadding: root.horizon ? 24 : 0
     rightPadding: root.horizon ? 22 : 0

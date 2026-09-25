@@ -235,7 +235,8 @@ Singleton {
             tab_mark: "transparent",
             rim: "transparent",
             title_case: false,
-            title_size: 0
+            title_size: 0,
+            footer_key_round: false
         };
         return {
             "default": {
@@ -454,7 +455,8 @@ Singleton {
                 tab_mark: "transparent",
                 rim: "transparent",
                 title_case: false,
-                title_size: 0
+                title_size: 0,
+                footer_key_round: false
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1602,6 +1604,7 @@ Singleton {
                     footer_fg: Theme.fg_dim,
                     footer_key_fg: sand,
                     footer_key_bg: Qt.alpha(sand, 0.1),
+                    footer_key_round: true,
                     footer_rule: true,
                     footer_rule_color: hair,
                     meter_on: Theme.theme_primary_light,
@@ -1937,8 +1940,10 @@ Singleton {
     readonly property color tab_mark: root.active.tab_mark
     // A 1px highlight along the top of raised tabs and cards.
     readonly property color rim: root.active.rim
-    // Titles in title case instead of the popup name's caps; title_size 0 keeps font_size - 2.
+    // Titles recase all-caps words over three letters ("NETWORK" to "Network"); title_size 0 keeps font_size - 2.
     readonly property bool title_case: root.active.title_case
+    // Footer keycaps with rounded corners and a key_border outline.
+    readonly property bool footer_key_round: root.active.footer_key_round
     readonly property int title_size: root.active.title_size
     // Bar clock art: "horizon" puts a horizon with the sun or moon in the clock's island.
     readonly property string clock_art: root.active.clock_art
@@ -1987,7 +1992,7 @@ Singleton {
 
     // A popup or OSD title as the style shows it.
     function title_text(text, st) {
-        return (st || root).title_case ? text.toLowerCase().replace(/(^|[\s-])\S/g, m => m.toUpperCase()) : text;
+        return (st || root).title_case ? text.replace(/\b[A-Z]{4,}\b/g, w => w.charAt(0) + w.slice(1).toLowerCase()) : text;
     }
 
     // Corner radius for a shape that is rounded by `r` in the default look.

@@ -2,8 +2,9 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../theme"
+import ".."
 
-// The oasis OSD: an icon in a well, the level in light numerals, and 20 horizon segments with a sand sun at the level.
+// The oasis OSD: an icon in a well, the level in light numerals, and the 20-segment meter with a sand sun at the level.
 ColumnLayout {
     id: root
 
@@ -95,34 +96,21 @@ ColumnLayout {
         Layout.leftMargin: 8
         Layout.rightMargin: 8
         Layout.preferredWidth: Style.px(284)
-        Layout.preferredHeight: 16
+        Layout.preferredHeight: 20
         opacity: root.muted ? 0.4 : 1
 
-        Row {
-            id: segments
-            readonly property real seg_w: (width - spacing * (root.count - 1)) / root.count
-            anchors.verticalCenter: parent.verticalCenter
+        Meter {
+            id: meter
             width: parent.width
-            spacing: 2
-
-            Repeater {
-                model: root.count
-
-                Rectangle {
-                    required property int index
-                    readonly property bool on: index < root.lit
-
-                    width: segments.seg_w
-                    height: on ? 3 : 2
-                    anchors.verticalCenter: parent.verticalCenter
-                    radius: 1.5
-                    color: !on ? Qt.alpha(Theme.theme_primary, 0.3) : index >= root.count * 0.9 ? Theme.theme_label : Qt.tint(Theme.theme_primary_strong, Qt.alpha(root.sand, index / (root.count - 1)))
-                }
-            }
+            anchors.verticalCenter: parent.verticalCenter
+            art_key: "osd"
+            segment_count: root.count
+            value: root.level
+            hot_from: 0.9
         }
 
         Rectangle {
-            readonly property real at: root.lit > 0 ? (root.lit * (segments.seg_w + segments.spacing) - segments.spacing) : 0
+            readonly property real at: root.lit > 0 ? root.lit * (meter.segment_width + meter.gap) - meter.gap : 0
             x: at - width / 2
             anchors.verticalCenter: parent.verticalCenter
             width: 20
