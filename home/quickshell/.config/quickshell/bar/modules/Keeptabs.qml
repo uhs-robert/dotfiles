@@ -148,7 +148,7 @@ Item {
                 readonly property bool is_wait: modelData.glyph === KeeptabsState.wait_glyph
                 readonly property Item glyph_text: badge.glyph_item
                 readonly property Item count_text: badge.count_item
-                readonly property real content_width: glyph_text.implicitWidth + (count_text.visible ? count_text.implicitWidth * 0.6 : 0)
+                readonly property real content_width: badge.implicitWidth
                 implicitWidth: badge.implicitWidth
                 implicitHeight: badge.implicitHeight
 

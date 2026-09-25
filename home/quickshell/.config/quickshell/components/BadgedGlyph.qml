@@ -2,8 +2,7 @@
 import QtQuick
 import "../theme"
 
-// A glyph with its count as a small superscript badge, top right. Reserves headroom above the
-// glyph so the badge never pokes past the item's own top and clips against the bar surface.
+// A glyph with its count as a small superscript badge at the top right.
 Item {
     id: root
 
@@ -18,11 +17,10 @@ Item {
     readonly property alias count_item: count_text
 
     readonly property real badge_size: Math.max(6, Style.bar_font_size - 3)
-    // How far the badge rises above the glyph's own top, like the old fixed "y: -3" — now reserved
-    // as real height instead of overflowing past the item's top edge.
     readonly property real badge_rise: 3
+    readonly property real badge_overlap: 1
 
-    implicitWidth: glyph_text.implicitWidth + (count_text.visible ? count_text.implicitWidth * 0.6 : 0)
+    implicitWidth: glyph_text.implicitWidth + (count_text.visible ? count_text.implicitWidth - root.badge_overlap : 0)
     implicitHeight: glyph_text.implicitHeight + root.badge_rise
 
     Text {
@@ -40,7 +38,7 @@ Item {
     Text {
         id: count_text
         visible: root.count !== ""
-        x: glyph_text.implicitWidth - implicitWidth * 0.4
+        x: glyph_text.implicitWidth - root.badge_overlap
         y: 0
         text: root.count
         color: root.tint
