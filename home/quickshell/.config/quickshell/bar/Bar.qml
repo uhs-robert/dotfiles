@@ -283,6 +283,8 @@ Item {
                     wire: parent.wire
                     fill: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
                     accent: true
+                    // The mode chip's hover tint.
+                    hover_fill: Qt.tint(fill, Qt.alpha(Theme.fg_strong, 0.15))
                     separators: false
                     lead_bg: y_section.shown ? y_section.end_fill : x_section.shown ? x_section.end_fill : "transparent"
                 }

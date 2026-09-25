@@ -17,12 +17,11 @@ Item {
     // The previous section's fill behind the lead arrow; transparent draws none.
     property color lead_bg: "transparent"
     property bool separators: true
-    // A strong fill: modules with an `on_accent` property draw in ink colors on it, and nothing lights on hover.
+    // A strong fill: modules with an `on_accent` property draw in ink colors on it.
     property bool accent: false
     // Set on the island's first section: its first component's fill goes to LualineState for the island cap.
     property string screen_name: ""
-    readonly property bool hoverable: !root.accent
-    readonly property int lead_width: root.hoverable ? Math.round(root.height * 0.4) + 1 : root.separators ? 14 : 2
+    readonly property int lead_width: Math.round(root.height * 0.4) + 1
 
     readonly property int first_shown: {
         for (let i = 0; i < cells.count; i++) {
@@ -102,7 +101,7 @@ Item {
                 readonly property bool last: cell.index === root.last_shown
                 // Its module's popup is open on this screen, by click, key or IPC.
                 readonly property bool popup_open: !!loader.item && Popups.open_name === cell.modelData.base && Popups.open_screen_name === (loader.item.screen_name || "")
-                readonly property bool lit: root.hoverable && (cell_hover.hovered || cell.popup_open)
+                readonly property bool lit: cell_hover.hovered || cell.popup_open
                 readonly property bool prev_lit: {
                     for (let i = cell.index - 1; i >= 0; i--) {
                         const c = cells.itemAt(i);
@@ -195,18 +194,6 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: cell.activate()
-                    }
-
-                    // Accent sections keep their soft wash instead of a lit segment.
-                    Rectangle {
-                        visible: root.accent && !!loader.item
-                        x: loader.x - 4
-                        y: loader.y - 4
-                        width: loader.width + 8
-                        height: loader.height + 8
-                        radius: Style.bar_radius(4)
-                        color: Theme.ui_visual_bg
-                        opacity: cell_hover.hovered || cell.popup_open ? 0.5 : 0
                     }
 
                     Loader {
