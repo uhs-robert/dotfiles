@@ -53,6 +53,7 @@ Popup {
     }
 
     function row_label(row) {
+        if (!row.node) return "";
         if (row.type === "stream") return row.node.properties["application.name"] || row.node.name;
         return row.node.description || row.node.name;
     }
