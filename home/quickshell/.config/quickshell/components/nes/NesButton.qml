@@ -9,7 +9,7 @@ Row {
 
     property string button: ""
     property real size: 14
-    readonly property int pixel: root.size < 12 ? 1 : 2
+    readonly property int pixel: root.size < 11 ? 1 : 2
     readonly property bool round: root.button === "a" || root.button === "b"
     readonly property bool pill: root.button === "start" || root.button === "select"
     readonly property color red: Qt.tint("#c8102e", Qt.alpha(Theme.red, 0.45))
