@@ -194,7 +194,8 @@ Item {
                 readonly property bool dot: pill.plain && pill.is_empty && !pill.modelData.active && Style.bar_workspace_dot.a > 0
 
                 // Hovered dots grow and light a core, the only hint they can be clicked.
-                property real dot_size: pill_hover.hovered ? 11 : 7
+                readonly property bool dot_hovered: pill_hover.hovered || dot_hover.hovered
+                property real dot_size: pill.dot_hovered ? 11 : 7
                 Behavior on dot_size {
                     NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
                 }
@@ -355,7 +356,7 @@ Item {
                     height: 5
                     radius: 2.5
                     color: Style.bar_workspace_focused
-                    opacity: pill_hover.hovered ? 1 : 0
+                    opacity: pill.dot_hovered ? 1 : 0
 
                     Behavior on opacity {
                         NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
@@ -389,6 +390,24 @@ Item {
 
                 HoverHandler {
                     id: pill_hover
+                }
+
+                // A dot's hit area: the capsule's height, out to half the gap on each side.
+                Item {
+                    visible: pill.dot
+                    x: -row.spacing / 2
+                    y: (pill.height - height) / 2
+                    width: pill.width + row.spacing
+                    height: root.bar_height - Style.bar_capsule
+
+                    HoverHandler {
+                        id: dot_hover
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = '" + pill.modelData.id + "' })")
+                    }
                 }
 
                 Row {
