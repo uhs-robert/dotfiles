@@ -20,3 +20,4 @@ Every `.ttf`/`.otf` here is registered for the whole qs process by `services/Bun
 | SairaStencilOne-Regular.ttf | Saira Stencil One | google/fonts ofl/sairastencilone | OFL-SairaStencilOne.txt |
 | ChakraPetch-Medium.ttf, ChakraPetch-Bold.ttf | Chakra Petch | google/fonts ofl/chakrapetch | OFL-ChakraPetch.txt |
 | Nunito-Variable.ttf | Nunito | google/fonts ofl/nunito | OFL-Nunito.txt |
+| Geist-Variable.ttf, GeistMono-Variable.ttf | Geist, Geist Mono | vercel/geist-font v1.7.2 | OFL-Geist.txt |
