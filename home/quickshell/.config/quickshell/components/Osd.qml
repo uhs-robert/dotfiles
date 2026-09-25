@@ -9,6 +9,7 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "../theme"
 import "../services"
+import "ps2" as Ps2
 
 PanelWindow {
     id: root
@@ -49,6 +50,7 @@ PanelWindow {
     readonly property bool ring_layout: Style.osd_layout === "ring" && !root.showing_vox
     readonly property bool banded: Style.show_title && (Style.title_band.a > 0 || Style.title_strip.a > 0)
     readonly property bool hud_layout: Style.osd_layout === "hud" && !root.showing_vox
+    readonly property bool glow_layout: Style.osd_layout === "glow" && !root.showing_vox
 
     readonly property string title: root.showing_vox ? root.vox_phase.toUpperCase() : root.kind.toUpperCase()
 
@@ -377,6 +379,20 @@ PanelWindow {
                     }
                 }
 
+                Loader {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Style.px(84)
+                    Layout.preferredHeight: Style.px(84)
+                    active: root.glow_layout
+                    visible: root.glow_layout
+                    sourceComponent: Ps2.GlowRing {
+                        value: root.level
+                        label: String(root.percent)
+                        caption: root.muted ? "Muted" : ""
+                        dimmed: root.muted
+                    }
+                }
+
                 OsdReadout {
                     visible: root.readout_layout
                     level: root.level
@@ -399,7 +415,7 @@ PanelWindow {
                 }
 
                 Item {
-                    visible: !root.readout_layout
+                    visible: !root.readout_layout && !root.glow_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: root.showing_vox ? Style.px(260) : Style.px(180)
                     Layout.preferredHeight: root.showing_vox ? Style.px(44) : meter.implicitHeight
@@ -424,7 +440,7 @@ PanelWindow {
                 }
 
                 Text {
-                    visible: !root.readout_layout && !root.ring_layout
+                    visible: !root.readout_layout && !root.ring_layout && !root.glow_layout
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: percent_metrics.width
                     horizontalAlignment: Text.AlignRight
