@@ -1703,6 +1703,7 @@ Singleton {
                     bar_font_family: "Inter",
                     bar_font_size: 16,
                     whichkey_size: 16,
+                    footer_size: 16,
                     bar_side_bg: Theme.bg_core,
                     bar_center_bg: Theme.bg_core,
                     bar_fg: t2,
