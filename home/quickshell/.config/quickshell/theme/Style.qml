@@ -244,6 +244,12 @@ Singleton {
             title_status: false,
             chip_fg: "transparent",
             bar_capsule: 0,
+            bar_capsule_pad: 0,
+            bar_height: 0,
+            bar_module_gap: 16,
+            bar_pill_height: 0,
+            bar_pill_pad: 0,
+            bar_workspace_gap: 0,
             bar_workspace_shade: "transparent",
             bar_workspace_dot: "transparent",
             bar_clock_layout: "",
@@ -482,6 +488,12 @@ Singleton {
                 title_status: false,
                 chip_fg: "transparent",
                 bar_capsule: 0,
+                bar_capsule_pad: 0,
+                bar_height: 0,
+                bar_module_gap: 16,
+                bar_pill_height: 0,
+                bar_pill_pad: 0,
+                bar_workspace_gap: 0,
                 bar_workspace_shade: "transparent",
                 bar_workspace_dot: "transparent",
                 bar_clock_layout: "",
@@ -1795,7 +1807,13 @@ Singleton {
                     bar_border_width: 1,
                     bar_border_color: edge,
                     bar_rounded: true,
-                    bar_capsule: 3,
+                    bar_capsule: 5,
+                    bar_capsule_pad: 14,
+                    bar_height: 40,
+                    bar_module_gap: 22,
+                    bar_pill_height: 26,
+                    bar_pill_pad: 3,
+                    bar_workspace_gap: 10,
                     bar_clock_layout: "capsule",
                     bar_start_well: well,
                     bar_workspace_focused: accent,
@@ -2251,8 +2269,16 @@ Singleton {
     readonly property bool bar_round_caps: root.bar.bar_round_caps
     // A horizon line across the bar, seen in the gaps between islands.
     readonly property color bar_horizon: root.bar.bar_horizon
-    // Islands as floating capsules this many px inside the bar; 0 keeps the slanted islands.
+    // Islands as floating capsules this many px inside the bar's top and ends, resting on its bottom edge; 0 keeps the slanted islands.
     readonly property int bar_capsule: root.bar.bar_capsule
+    readonly property int bar_capsule_pad: root.bar.bar_capsule_pad
+    // Bar height when bars.json sets none; 0 keeps the default.
+    readonly property int bar_height: root.bar.bar_height
+    readonly property int bar_module_gap: root.bar.bar_module_gap
+    // Plain workspace pills: height (0 keeps the default), extra room each side of their icons, and the gap between them.
+    readonly property int bar_pill_height: root.bar.bar_pill_height
+    readonly property int bar_pill_pad: root.bar.bar_pill_pad
+    readonly property int bar_workspace_gap: root.bar.bar_workspace_gap
     readonly property color bar_workspace_shade: root.bar.bar_workspace_shade
     // Empty workspaces as small dots of this color instead of pills.
     readonly property color bar_workspace_dot: root.bar.bar_workspace_dot

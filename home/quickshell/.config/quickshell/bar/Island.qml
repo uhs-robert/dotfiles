@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import "../components"
+import "../services"
 import "../theme"
 
 Item {
@@ -27,11 +28,17 @@ Item {
     // The visor's rounded bottom corners, filled with the shade instead of glass.
     property bool round_caps: false
     readonly property bool curved: root.visor || root.round_caps
-    // A floating capsule this many px inside the island's box, in place of the slants; sheen_color lights its top edge.
+    // A capsule this many px inside the island's top and ends, resting on its bottom edge; sheen_color lights its top edge.
     property real capsule_inset: 0
     property color sheen_color: "transparent"
     readonly property bool capsule: root.capsule_inset > 0
-    readonly property real capsule_width: root.width - root.capsule_inset * 2
+    readonly property real capsule_width: body.width
+    readonly property real capsule_radius: (root.height - root.capsule_inset) / 2
+    // The submap tab hangs from this island.
+    property bool tab_joined: false
+    readonly property bool joined: root.capsule && (root.tab_joined || (Popups.open_name !== "" && Popups.open_anchor === body) || (Popups.open_name === "" && Tooltip.visible && Tooltip.island === body))
+    // 1 while a popup or the submap tab hangs from the capsule: its bottom corners flatten to meet it.
+    property real join: 0
     readonly property bool shaded: root.shade_color.a > 0 || root.curved || root.capsule
     default property alias content: layout.children
 
@@ -40,20 +47,38 @@ Item {
     readonly property bool lualine: Style.bar_lualine
     readonly property bool center: root.cap_left && root.cap_right
     readonly property int cap_width: root.lualine ? Math.round(height * 0.4) : height / 2
-    readonly property real pad: root.lualine ? (root.center ? 10 : 0) : 8
+    readonly property real pad: root.capsule ? Style.bar_capsule_pad : root.lualine ? (root.center ? 10 : 0) : 8
 
     signal clicked
 
     height: 30
-    width: body.width + (cap_left ? cap_width : 0) + (cap_right ? cap_width : 0)
+    width: root.capsule ? body.width + root.capsule_inset * 2 : body.width + (cap_left ? cap_width : 0) + (cap_right ? cap_width : 0)
+
+    onJoinedChanged: {
+        join_anim.stop();
+        unjoin_anim.stop();
+        (root.joined ? join_anim : unjoin_anim).restart();
+    }
+
+    NumberAnimation { id: join_anim; target: root; property: "join"; to: 1; duration: 180; easing.type: Easing.OutCubic }
+
+    // Waits for the popup to fold away before the corners round again.
+    SequentialAnimation {
+        id: unjoin_anim
+        PauseAnimation { duration: 120 }
+        NumberAnimation { target: root; property: "join"; to: 0; duration: 90; easing.type: Easing.InCubic }
+    }
 
     Rectangle {
         visible: root.capsule
         x: root.capsule_inset
         y: root.capsule_inset
-        width: root.width - root.capsule_inset * 2
-        height: root.height - root.capsule_inset * 2
-        radius: height / 2
+        width: body.width
+        height: root.height - root.capsule_inset
+        topLeftRadius: root.capsule_radius
+        topRightRadius: root.capsule_radius
+        bottomLeftRadius: root.capsule_radius * (1 - root.join)
+        bottomRightRadius: root.capsule_radius * (1 - root.join)
         border.width: root.border_width
         border.color: root.border_color
         gradient: Gradient {
@@ -63,7 +88,7 @@ Item {
 
         Sheen {
             color_top: root.sheen_color
-            corner: parent.radius
+            corner: root.capsule_radius
             edge: root.border_width
         }
     }
@@ -142,7 +167,7 @@ Item {
     Rectangle {
         id: body
 
-        x: cap_left ? root.cap_width : 0
+        x: root.capsule ? root.capsule_inset : cap_left ? root.cap_width : 0
         height: root.height
         width: Math.ceil(layout.implicitWidth) + root.pad * 2
         color: root.shaded ? "transparent" : root.bg_color
@@ -164,19 +189,18 @@ Item {
             }
         }
 
-        // Declared before the layout so module MouseAreas stack above it; capsules take clicks across their round ends.
+        // Declared before the layout so module MouseAreas stack above it.
         MouseArea {
-            x: root.capsule ? root.capsule_inset - body.x : 0
-            width: root.capsule ? root.capsule_width : parent.width
-            height: parent.height
+            anchors.fill: parent
             onClicked: root.clicked()
         }
 
         RowLayout {
             id: layout
             x: root.pad
-            height: parent.height
-            spacing: root.lualine && !root.center ? 0 : 16
+            y: root.capsule ? root.capsule_inset : 0
+            height: parent.height - y
+            spacing: root.lualine && !root.center ? 0 : Style.bar_module_gap
         }
     }
 

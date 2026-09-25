@@ -173,6 +173,7 @@ Item {
         sheen_color: Style.sheen
         cap_left: true
         cap_right: true
+        tab_joined: SubmapState.active && !root.has_mode_chip
         visible: root.center_entries.length > 0
 
         onClicked: if (root.center_entries.some(e => e.base === "clock")) Popups.toggle("clock", center_island.body_item, center_island.bg_color, root.screen_name)
@@ -205,9 +206,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.leftMargin: 6
-        anchors.rightMargin: 6
-        anchors.bottomMargin: center_island.capsule ? center_island.capsule_inset + 1 : center_island.inset_color.a > 0 ? center_island.inset_gap + center_island.inset_width : 0
+        anchors.leftMargin: center_island.capsule ? center_island.capsule_radius : 6
+        anchors.rightMargin: center_island.capsule ? center_island.capsule_radius : 6
+        anchors.bottomMargin: center_island.capsule ? center_island.border_width + 1 : center_island.inset_color.a > 0 ? center_island.inset_gap + center_island.inset_width : 0
         active: MediaState.playing && root.has_center
     }
 

@@ -190,8 +190,12 @@ PanelWindow {
     // Full width along the bottom of the screen, rising from its edge; the frame loses its rounded corners.
     property bool dock_bottom: false
     readonly property real frame_radius: root.dock_bottom ? 0 : root.st.frame_radius
-    readonly property bool floating: root.st.frame_float > 0 && !root.dock_bottom
+    readonly property bool floating: root.st.frame_float > 0 && !root.dock_bottom && !root.island_capsule
     readonly property real top_radius: root.floating ? root.frame_radius : 0
+    // Hung flush from a capsule: square under it, rounded where the frame reaches past its ends.
+    readonly property real overhang: root.island_capsule && !root.dock_bottom ? root.width - root.island_width : 0
+    readonly property real top_left_radius: root.overhang > 0 && root.side !== "left" ? Math.min(root.frame_radius, root.side === "center" ? root.overhang / 2 : root.overhang) : root.top_radius
+    readonly property real top_right_radius: root.overhang > 0 && root.side !== "right" ? Math.min(root.frame_radius, root.side === "center" ? root.overhang / 2 : root.overhang) : root.top_radius
     // Shortcuts fire before the focused item, so popups that bind h/l themselves still walk.
     function walk_allowed() {
         const f = content_scope.Window.activeFocusItem;
@@ -226,7 +230,7 @@ PanelWindow {
     readonly property var island: held_anchor ? held_anchor.parent : null
     // Capsule islands measure by the capsule they draw, not the body between their caps.
     readonly property bool island_capsule: !!island && island.capsule === true
-    readonly property real island_width: root.island_capsule ? root.island.capsule_width : held_anchor ? held_anchor.width : 0
+    readonly property real island_width: root.island && root.island_capsule ? root.island.capsule_width : held_anchor ? held_anchor.width : 0
     readonly property bool island_cap_left: !!island && island.cap_left === true
     readonly property bool island_cap_right: !!island && island.cap_right === true
     // cap_right-only = a left island, flush with the screen's left edge; cap_left-only = a right island.
@@ -239,8 +243,8 @@ PanelWindow {
     anchors.left: side === "left" || dock_bottom
     anchors.right: side === "right" || dock_bottom
     margins.top: root.floating ? root.st.frame_float : 0
-    margins.left: root.island_capsule && root.side === "left" ? root.island.capsule_inset : 0
-    margins.right: root.island_capsule && root.side === "right" ? root.island.capsule_inset : 0
+    margins.left: root.island && root.island_capsule && root.side === "left" ? root.island.capsule_inset : 0
+    margins.right: root.island && root.island_capsule && root.side === "right" ? root.island.capsule_inset : 0
     exclusiveZone: 0
     color: "transparent"
     visible: false
@@ -439,8 +443,8 @@ PanelWindow {
             Rectangle {
                 anchors.fill: parent
                 color: root.st.frame_chamfer > 0 || root.st.frame_visor || root.st.custom_frame || root.device || root.st.border_title ? "transparent" : root.st.frame_follows_island ? root.held_color : root.st.frame_color
-                topLeftRadius: root.top_radius
-                topRightRadius: root.top_radius
+                topLeftRadius: root.top_left_radius
+                topRightRadius: root.top_right_radius
                 bottomLeftRadius: root.frame_radius
                 bottomRightRadius: root.frame_radius
                 border.width: root.st.frame_visor || root.st.frame_chamfer > 0 || root.st.custom_frame || root.st.border_title ? 0 : root.st.frame_border_width
@@ -488,7 +492,8 @@ PanelWindow {
             FrameShade {
                 anchors.fill: parent
                 anchors.margins: root.st.frame_border_width
-                top_radius: Math.max(0, root.top_radius - root.st.frame_border_width)
+                top_left_radius: Math.max(0, root.top_left_radius - root.st.frame_border_width)
+                top_right_radius: Math.max(0, root.top_right_radius - root.st.frame_border_width)
                 bottom_radius: Math.max(0, root.frame_radius - root.st.frame_border_width)
                 chamfer: root.st.frame_chamfer
             }
