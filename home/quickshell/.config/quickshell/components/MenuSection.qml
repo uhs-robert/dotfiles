@@ -11,7 +11,8 @@ Text {
 
     property string label: ""
 
-    width: (root.st.section_rule || root.st.section_fade.a > 0) && parent ? parent.width : implicitWidth
+    // Undefined resets width to follow implicitWidth without a binding on it, which looped while fonts relaid out.
+    width: (root.st.section_rule || root.st.section_fade.a > 0) && parent ? parent.width : undefined
     clip: root.st.section_rule
     text: root.st.section_rule ? "── " + root.label + " " + "─".repeat(160) : root.label
     color: root.st.section_fg

@@ -9,12 +9,15 @@ Shape {
     property color color: "transparent"
     property real bottom_radius: 0
 
+    // Fixed, so the path never feeds back through the Shape's implicit size.
+    readonly property real foot: 46
+
     visible: root.color.a > 0
-    implicitHeight: 46
+    height: root.foot
     preferredRendererType: Shape.CurveRenderer
 
     readonly property string dune_path: {
-        const w = root.width, h = root.height, sx = w / 400, sy = h / 40;
+        const w = root.width, h = root.foot, sx = w / 400, sy = h / 40;
         const r = Math.min(root.bottom_radius, h / 2, w / 2);
         const p = (x, y) => (x * sx).toFixed(2) + " " + (y * sy).toFixed(2);
         return "M" + p(0, 26) + "C" + p(50, 12) + " " + p(110, 12) + " " + p(160, 22) + "C" + p(210, 32) + " " + p(260, 38) + " " + p(320, 22)
@@ -28,7 +31,7 @@ Shape {
             x1: 0
             y1: 0
             x2: 0
-            y2: root.height
+            y2: root.foot
             GradientStop { position: 0; color: root.color }
             GradientStop { position: 1; color: Qt.alpha(root.color, root.color.a * 0.4) }
         }

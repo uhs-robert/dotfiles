@@ -622,7 +622,7 @@ PanelWindow {
                         anchors.horizontalCenterOffset: title_tab.lead_space / 2
                         x: 10 + title_tab.lead_space
                         y: (parent.height - height) / 2
-                        width: Math.min(title_metrics.width, parent.width - 20 - title_tab.lead_space)
+                        width: Math.min(Math.ceil(Math.max(title_metrics.width, title_metrics.advanceWidth)), parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
                         text: root.st.title_prefix + (root.passive ? root.title : Style.title_text(root.title, root.st)) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg

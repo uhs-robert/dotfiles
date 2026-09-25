@@ -6,7 +6,7 @@ import Quickshell.Widgets
 import "../../theme"
 import "../../services"
 
-// Workspaces as a low constellation: the focused star a sand sparkle, occupied ones lit, empty ones hollow, apps under their star.
+// Workspaces as a constellation: a star per workspace with its apps beside it, stars linked across the gaps; the focused one a sand sparkle.
 Item {
     id: root
 
@@ -15,28 +15,32 @@ Item {
     property var workspaces: []
     property bool compact: false
 
-    readonly property int glyph: compact ? 11 : 12
-    readonly property int gap: 3
-    readonly property int lead: 2
+    readonly property int glyph: compact ? 15 : 17
+    readonly property int gap: 4
+    // Star centre from the slot's left edge, apps start after it, and the link runs in the gap after the apps.
+    readonly property int star_x: 10
+    readonly property int apps_x: 26
+    readonly property int link_room: 16
     readonly property color sand: Theme.theme_secondary
-    readonly property var lifts: [2, 0, 3, 1, 4]
+    readonly property var lifts: [0, -3, 2, -2, 3]
 
     function slot_width(k) {
-        return Math.max(30, k * root.glyph + Math.max(0, k - 1) * root.gap + 12);
+        return k > 0 ? root.apps_x + k * root.glyph + (k - 1) * root.gap + root.link_room : root.star_x * 2 + root.link_room - 4;
     }
 
     readonly property var slots: {
         const out = [];
-        let x = root.lead;
+        let x = 0;
         for (const w of root.workspaces) {
             const k = w.toplevels.values.length, wd = root.slot_width(k);
-            out.push({ id: w.id, x: x, w: wd, cx: x + wd / 2, cy: 9 + root.lifts[Math.abs(w.id) % 5], k: k, focused: w.focused, active: w.active });
+            const end = k > 0 ? x + root.apps_x + k * root.glyph + (k - 1) * root.gap : x + root.star_x;
+            out.push({ id: w.id, x: x, w: wd, cx: x + root.star_x, cy: root.height / 2 + root.lifts[Math.abs(w.id) % 5], end: end, k: k, focused: w.focused, active: w.active });
             x += wd;
         }
         return out;
     }
 
-    implicitWidth: slots.length ? slots[slots.length - 1].x + slots[slots.length - 1].w + root.lead : 0
+    implicitWidth: slots.length ? slots[slots.length - 1].x + slots[slots.length - 1].w - root.link_room + 4 : 0
     implicitHeight: 34
 
     // A four-point sparkle of radius r at (x, y).
@@ -46,25 +50,26 @@ Item {
         return "M" + p(0, -r) + "Q" + p(k, -k) + " " + p(r, 0) + "Q" + p(k, k) + " " + p(0, r) + "Q" + p(-k, k) + " " + p(-r, 0) + "Q" + p(-k, -k) + " " + p(0, -r) + "Z";
     }
 
+    function circle(x, y, r) {
+        return "M" + (x - r) + " " + y + "a" + r + " " + r + " 0 1 0 " + 2 * r + " 0a" + r + " " + r + " 0 1 0 " + -2 * r + " 0";
+    }
+
     function star_radius(s) {
-        return s.focused ? 7.8 : s.k ? (s.active ? 5 : 4.2) : 1.8;
+        return s.focused ? 9 : s.k ? 6.5 : 3;
     }
 
-    // A link between neighbouring stars, trimmed short of each so it never crosses them.
-    function link(a, b) {
-        const dx = b.cx - a.cx, dy = b.cy - a.cy, len = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-        const ta = root.star_radius(a) + 3, tb = root.star_radius(b) + 3;
-        if (len <= ta + tb) return "";
-        const ux = dx / len, uy = dy / len;
-        return "M" + (a.cx + ux * ta).toFixed(2) + " " + (a.cy + uy * ta).toFixed(2) + "L" + (b.cx - ux * tb).toFixed(2) + " " + (b.cy - uy * tb).toFixed(2);
+    function lit(s) {
+        return s.k > 0 || s.focused;
     }
 
-    // Solid links join two lit stars; any link touching an empty star is dashed.
+    // Solid links join two lit stars; any link touching an empty star is dashed. Each runs from a slot's last app to the next star.
     function links(solid) {
         let d = "";
         for (let i = 1; i < root.slots.length; i++) {
             const a = root.slots[i - 1], b = root.slots[i];
-            if (((a.k > 0 || a.focused) && (b.k > 0 || b.focused)) === solid) d += root.link(a, b);
+            if ((root.lit(a) && root.lit(b)) !== solid) continue;
+            const x0 = a.k > 0 ? a.end + 4 : a.cx + root.star_radius(a) + 3, x1 = b.cx - root.star_radius(b) - 3;
+            if (x1 - x0 > 2) d += "M" + x0.toFixed(2) + " " + a.cy.toFixed(2) + "L" + x1.toFixed(2) + " " + b.cy.toFixed(2);
         }
         return d || "M0 0";
     }
@@ -74,15 +79,15 @@ Item {
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
-            strokeWidth: 0.8
-            strokeColor: Qt.alpha(Theme.theme_primary, 0.45)
+            strokeWidth: 1
+            strokeColor: Qt.alpha(Theme.theme_primary, 0.55)
             fillColor: "transparent"
             PathSvg { path: root.links(true) }
         }
 
         ShapePath {
-            strokeWidth: 0.8
-            strokeColor: Qt.alpha(Theme.theme_primary, 0.3)
+            strokeWidth: 1
+            strokeColor: Qt.alpha(Theme.theme_primary, 0.4)
             fillColor: "transparent"
             strokeStyle: ShapePath.DashLine
             dashPattern: [2, 3]
@@ -91,45 +96,45 @@ Item {
 
         ShapePath {
             strokeWidth: -1
-            fillColor: Qt.alpha(root.sand, 0.08)
-            PathSvg { path: root.slots.filter(s => s.focused).map(s => "M" + (s.cx - 8) + " " + s.cy + "a8 8 0 1 0 16 0a8 8 0 1 0 -16 0").join("") || "M0 0" }
+            fillColor: Qt.alpha(root.sand, 0.1)
+            PathSvg { path: root.slots.filter(s => s.focused).map(s => root.circle(s.cx, s.cy, 10)).join("") || "M0 0" }
         }
 
         ShapePath {
             strokeWidth: -1
-            fillColor: Qt.alpha(root.sand, 0.14)
-            PathSvg { path: root.slots.filter(s => s.focused).map(s => "M" + (s.cx - 4.5) + " " + s.cy + "a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0 -9 0").join("") || "M0 0" }
+            fillColor: Qt.alpha(root.sand, 0.18)
+            PathSvg { path: root.slots.filter(s => s.focused).map(s => root.circle(s.cx, s.cy, 5.5)).join("") || "M0 0" }
         }
 
         ShapePath {
             strokeWidth: -1
             fillColor: root.sand
-            PathSvg { path: root.slots.filter(s => s.focused).map(s => root.sparkle(s.cx, s.cy, 7.8)).join("") || "M0 0" }
+            PathSvg { path: root.slots.filter(s => s.focused).map(s => root.sparkle(s.cx, s.cy, 9)).join("") || "M0 0" }
         }
 
         ShapePath {
             strokeWidth: -1
             fillColor: Theme.fg_strong
-            PathSvg { path: root.slots.filter(s => s.focused).map(s => "M" + (s.cx - 1.2) + " " + s.cy + "a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0 -2.4 0").join("") || "M0 0" }
+            PathSvg { path: root.slots.filter(s => s.focused).map(s => root.circle(s.cx, s.cy, 1.4)).join("") || "M0 0" }
         }
 
         ShapePath {
             strokeWidth: -1
             fillColor: Theme.theme_secondary_strong
-            PathSvg { path: root.slots.filter(s => !s.focused && s.active && s.k).map(s => root.sparkle(s.cx, s.cy, 5)).join("") || "M0 0" }
+            PathSvg { path: root.slots.filter(s => !s.focused && s.active && s.k).map(s => root.sparkle(s.cx, s.cy, 7.5)).join("") || "M0 0" }
         }
 
         ShapePath {
             strokeWidth: -1
             fillColor: Theme.theme_primary_light
-            PathSvg { path: root.slots.filter(s => !s.focused && !s.active && s.k).map(s => root.sparkle(s.cx, s.cy, 4.2)).join("") || "M0 0" }
+            PathSvg { path: root.slots.filter(s => !s.focused && !s.active && s.k).map(s => root.sparkle(s.cx, s.cy, 6.5)).join("") || "M0 0" }
         }
 
         ShapePath {
-            strokeWidth: 1
+            strokeWidth: 1.2
             strokeColor: Theme.fg_dim
             fillColor: "transparent"
-            PathSvg { path: root.slots.filter(s => !s.focused && !s.k).map(s => "M" + (s.cx - 1.8) + " " + s.cy + "a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0").join("") || "M0 0" }
+            PathSvg { path: root.slots.filter(s => !s.focused && !s.k).map(s => root.circle(s.cx, s.cy, 3)).join("") || "M0 0" }
         }
     }
 
@@ -143,7 +148,7 @@ Item {
             readonly property var info: root.slots[index] || { x: 0, w: 0, cx: 0, cy: 0, k: 0, focused: false }
 
             x: info.x
-            width: info.w
+            width: info.w - (info.k > 0 ? root.link_room - 4 : 0)
             height: root.height
 
             MouseArea {
@@ -156,19 +161,19 @@ Item {
             }
 
             Text {
-                x: slot.info.w / 2 + (slot.info.focused ? 8 : 5)
-                y: slot.info.cy - implicitHeight + (slot.info.focused ? 0 : 1)
+                x: root.star_x + (slot.info.focused ? 5 : 4)
+                y: slot.info.cy - implicitHeight - (slot.info.focused ? 3 : 2)
                 text: String(slot.modelData.id)
                 color: slot.info.focused ? root.sand : slot_hover.hovered ? Theme.fg_strong : slot.info.k ? Theme.fg_dim : Theme.fg_muted
                 font.family: Style.bar_font_family
-                font.pixelSize: 8
-                font.weight: Font.Medium
+                font.pixelSize: 9
+                font.weight: Font.DemiBold
                 font.features: { "tnum": 1 }
             }
 
             Row {
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: root.height - root.glyph - 2
+                x: root.apps_x
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: root.gap
 
                 Repeater {
@@ -180,7 +185,7 @@ Item {
 
                         width: root.glyph
                         height: width
-                        opacity: slot.info.focused || slot_hover.hovered ? 1 : 0.7
+                        opacity: slot.info.focused || slot_hover.hovered ? 1 : 0.75
 
                         IconImage {
                             anchors.centerIn: parent

@@ -34,7 +34,8 @@ Item {
         return { day: false, f: since / Math.max(1, 1440 - (set - rise)) };
     }
     readonly property real body_x: root.track_left + root.sky.f * (root.track_right - root.track_left)
-    readonly property real body_y: root.horizon_y - 6
+    // Half sunk into the horizon, below the clock text the Clock lifts clear of it.
+    readonly property real body_y: root.horizon_y
 
     Rectangle {
         y: root.horizon_y + 1
@@ -80,8 +81,8 @@ Item {
     Rectangle {
         x: root.body_x - width / 2
         y: root.body_y - height / 2
-        width: 17
-        height: 17
+        width: 13
+        height: 13
         radius: width / 2
         color: Qt.alpha(root.sand, root.sky.day ? 0.16 : 0.1)
     }
@@ -90,31 +91,31 @@ Item {
         visible: root.sky.day
         x: root.body_x - width / 2
         y: root.body_y - height / 2
-        width: 9
-        height: 9
+        width: 7
+        height: 7
         radius: width / 2
         color: root.sand
     }
 
     Shape {
         visible: !root.sky.day
-        x: root.body_x - 6
-        y: root.body_y - 6
-        width: 12
-        height: 12
+        x: root.body_x - 5
+        y: root.body_y - 5
+        width: 10
+        height: 10
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             strokeWidth: -1
             fillColor: Qt.tint(root.sand, Qt.alpha(Theme.fg_strong, 0.35))
-            scale: Qt.size(0.75, 0.75)
+            scale: Qt.size(0.625, 0.625)
             PathSvg { path: "M11.5 1.94A7 7 0 1 0 11.5 14.06A6.06 6.06 0 0 1 11.5 1.94Z" }
         }
     }
 
     Shape {
         x: root.body_x - 8
-        y: root.horizon_y + 2
+        y: root.horizon_y + 4
         width: 18
         height: 4
         preferredRendererType: Shape.CurveRenderer
