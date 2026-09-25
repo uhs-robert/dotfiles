@@ -269,6 +269,7 @@ Item {
                     wire: parent.wire
                     fill: Modes.color(SubmapState.submap_name, Theme, SubmapState.submap_color)
                     accent: true
+                    separators: false
                     lead_bg: y_section.shown ? y_section.fill : x_section.shown ? x_section.fill : "transparent"
                 }
             }

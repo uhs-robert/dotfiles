@@ -89,7 +89,7 @@ Row {
         text: "\u{f0954}"
         color: root.on_accent ? root.ink : Theme.theme_primary
         font.family: Style.bar_font_family
-        font.pixelSize: Style.bar_font_size
+        font.pixelSize: Theme.glyph_size
     }
 
     Text {
@@ -122,7 +122,7 @@ Row {
             font.weight: root.lualine ? Font.Bold : root.horizon ? Font.DemiBold : Font.Normal
             style: root.chip ? Text.Normal : Style.bar_text_style
             styleColor: Style.bar_glow_color
-            font.pixelSize: root.chip ? Style.bar_font_size + 2 : Style.bar_font_size
+            font.pixelSize: root.lualine ? Theme.glyph_size : root.chip ? Style.bar_font_size + 2 : Style.bar_font_size
             font.capitalization: Style.bar_capitalization
             font.letterSpacing: root.chip ? 0 : Style.bar_letter_spacing
         }
