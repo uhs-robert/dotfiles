@@ -5,6 +5,7 @@ import Quickshell
 import "../../components"
 import "../../theme"
 import "../../services"
+import "../../components/oasis" as Oasis
 
 // One column per day in a window of up to five that the popup scrolls with day_cursor.
 // sub 0: temp band + precip chance. 1: wind. 2: UV. 3: sunshine.
@@ -35,7 +36,9 @@ Item {
     readonly property bool scan: Style.weather_header === "scan"
     // Game Boy: days as a Game Boy Camera photo strip on the week's hi/lo dot scale.
     readonly property bool camera: Style.weather_header === "pokedex" && root.sub === 0
-    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns || root.camera
+    // Oasis: range pills over a horizon of weekday names, the selected day rising in sand.
+    readonly property bool dunes: Style.weather_header === "oasis" && root.sub === 0
+    readonly property bool custom_column: root.stat_columns || root.ws_panels || root.tower_columns || root.camera || root.dunes
     // NES: each column in a Dragon Quest window with a cursor on the selected day.
     readonly property bool dq: Style.weather_header === "battle"
     // SNES: columns standing on a Mode 7 floor.
@@ -331,6 +334,20 @@ Item {
                             scale_min: root.week_low
                             scale_max: root.week_high
                             slot_w: Math.floor((day_row.width - day_row.spacing * (root.window_days.length - 1)) / Math.max(1, root.window_days.length))
+                        }
+                    }
+
+                    Loader {
+                        active: root.dunes
+                        anchors.fill: parent
+                        sourceComponent: Oasis.OasisDay {
+                            day: day_col.modelData
+                            selected: day_col.day_index === root.day_cursor
+                            scale_min: root.week_temp_range.min
+                            scale_max: root.week_temp_range.max
+                            first: day_col.index === 0
+                            last: day_col.index === root.window_days.length - 1
+                            bleed: day_row.spacing / 2
                         }
                     }
 

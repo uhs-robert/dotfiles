@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import "../theme"
 import "../services"
 import "modules"
+import "../components/oasis" as Oasis
 
 Item {
     id: root
@@ -53,7 +54,15 @@ Item {
     readonly property var right_entries: root.build_entries(root.rule ? root.rule.right : [])
 
     // Sets island/screen/stat properties a module declares, after the Loader instantiates it.
+    // The oasis horizon decorates the center island when it holds the clock; that clock makes room for it and lends it the time.
+    readonly property bool clock_horizon: Style.clock_art === "horizon" && root.center_entries.some(e => e.base === "clock")
+    property var horizon_clock: null
+
     function wire_module(item, entry, island) {
+        if (entry.base === "clock" && island === center_island) {
+            root.horizon_clock = item;
+            item.horizon = Qt.binding(() => root.clock_horizon);
+        }
         // Color first: setting island triggers the module's popup registration, which reads it.
         if (item.hasOwnProperty("island_color")) item.island_color = Qt.binding(() => island.bg_color);
         if (item.hasOwnProperty("island")) item.island = island.body_item;
@@ -61,7 +70,7 @@ Item {
     }
 
     Component { id: start_component; StartButton { compact: root.compact; screen_name: root.screen_name } }
-    Component { id: workspaces_component; Workspaces { compact: root.compact; screen_name: root.screen_name } }
+    Component { id: workspaces_component; Workspaces { compact: root.compact; screen_name: root.screen_name; bar_height: root.bar_height } }
     Component { id: clock_component; Clock { compact: root.compact } }
     Component { id: tray_component; Tray { compact: root.compact; screen_name: root.screen_name } }
     Component { id: volume_component; Volume { compact: root.compact; screen_name: root.screen_name } }
@@ -75,6 +84,20 @@ Item {
     Component { id: voxtype_component; Voxtype { compact: root.compact } }
     Component { id: notifications_component; Notifications { compact: root.compact; screen_name: root.screen_name } }
     Component { id: media_component; Media { compact: root.compact; screen_name: root.screen_name } }
+
+    Rectangle {
+        visible: Style.bar_horizon.a > 0
+        y: Math.round((root.height - root.bar_height) / 2 + root.bar_height * 0.78)
+        width: root.width
+        height: 1
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: "transparent" }
+            GradientStop { position: 0.06; color: Style.bar_horizon }
+            GradientStop { position: 0.94; color: Style.bar_horizon }
+            GradientStop { position: 1; color: "transparent" }
+        }
+    }
 
     Island {
         height: root.bar_height
@@ -92,6 +115,7 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
+        round_caps: Style.bar_round_caps
         cap_right: true
         visible: root.left_entries.length > 0
 
@@ -128,6 +152,7 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
+        round_caps: Style.bar_round_caps
         cap_left: true
         cap_right: true
         visible: root.center_entries.length > 0
@@ -144,6 +169,16 @@ Item {
                 visible: !item || item.shown === undefined || item.shown
                 onLoaded: root.wire_module(item, modelData, center_island)
             }
+        }
+    }
+
+    Loader {
+        parent: center_island.body_item
+        anchors.fill: parent
+        z: -1
+        active: root.clock_horizon
+        sourceComponent: Oasis.Horizon {
+            date: root.horizon_clock ? root.horizon_clock.date : new Date()
         }
     }
 
@@ -174,6 +209,7 @@ Item {
         inset_width: Style.bar_inset_width
         inset_color: Style.bar_inset_color
         visor: Style.frame_visor
+        round_caps: Style.bar_round_caps
         cap_left: true
         visible: root.right_entries.length > 0
 

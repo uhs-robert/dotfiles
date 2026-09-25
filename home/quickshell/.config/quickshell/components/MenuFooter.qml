@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../theme"
+import "oasis" as Oasis
 import "KeyHints.js" as KeyHints
 
 // The key hint line under a popup; some styles rule it off with a dashed line.
@@ -15,7 +16,7 @@ Item {
     property bool centered: false
     // Tabs that show their number already teach "1-N select".
     readonly property string filtered_text: root.st.tab_keys ? root.text.split(" · ").filter(g => !/^1-\d select$/.test(g)).join(" · ") : root.text
-    readonly property int rule_gap: root.st.footer_rule ? 5 : 0
+    readonly property int rule_gap: root.st.footer_rule ? (root.st.wave_rules ? 11 : 5) : 0
     readonly property var groups: KeyHints.parse(root.filtered_text)
     // While the enclosing popup searches, its query line takes this footer's place at the same height.
     readonly property var popup: {
@@ -33,21 +34,30 @@ Item {
     implicitHeight: hint.childrenRect.height + root.rule_gap
     clip: !root.wrap
 
+    Loader {
+        active: root.st.footer_rule && root.st.wave_rules
+        width: parent.width
+        sourceComponent: Oasis.DuneLine {
+            color: root.st.footer_rule_color
+            fade: "both"
+        }
+    }
+
     Rectangle {
-        visible: root.st.footer_rule && root.st.footer_rule_solid
+        visible: root.st.footer_rule && root.st.footer_rule_solid && !root.st.wave_rules
         width: parent.width
         height: 1
         color: root.st.footer_rule_color
     }
 
     Row {
-        visible: root.st.footer_rule && !root.st.footer_rule_solid
+        visible: root.st.footer_rule && !root.st.footer_rule_solid && !root.st.wave_rules
         width: parent.width
         spacing: 3
         clip: true
 
         Repeater {
-            model: root.st.footer_rule && !root.st.footer_rule_solid ? Math.max(0, Math.ceil(root.width / 7)) : 0
+            model: root.st.footer_rule && !root.st.footer_rule_solid && !root.st.wave_rules ? Math.max(0, Math.ceil(root.width / 7)) : 0
 
             Rectangle {
                 width: 4
@@ -109,7 +119,10 @@ Item {
                         anchors.fill: parent
                         anchors.topMargin: 1
                         anchors.bottomMargin: 1
+                        radius: root.st.footer_key_round ? 4 : 0
                         color: root.st.footer_key_bg
+                        border.width: root.st.footer_key_round ? 1 : 0
+                        border.color: root.st.key_border
                     }
                 }
 

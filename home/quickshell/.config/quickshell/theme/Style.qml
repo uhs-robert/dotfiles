@@ -10,7 +10,7 @@ Singleton {
     property string name: "default"
     // The saved choice; `name` differs from it only while the style picker previews.
     property string saved_name: "default"
-    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech"]
+    readonly property var order: ["default", "terminal", "crt", "nes", "snes", "gameboy", "goldeneye", "ps1", "ff7", "ps2", "halflife", "tie", "metroid", "oblivion", "mech", "oasis"]
     readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0))
     readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter" })
 
@@ -224,7 +224,19 @@ Singleton {
             meter_art: ({}),
             toast_enter: "",
             console_views: "",
-            workspace_art: ""
+            workspace_art: "",
+            bar_round_caps: false,
+            bar_horizon: "transparent",
+            clock_art: "",
+            dune: "transparent",
+            wave_rules: false,
+            selection_edge: "transparent",
+            tab_track: "transparent",
+            tab_mark: "transparent",
+            rim: "transparent",
+            title_case: false,
+            title_size: 0,
+            footer_key_round: false
         };
         return {
             "default": {
@@ -432,7 +444,19 @@ Singleton {
                     meter_art: ({}),
                     toast_enter: "",
                 console_views: "",
-                workspace_art: ""
+                workspace_art: "",
+                bar_round_caps: false,
+                bar_horizon: "transparent",
+                clock_art: "",
+                dune: "transparent",
+                wave_rules: false,
+                selection_edge: "transparent",
+                tab_track: "transparent",
+                tab_mark: "transparent",
+                rim: "transparent",
+                title_case: false,
+                title_size: 0,
+                footer_key_round: false
             },
             "terminal": Object.assign({}, terminal, {
                 wait_anim: "cursor",
@@ -1516,6 +1540,113 @@ Singleton {
                     bar_glow_color: Theme.bg_crust,
                     bar_text_raised: true
                 });
+            })(),
+            // A desert oasis at night: night-blue panels, sand for selection and focus, dune contours and a horizon.
+            "oasis": (() => {
+                const sand = Theme.theme_secondary;
+                const sky = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.ui_visual_bg, 0.72));
+                const rim = Qt.tint(Theme.bg_mantle, Qt.alpha(Theme.theme_primary_light, 0.4));
+                const edge = Qt.tint(Theme.bg_core, Qt.alpha(Theme.theme_primary, 0.28));
+                const hair = Qt.alpha(Theme.theme_primary, 0.3);
+                const well = Qt.alpha(Theme.bg_crust, 0.55);
+                const t2 = Qt.tint(Theme.fg_core, Qt.alpha(Theme.theme_primary_light, 0.28));
+                return Object.assign({}, terminal, {
+                    workspace_art: "constellation",
+                    clock_art: "horizon",
+                    weather_header: "oasis",
+                    osd_layout: "horizon",
+                    card_layout: "oasis",
+                    text_muted: Theme.fg_dim,
+                    text_dim: t2,
+                    text_fg: t2,
+                    text_strong: Theme.fg_strong,
+                    text_primary: Theme.theme_primary_light,
+                    text_accent: sand,
+                    font_family: "Inter",
+                    font_size: Theme.popup_font_size - 1,
+                    scale: 1,
+                    number_font: "Inter",
+                    mono_font: "JetBrainsMono Nerd Font",
+                    rounded: true,
+                    corner_scale: 2,
+                    frame_color: Theme.bg_core,
+                    frame_shade: sky,
+                    shade_vertical: true,
+                    frame_radius: 16,
+                    frame_border_width: 1,
+                    frame_border_color: edge,
+                    accent_color: rim,
+                    accent_height: 1,
+                    accent_full_width: false,
+                    dune: Qt.alpha(sand, 0.07),
+                    rim: Qt.alpha(Theme.theme_primary_light, 0.34),
+                    selection_bg: Qt.alpha(sand, 0.16),
+                    selection_outline: "transparent",
+                    selection_edge: sand,
+                    fade_fills: true,
+                    caret_color: sand,
+                    caret_blink: false,
+                    row_cursor: "",
+                    tab_track: well,
+                    tab_mark: sand,
+                    tab_active_bg: Theme.bg_surface,
+                    tab_active_fg: Theme.fg_strong,
+                    tab_fg: Theme.fg_dim,
+                    key_bg: Qt.alpha(sand, 0.1),
+                    key_fg: sand,
+                    key_border: Qt.alpha(sand, 0.22),
+                    section_fg: Theme.theme_primary,
+                    section_rule: false,
+                    section_fade: hair,
+                    wave_rules: true,
+                    label_caps: false,
+                    caps_tracking: 0,
+                    footer_fg: Theme.fg_dim,
+                    footer_key_fg: sand,
+                    footer_key_bg: Qt.alpha(sand, 0.1),
+                    footer_key_round: true,
+                    footer_rule: true,
+                    footer_rule_color: hair,
+                    meter_on: Theme.theme_primary_light,
+                    meter_off: Qt.alpha(Theme.theme_primary, 0.14),
+                    meter_hot: Theme.theme_label,
+                    meter_radius: 2,
+                    meter_height: 6,
+                    chart_fill: Theme.theme_primary_light,
+                    title_bg: "transparent",
+                    title_fg: Theme.fg_strong,
+                    title_spacing: 0,
+                    title_weight: Font.DemiBold,
+                    title_case: true,
+                    title_size: Theme.popup_font_size + 1,
+                    boxed_cards: false,
+                    chip_brackets: false,
+                    chip_bg: Qt.alpha(Theme.theme_primary, 0.1),
+                    chip_active_bg: Qt.alpha(sand, 0.16),
+                    chip_active_fg: Theme.fg_strong,
+                    chip_pick: sand,
+                    chip_border: edge,
+                    toggle_brackets: false,
+                    toggle_on: sand,
+                    toggle_off: Theme.fg_dim,
+                    marker_fill: false,
+                    bar_font_family: "Inter",
+                    bar_font_size: Theme.font_size,
+                    bar_side_bg: Theme.bg_core,
+                    bar_center_bg: Theme.bg_core,
+                    bar_fg: t2,
+                    bar_clock_fg: Theme.fg_strong,
+                    bar_border_width: 1,
+                    bar_border_color: edge,
+                    bar_rounded: true,
+                    bar_round_caps: true,
+                    bar_horizon: hair,
+                    bar_workspace_focused: sand,
+                    bar_workspace_active: Theme.theme_primary_light,
+                    bar_workspace_idle: Theme.bg_surface,
+                    bar_workspace_ring: "transparent",
+                    bar_hover_bg: Qt.alpha(Theme.theme_primary_light, 0.1)
+                });
             })()
         };
     }
@@ -1757,7 +1888,7 @@ Singleton {
     // Start's schematic and status strip.
     readonly property color schematic: root.active.schematic
     readonly property bool status_strip: root.active.status_strip
-    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert" or "glow", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex" or "status", cards "rule", "channel", "pixel", "dq", "dialogue" or "dialog".
+    // Alternate layouts: "" keeps the default; osd "ring", "readout", "hud", "rpg", "alert", "glow" or "horizon", weather "ring", "spec", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status" or "oasis", cards "rule", "channel", "pixel", "dq", "dialogue", "dialog" or "oasis".
     readonly property string osd_layout: root.active.osd_layout
     readonly property string weather_header: root.active.weather_header
     readonly property string card_layout: root.active.card_layout
@@ -1796,8 +1927,26 @@ Singleton {
     readonly property string toast_enter: root.active.toast_enter
     // Popups, toasts and bar modules swap in this console's views ("nes", "snes", "ps1", "ps2"); "" keeps the shared ones.
     readonly property string console_views: root.active.console_views
-    // Bar workspace indicator art for non-console styles ("dial", "materia", "doors"); "" keeps pills.
+    // Bar workspace indicator art for non-console styles ("dial", "materia", "doors", "constellation"); "" keeps pills.
     readonly property string workspace_art: root.active.workspace_art
+    // A dune silhouette in this color along the foot of popups and toasts.
+    readonly property color dune: root.active.dune
+    // Section fades and footer rules drawn as dune contour lines (DuneLine).
+    readonly property bool wave_rules: root.active.wave_rules
+    // A lit edge down the left of the selected row.
+    readonly property color selection_edge: root.active.selection_edge
+    // Tab rows sit in a recessed track of this color, the active tab raised with a tab_mark on its lower edge; chips become tabs.
+    readonly property color tab_track: root.active.tab_track
+    readonly property color tab_mark: root.active.tab_mark
+    // A 1px highlight along the top of raised tabs and cards.
+    readonly property color rim: root.active.rim
+    // Titles recase all-caps words over three letters ("NETWORK" to "Network"); title_size 0 keeps font_size - 2.
+    readonly property bool title_case: root.active.title_case
+    // Footer keycaps with rounded corners and a key_border outline.
+    readonly property bool footer_key_round: root.active.footer_key_round
+    readonly property int title_size: root.active.title_size
+    // Bar clock art: "horizon" puts a horizon with the sun or moon in the clock's island.
+    readonly property string clock_art: root.active.clock_art
 
     property bool cava_line: true
     readonly property var bar: root.active
@@ -1835,7 +1984,16 @@ Singleton {
     readonly property color bar_hover_bg: root.bar.bar_hover_bg
     readonly property color bar_glow_color: root.bar.bar_glow_color
     readonly property color bar_scanline_color: root.bar.bar_scanline_color
+    // Islands with rounded bottom corners instead of slants.
+    readonly property bool bar_round_caps: root.bar.bar_round_caps
+    // A horizon line across the bar, seen in the gaps between islands.
+    readonly property color bar_horizon: root.bar.bar_horizon
     readonly property int bar_text_style: root.bar.bar_text_raised ? Text.Raised : root.bar_glow_color.a > 0 ? Text.Outline : Text.Normal
+
+    // A popup or OSD title as the style shows it.
+    function title_text(text, st) {
+        return (st || root).title_case ? text.replace(/\b[A-Z]{4,}\b/g, w => w.charAt(0) + w.slice(1).toLowerCase()) : text;
+    }
 
     // Corner radius for a shape that is rounded by `r` in the default look.
     function radius(r) {

@@ -8,7 +8,13 @@ Row {
     id: root
 
     property bool compact: false
+    // Set by the bar when its oasis horizon art sits behind this clock; it needs room for the palm and sky.
+    property bool horizon: false
+    readonly property date date: clock.date
     spacing: 6
+    leftPadding: root.horizon ? 24 : 0
+    rightPadding: root.horizon ? 22 : 0
+    transform: Translate { y: root.horizon ? -4 : 0 }
 
     SystemClock {
         id: clock
@@ -74,6 +80,7 @@ Row {
             color: root.chip ? Style.bar_clock_fg : Style.bar_fg
             font.family: root.chip ? Style.bar_clock_font : Style.bar_font_family
             font.features: { "tnum": 1 }
+            font.weight: root.horizon ? Font.DemiBold : Font.Normal
             style: root.chip ? Text.Normal : Style.bar_text_style
             styleColor: Style.bar_glow_color
             font.pixelSize: root.chip ? Style.bar_font_size + 2 : Style.bar_font_size
@@ -96,7 +103,7 @@ Row {
     }
 
     Text {
-        visible: !root.compact
+        visible: !root.compact && !root.horizon
         anchors.verticalCenter: parent.verticalCenter
         text: root.hud ? " WORLD" : "|"
         color: Theme.theme_primary

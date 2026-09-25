@@ -12,6 +12,7 @@ import "../services"
 import "snes" as Snes
 import "ps1" as Ps1
 import "ps2" as Ps2
+import "oasis" as Oasis
 
 PanelWindow {
     id: root
@@ -56,7 +57,8 @@ PanelWindow {
     readonly property var console_osd: root.showing_vox ? null : ({
             rpg: { art: rpg_osd, hides: ["glyph", "meter", "percent"] },
             alert: { art: alert_osd, hides: ["glyph"] },
-            glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) }
+            glow: { art: glow_osd, hides: ["meter", "percent"], size: Style.px(84) },
+            horizon: { art: horizon_osd, hides: ["glyph", "meter", "percent"], untitled: true, panel: true }
         })[Style.osd_layout] || null
 
     function replaced(part) {
@@ -251,7 +253,7 @@ PanelWindow {
         width: Math.max(body.implicitWidth + pad_x * 2, title_tab.visible ? title_tab.width + Style.inset_pad * 2 : 0)
         height: header_height + body.implicitHeight + pad_y * 2
         // Sized console art makes the frame near square, where a pill radius would round it into a circle.
-        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && root.console_osd.size) ? height / 2 : Style.frame_radius
+        radius: Style.rounded && !Style.frame_visor && !(root.console_osd && (root.console_osd.size || root.console_osd.panel)) ? height / 2 : Style.frame_radius
         color: Style.frame_chamfer > 0 || Style.frame_visor || Style.custom_frame ? "transparent" : Style.frame_follows_island ? Theme.bg_core : Style.frame_color
         border.width: Style.frame_visor || Style.frame_chamfer > 0 || Style.custom_frame ? 0 : Style.frame_border_width
         border.color: Style.frame_border_color
@@ -299,6 +301,18 @@ PanelWindow {
             bottom_radius: frame.radius
         }
 
+        Loader {
+            active: Style.dune.a > 0
+            x: Style.frame_border_width
+            width: frame.width - x * 2
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Style.frame_border_width
+            sourceComponent: Oasis.DuneFoot {
+                color: Style.dune
+                bottom_radius: Math.max(0, frame.radius - Style.frame_border_width)
+            }
+        }
+
         Item {
             id: glow_layer
             readonly property bool layered: Style.glow || Style.text_shadow.a > 0
@@ -336,7 +350,7 @@ PanelWindow {
 
             Rectangle {
                 id: title_tab
-                visible: Style.show_title
+                visible: Style.show_title && !(root.console_osd && root.console_osd.untitled)
                 opacity: root.banded ? 0 : 1
                 x: (Style.fade_fills || Style.rounded ? frame.radius : 0) + Style.inset_pad
                 y: (Style.fade_fills ? Style.frame_border_width : 0) + frame.top_rule + Style.inset_pad
@@ -362,10 +376,10 @@ PanelWindow {
                     anchors.horizontalCenterOffset: title_index.space / 2
                     x: 10 + title_index.space
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + root.title + Style.title_suffix
+                    text: Style.title_prefix + Style.title_text(root.title) + Style.title_suffix
                     color: Style.title_fg
                     font.family: Style.title_font_family
-                    font.pixelSize: Style.font_size - 2
+                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.title_spacing
                 }
@@ -478,6 +492,18 @@ PanelWindow {
             Ps1.AlertMark {
                 size: Theme.glyph_size + 10
                 opacity: root.muted ? 0.5 : 1
+            }
+        }
+
+        Component {
+            id: horizon_osd
+            Oasis.HorizonOsd {
+                level: root.level
+                percent: root.percent
+                muted: root.muted
+                glyph: root.glyph
+                label: root.kind === "brightness" ? "Brightness" : root.muted ? "Muted" : "Volume"
+                detail: root.kind === "brightness" ? "Backlight" : root.sink ? root.sink.description || root.sink.name : ""
             }
         }
 

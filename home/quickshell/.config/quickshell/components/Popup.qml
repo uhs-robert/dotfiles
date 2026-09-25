@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import "../theme"
 import "../services"
 import "Search.js" as Search
+import "oasis" as Oasis
 
 PanelWindow {
     id: root
@@ -473,6 +474,18 @@ PanelWindow {
                 bottom_radius: root.frame_radius
             }
 
+            Loader {
+                active: root.st.dune.a > 0
+                x: root.st.frame_border_width
+                width: parent.width - x * 2
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: root.st.frame_border_width
+                sourceComponent: Oasis.DuneFoot {
+                    color: root.st.dune
+                    bottom_radius: Math.max(0, root.frame_radius - root.st.frame_border_width)
+                }
+            }
+
             // The watch face: a shaded panel with static scan rows, and the engraving on the bezel below it.
             Rectangle {
                 id: lcd_panel
@@ -570,7 +583,7 @@ PanelWindow {
                     y: (root.st.fade_fills ? root.st.frame_border_width : 0) + root.st.inset_pad + root.st.lcd_margin * 2 + root.device_top
                     readonly property real reticle_space: root.st.title_reticle.a > 0 ? title_text.implicitHeight + 4 : 0
                     readonly property real lead_space: title_tab.reticle_space + title_index.space
-                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_metrics.width + 20 + title_tab.lead_space, parent.width - title_tab.x * 2)
+                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(Math.ceil(Math.max(title_metrics.width, title_metrics.advanceWidth)) + 20 + title_tab.lead_space, parent.width - title_tab.x * 2)
                     height: Math.max(title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
                     color: root.st.fade_fills ? "transparent" : root.st.title_bg
 
@@ -609,12 +622,12 @@ PanelWindow {
                         anchors.horizontalCenterOffset: title_tab.lead_space / 2
                         x: 10 + title_tab.lead_space
                         y: (parent.height - height) / 2
-                        width: Math.min(title_metrics.width, parent.width - 20 - title_tab.lead_space)
+                        width: Math.min(Math.ceil(Math.max(title_metrics.width, title_metrics.advanceWidth)), parent.width - 20 - title_tab.lead_space)
                         elide: Text.ElideRight
-                        text: root.st.title_prefix + root.title + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
+                        text: root.st.title_prefix + (root.passive ? root.title : Style.title_text(root.title, root.st)) + (Style.caret_phase ? root.st.title_suffix : " ".repeat(root.st.title_suffix.length))
                         color: root.st.title_fg
                         font.family: root.st.title_font_family
-                        font.pixelSize: root.st.font_size - 2
+                        font.pixelSize: root.st.title_size > 0 ? root.st.title_size : root.st.font_size - 2
                         font.weight: root.st.title_weight > 0 ? root.st.title_weight : root.st.title_font_family === root.st.font_family ? Font.Bold : Font.Normal
                         font.letterSpacing: root.st.title_spacing
                     }

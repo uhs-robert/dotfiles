@@ -9,6 +9,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import "../theme"
+import "oasis" as Oasis
 
 // HyprVim's which-key HUD over its `hyprvim_whichkey` IPC target, drawn in the active style.
 PanelWindow {
@@ -193,6 +194,18 @@ PanelWindow {
             top_offset: frame.top_edge - Style.frame_border_width
         }
 
+        Loader {
+            active: Style.dune.a > 0
+            x: Style.frame_border_width
+            width: frame.width - x * 2
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Style.frame_border_width
+            sourceComponent: Oasis.DuneFoot {
+                color: Style.dune
+                bottom_radius: Math.max(0, frame.radius - Style.frame_border_width)
+            }
+        }
+
         Rectangle {
             x: frame.radius
             width: frame.width - frame.radius * 2
@@ -253,10 +266,10 @@ PanelWindow {
                     id: title_text
                     x: 10
                     y: (parent.height - height) / 2
-                    text: Style.title_prefix + root.title + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
+                    text: Style.title_prefix + Style.title_text(root.title) + (Style.caret_phase ? Style.title_suffix : " ".repeat(Style.title_suffix.length))
                     color: Style.show_title ? Style.title_fg : Style.accent_color
                     font.family: Style.title_font_family
-                    font.pixelSize: Style.font_size - 2
+                    font.pixelSize: Style.title_size > 0 ? Style.title_size : Style.font_size - 2
                     font.weight: Style.title_weight > 0 ? Style.title_weight : Style.title_font_family === Style.font_family ? Font.Bold : Font.Normal
                     font.letterSpacing: Style.show_title ? Style.title_spacing : 0
                 }

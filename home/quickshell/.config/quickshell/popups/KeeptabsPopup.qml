@@ -176,6 +176,8 @@ Popup {
                         label: tab_chip.modelData
                         active: tab_chip.index === root.current_tab
                         key: tab_chip.index < 9 ? String(tab_chip.index + 1) : ""
+                        track_left: tab_chip.index === 0
+                        track_right: tab_chip.index === root.tabs.length - 1
                         onClicked: root.set_tab(tab_chip.index)
                     }
                 }

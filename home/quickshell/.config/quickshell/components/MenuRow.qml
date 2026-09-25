@@ -46,6 +46,7 @@ Rectangle {
     FadeFill {
         visible: root.selected && root.st.fade_fills
         fill: root.st.selection_bg
+        radius: root.st.selection_edge.a > 0 ? root.radius : 0
     }
 
     DashedOutline {
@@ -64,6 +65,16 @@ Rectangle {
         width: 2
         height: parent.height
         color: root.st.caret_color
+    }
+
+    Rectangle {
+        visible: root.selected && root.st.selection_edge.a > 0
+        anchors.verticalCenter: parent.verticalCenter
+        width: 3
+        height: Math.max(6, parent.height - 14)
+        topRightRadius: 3
+        bottomRightRadius: 3
+        color: root.st.selection_edge
     }
 
     Rectangle {
