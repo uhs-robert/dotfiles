@@ -10,6 +10,7 @@ import "../weather" as Weather
 import "../../components/snes" as Snes
 import "../../components/ps1" as Ps1
 import "../../components/ps2" as Ps2
+import "../../components/modern" as Modern
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -30,6 +31,8 @@ Item {
     // MGS codec calls: the app icon as the caller's portrait.
     readonly property bool codec: Style.console_views === "ps1"
     readonly property bool dialog: Style.card_layout === "dialog"
+    // Layered cards with the app icon on a tinted tile.
+    readonly property bool tile: Style.card_layout === "tile"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
 
     readonly property bool focused_valid: root.focused_action >= 0 && root.focused_action < root.actions.length
@@ -104,7 +107,7 @@ Item {
         Loader {
             anchors.fill: parent
             z: -1
-            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card })[Style.card_layout] || null
+            sourceComponent: ({ dq: dq_card, dialogue: dialogue_card, dialog: dialog_card, tile: tile_card })[Style.card_layout] || null
         }
 
         CardRule {
@@ -215,7 +218,7 @@ Item {
         }
 
         Rectangle {
-            visible: !Style.boxed_cards
+            visible: !Style.boxed_cards && !root.tile
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -241,7 +244,7 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 10
-            anchors.leftMargin: root.channels ? 58 : root.dialogue ? 28 : root.dq ? 24 : 16
+            anchors.leftMargin: root.channels ? 58 : root.dialogue ? 28 : root.dq ? 24 : root.tile ? 12 : 16
             anchors.rightMargin: root.dialogue ? 16 : 10
             spacing: 10
 
@@ -256,11 +259,23 @@ Item {
                 }
             }
 
+            Loader {
+                active: root.tile
+                visible: active
+                Layout.alignment: Qt.AlignTop
+                sourceComponent: Modern.AccentTile {
+                    size: root.width < 320 ? 32 : 36
+                    tint: root.critical ? Theme.theme_label : Theme.info
+                    glyph: "\u{f0f3}"
+                    icon: root.notification ? (root.notification.image !== "" ? root.notification.image : root.notification.appIcon !== "" ? Quickshell.iconPath(root.notification.appIcon, true) : "") : ""
+                }
+            }
+
             Image {
                 Layout.alignment: Qt.AlignTop
                 Layout.preferredWidth: root.width < 320 ? 32 : 44
                 Layout.preferredHeight: Layout.preferredWidth
-                visible: !root.codec && !root.channels && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+                visible: !root.codec && !root.channels && !root.tile && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
                 source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
                 fillMode: Image.PreserveAspectFit
             }
@@ -363,7 +378,7 @@ Item {
                             implicitWidth: Math.min(action_label.implicitWidth + 18 + (action_chip.hand ? 20 : 0), layout.width)
                             implicitHeight: 26
                             radius: Style.pill_chips ? height / 2 : Style.radius(13)
-                            color: action_chip.hand ? "transparent" : action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : Theme.bg_surface
+                            color: action_chip.hand ? "transparent" : action_chip.focused ? Style.chip_pick : Style.boxed_cards ? "transparent" : root.tile ? Style.tab_active_bg : Theme.bg_surface
                             border.width: Style.boxed_cards || action_chip.focused ? 1 : 0
                             border.color: action_chip.focused ? Style.chip_pick : Style.chip_border.a > 0 ? Style.chip_border : Style.key_border
 
@@ -376,7 +391,7 @@ Item {
                                 width: Math.min(implicitWidth, layout.width - 18)
                                 horizontalAlignment: Text.AlignHCenter
                                 text: action_chip.modelData.text
-                                color: action_chip.hand ? Theme.fg_strong : action_chip.focused ? Theme.bg_crust : Theme.theme_secondary
+                                color: action_chip.hand ? Theme.fg_strong : action_chip.focused ? Theme.bg_crust : Style.chip_fg.a > 0 ? Style.chip_fg : Theme.theme_secondary
                                 font.bold: action_chip.focused
                                 font.family: Style.label_font_family
                                 font.pixelSize: Style.font_size - 3
@@ -450,6 +465,13 @@ Item {
         id: dialogue_card
         Snes.SnesWindow {
             lit: root.selected
+        }
+    }
+
+    Component {
+        id: tile_card
+        Modern.CardSurface {
+            selected: root.selected
         }
     }
 

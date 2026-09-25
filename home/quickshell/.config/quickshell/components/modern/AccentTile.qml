@@ -10,14 +10,16 @@ Rectangle {
     property url icon: ""
     property bool dimmed: false
     property int size: 36
+    // Tints the tile from this color instead of the selection gradient.
+    property color tint: "transparent"
 
     implicitWidth: root.size
     implicitHeight: root.size
     radius: Math.round(root.size * 0.28)
     opacity: root.dimmed ? 0.55 : 1
     gradient: Gradient {
-        GradientStop { position: 0; color: Style.selection_shade.a > 0 ? Style.selection_shade : Style.selection_bg }
-        GradientStop { position: 1; color: Style.selection_bg }
+        GradientStop { position: 0; color: root.tint.a > 0 ? Qt.tint(root.tint, Qt.alpha(Theme.fg_strong, 0.12)) : Style.selection_shade.a > 0 ? Style.selection_shade : Style.selection_bg }
+        GradientStop { position: 1; color: root.tint.a > 0 ? Qt.tint(root.tint, Qt.alpha(Theme.theme_primary_strong, 0.4)) : Style.selection_bg }
     }
 
     Sheen {
