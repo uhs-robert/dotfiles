@@ -193,8 +193,10 @@ Popup {
 
                 Component {
                     id: ps1_clock
-                    Ps1.BiosClock {
+                    Ps1.SaveClock {
+                        id: save_clock
                         running: root.is_open
+                        week: root.week_number(save_clock.now)
                     }
                 }
 
