@@ -6,6 +6,7 @@ import Quickshell.Services.Notifications
 import "../../components"
 import "../../theme"
 import "../../services"
+import "../../components/snes" as Snes
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -18,6 +19,8 @@ Item {
     // The card's 1-based position in the list, shown by styles with channel cards.
     property int channel: 0
     readonly property bool channels: Style.card_layout === "channel"
+    // Chrono Trigger dialogue boxes: the app speaks its summary and body in a blue window.
+    readonly property bool dialogue: Style.card_layout === "dialogue"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
 
     signal invoke_requested()
@@ -68,7 +71,7 @@ Item {
         id: card
         anchors.left: parent.left
         anchors.right: parent.right
-        implicitHeight: layout.implicitHeight + 20
+        implicitHeight: layout.implicitHeight + 20 + (root.dialogue ? 3 : 0)
         radius: Style.radius(8)
         color: Style.card_layout !== "" ? "transparent" : Style.boxed_cards ? (root.selected ? Qt.alpha(Style.caret_color, 0.08) : "transparent") : root.selected ? Theme.bg_surface : Theme.bg_mantle
         border.width: Style.card_layout !== "" ? 0 : 1
@@ -82,6 +85,22 @@ Item {
         CardRule {
             visible: Style.card_layout === "rule"
             selected: root.selected
+        }
+
+        Loader {
+            active: root.dialogue
+            anchors.fill: parent
+            sourceComponent: Snes.SnesWindow {
+                lit: root.selected
+            }
+        }
+
+        HandCursor {
+            visible: root.dialogue && root.selected
+            x: 5
+            y: layout.y + 2
+            width: 19
+            height: 12
         }
 
         PixelBox {
@@ -159,7 +178,7 @@ Item {
         }
 
         Text {
-            visible: Style.boxed_cards && root.selected && Style.row_cursor !== "" && Style.caret_phase && Style.card_layout !== "pixel"
+            visible: Style.boxed_cards && root.selected && Style.row_cursor !== "" && Style.caret_phase && Style.card_layout !== "pixel" && !root.dialogue
             x: 4
             y: layout.y + 1
             text: Style.row_cursor
@@ -205,7 +224,8 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 10
-            anchors.leftMargin: root.channels ? 58 : 16
+            anchors.leftMargin: root.channels ? 58 : root.dialogue ? 28 : 16
+            anchors.rightMargin: root.dialogue ? 16 : 10
             spacing: 10
 
             Image {
@@ -226,16 +246,29 @@ Item {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight
-                    rightPadding: root.channels ? priority_text.implicitWidth + 8 : 0
-                    label: root.channels ? (root.notification ? root.notification.appName : "") : Style.boxed_cards
+                    label: root.dialogue ? (root.notification ? root.notification.appName : "") + ":" : root.channels ? (root.notification ? root.notification.appName : "") : Style.boxed_cards
                         ? "[" + (root.notification ? root.notification.appName : "") + "] " + (root.entry ? root.relative_time(root.entry.time) : "") + root.urgency_tag
                         : (root.notification ? root.notification.appName : "") + "  ·  " + (root.entry ? root.relative_time(root.entry.time) : "")
-                    color: root.channels ? Style.text_muted : Style.boxed_cards ? root.accent : Style.text_muted
+                    rightPadding: root.dialogue ? speaker_time.implicitWidth + 8 : root.channels ? priority_text.implicitWidth + 8 : 0
+                    color: root.dialogue ? (root.critical ? Theme.theme_label : Theme.theme_secondary) : root.channels ? Style.text_muted : Style.boxed_cards ? root.accent : Style.text_muted
+                    style: root.dialogue ? Text.Raised : Text.Normal
+                    styleColor: Style.text_shadow
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size - (Style.boxed_cards ? 3 : 1)
                     font.bold: root.channels
                     font.capitalization: root.channels ? Font.AllUppercase : Font.MixedCase
                     font.letterSpacing: root.channels ? Style.label_spacing : 0
+
+                    Text {
+                        id: speaker_time
+                        visible: root.dialogue
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.entry ? root.relative_time(root.entry.time) + root.urgency_tag : ""
+                        color: Style.text_muted
+                        font.family: Style.font_family
+                        font.pixelSize: Style.font_size - 5
+                    }
 
                     Text {
                         id: priority_text
@@ -253,8 +286,11 @@ Item {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight
+                    Layout.leftMargin: root.dialogue ? 12 : 0
                     label: root.notification ? root.notification.summary : ""
-                    color: Theme.fg_core
+                    color: root.dialogue ? Theme.fg_strong : Theme.fg_core
+                    style: root.dialogue ? Text.Raised : Text.Normal
+                    styleColor: Style.text_shadow
                     font.bold: Style.title_font_family === Style.font_family
                     font.family: Style.title_font_family
                     font.pixelSize: Style.font_size + (Style.boxed_cards ? 0 : 1)
@@ -269,8 +305,11 @@ Item {
                     elide: Text.ElideRight
                     // StyledText (unlike RichText) elides correctly and still renders <b>/<i>/etc.
                     textFormat: Text.StyledText
+                    Layout.leftMargin: root.dialogue ? 12 : 0
                     text: root.notification ? NotificationState.clean_body(root.notification.body) : ""
-                    color: Style.text_muted
+                    color: root.dialogue ? Theme.fg_core : Style.text_muted
+                    style: root.dialogue ? Text.Raised : Text.Normal
+                    styleColor: Style.text_shadow
                     font.family: Style.font_family
                     font.pixelSize: Style.font_size
                 }
