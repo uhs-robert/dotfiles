@@ -18,7 +18,7 @@ Item {
     property bool compact: false
 
     // Memory card save icons: one bevelled card per workspace holding its lead app.
-    readonly property bool slots: Style.console_views === "ps1"
+    readonly property bool slots: false
     readonly property int icon_size: slots ? (compact ? 15 : 17) : compact ? 16 : 19
     readonly property int pill_height: slots ? (compact ? 22 : 26) : compact ? 20 : 22
 
