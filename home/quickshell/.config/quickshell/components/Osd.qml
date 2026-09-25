@@ -542,6 +542,8 @@ PanelWindow {
                 muted: root.muted
                 glyph: root.glyph
                 device: root.kind === "volume" && root.sink ? root.sink.description || root.sink.name : ""
+                node: root.sink
+                peaks_on: root.wanted && root.visible && Power.on_ac
             }
         }
 

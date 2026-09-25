@@ -14,6 +14,9 @@ ColumnLayout {
     property bool muted: false
     property string glyph: ""
     property string device: ""
+    // The default sink's live wave in the volume capsule; off unless peaks_on.
+    property var node: null
+    property bool peaks_on: false
 
     spacing: Style.px(14)
     implicitWidth: Style.px(300)
@@ -89,12 +92,14 @@ ColumnLayout {
     CapsuleSlider {
         visible: Style.level_layout === "capsule"
         Layout.fillWidth: true
-        implicitHeight: Style.px(12)
+        implicitHeight: root.kind === "volume" ? Style.px(26) : Style.px(12)
         value: root.level
         muted: root.muted
         interactive: false
         show_readout: false
-        solid: true
+        solid: root.kind !== "volume"
+        node: root.node
+        peaks_on: root.peaks_on && root.kind === "volume"
     }
 
     Shared.Meter {
