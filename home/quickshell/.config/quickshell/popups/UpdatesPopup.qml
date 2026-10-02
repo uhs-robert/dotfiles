@@ -259,6 +259,7 @@ Popup {
                         width: row_list.width
                         height: row_list.stacked ? Math.max(Style.px(30), row_text.implicitHeight + 8) : Style.px(30)
                         selected: update_row.index === root.selected
+                        data_row: true
 
                         Loader {
                             id: save_icon

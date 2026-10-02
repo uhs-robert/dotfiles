@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Synthesizes each ported pack's sounds into sounds/<pack>/ (a style, or an extra pack such as mgs2): cursor, confirm, cancel and notify (ogg). Also writes lock skin effects (mgs2-skin, goldeneye-skin). Needs numpy and ffmpeg.
+# Synthesizes each ported pack's sounds into sounds/<pack>/ (a style name): cursor, confirm, cancel and notify (ogg). Also writes lock skin effects (mgs2-skin, goldeneye-skin). Needs numpy and ffmpeg.
 # Usage: synth-sounds [--out DIR] [NAME...]   (no names means all; files in ~/.local/share/quickshell/sounds/<style>/ override these)
 import argparse
 import subprocess

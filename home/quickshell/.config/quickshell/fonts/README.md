@@ -25,3 +25,4 @@ Every `.ttf`/`.otf` here is registered for the whole qs process by `services/Bun
 | Cinzel-Variable.ttf | Cinzel | google/fonts ofl/cinzel | OFL-Cinzel.txt |
 | Belleza-Regular.ttf | Belleza | google/fonts ofl/belleza | OFL-Belleza.txt |
 | MPLUSRounded1c-Medium.ttf, MPLUSRounded1c-ExtraBold.ttf | Rounded Mplus 1c | google/fonts ofl/mplusrounded1c, Latin subset | OFL-MPLUSRounded1c.txt |
+| LiberationSans-Regular.ttf, LiberationSans-Bold.ttf | Liberation Sans | liberation-fonts 2.x (ttf-liberation) | OFL-LiberationSans.txt |

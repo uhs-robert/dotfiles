@@ -13,7 +13,7 @@ Hyprland starts it with `qs -n` (see `home/hypr/.config/hypr/config/autostart/`)
 | `popups/`     | One popup per bar module (clock, volume, network, weather...), plus Start, Power and the screenshot tool |
 | `picker/`     | The fuzzy picker, its providers (apps, clipboard, dirs, emoji, keybinds) and the HyprVim `:` prompt |
 | `services/`   | Singletons that hold state (media, network, weather, notifications...) and the IPC handlers |
-| `components/` | Shared widgets, with per-style pieces in their own folders (`nes/`, `ps1/`, `oasis/`...)   |
+| `components/` | Shared widgets, with per-style pieces in their own folders (`nes/`, `ps1/`, `mgs2/`, `oasis/`...)   |
 | `theme/`      | `Theme.qml` (colors from the Oasis theme) and `Style.qml` (every style's tokens)          |
 | `settings/`   | The Settings panel and its sections                                                        |
 | `lock/`       | The session lock, the simple lock screen and the styled lock skins in `skins/`             |
@@ -30,7 +30,7 @@ Weather reads `weather.json`, with untracked per-machine overrides (real coordin
 
 A style changes how the whole shell looks and behaves: fonts, frames, meters, key hints, transitions, sounds, even which views a popup shows. Colors never come from a style. They always come from the active Oasis palette, so every style works with every theme. The one deliberate exception is the watch in `goldeneye`, which keeps the classic pause watch's own colors under every palette (see below).
 
-The styles, in picker order: `oasis` (the default), `modern`, `neovim`, `terminal`, `crt`, `nes`, `gameboy`, `snes`, `ps1`, `ff7`, `goldeneye`, `ps2`, `tie`, `halflife`, `metroid` and `reticle`. Everyday styles come first, then consoles by release year, then sci-fi.
+The styles, in picker order: `oasis` (the default), `modern`, `neovim`, `terminal`, `crt`, `nes`, `gameboy`, `snes`, `ps1`, `ff7`, `goldeneye`, `ps2`, `mgs2`, `tie`, `halflife`, `metroid` and `reticle`. Everyday styles come first, then consoles by release year, then sci-fi.
 
 Switch styles from Settings > Style (Start > Settings opens the panel), or over IPC:
 
@@ -146,7 +146,7 @@ Popup names are the `LazyPopup` names in `shell.qml`: `start`, `settings`, `powe
 
 `~/.config/hypr/scripts/lock-screen.sh` (used by hypridle and the Power menu; hypridle passes `--auto`) locks with this shell and falls back to hyprlock when the bar isn't running or can't lock. If qs restarts while locked, the new instance takes the lock over.
 
-Settings > Lock screen picks the lock: `follow` (the lock skin of the current style), `simple` (a plain card over a pixelated or blurred desktop), or any skin by name. Skins live in `lock/skins/` as `Crt`, `Ff7`, `Goldeneye`, `Mgs2`, `Ocarina` and `Tie`. `Ocarina` and `Mgs2` are lock-only and have no bar style. A style without a skin gets the simple screen. Tints recolor the skins (primary, secondary, green, amber, white). Once the password is accepted, any key skips the skin's unlock animation, on the lock and the login screen alike.
+Settings > Lock screen picks the lock: `follow` (the lock skin of the current style), `simple` (a plain card over a pixelated or blurred desktop), or any skin by name. Skins live in `lock/skins/` as `Crt`, `Ff7`, `Goldeneye`, `Mgs2`, `Ocarina` and `Tie`. `Ocarina` is lock-only and has no bar style. A style without a skin gets the simple screen. Tints recolor the skins (primary, secondary, green, amber, white). Once the password is accepted, any key skips the skin's unlock animation, on the lock and the login screen alike.
 
 The FF7, GoldenEye, MGS2 and Ocarina skins can play game music and effects, which aren't in the repo. Import your own copies with `scripts/ff7-audio`, `scripts/goldeneye-audio`, `scripts/mgs2-audio` and `scripts/ocarina-audio`. The MGS2 skin's effects are the exception: synthesized stand-ins ship in `lock/skins/mgs2/fx/` (from `scripts/synth-sounds mgs2-skin`), and an imported file of the same name replaces each one. The GoldenEye skin ships its lock and unlock chirps, the pause-watch static and typing, cursor, confirm, cancel and error clicks in `lock/skins/goldeneye/fx/` the same way (from `scripts/synth-sounds goldeneye-skin`, the clicks reusing the GoldenEye theme pack's).
 
@@ -193,6 +193,6 @@ One rule for new code: nothing animates or polls on battery or while it isn't vi
 
 The bundled fonts are all under the SIL Open Font License. `fonts/README.md` lists each one with its source and licence file. The weather icons in `assets/weather/` are MIT licensed (see its `LICENSE`).
 
-The sounds in `sounds/<style>/` are synthesized by `scripts/synth-sounds` (numpy and ffmpeg), one hand-built patch per style. `sounds/mgs2/` is an extra pack tied to no style. To use your own, drop `cursor`, `confirm`, `cancel` or `notify` files (`.wav` or `.ogg`) into `~/.local/share/quickshell/sounds/<pack>/`, where `<pack>` is the style or pack name. They win file by file.
+The sounds in `sounds/<style>/` are synthesized by `scripts/synth-sounds` (numpy and ffmpeg), one hand-built patch per style. To use your own, drop `cursor`, `confirm`, `cancel` or `notify` files (`.wav` or `.ogg`) into `~/.local/share/quickshell/sounds/<pack>/`, where `<pack>` is the style name. They win file by file.
 
 Settings > Audio picks one effects pack for every style: follow the style (the default), any style's sounds, the synthesized MGS2 pack, or an imported game pack (FFVII, MGS2, Ocarina). When following the style, FFVII uses the imported FFVII pack once there is one, and every other style its own. No music ships: lock and login music plays only from your own `music.ogg`, `music.wav` or `music.mp3` in `~/.local/share/quickshell/sounds/<style>/`.

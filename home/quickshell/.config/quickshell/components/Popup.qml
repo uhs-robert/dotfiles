@@ -10,6 +10,8 @@ import "Search.js" as Search
 import "../picker/Fuzzy.js" as Fuzzy
 import "neovim" as Neovim
 import "goldeneye" as Goldeneye
+import "mgs2" as Mgs2
+import "mgs2/Seg.js" as Seg
 
 PanelWindow {
     id: root
@@ -652,6 +654,16 @@ PanelWindow {
                 }
             }
 
+            Mgs2.Rail {
+                visible: root.st.rail_width > 0
+                anchors.fill: parent
+                anchors.margins: root.st.frame_border_width
+                rail_width: root.st.rail_width
+                outline_width: 0
+                rail_fill: root.st.rail_fill
+                rail_edge: root.st.rail_edge
+            }
+
             Text {
                 id: engraving
                 visible: root.st.frame_engraving !== ""
@@ -699,8 +711,10 @@ PanelWindow {
                     y: (root.st.fade_fills ? root.st.frame_border_width : 0) + root.st.inset_pad + root.st.lcd_margin * 2 + root.device_top
                     readonly property real reticle_space: root.st.title_reticle.a > 0 ? title_text.implicitHeight + 4 : 0
                     readonly property real lead_space: title_tab.reticle_space + title_index.space
-                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(Math.ceil(Math.max(title_metrics.width, title_metrics.advanceWidth)) + 20 + title_tab.lead_space, parent.width - title_tab.x * 2)
-                    height: Math.max(title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
+                    readonly property bool seg_title: root.st.seg_face && Seg.supported(root.shown_title)
+                    readonly property real face_width: title_tab.seg_title ? title_head.implicitWidth : Math.ceil(Math.max(title_metrics.width, title_metrics.advanceWidth))
+                    width: root.st.fade_fills ? parent.width - root.st.frame_border_width * 2 : Math.min(title_tab.face_width + 20 + title_tab.lead_space, parent.width - title_tab.x * 2)
+                    height: Math.max(title_tab.seg_title ? title_head.implicitHeight : title_text.implicitHeight, title_index.space > 0 ? title_index.implicitHeight : 0) + 4
                     color: root.st.fade_fills ? "transparent" : root.st.title_bg
 
                     Reticle {
@@ -732,8 +746,19 @@ PanelWindow {
                         text: title_text.text
                     }
 
+                    Mgs2.Head {
+                        id: title_head
+                        visible: title_tab.seg_title
+                        x: 10 + title_tab.lead_space
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.shown_title
+                        cap_height: Math.round((root.st.title_size > 0 ? root.st.title_size : root.st.fs(-2)) * 0.7)
+                        color: root.st.title_fg
+                    }
+
                     Text {
                         id: title_text
+                        visible: !title_tab.seg_title
                         anchors.centerIn: root.st.fade_fills ? undefined : parent
                         anchors.horizontalCenterOffset: title_tab.lead_space / 2
                         x: 10 + title_tab.lead_space

@@ -365,6 +365,7 @@ Popup {
             Layout.topMargin: device_row.row_index === 0 ? 6 : 0
             height: root.slots ? Style.px(30) : Style.px(22)
             selected: device_row.row_index === root.selected
+            data_row: true
 
             RowLayout {
                 anchors.fill: parent

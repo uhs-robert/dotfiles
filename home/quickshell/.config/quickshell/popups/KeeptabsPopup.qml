@@ -208,6 +208,7 @@ Popup {
                         width: session_list.width
                         height: Style.px(46)
                         selected: session_row.index === root.selected
+                        data_row: true
 
                         ColumnLayout {
                             anchors.fill: parent

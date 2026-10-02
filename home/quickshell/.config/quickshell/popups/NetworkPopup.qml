@@ -689,6 +689,7 @@ Popup {
                         width: network_list.width
                         height: Style.px(24)
                         selected: net_row.index === root.selected
+                        data_row: !net_row.is_advanced
 
                         Loader {
                             active: root.ps2

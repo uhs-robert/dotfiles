@@ -22,6 +22,15 @@ Text {
     readonly property color mark_color: root.st.selection_inverse && Qt.colorEqual(root.color, root.st.selection_fg) ? root.color : root.st.caret_color
     readonly property var marked: root.query !== "" ? Search.mark(root.label, root.query, root.mark_color) : null
 
+    readonly property var row: {
+        for (let p = root.parent; p; p = p.parent) {
+            if (p.accent_active !== undefined) return p;
+        }
+        return null;
+    }
+
+    style: root.row && root.row.accent_active ? Text.Outline : Text.Normal
+    styleColor: Qt.alpha(root.color, 0.25)
     textFormat: root.marked !== null ? Text.StyledText : Text.PlainText
     text: root.marked !== null ? root.marked : root.label
 }

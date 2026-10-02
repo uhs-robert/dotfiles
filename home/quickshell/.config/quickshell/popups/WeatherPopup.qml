@@ -30,7 +30,7 @@ Popup {
     readonly property bool hev: Style.weather_header === "hev"
     readonly property bool dex: Style.weather_header === "pokedex"
     // Headers that carry their own alert (HEV banner, Pokédex alert, FF7 status panel) replace the shared banner.
-    readonly property bool own_alert: root.hev || root.dex || Style.weather_header === "status" || Style.weather_header === "hero" || Style.weather_header === "lsp"
+    readonly property bool own_alert: root.hev || root.dex || Style.weather_header === "status" || Style.weather_header === "hero" || Style.weather_header === "lsp" || Style.weather_header === "radar"
 
     readonly property var daily_sub_names: ["Temp & Precip", "Wind", "UV", "Sunshine", "Sun & Moon"]
     readonly property int sun_moon_sub: 4
@@ -225,7 +225,7 @@ Popup {
                 Layout.fillWidth: true
                 active: Style.weather_header !== ""
                 visible: active
-                sourceComponent: ({ scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, hev: hev_header, pokedex: dex_header, status: status_header, oasis: oasis_header, hero: hero_header, lsp: lsp_header })[Style.weather_header] || ring_header
+                sourceComponent: ({ scope: scope_header, watch: watch_header, memcard: memcard_header, battle: battle_header, mode7: mode7_header, wttr: wttr_header, weatherstar: ws_header, towers: towers_header, scan: scan_header, hev: hev_header, pokedex: dex_header, status: status_header, oasis: oasis_header, hero: hero_header, lsp: lsp_header, radar: radar_header })[Style.weather_header] || ring_header
 
                 Component {
                     id: scope_header
@@ -297,6 +297,11 @@ Popup {
                         trail: [root.tabs[root.current_tab] || "", root.sub_views[root.current_sub] || ""]
                         onAlert_clicked: root.open_alerts()
                     }
+                }
+
+                Component {
+                    id: radar_header
+                    RadarHeader {}
                 }
 
                 Component {

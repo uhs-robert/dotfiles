@@ -10,6 +10,7 @@ import "goldeneye" as Goldeneye
 import "ps1" as Ps1
 import "modern" as Modern
 import "neovim" as Neovim
+import "mgs2" as Mgs2
 
 Rectangle {
     id: root
@@ -25,8 +26,10 @@ Rectangle {
     readonly property bool tile: Style.card_layout === "tile"
     // An nvim-notify window: border and title line in the level color.
     readonly property bool notify: Style.card_layout === "notify"
+    // MGS2 codec call: draws its own boxes.
+    readonly property bool mgs2: Style.card_layout === "codec"
     // Card layouts that draw their own surface behind the toast.
-    readonly property bool own_surface: root.dq || root.oasis || root.tile
+    readonly property bool own_surface: root.dq || root.oasis || root.tile || root.mgs2
     property real typed: 1
     readonly property string summary: root.notification ? root.notification.summary : ""
 
@@ -377,7 +380,7 @@ Rectangle {
             Layout.alignment: Qt.AlignTop
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
-            visible: Style.console_views !== "ps1" && !root.tile && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+            visible: Style.console_views !== "ps1" && !root.tile && !root.mgs2 && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
             source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
             sourceSize.width: width * 2
             sourceSize.height: height * 2
@@ -389,8 +392,31 @@ Rectangle {
             Layout.minimumWidth: 0
             spacing: 2
 
+            Loader {
+                active: root.mgs2
+                visible: active
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                sourceComponent: Mgs2.CodecCard {
+                    notification: root.notification
+                    app_name: root.notification ? root.notification.appName : ""
+                    summary: root.summary
+                    body: root.notification ? NotificationState.clean_body(root.notification.body) : ""
+                    age: root.relative_time
+                    compact: true
+                    critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
+                    low: !!root.notification && root.notification.urgency === NotificationUrgency.Low
+                    selected: root.highlighted
+                    closable: true
+                    cue: true
+                    body_lines: 3
+                    onClose_requested: root.close_animated("dismiss")
+                }
+            }
+
             RowLayout {
                 id: header_row
+                visible: !root.mgs2
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
                 Layout.bottomMargin: Style.title_strip.a > 0 ? 6 : 0
@@ -439,6 +465,7 @@ Rectangle {
             }
 
             Text {
+                visible: !root.mgs2
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
                 elide: Text.ElideRight
@@ -454,7 +481,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
-                visible: root.notification && NotificationState.clean_body(root.notification.body) !== ""
+                visible: !root.mgs2 && root.notification && NotificationState.clean_body(root.notification.body) !== ""
                 maximumLineCount: 4
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight

@@ -36,7 +36,7 @@ Singleton {
             "game:ocarina": { label: "Ocarina", dir: "file://" + root.data_dir + "/ocarina-audio", names: { cursor: "move", confirm: "decide", cancel: "cancel", notify: "letter" } }
         })
     // Shipped packs that belong to no style.
-    readonly property var extra_packs: ({ mgs2: { label: "MGS2" } })
+    readonly property var extra_packs: ({})
     readonly property var presets: ({ ff7: "game:ff7" })
     readonly property var game_urls: {
         const out = {};

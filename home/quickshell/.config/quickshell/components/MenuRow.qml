@@ -1,6 +1,9 @@
 // home/quickshell/.config/quickshell/components/MenuRow.qml
 import QtQuick
 import "../theme"
+import "../services"
+import "mgs2" as Mgs2
+import "mgs2/MarkerMemory.js" as Memory
 
 Rectangle {
     id: root
@@ -8,11 +11,17 @@ Rectangle {
     readonly property var st: Style.for_item(root)
 
     property bool selected: false
+    // False for read-only rows, which never dim.
+    property bool selectable: true
+    // A data row turns the style's accent when selected.
+    property bool data_row: false
+    readonly property bool accent_active: root.selected && root.data_row && root.st.row_accent_selected.a > 0
+    property real marker_travel: 0
     property real base_radius: 4
     // A slot number a style with a row gutter shows; -1 for none.
     property int slot: -1
     // Room reserved at the left for the style's cursor marker; rows add it to their left margin.
-    readonly property real inset: root.st.row_gutter ? 32 : root.st.hand_cursor ? 24 : root.st.row_cursor !== "" ? cursor_text.implicitWidth + 4 : 0
+    readonly property real inset: root.st.row_gutter ? 32 : root.st.hand_cursor ? 24 : root.st.seg_marker ? row_marker.width + 12 : root.st.row_cursor !== "" ? cursor_text.implicitWidth + 4 : 0
     // The row's shortcut, drawn as a badge at the right by styles that show row keys.
     property string key: ""
     readonly property bool show_key: root.st.row_keys && root.key !== ""
@@ -39,7 +48,39 @@ Rectangle {
 
     // Styles with an inverse selection repaint the row's text and glyphs in one color.
     function fg(c) {
-        return root.selected && root.st.selection_inverse ? root.st.selection_fg : c;
+        if (root.accent_active) return root.st.row_accent_selected;
+        if (root.selected && root.st.selection_inverse) return root.st.selection_fg;
+        if (root.st.row_dim_unselected) {
+            if (root.selected) return Qt.colorEqual(c, root.st.text_fg) ? root.st.text_strong : c;
+            if (root.selectable && (Qt.colorEqual(c, root.st.text_fg) || Qt.colorEqual(c, root.st.text_strong))) return Qt.tint(root.st.text_dim, Qt.alpha(root.st.text_fg, 0.3));
+        }
+        return c;
+    }
+
+    onSelectedChanged: {
+        if (!root.selected || !root.st.seg_marker) return;
+        const from = Memory.owner === root.parent ? Memory.y - root.y : 0;
+        Memory.owner = root.parent;
+        Memory.y = root.y;
+        marker_slide.stop();
+        root.marker_travel = 0;
+        if (from !== 0 && root.visible && Power.on_ac) {
+            root.marker_travel = from;
+            marker_slide.start();
+        }
+    }
+
+    onVisibleChanged: {
+        if (!root.visible && Memory.owner === root.parent) Memory.owner = null;
+    }
+
+    NumberAnimation {
+        id: marker_slide
+        target: root
+        property: "marker_travel"
+        to: 0
+        duration: 90
+        easing.type: Easing.Linear
     }
 
     FadeFill {
@@ -114,7 +155,7 @@ Rectangle {
 
     Text {
         id: cursor_text
-        visible: root.selected && root.st.row_cursor !== "" && Style.caret_phase
+        visible: root.selected && root.st.row_cursor !== "" && !root.st.seg_marker && Style.caret_phase
         x: 6
         anchors.verticalCenter: parent.verticalCenter
         text: root.st.row_cursor
@@ -122,6 +163,15 @@ Rectangle {
         font.family: root.st.mono_font
         font.pixelSize: root.st.fs(-1)
         font.bold: true
+    }
+
+    Mgs2.Marker {
+        id: row_marker
+        visible: root.selected && root.st.seg_marker
+        cap_height: root.st.fs(0) * 1.1
+        x: 6
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.marker_travel
     }
 
     HandCursor {

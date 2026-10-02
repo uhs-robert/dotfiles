@@ -250,14 +250,53 @@ function sunrise(ctx, t, d, w, h, c) {
     ctx.fill();
 }
 
+// MGS2: a rule sweeps up and the ground fills behind it, then a thin box is drawn edge by edge as the ground clears.
+function frame(ctx, t, cover, reveal, w, h, c) {
+    const lw = 1.5;
+    const x0 = lw / 2;
+    const y0 = lw / 2;
+    const x1 = w - lw / 2;
+    const y1 = h - lw / 2;
+    ctx.fillStyle = c.cover;
+    ctx.strokeStyle = c.strong;
+    ctx.lineWidth = lw;
+    if (t < cover) {
+        const y = h * (1 - ease_out(seg(t, 0, cover)));
+        box(ctx, 0, y, w, h - y);
+        ctx.fillStyle = c.strong;
+        ctx.fillRect(0, Math.min(y, h - lw), w, lw);
+        return;
+    }
+    const k = (t - cover) / reveal;
+    ctx.globalAlpha = 1 - ease_in_out(seg(k, 0.35, 0.85));
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalAlpha = 1 - seg(k, 0.85, 1);
+    const top = ease_out(seg(k, 0, 0.45));
+    const left = ease_in_out(seg(k, 0.15, 0.6));
+    const bottom = ease_in_out(seg(k, 0.4, 0.8));
+    const right = ease_in_out(seg(k, 0.4, 0.8));
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x0 + (x1 - x0) * top, y0);
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x0, y0 + (y1 - y0) * left);
+    ctx.moveTo(x0, y1);
+    ctx.lineTo(x0 + (x1 - x0) * bottom, y1);
+    ctx.moveTo(x1, y0);
+    ctx.lineTo(x1, y0 + (y1 - y0) * right);
+    ctx.stroke();
+}
+
 const painters = { blocks: blocks, towers: towers, visor: visor, grid: grid, trace: trace, cursor: cursor, sunrise: sunrise };
 
-// The cover half plays a kind's reveal in reverse; iris has its own two halves.
+// The cover half plays a kind's reveal in reverse; iris and frame have their own two halves.
 function paint(ctx, kind, t, cover, reveal, w, h, c) {
     ctx.save();
     ctx.clearRect(0, 0, w, h);
     if (kind === "iris") {
         iris(ctx, t, cover, reveal, w, h, c);
+    } else if (kind === "frame") {
+        frame(ctx, t, cover, reveal, w, h, c);
     } else {
         const fn = painters[kind];
         const r = t < cover ? reveal * (1 - t / cover) : t - cover;

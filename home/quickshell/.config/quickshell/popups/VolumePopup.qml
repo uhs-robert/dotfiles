@@ -341,6 +341,7 @@ Popup {
                         width: row_wrap.width
                         height: Style.px(22)
                         selected: row_wrap.index === root.selected
+                        data_row: row_wrap.modelData.type === "sink_device" || row_wrap.modelData.type === "source_device" || row_wrap.modelData.type === "stream"
                         key: root.row_key(row_wrap.index)
 
                         RowLayout {

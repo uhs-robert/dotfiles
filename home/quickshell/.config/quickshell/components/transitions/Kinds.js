@@ -17,7 +17,8 @@ const by_style = {
     tie: "grid",
     halflife: "flicker",
     metroid: "visor",
-    reticle: "trace"
+    reticle: "trace",
+    mgs2: "frame"
 };
 
 // [cover, reveal] in ms: the old look is covered, the style swaps, then the new one is revealed.
@@ -35,6 +36,7 @@ const durations = {
     iris: [400, 500],
     grid: [300, 450],
     trace: [350, 500],
+    frame: [320, 620],
     cursor: [300, 400],
     sunrise: [400, 600]
 };

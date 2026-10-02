@@ -125,6 +125,7 @@ Popup {
                     clip: true
                     // The stats are read-only; btop is the popup's one action.
                     selected: stat_row.is_btop
+                    selectable: false
                     key: stat_row.modelData.key || ""
 
                     RowLayout {

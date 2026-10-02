@@ -13,6 +13,7 @@ import "../../components/ps2" as Ps2
 import "../../components/oasis" as Oasis
 import "../../components/modern" as Modern
 import "../../components/neovim" as Neovim
+import "../../components/mgs2" as Mgs2
 
 // A single notification row, shared by the All/Apps/Critical tabs. Every Text below sets
 // Layout.minimumWidth: 0 so a long unbroken summary/body can never grow the card past its width.
@@ -33,6 +34,8 @@ Item {
     // Layered cards with the app icon on a tinted tile.
     readonly property bool tile: Style.card_layout === "tile"
     readonly property bool notify: Style.card_layout === "notify"
+    // MGS2 codec call: portrait, meter and frequency over a spoken-line box.
+    readonly property bool mgs2: Style.card_layout === "codec"
     readonly property bool critical: !!root.notification && root.notification.urgency === NotificationUrgency.Critical
 
     readonly property bool focused_valid: root.focused_action >= 0 && root.focused_action < root.actions.length
@@ -162,7 +165,7 @@ Item {
         }
 
         Rectangle {
-            visible: root.unread
+            visible: root.unread && !root.mgs2
             width: 8
             height: 8
             radius: Style.radius(4)
@@ -209,7 +212,7 @@ Item {
                 Layout.alignment: Qt.AlignTop
                 Layout.preferredWidth: root.width < 320 ? 32 : 44
                 Layout.preferredHeight: Layout.preferredWidth
-                visible: !root.codec && !root.tile && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
+                visible: !root.codec && !root.tile && !root.mgs2 && root.notification && (root.notification.image !== "" || root.notification.appIcon !== "")
                 source: root.notification ? (root.notification.image !== "" ? root.notification.image : Quickshell.iconPath(root.notification.appIcon, true)) : ""
                 sourceSize.width: width * 2
                 sourceSize.height: height * 2
@@ -235,8 +238,27 @@ Item {
                     }
                 }
 
+                Loader {
+                    active: root.mgs2
+                    visible: active
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    sourceComponent: Mgs2.CodecCard {
+                        notification: root.notification
+                        app_name: root.notification ? root.notification.appName : ""
+                        summary: root.notification ? root.notification.summary : ""
+                        body: root.notification ? NotificationState.clean_body(root.notification.body) : ""
+                        age: root.entry ? root.relative_time(root.entry.time) : ""
+                        critical: root.critical
+                        low: !!root.notification && root.notification.urgency === NotificationUrgency.Low
+                        selected: root.selected
+                        unread: root.unread
+                        cue: !!root.entry && Date.now() - root.entry.time < 5000
+                    }
+                }
+
                 RowLabel {
-                    visible: !root.notify
+                    visible: !root.notify && !root.mgs2
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight
@@ -264,6 +286,7 @@ Item {
                 }
 
                 RowLabel {
+                    visible: !root.mgs2
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     elide: Text.ElideRight
@@ -280,7 +303,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
-                    visible: root.notification && NotificationState.clean_body(root.notification.body) !== ""
+                    visible: !root.mgs2 && root.notification && NotificationState.clean_body(root.notification.body) !== ""
                     maximumLineCount: 3
                     wrapMode: Text.Wrap
                     elide: Text.ElideRight

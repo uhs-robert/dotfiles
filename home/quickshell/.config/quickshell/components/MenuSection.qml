@@ -1,6 +1,8 @@
 // home/quickshell/.config/quickshell/components/MenuSection.qml
 import QtQuick
 import "../theme"
+import "mgs2" as Mgs2
+import "mgs2/Seg.js" as Seg
 
 Text {
     id: root
@@ -8,11 +10,12 @@ Text {
     readonly property var st: Style.for_item(root)
 
     property string label: ""
+    readonly property bool seg_label: root.st.seg_face && Seg.supported(root.label)
 
     width: (root.st.section_rule || root.st.section_fade.a > 0 || root.st.section_fold) && parent ? parent.width : undefined
     clip: root.st.section_rule
     text: root.st.section_rule ? "── " + root.label + " " + "─".repeat(160) : root.st.section_fold ? "\u25be " + root.label : root.label
-    color: root.st.section_fg
+    color: root.seg_label ? "transparent" : root.st.section_fg
     font.family: root.st.label_font_family
     font.pixelSize: root.st.fs(-3)
     font.capitalization: root.st.label_caps || root.st.caps_tracking > 0 ? Font.AllUppercase : Font.MixedCase
@@ -20,6 +23,15 @@ Text {
     font.bold: root.st.caps_tracking > 0
     readonly property bool orb: root.st.materia.section !== undefined
     leftPadding: root.orb ? 15 : 0
+
+    Mgs2.Head {
+        visible: root.seg_label
+        x: root.leftPadding
+        y: root.topPadding
+        text: root.label
+        cap_height: Math.round(root.st.fs(-3) * 0.7)
+        color: root.st.section_fg
+    }
 
     MateriaOrb {
         visible: root.orb

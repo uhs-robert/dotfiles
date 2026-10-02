@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import "../../theme"
 import "../../services"
+import "../../components/mgs2" as Mgs2
 import "../../components/modern" as Modern
 import "../../lock/skins/goldeneye/Watch.js" as Watch
 
@@ -43,6 +44,7 @@ Row {
     readonly property bool capsule: Style.bar_clock_layout === "capsule"
     // Lualine: bold digits, the zone and date dimmed after them.
     readonly property bool lualine: Style.bar_lualine
+    readonly property bool seg: Style.seg_face && !root.capsule && !root.on_accent
     readonly property string digits_text: {
         const d = Timezones.shift(clock.date);
         const hm = pad2(d.getHours() % 12 || 12) + ":" + pad2(d.getMinutes());
@@ -115,9 +117,9 @@ Row {
             id: time_label
             x: parent.pad
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(implicitWidth, Math.ceil(time_metrics.advanceWidth))
+            width: root.seg ? time_seg.implicitWidth : Math.max(implicitWidth, Math.ceil(time_metrics.advanceWidth))
             text: root.on_accent ? root.digits_text + " " + (Timezones.shift(clock.date).getHours() < 12 ? "AM" : "PM") : root.chip || root.lualine ? root.digits_text : root.time_text
-            color: root.on_accent ? root.ink : root.chip || root.lualine ? Style.bar_clock_fg : Style.bar_fg
+            color: root.seg ? "transparent" : root.on_accent ? root.ink : root.chip || root.lualine ? Style.bar_clock_fg : Style.bar_fg
             font.family: root.chip ? Style.bar_clock_font : Style.bar_font_family
             font.features: { "tnum": 1 }
             font.weight: root.horizon ? Font.DemiBold : Font.Normal
@@ -126,6 +128,17 @@ Row {
             font.pixelSize: root.lualine ? Style.bar_clock_size || Style.bar_glyph_size : root.chip ? Style.bar_font_size + 2 : Style.bar_font_size
             font.capitalization: Style.bar_capitalization
             font.letterSpacing: root.chip ? 0 : Style.bar_letter_spacing
+        }
+
+        Mgs2.SegText {
+            id: time_seg
+            visible: root.seg
+            x: parent.pad
+            anchors.verticalCenter: parent.verticalCenter
+            text: time_label.text
+            floor_text: time_label.text.replace(/\d/g, "0")
+            cap_height: Math.round(Style.bar_font_size * 0.65)
+            color: root.chip ? Style.bar_clock_fg : Style.bar_fg
         }
     }
 

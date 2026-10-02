@@ -87,7 +87,7 @@ Styles transform the appearance of the bar, popups, menus, pickers, fonts, sound
 Pick a style in `Settings > Style` (`SUPER + SPACE` then `S`) and it swaps live.
 
 > [!NOTE]
-> **Styles include:** Oasis, Modern, CRT, NES, Game Boy, SNES, PSX, FF7, GoldenEye, PS2, TIE Fighter, Half-Life and Metroid.
+> **Styles include:** Oasis, Modern, CRT, NES, Game Boy, SNES, PSX, FF7, GoldenEye, PS2, MGS2, TIE Fighter, Half-Life and Metroid.
 
 ### 🍫 Bar Style Examples
 

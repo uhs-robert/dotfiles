@@ -12,14 +12,14 @@ Singleton {
     // The saved choice; `name` differs from it only while the style picker previews.
     property string saved_name: "oasis"
     // Everyday styles, then consoles by release year, then sci-fi.
-    readonly property var order: ["oasis", "modern", "neovim", "terminal", "crt", "nes", "gameboy", "snes", "ps1", "ff7", "goldeneye", "ps2", "tie", "halflife", "metroid", "reticle"]
+    readonly property var order: ["oasis", "modern", "neovim", "terminal", "crt", "nes", "gameboy", "snes", "ps1", "ff7", "goldeneye", "ps2", "mgs2", "tie", "halflife", "metroid", "reticle"]
     // The base token set every style builds on; retired from the picker, old saves map to oasis.
     readonly property var hidden: ["default"]
     readonly property var names: root.order.filter(n => n in root.styles).concat(Object.keys(root.styles).filter(n => root.order.indexOf(n) < 0 && root.hidden.indexOf(n) < 0))
-    readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", halflife: "Half Life", tie: "Tie Fighter", modern: "Modern" })
+    readonly property var labels: ({ crt: "CRT", nes: "NES", snes: "SNES", gameboy: "Gameboy", goldeneye: "Goldeneye", ps1: "PSX", ff7: "FFVII", ps2: "PS2", mgs2: "MGS2", halflife: "Half Life", tie: "Tie Fighter", modern: "Modern" })
 
     // Lock screens with no bar style of their own yet, name to label; never in `names`.
-    readonly property var lock_only: ({ ocarina: "Ocarina", mgs2: "MGS2" })
+    readonly property var lock_only: ({ ocarina: "Ocarina" })
     readonly property var lock_only_names: Object.keys(root.lock_only)
 
     function label(style_name) {
@@ -353,6 +353,13 @@ Singleton {
             type_scale: ({}),
             meter_gap: 2,
             meter_palette: "",
+            seg_face: false,
+            seg_marker: false,
+            rail_width: 0,
+            rail_fill: "transparent",
+            rail_edge: "transparent",
+            row_dim_unselected: false,
+            row_accent_selected: "transparent",
             bar_lualine: false
         };
         return {
@@ -601,6 +608,13 @@ Singleton {
                 type_scale: ({}),
                 meter_gap: 2,
                 meter_palette: "",
+                seg_face: false,
+                seg_marker: false,
+                rail_width: 0,
+                rail_fill: "transparent",
+                rail_edge: "transparent",
+                row_dim_unselected: false,
+                row_accent_selected: "transparent",
                 bar_lualine: false
             },
             "terminal": Object.assign({}, terminal, {
@@ -1074,6 +1088,73 @@ Singleton {
                 console_views: "ps2",
                 toast_enter: "bloom",
                 picker_skin: "scopeitem"
+            }),
+            // Metal Gear Solid 2 menus: square outlined boxes, the segment face and a solid gutter block, all from the palette.
+            "mgs2": Object.assign({}, terminal, {
+                card_layout: "codec",
+                weather_header: "radar",
+                picker_skin: "scope",
+                picker_hud: Qt.tint(Theme.fg_core, Qt.alpha(Theme.theme_secondary, 0.25)),
+                font_family: "Liberation Sans",
+                title_font_family: "Barlow Condensed",
+                font_size: Theme.popup_font_size + 1,
+                frame_color: Qt.alpha(Theme.bg_crust, 0.92),
+                frame_radius: 0,
+                frame_border_width: 1,
+                frame_border_color: Qt.alpha(Theme.fg_core, 0.55),
+                accent_color: Qt.alpha(Theme.fg_core, 0.55),
+                accent_height: 1,
+                selection_outline: "transparent",
+                caret_color: Theme.fg_strong,
+                row_cursor: "\u25a0",
+                seg_face: true,
+                seg_marker: true,
+                rail_width: 7,
+                rail_fill: Qt.alpha(Theme.fg_core, 0.08),
+                rail_edge: Qt.alpha(Theme.fg_core, 0.55),
+                row_dim_unselected: true,
+                row_accent_selected: Theme.error,
+                tab_active_bg: "transparent",
+                tab_active_fg: Theme.fg_strong,
+                tab_fg: Theme.fg_dim,
+                tab_caps: true,
+                tab_underline: Theme.fg_strong,
+                key_fg: Theme.fg_dim,
+                key_border: Qt.alpha(Theme.fg_core, 0.4),
+                section_fg: Theme.fg_core,
+                section_rule: false,
+                label_caps: true,
+                label_spacing: 1.5,
+                footer_fg: Theme.fg_dim,
+                footer_key_fg: Theme.fg_strong,
+                footer_rule_color: Qt.alpha(Theme.fg_core, 0.4),
+                footer_rule_solid: true,
+                meter_on: Theme.fg_strong,
+                meter_off: Qt.alpha(Theme.fg_core, 0.12),
+                meter_hot: Theme.error,
+                title_bg: "transparent",
+                title_fg: Theme.fg_strong,
+                title_spacing: 2,
+                chip_brackets: false,
+                chip_active_bg: "transparent",
+                chip_active_fg: Theme.fg_strong,
+                chip_pick: Qt.alpha(Theme.fg_core, 0.2),
+                chip_border: Qt.alpha(Theme.fg_core, 0.55),
+                toggle_brackets: false,
+                toggle_on: Theme.fg_strong,
+                toggle_off: Theme.fg_dim,
+                bar_font_family: "Barlow Condensed",
+                bar_font_size: Theme.font_size + 1,
+                bar_caps: true,
+                bar_letter_spacing: 1.5,
+                bar_side_bg: Theme.bg_crust,
+                bar_center_bg: Theme.bg_crust,
+                bar_border_color: Qt.alpha(Theme.fg_core, 0.55),
+                bar_pill_square: true,
+                bar_workspace_focused: Theme.fg_strong,
+                bar_workspace_active: Theme.fg_core,
+                bar_workspace_idle: Qt.alpha(Theme.fg_core, 0.2),
+                bar_hover_bg: Qt.alpha(Theme.fg_core, 0.12)
             }),
             // TIE Fighter cockpit: large popups in the octagonal viewport, `small` ones the targeting computer.
             "tie": (() => {
@@ -2147,7 +2228,7 @@ Singleton {
     readonly property color footer_key_bg: root.active.footer_key_bg
     readonly property string footer_separator: root.active.footer_separator
     readonly property bool footer_rule_solid: root.active.footer_rule_solid
-    // Alternate layouts: "" keeps the default; osd "ring", "hud", "rpg", "alert", "glow", "horizon" or "tile", weather "ring", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status", "oasis", "hero" or "lsp", cards "rule", "pixel", "dq", "dialogue", "dialog", "oasis", "tile" or "notify".
+    // Alternate layouts: "" keeps the default; osd "ring", "hud", "rpg", "alert", "glow", "horizon" or "tile", weather "ring", "scope", "watch", "memcard", "battle", "mode7", "wttr", "weatherstar", "towers", "scan", "hev", "pokedex", "status", "oasis", "hero", "lsp" or "radar", cards "rule", "pixel", "dq", "dialogue", "dialog", "oasis", "tile", "notify" or "codec".
     readonly property string osd_layout: root.active.osd_layout
     // Level rows: "capsule" draws them as tall capsule sliders with live peaks, "slant" and "visor" the same with slanted ends or visor glass (Volume popup and OSD only); "" keeps the shared slider.
     readonly property string level_layout: root.active.level_layout
@@ -2236,6 +2317,16 @@ Singleton {
     readonly property real meter_gap: root.active.meter_gap
     // "bezel" colours a level meter warm for its first half and blue for the second, dim when unlit.
     readonly property string meter_palette: root.active.meter_palette
+    // Popup titles, section heads and the bar clock in the MGS2 segment face (components/mgs2/SegText); seg_marker draws a solid block in the gutter of the selected row.
+    readonly property bool seg_face: root.active.seg_face
+    readonly property bool seg_marker: root.active.seg_marker
+    // A strip rail_width px wide down the left inside edge of popup frames, with a 1px right edge.
+    readonly property int rail_width: root.active.rail_width
+    readonly property color rail_fill: root.active.rail_fill
+    readonly property color rail_edge: root.active.rail_edge
+    // Unselected selectable rows dim to text_dim; data rows flagged data_row turn this color, with a soft outline, when selected.
+    readonly property bool row_dim_unselected: root.active.row_dim_unselected
+    readonly property color row_accent_selected: root.active.row_accent_selected
 
     property bool cava_line: true
     readonly property var bar: root.active
